@@ -3,6 +3,7 @@ package com.pengyouquan.english.controller;
 import com.pengyouquan.english.dto.*;
 import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.AuthService;
+import com.pengyouquan.english.service.WechatAuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final WechatAuthService wechatAuthService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, WechatAuthService wechatAuthService) {
         this.authService = authService;
+        this.wechatAuthService = wechatAuthService;
     }
 
     /** 用户注册 */
@@ -39,5 +42,11 @@ public class AuthController {
             return ApiResponse.unauthorized("未登录");
         }
         return ApiResponse.success(authService.getUserInfo(userId));
+    }
+
+    /** 微信小程序登录 */
+    @PostMapping("/wechat-login")
+    public ApiResponse<LoginResponse> wechatLogin(@Valid @RequestBody WechatLoginRequest request) {
+        return ApiResponse.success(wechatAuthService.login(request.getCode()));
     }
 }

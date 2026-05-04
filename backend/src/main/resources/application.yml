@@ -45,6 +45,11 @@ jwt:
   secret: pengyouquan-english-jwt-secret-key-2024-change-in-production
   expiration: 86400000  # 24小时，单位毫秒
 
+# 微信小程序配置（需要从小程序后台获取）
+wechat:
+  app-id:
+  app-secret:
+
 # 日志配置
 logging:
   level:
