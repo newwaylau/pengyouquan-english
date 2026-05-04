@@ -38,11 +38,20 @@ export default function PracticePage({ user }: { user: any }) {
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [dailyStats, setDailyStats] = useState({ done: 0, correct: 0 });
 
   // 加载剧集列表
   useEffect(() => {
     api.shows().then(r => { if (r.code === 200) setShowList(r.data); });
   }, []);
+
+  // 加载统计
+  useEffect(() => {
+    if (user) {
+      api.stats().then(r => { if (r.code === 200) setDailyStats({ done: r.data.totalPractices, correct: r.data.totalCorrect }); });
+    }
+  }, [user]);
 
   // 加载句子
   const loadSentence = useCallback(async () => {
@@ -167,7 +176,16 @@ export default function PracticePage({ user }: { user: any }) {
   const cn = extractCn(sentence.text);
 
   return (
-    <div className="practice-page">
+    <div className={`practice-page ${focusMode ? 'focus-mode' : ''}`}>
+      {/* 进度条 */}
+      {user && (
+        <div className="progress-bar">
+          <span>📊 今日练习 {dailyStats.done} 次</span>
+          <span className="focus-toggle" onClick={() => setFocusMode(f => !f)}>
+            {focusMode ? '🎯 退出专注' : '🎯 专注'}
+          </span>
+        </div>
+      )}
       {/* 控制栏 */}
       <div className="controls">
         <select value={mode} onChange={e => setMode(e.target.value as any)}>

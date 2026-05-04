@@ -69,3 +69,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .search-result:hover{background:#f0f5ff}
 .result-text{font-size:14px;margin-bottom:4px}
 .result-meta{font-size:12px;color:#999}
+.progress-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;color:#666;margin-bottom:8px}
+.focus-toggle{cursor:pointer;padding:2px 8px;border-radius:4px;font-size:12px}
+.focus-toggle:hover{background:#f0f0f0}
+.focus-mode .topnav,.focus-mode .controls,.focus-mode .settings-btn,.focus-mode .shortcuts-hint{display:none}
