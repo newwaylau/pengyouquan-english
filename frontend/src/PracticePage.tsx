@@ -33,7 +33,9 @@ export default function PracticePage({ user }: { user: any }) {
   const [correctWords, setCorrectWords] = useState<Set<number>>(new Set());
   const [wrongWords, setWrongWords] = useState<Set<number>>(new Set());
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [historyIds, setHistoryIds] = useState<number[]>([]);
+  const [historyIds, setHistoryIds] = useState<number[]>(
+    () => JSON.parse(localStorage.getItem('historyIds') || '[]')
+  );
   const [showList, setShowList] = useState<any[]>([]);
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -59,6 +61,11 @@ export default function PracticePage({ user }: { user: any }) {
       if (s.showId) setSelectedShowId(Number(s.showId));
     });
   }, [user]);
+
+  // 持久化历史到 localStorage（保留最近200条）
+  useEffect(() => {
+    localStorage.setItem('historyIds', JSON.stringify(historyIds.slice(-200)));
+  }, [historyIds]);
 
   // 加载句子
   const loadSentence = useCallback(async () => {
