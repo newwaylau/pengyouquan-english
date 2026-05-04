@@ -1,16 +1,27 @@
-node_modules/
-build/
-dist/
-target/
+# Java
+backend/target/
 *.class
 *.jar
 *.war
-*.log
-.DS_Store
-.env
-.local
-*.iml
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
 .idea/
+*.iml
 .vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.log
+
+# Python (weapp)
 __pycache__/
 *.pyc
+venv/
