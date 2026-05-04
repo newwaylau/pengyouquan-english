@@ -1,0 +1,188 @@
+# 朋友圈英语 - 应用规格说明书
+
+## 1. 项目概述
+
+朋友圈英语（pengyouquan-english）是一个从美剧英剧字幕中学习英语的听写练习平台。
+支持 PC 网页端和微信小程序，提供沉浸式的英语听写学习体验。
+
+## 2. 技术栈
+
+- **前端:** React 18 + TypeScript + Ant Design Mobile
+- **后端:** Java 17 + Spring Boot 3.x
+- **数据库:** MySQL 8.x
+- **部署:** Docker + Docker Compose
+- **缓存:** Redis（会话管理/缓存）
+- **认证:** JWT Token
+- **API风格:** RESTful
+
+## 3. 核心功能
+
+### 3.1 用户系统
+- 注册/登录（邮箱+密码）
+- 微信小程序一键登录
+- JWT Token 认证
+- 用户资料管理
+- 练习统计/进度追踪
+
+### 3.2 剧集系统
+- 剧集列表（多级：剧名→季→集）
+- 每集句子库（Whisper自动生成）
+- 搜索句子（关键词/编号）
+- 浏览模式（按编号浏览全部句子）
+
+### 3.3 练习系统（核心）
+- **中译英听写模式:** 显示中文，用户输入英文
+- **纯听写模式:** 播放语音，用户默写
+- 逐词输入框（自动切词）
+- 两次错误机制（第一次标红重试，第二次显示答案）
+- 自动播放（可选手动/导播/剧集原音）
+- 播放速度控制（0.5x/0.75x/1x/1.5x）
+- 显示/隐藏英文（模糊遮住）
+- 显示/隐藏中文（模糊遮住）
+- 快捷键支持（=音色/-原音/Enter提交/\\下一句/[中文/]英文）
+
+### 3.4 语音系统
+- 剧集原音（预生成 MP3 文件）
+- 服务器语音（edge-tts，6种音色可选）
+- 浏览器语音（Web Speech API）
+- TTS 缓存（按文本+音色hash）
+
+### 3.5 错题本
+- 自动记录错误句子
+- 错题列表（含句子内容预览）
+- 点击跳转练习
+- 一键清空
+
+### 3.6 设置面板
+- 练习模式切换
+- 剧集选择（三级联动）
+- 语音音色选择（6种）
+- 自动播放模式
+- 播放速度
+- 快捷键说明
+- 专注模式
+
+### 3.7 用户流量监控（管理员后台）
+- 总览仪表盘（DAU/MAU/练习量）
+- 用户管理列表
+- 练习统计（正确率趋势/模式分布）
+- 剧集热度排行
+- 音频系统统计
+- 系统健康监控
+
+## 4. 数据模型
+
+### 4.1 users（用户表）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | 用户ID |
+| email | VARCHAR(255) | 邮箱（唯一） |
+| password_hash | VARCHAR(255) | 密码hash |
+| nickname | VARCHAR(50) | 昵称 |
+| avatar | VARCHAR(500) | 头像URL |
+| wx_openid | VARCHAR(100) | 微信openid |
+| created_at | DATETIME | 注册时间 |
+| last_login_at | DATETIME | 最后登录 |
+
+### 4.2 shows（剧集表）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | 剧集ID |
+| name | VARCHAR(200) | 剧集名（含季集） |
+| sentence_count | INT | 句子数 |
+
+### 4.3 sentences（句子表）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | 句子ID |
+| show_id | BIGINT FK | 所属剧集 |
+| text | TEXT | 英文/中文（/分隔） |
+| audio_file | VARCHAR(200) | 音频文件名 |
+| start_time | FLOAT | 起始时间 |
+| end_time | FLOAT | 结束时间 |
+| episode_info | VARCHAR(50) | 集信息 |
+
+### 4.4 practice_logs（练习记录）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | 记录ID |
+| user_id | BIGINT FK | 用户ID |
+| sentence_id | BIGINT FK | 句子ID |
+| correct | BOOLEAN | 是否正确 |
+| mode | VARCHAR(20) | 练习模式 |
+| attempted_at | DATETIME | 练习时间 |
+
+### 4.5 user_progress（用户进度）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | |
+| user_id | BIGINT FK | 用户ID |
+| show_id | BIGINT FK | 剧集ID |
+| completed_count | INT | 已完成数 |
+| total_count | INT | 总数 |
+
+### 4.6 user_settings（用户设置）
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT PK | |
+| user_id | BIGINT FK | 用户ID |
+| settings_json | JSON | 设置内容 |
+
+## 5. API 接口
+
+### 5.1 认证接口
+- POST /api/auth/register - 注册
+- POST /api/auth/login - 登录
+- POST /api/auth/wx-login - 微信登录
+- GET /api/auth/me - 获取当前用户
+
+### 5.2 剧集接口
+- GET /api/shows - 剧集列表
+- GET /api/shows/{id}/sentences - 某剧集句子（分页）
+
+### 5.3 练习接口
+- GET /api/sentences/random - 随机句子
+- POST /api/practice/log - 提交练习记录
+- GET /api/sentences/{id} - 单句详情
+
+### 5.4 搜索接口
+- GET /api/search?q=xxx - 搜索句子
+
+### 5.5 语音接口
+- GET /api/audio/{filename} - 音频文件
+- GET /api/tts?text=&voice= - TTS生成
+
+### 5.6 用户接口
+- GET /api/user/stats - 用户统计
+- GET /api/user/wrong-words - 错题列表
+- GET /api/user/settings - 用户设置
+- PUT /api/user/settings - 更新设置
+
+### 5.7 管理接口
+- GET /api/admin/dashboard - 仪表盘数据
+- GET /api/admin/users - 用户列表（分页）
+- GET /api/admin/stats - 练习统计
+- GET /api/admin/shows/popularity - 剧集热度
+
+## 6. 部署架构
+
+```
+客户端 → Cloudflare CDN
+    ├── https://english.pengyouquan.top → React 前端
+    └── https://api.english.pengyouquan.top → Spring Boot 后端
+                                                  → MySQL
+                                                  → Redis
+
+Docker 容器:
+├── frontend: nginx + React build
+├── backend: Spring Boot JAR
+├── mysql: MySQL 8.x
+└── redis: Redis 7.x
+```
+
+## 7. 微信小程序
+
+- 共用后端 API
+- 微信登录（wx.login）
+- 适配移动端 UI
+- 支持离线缓存已练习的句子

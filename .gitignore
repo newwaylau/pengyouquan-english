@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+target/
+*.class
+*.jar
+*.war
+*.log
+.DS_Store
+.env
+.local
+*.iml
+.idea/
+.vscode/
+__pycache__/
+*.pyc

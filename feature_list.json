@@ -1,0 +1,2040 @@
+[
+  {
+    "id": 1,
+    "category": "setup",
+    "description": "Spring Boot 项目创建并成功启动",
+    "steps": [
+      "创建 Spring Boot 项目",
+      "配置 application.yml",
+      "运行 mvn spring-boot:run 验证启动"
+    ],
+    "passes": false
+  },
+  {
+    "id": 2,
+    "category": "setup",
+    "description": "MySQL 数据库连接配置",
+    "steps": [
+      "配置 MySQL 数据源",
+      "创建数据库和用户",
+      "执行初始化 SQL",
+      "验证连接成功"
+    ],
+    "passes": false
+  },
+  {
+    "id": 3,
+    "category": "setup",
+    "description": "React 项目创建并成功运行",
+    "steps": [
+      "create-react-app 创建项目",
+      "安装依赖",
+      "运行 npm start 验证"
+    ],
+    "passes": false
+  },
+  {
+    "id": 4,
+    "category": "setup",
+    "description": "Docker Compose 一键启动",
+    "steps": [
+      "编写 docker-compose.yml",
+      "配置各服务",
+      "运行 docker-compose up",
+      "验证所有容器正常"
+    ],
+    "passes": false
+  },
+  {
+    "id": 5,
+    "category": "setup",
+    "description": "Redis 配置与连接",
+    "steps": [
+      "配置 Redis 连接",
+      "编写配置类",
+      "测试缓存读写"
+    ],
+    "passes": false
+  },
+  {
+    "id": 6,
+    "category": "setup",
+    "description": "JWT 认证配置",
+    "steps": [
+      "添加 jwt 依赖",
+      "配置密钥和过期时间",
+      "编写 JWT 工具类",
+      "测试 token 生成和验证"
+    ],
+    "passes": false
+  },
+  {
+    "id": 7,
+    "category": "setup",
+    "description": "CORS 跨域配置",
+    "steps": [
+      "配置允许的来源",
+      "配置允许的方法",
+      "测试前端跨域请求"
+    ],
+    "passes": false
+  },
+  {
+    "id": 8,
+    "category": "setup",
+    "description": "统一异常处理",
+    "steps": [
+      "创建全局异常处理器",
+      "定义业务异常类",
+      "测试异常返回"
+    ],
+    "passes": false
+  },
+  {
+    "id": 9,
+    "category": "setup",
+    "description": "统一响应格式",
+    "steps": [
+      "定义 ApiResponse 类",
+      "统一成功/失败格式"
+    ],
+    "passes": false
+  },
+  {
+    "id": 10,
+    "category": "setup",
+    "description": "日志配置",
+    "steps": [
+      "配置 logback",
+      "设置日志级别",
+      "验证日志输出"
+    ],
+    "passes": false
+  },
+  {
+    "id": 11,
+    "category": "setup",
+    "description": "数据迁移脚本",
+    "steps": [
+      "编写 Flyway 迁移脚本",
+      "执行迁移",
+      "验证数据库表结构"
+    ],
+    "passes": false
+  },
+  {
+    "id": 12,
+    "category": "setup",
+    "description": "Dockerfile 编写",
+    "steps": [
+      "编写前端 Dockerfile",
+      "编写后端 Dockerfile",
+      "构建镜像验证"
+    ],
+    "passes": false
+  },
+  {
+    "id": 13,
+    "category": "setup",
+    "description": "Git 初始化与首次提交",
+    "steps": [
+      "初始化 Git",
+      "编写 .gitignore",
+      "首次提交"
+    ],
+    "passes": false
+  },
+  {
+    "id": 14,
+    "category": "user",
+    "description": "用户注册 - 正常流程",
+    "steps": [
+      "访问注册页面",
+      "填写邮箱和密码",
+      "点击注册",
+      "验证返回成功",
+      "验证数据库有记录"
+    ],
+    "passes": false
+  },
+  {
+    "id": 15,
+    "category": "user",
+    "description": "用户注册 - 重复邮箱",
+    "steps": [
+      "用已注册邮箱再次注册",
+      "验证返回错误提示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 16,
+    "category": "user",
+    "description": "用户注册 - 邮箱格式校验",
+    "steps": [
+      "输入非法邮箱格式",
+      "验证前端校验提示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 17,
+    "category": "user",
+    "description": "用户注册 - 密码强度",
+    "steps": [
+      "输入过短密码",
+      "验证提示密码要求"
+    ],
+    "passes": false
+  },
+  {
+    "id": 18,
+    "category": "user",
+    "description": "用户登录 - 正常流程",
+    "steps": [
+      "访问登录页",
+      "输入正确账号密码",
+      "验证 JWT token 返回"
+    ],
+    "passes": false
+  },
+  {
+    "id": 19,
+    "category": "user",
+    "description": "用户登录 - 错误密码",
+    "steps": [
+      "输入错误密码",
+      "验证返回错误提示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 20,
+    "category": "user",
+    "description": "用户登录 - 不存在账号",
+    "steps": [
+      "输入未注册邮箱",
+      "验证返回错误提示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 21,
+    "category": "user",
+    "description": "JWT Token 过期处理",
+    "steps": [
+      "等待 token 过期",
+      "验证 401 返回"
+    ],
+    "passes": false
+  },
+  {
+    "id": 22,
+    "category": "user",
+    "description": "获取当前用户信息",
+    "steps": [
+      "登录后获取 /api/auth/me",
+      "验证返回用户信息"
+    ],
+    "passes": false
+  },
+  {
+    "id": 23,
+    "category": "user",
+    "description": "用户资料修改",
+    "steps": [
+      "修改昵称",
+      "修改头像",
+      "验证保存成功"
+    ],
+    "passes": false
+  },
+  {
+    "id": 24,
+    "category": "user",
+    "description": "用户统计信息",
+    "steps": [
+      "获取总练习数",
+      "获取今日练习数",
+      "验证数据正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 25,
+    "category": "user",
+    "description": "账号删除",
+    "steps": [
+      "删除账号",
+      "验证无法登录"
+    ],
+    "passes": false
+  },
+  {
+    "id": 26,
+    "category": "user",
+    "description": "用户搜索",
+    "steps": [
+      "按邮箱搜索",
+      "按昵称搜索",
+      "验证返回结果"
+    ],
+    "passes": false
+  },
+  {
+    "id": 27,
+    "category": "user",
+    "description": "用户禁用/解禁",
+    "steps": [
+      "管理员禁用用户",
+      "验证该用户无法登录"
+    ],
+    "passes": false
+  },
+  {
+    "id": 28,
+    "category": "user",
+    "description": "微信登录",
+    "steps": [
+      "模拟微信登录流程",
+      "验证成功绑定"
+    ],
+    "passes": false
+  },
+  {
+    "id": 29,
+    "category": "user",
+    "description": "用户设置持久化",
+    "steps": [
+      "修改设置",
+      "重新登录",
+      "验证设置保留"
+    ],
+    "passes": false
+  },
+  {
+    "id": 30,
+    "category": "show",
+    "description": "剧集列表加载",
+    "steps": [
+      "进入首页",
+      "验证剧集列表显示",
+      "验证句子数正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 31,
+    "category": "show",
+    "description": "三级联动 - 选中剧集",
+    "steps": [
+      "选中一部剧",
+      "验证季列表刷新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 32,
+    "category": "show",
+    "description": "三级联动 - 选中季",
+    "steps": [
+      "选中一季",
+      "验证集列表刷新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 33,
+    "category": "show",
+    "description": "三级联动 - 选中集",
+    "steps": [
+      "选中一集",
+      "验证自动加载该集句子"
+    ],
+    "passes": false
+  },
+  {
+    "id": 34,
+    "category": "show",
+    "description": "全部剧集选项",
+    "steps": [
+      "选择全部剧集",
+      "验证从所有剧集中随机出题"
+    ],
+    "passes": false
+  },
+  {
+    "id": 35,
+    "category": "show",
+    "description": "剧集名显示",
+    "steps": [
+      "练习时显示当前剧集名",
+      "验证剧集名正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 36,
+    "category": "show",
+    "description": "浏览模式 - 句子列表",
+    "steps": [
+      "切换浏览模式",
+      "验证显示句子列表"
+    ],
+    "passes": false
+  },
+  {
+    "id": 37,
+    "category": "show",
+    "description": "浏览模式 - 编号跳转",
+    "steps": [
+      "输入编号跳转",
+      "验证进入练习该句"
+    ],
+    "passes": false
+  },
+  {
+    "id": 38,
+    "category": "show",
+    "description": "句子搜索 - 英文关键词",
+    "steps": [
+      "输入英文关键词搜索",
+      "验证返回匹配句子"
+    ],
+    "passes": false
+  },
+  {
+    "id": 39,
+    "category": "show",
+    "description": "句子搜索 - 中文关键词",
+    "steps": [
+      "输入中文关键词搜索",
+      "验证返回匹配句子"
+    ],
+    "passes": false
+  },
+  {
+    "id": 40,
+    "category": "show",
+    "description": "句子搜索 - 结果点击练习",
+    "steps": [
+      "搜索后点击结果",
+      "验证进入练习该句"
+    ],
+    "passes": false
+  },
+  {
+    "id": 41,
+    "category": "show",
+    "description": "句子搜索 - 空结果",
+    "steps": [
+      "输入不存在的关键词",
+      "验证显示无结果"
+    ],
+    "passes": false
+  },
+  {
+    "id": 42,
+    "category": "show",
+    "description": "句子搜索 - 防抖",
+    "steps": [
+      "快速连续输入",
+      "验证只触发一次搜索"
+    ],
+    "passes": false
+  },
+  {
+    "id": 43,
+    "category": "show",
+    "description": "句子详情 - 元信息",
+    "steps": [
+      "进入练习",
+      "验证显示编号和剧集名"
+    ],
+    "passes": false
+  },
+  {
+    "id": 44,
+    "category": "show",
+    "description": "剧集切换保留进度",
+    "steps": [
+      "切换剧集",
+      "验证进度统计更新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 45,
+    "category": "practice",
+    "description": "中译英模式 - 显示中文英文模糊",
+    "steps": [
+      "切换到中译英模式",
+      "验证中文可见",
+      "验证英文模糊"
+    ],
+    "passes": false
+  },
+  {
+    "id": 46,
+    "category": "practice",
+    "description": "中译英模式 - 逐词输入框",
+    "steps": [
+      "显示中文",
+      "验证英文词拆为独立输入框",
+      "验证框数量正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 47,
+    "category": "practice",
+    "description": "中译英模式 - 全部正确",
+    "steps": [
+      "输入全部正确英文",
+      "点击提交",
+      "验证显示完全正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 48,
+    "category": "practice",
+    "description": "中译英模式 - 第一次错误",
+    "steps": [
+      "输入错误英文提交",
+      "验证错误词标红",
+      "验证正确词标绿"
+    ],
+    "passes": false
+  },
+  {
+    "id": 49,
+    "category": "practice",
+    "description": "中译英模式 - 第二次错误显示答案",
+    "steps": [
+      "再次提交错误",
+      "验证显示正确答案",
+      "验证显示中文"
+    ],
+    "passes": false
+  },
+  {
+    "id": 50,
+    "category": "practice",
+    "description": "中译英模式 - 显示英文",
+    "steps": [
+      "点击显示英文",
+      "验证英文模糊去除"
+    ],
+    "passes": false
+  },
+  {
+    "id": 51,
+    "category": "practice",
+    "description": "中译英模式 - 隐藏英文",
+    "steps": [
+      "点击隐藏英文",
+      "验证英文恢复模糊"
+    ],
+    "passes": false
+  },
+  {
+    "id": 52,
+    "category": "practice",
+    "description": "纯听写模式 - 英文模糊中文模糊",
+    "steps": [
+      "切换到纯听写",
+      "验证英文模糊",
+      "验证中文模糊"
+    ],
+    "passes": false
+  },
+  {
+    "id": 53,
+    "category": "practice",
+    "description": "纯听写模式 - 显示中文",
+    "steps": [
+      "点击显示中文",
+      "验证中文变清晰"
+    ],
+    "passes": false
+  },
+  {
+    "id": 54,
+    "category": "practice",
+    "description": "纯听写模式 - 隐藏中文",
+    "steps": [
+      "点击隐藏中文",
+      "验证中文恢复模糊"
+    ],
+    "passes": false
+  },
+  {
+    "id": 55,
+    "category": "practice",
+    "description": "纯听写模式 - 正确后都清晰",
+    "steps": [
+      "输入正确",
+      "验证英文中文同时清晰"
+    ],
+    "passes": false
+  },
+  {
+    "id": 56,
+    "category": "practice",
+    "description": "纯听写模式 - 两次错误显示中文",
+    "steps": [
+      "两次错误后",
+      "验证显示中文翻译"
+    ],
+    "passes": false
+  },
+  {
+    "id": 57,
+    "category": "practice",
+    "description": "逐词输入 - 自动跳转下一框",
+    "steps": [
+      "输入一个词",
+      "验证自动跳转到下一框"
+    ],
+    "passes": false
+  },
+  {
+    "id": 58,
+    "category": "practice",
+    "description": "逐词输入 - 空格跳转",
+    "steps": [
+      "输入后按空格",
+      "验证跳到下一框"
+    ],
+    "passes": false
+  },
+  {
+    "id": 59,
+    "category": "practice",
+    "description": "逐词输入 - 退格回跳",
+    "steps": [
+      "空框按退格",
+      "验证跳回上一框"
+    ],
+    "passes": false
+  },
+  {
+    "id": 60,
+    "category": "practice",
+    "description": "逐词输入 - Tab跳转",
+    "steps": [
+      "按Tab",
+      "验证跳到下一框"
+    ],
+    "passes": false
+  },
+  {
+    "id": 61,
+    "category": "practice",
+    "description": "逐词输入 - 回车提交",
+    "steps": [
+      "按回车",
+      "验证提交答案"
+    ],
+    "passes": false
+  },
+  {
+    "id": 62,
+    "category": "practice",
+    "description": "逐词输入 - 带撇号词自动填充",
+    "steps": [
+      "验证don't can't等自动填充",
+      "验证不可编辑"
+    ],
+    "passes": false
+  },
+  {
+    "id": 63,
+    "category": "practice",
+    "description": "逐词输入 - 随机提示词",
+    "steps": [
+      "验证部分词随机预填",
+      "验证不可编辑"
+    ],
+    "passes": false
+  },
+  {
+    "id": 64,
+    "category": "practice",
+    "description": "正确反馈 - 显示正确率",
+    "steps": [
+      "全部正确",
+      "验证显示100%"
+    ],
+    "passes": false
+  },
+  {
+    "id": 65,
+    "category": "practice",
+    "description": "正确反馈 - 下一句按钮",
+    "steps": [
+      "正确后",
+      "验证有下一句按钮"
+    ],
+    "passes": false
+  },
+  {
+    "id": 66,
+    "category": "practice",
+    "description": "错误反馈 - 重试提示",
+    "steps": [
+      "第一次错误",
+      "验证提示重试"
+    ],
+    "passes": false
+  },
+  {
+    "id": 67,
+    "category": "practice",
+    "description": "错误反馈 - 显示正确答案",
+    "steps": [
+      "第二次错误",
+      "验证黄色标记正确答案"
+    ],
+    "passes": false
+  },
+  {
+    "id": 68,
+    "category": "practice",
+    "description": "自动播放 - 剧集原音",
+    "steps": [
+      "设自动播放为剧集原音",
+      "加载新句",
+      "验证播放原音"
+    ],
+    "passes": false
+  },
+  {
+    "id": 69,
+    "category": "practice",
+    "description": "自动播放 - 导播音色",
+    "steps": [
+      "设自动播放为导播",
+      "加载新句",
+      "验证TTS播放"
+    ],
+    "passes": false
+  },
+  {
+    "id": 70,
+    "category": "practice",
+    "description": "播放速度 - 0.5x",
+    "steps": [
+      "设0.5倍速播放",
+      "验证慢速"
+    ],
+    "passes": false
+  },
+  {
+    "id": 71,
+    "category": "practice",
+    "description": "播放速度 - 1.5x",
+    "steps": [
+      "设1.5倍速播放",
+      "验证快速"
+    ],
+    "passes": false
+  },
+  {
+    "id": 72,
+    "category": "practice",
+    "description": "剧集原音按钮播放",
+    "steps": [
+      "点击剧集原音按钮",
+      "验证播放原音"
+    ],
+    "passes": false
+  },
+  {
+    "id": 73,
+    "category": "practice",
+    "description": "音色按钮播放",
+    "steps": [
+      "点击音色按钮",
+      "验证播放TTS"
+    ],
+    "passes": false
+  },
+  {
+    "id": 74,
+    "category": "practice",
+    "description": "下一句按钮",
+    "steps": [
+      "点击下一句",
+      "验证加载新句子"
+    ],
+    "passes": false
+  },
+  {
+    "id": 75,
+    "category": "practice",
+    "description": "快捷键 = 音色",
+    "steps": [
+      "按=键",
+      "验证音色播放"
+    ],
+    "passes": false
+  },
+  {
+    "id": 76,
+    "category": "practice",
+    "description": "快捷键 - 原音",
+    "steps": [
+      "按-键",
+      "验证原音播放"
+    ],
+    "passes": false
+  },
+  {
+    "id": 77,
+    "category": "practice",
+    "description": "快捷键 Enter",
+    "steps": [
+      "按Enter",
+      "验证提交"
+    ],
+    "passes": false
+  },
+  {
+    "id": 78,
+    "category": "practice",
+    "description": "快捷键 [ 中文切换",
+    "steps": [
+      "按[键",
+      "验证中文切换"
+    ],
+    "passes": false
+  },
+  {
+    "id": 79,
+    "category": "practice",
+    "description": "快捷键 ] 英文切换",
+    "steps": [
+      "按]键",
+      "验证英文切换"
+    ],
+    "passes": false
+  },
+  {
+    "id": 80,
+    "category": "practice",
+    "description": "快捷键 \\ 下一句",
+    "steps": [
+      "按\\键",
+      "验证加载下一句"
+    ],
+    "passes": false
+  },
+  {
+    "id": 81,
+    "category": "practice",
+    "description": "快捷键在输入框也生效",
+    "steps": [
+      "焦点在输入框按快捷键",
+      "验证仍然触发"
+    ],
+    "passes": false
+  },
+  {
+    "id": 82,
+    "category": "practice",
+    "description": "模式切换 - 中译英到纯听写",
+    "steps": [
+      "切换到纯听写",
+      "验证中文按钮显示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 83,
+    "category": "practice",
+    "description": "模式切换 - 纯听到中译英",
+    "steps": [
+      "切换到中译英",
+      "验证中文按钮隐藏"
+    ],
+    "passes": false
+  },
+  {
+    "id": 84,
+    "category": "practice",
+    "description": "句子加载完毕提示",
+    "steps": [
+      "所有句子练完",
+      "验证显示提示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 85,
+    "category": "practice",
+    "description": "显示英文按钮初始状态",
+    "steps": [
+      "新句子加载",
+      "验证显示显示英文"
+    ],
+    "passes": false
+  },
+  {
+    "id": 86,
+    "category": "practice",
+    "description": "提交正确后自动清晰",
+    "steps": [
+      "提交正确",
+      "验证英文中文自动清晰"
+    ],
+    "passes": false
+  },
+  {
+    "id": 87,
+    "category": "practice",
+    "description": "中译英模式 [ 键提示",
+    "steps": [
+      "中译英模式按[",
+      "验证提示中文总是显示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 88,
+    "category": "practice",
+    "description": "TTS 6种音色切换",
+    "steps": [
+      "切换6种音色",
+      "验证每种都能播放"
+    ],
+    "passes": false
+  },
+  {
+    "id": 89,
+    "category": "practice",
+    "description": "练习记录提交服务端",
+    "steps": [
+      "完成练习",
+      "验证API被调用"
+    ],
+    "passes": false
+  },
+  {
+    "id": 90,
+    "category": "practice",
+    "description": "专注模式进入退出",
+    "steps": [
+      "点击专注",
+      "验证无关元素隐藏",
+      "退出恢复正常"
+    ],
+    "passes": false
+  },
+  {
+    "id": 91,
+    "category": "settings",
+    "description": "设置面板打开关闭",
+    "steps": [
+      "点击设置",
+      "验证面板打开",
+      "点击关闭",
+      "验证面板关闭"
+    ],
+    "passes": false
+  },
+  {
+    "id": 92,
+    "category": "settings",
+    "description": "设置面板关闭按钮",
+    "steps": [
+      "打开设置",
+      "点击X关闭",
+      "验证面板关闭"
+    ],
+    "passes": false
+  },
+  {
+    "id": 93,
+    "category": "settings",
+    "description": "练习模式pill切换",
+    "steps": [
+      "验证两个模式pill",
+      "点击切换"
+    ],
+    "passes": false
+  },
+  {
+    "id": 94,
+    "category": "settings",
+    "description": "剧集选择下拉框",
+    "steps": [
+      "验证剧集/季/集三个下拉框存在各"
+    ],
+    "passes": false
+  },
+  {
+    "id": 95,
+    "category": "settings",
+    "description": "语音默认勾选",
+    "steps": [
+      "验证默认永远勾选"
+    ],
+    "passes": false
+  },
+  {
+    "id": 96,
+    "category": "settings",
+    "description": "音色选择默认Ryan",
+    "steps": [
+      "验证默认选中Ryan"
+    ],
+    "passes": false
+  },
+  {
+    "id": 97,
+    "category": "settings",
+    "description": "音色6种可切换",
+    "steps": [
+      "验证6种音色可选",
+      "选后按钮名同步更新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 98,
+    "category": "settings",
+    "description": "自动播放两个选项",
+    "steps": [
+      "验证剧集原音/导播",
+      "切换验证行为变化"
+    ],
+    "passes": false
+  },
+  {
+    "id": 99,
+    "category": "settings",
+    "description": "播放速度选中高亮",
+    "steps": [
+      "切换速度",
+      "验证对应按钮高亮"
+    ],
+    "passes": false
+  },
+  {
+    "id": 100,
+    "category": "settings",
+    "description": "快捷键说明显示",
+    "steps": [
+      "打开设置",
+      "验证快捷键在最底部"
+    ],
+    "passes": false
+  },
+  {
+    "id": 101,
+    "category": "settings",
+    "description": "设置持久化刷新保留",
+    "steps": [
+      "修改设置",
+      "刷新",
+      "验证保留"
+    ],
+    "passes": false
+  },
+  {
+    "id": 102,
+    "category": "settings",
+    "description": "音色按钮名同步",
+    "steps": [
+      "切换音色",
+      "验证主界面按钮更新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 103,
+    "category": "settings",
+    "description": "搜索面板打开关闭",
+    "steps": [
+      "打开搜索",
+      "验证有关闭按钮",
+      "关闭验证面板关闭"
+    ],
+    "passes": false
+  },
+  {
+    "id": 104,
+    "category": "settings",
+    "description": "专注时关闭设置面板",
+    "steps": [
+      "打开设置点专注",
+      "验证设置自动关闭"
+    ],
+    "passes": false
+  },
+  {
+    "id": 105,
+    "category": "settings",
+    "description": "专注时关闭搜索面板",
+    "steps": [
+      "打开搜索点专注",
+      "验证搜索自动关闭"
+    ],
+    "passes": false
+  },
+  {
+    "id": 106,
+    "category": "wrong",
+    "description": "错题自动记录",
+    "steps": [
+      "练习答错",
+      "验证错题本有记录"
+    ],
+    "passes": false
+  },
+  {
+    "id": 107,
+    "category": "wrong",
+    "description": "错题列表显示",
+    "steps": [
+      "打开错题本",
+      "验证显示句子预览"
+    ],
+    "passes": false
+  },
+  {
+    "id": 108,
+    "category": "wrong",
+    "description": "错题点击跳转练习",
+    "steps": [
+      "点击错题项",
+      "验证进入练习"
+    ],
+    "passes": false
+  },
+  {
+    "id": 109,
+    "category": "wrong",
+    "description": "错题清空",
+    "steps": [
+      "点击清空",
+      "验证错题本为空"
+    ],
+    "passes": false
+  },
+  {
+    "id": 110,
+    "category": "wrong",
+    "description": "同句不重复记录",
+    "steps": [
+      "同一句多次错误",
+      "验证只记一条"
+    ],
+    "passes": false
+  },
+  {
+    "id": 111,
+    "category": "wrong",
+    "description": "错题服务端同步",
+    "steps": [
+      "刷新页面",
+      "验证错题保留"
+    ],
+    "passes": false
+  },
+  {
+    "id": 112,
+    "category": "wrong",
+    "description": "错题空状态",
+    "steps": [
+      "错题本为空",
+      "验证显示空状态"
+    ],
+    "passes": false
+  },
+  {
+    "id": 113,
+    "category": "wrong",
+    "description": "错题数量显示",
+    "steps": [
+      "顶部统计栏",
+      "验证错题数量正确"
+    ],
+    "passes": false
+  },
+  {
+    "id": 114,
+    "category": "wrong",
+    "description": "错题跨设备同步",
+    "steps": [
+      "另一设备登录",
+      "验证错题数据一致"
+    ],
+    "passes": false
+  },
+  {
+    "id": 115,
+    "category": "browse",
+    "description": "浏览模式切换",
+    "steps": [
+      "点击浏览",
+      "验证进入浏览"
+    ],
+    "passes": false
+  },
+  {
+    "id": 116,
+    "category": "browse",
+    "description": "浏览句子列表",
+    "steps": [
+      "验证显示当前剧集句子"
+    ],
+    "passes": false
+  },
+  {
+    "id": 117,
+    "category": "browse",
+    "description": "编号显示",
+    "steps": [
+      "验证每句显示编号"
+    ],
+    "passes": false
+  },
+  {
+    "id": 118,
+    "category": "browse",
+    "description": "错题标记",
+    "steps": [
+      "验证错题句子有标记"
+    ],
+    "passes": false
+  },
+  {
+    "id": 119,
+    "category": "browse",
+    "description": "编号跳转",
+    "steps": [
+      "输入编号",
+      "验证跳转练习"
+    ],
+    "passes": false
+  },
+  {
+    "id": 120,
+    "category": "browse",
+    "description": "返回练习",
+    "steps": [
+      "点击返回",
+      "验证回到练习"
+    ],
+    "passes": false
+  },
+  {
+    "id": 121,
+    "category": "browse",
+    "description": "剧集过滤",
+    "steps": [
+      "切换剧集",
+      "验证浏览列表更新"
+    ],
+    "passes": false
+  },
+  {
+    "id": 122,
+    "category": "weapp",
+    "description": "小程序微信登录",
+    "steps": [
+      "打开小程序",
+      "微信登录",
+      "验证成功"
+    ],
+    "passes": false
+  },
+  {
+    "id": 123,
+    "category": "weapp",
+    "description": "小程序剧集选择",
+    "steps": [
+      "验证三级联动"
+    ],
+    "passes": false
+  },
+  {
+    "id": 124,
+    "category": "weapp",
+    "description": "小程序中译英练习",
+    "steps": [
+      "验证练习完整流程"
+    ],
+    "passes": false
+  },
+  {
+    "id": 125,
+    "category": "weapp",
+    "description": "小程序纯听写练习",
+    "steps": [
+      "验证练习完整流程"
+    ],
+    "passes": false
+  },
+  {
+    "id": 126,
+    "category": "weapp",
+    "description": "小程序音频播放",
+    "steps": [
+      "验证播放功能"
+    ],
+    "passes": false
+  },
+  {
+    "id": 127,
+    "category": "weapp",
+    "description": "小程序错题本",
+    "steps": [
+      "验证错题功能"
+    ],
+    "passes": false
+  },
+  {
+    "id": 128,
+    "category": "weapp",
+    "description": "小程序设置",
+    "steps": [
+      "验证设置功能"
+    ],
+    "passes": false
+  },
+  {
+    "id": 129,
+    "category": "weapp",
+    "description": "小程序搜索",
+    "steps": [
+      "验证搜索功能"
+    ],
+    "passes": false
+  },
+  {
+    "id": 130,
+    "category": "weapp",
+    "description": "小程序触屏适配",
+    "steps": [
+      "验证按钮大小适配触屏"
+    ],
+    "passes": false
+  },
+  {
+    "id": 131,
+    "category": "weapp",
+    "description": "小程序离线缓存",
+    "steps": [
+      "验证离线可用"
+    ],
+    "passes": false
+  },
+  {
+    "id": 132,
+    "category": "weapp",
+    "description": "小程序进度同步",
+    "steps": [
+      "验证Web和小程序进度一致"
+    ],
+    "passes": false
+  },
+  {
+    "id": 133,
+    "category": "weapp",
+    "description": "小程序TTS播放",
+    "steps": [
+      "验证语音播放"
+    ],
+    "passes": false
+  },
+  {
+    "id": 134,
+    "category": "admin",
+    "description": "仪表盘总览",
+    "steps": [
+      "验证总用户数",
+      "今日活跃",
+      "今日练习量"
+    ],
+    "passes": false
+  },
+  {
+    "id": 135,
+    "category": "admin",
+    "description": "用户列表分页",
+    "steps": [
+      "验证分页",
+      "搜索",
+      "筛选"
+    ],
+    "passes": false
+  },
+  {
+    "id": 136,
+    "category": "admin",
+    "description": "练习量趋势图",
+    "steps": [
+      "验证图表显示"
+    ],
+    "passes": false
+  },
+  {
+    "id": 137,
+    "category": "admin",
+    "description": "正确率趋势",
+    "steps": [
+      "验证正确率趋势"
+    ],
+    "passes": false
+  },
+  {
+    "id": 138,
+    "category": "admin",
+    "description": "模式分布",
+    "steps": [
+      "验证中译英/纯听写比例"
+    ],
+    "passes": false
+  },
+  {
+    "id": 139,
+    "category": "admin",
+    "description": "剧集热度排行",
+    "steps": [
+      "验证排行数据"
+    ],
+    "passes": false
+  },
+  {
+    "id": 140,
+    "category": "admin",
+    "description": "音频统计",
+    "steps": [
+      "验证TTS调用统计"
+    ],
+    "passes": false
+  },
+  {
+    "id": 141,
+    "category": "admin",
+    "description": "API监控",
+    "steps": [
+      "验证请求量响应时间"
+    ],
+    "passes": false
+  },
+  {
+    "id": 142,
+    "category": "admin",
+    "description": "错误日志",
+    "steps": [
+      "验证错误日志列表"
+    ],
+    "passes": false
+  },
+  {
+    "id": 143,
+    "category": "admin",
+    "description": "权限控制",
+    "steps": [
+      "验证普通用户无权访问"
+    ],
+    "passes": false
+  },
+  {
+    "id": 144,
+    "category": "admin",
+    "description": "用户禁用",
+    "steps": [
+      "禁用用户",
+      "验证该用户无法使用"
+    ],
+    "passes": false
+  },
+  {
+    "id": 145,
+    "category": "admin",
+    "description": "留存分析",
+    "steps": [
+      "验证日留存数据"
+    ],
+    "passes": false
+  },
+  {
+    "id": 146,
+    "category": "admin",
+    "description": "数据导出CSV",
+    "steps": [
+      "验证导出功能"
+    ],
+    "passes": false
+  },
+  {
+    "id": 147,
+    "category": "admin",
+    "description": "系统通知",
+    "steps": [
+      "发送通知",
+      "验证用户收到"
+    ],
+    "passes": false
+  },
+  {
+    "id": 148,
+    "category": "docker",
+    "description": "docker-compose一键启动",
+    "steps": [
+      "运行docker-compose up",
+      "验证容器都正常"
+    ],
+    "passes": false
+  },
+  {
+    "id": 149,
+    "category": "docker",
+    "description": "前端nginx配置",
+    "steps": [
+      "验证正确托管React构建"
+    ],
+    "passes": false
+  },
+  {
+    "id": 150,
+    "category": "docker",
+    "description": "后端健康检查",
+    "steps": [
+      "验证/api/health返回200"
+    ],
+    "passes": false
+  },
+  {
+    "id": 151,
+    "category": "docker",
+    "description": "MySQL数据持久化",
+    "steps": [
+      "重启后数据不丢失"
+    ],
+    "passes": false
+  },
+  {
+    "id": 152,
+    "category": "docker",
+    "description": "Redis缓存生效",
+    "steps": [
+      "验证连接正常缓存生效"
+    ],
+    "passes": false
+  },
+  {
+    "id": 153,
+    "category": "docker",
+    "description": "容器资源限制",
+    "steps": [
+      "验证内存CPU限制"
+    ],
+    "passes": false
+  },
+  {
+    "id": 154,
+    "category": "docker",
+    "description": "部署脚本deploy.sh",
+    "steps": [
+      "验证一键部署流程"
+    ],
+    "passes": false
+  },
+  {
+    "id": 155,
+    "category": "docker",
+    "description": "HTTPS证书",
+    "steps": [
+      "验证Tunnel自动HTTPS"
+    ],
+    "passes": false
+  },
+  {
+    "id": 156,
+    "category": "docker",
+    "description": "数据库迁移自动执行",
+    "steps": [
+      "验证Flyway自动迁移"
+    ],
+    "passes": false
+  },
+  {
+    "id": 157,
+    "category": "docker",
+    "description": "日志集中收集",
+    "steps": [
+      "验证日志输出"
+    ],
+    "passes": false
+  },
+  {
+    "id": 158,
+    "category": "docker",
+    "description": "容器健康检查",
+    "steps": [
+      "验证健康检查配置"
+    ],
+    "passes": false
+  },
+  {
+    "id": 159,
+    "category": "docker",
+    "description": "优雅关闭",
+    "steps": [
+      "验证docker-compose down正常停止"
+    ],
+    "passes": false
+  },
+  {
+    "id": 160,
+    "category": "docker",
+    "description": "前端构建优化",
+    "steps": [
+      "验证打包大小优化"
+    ],
+    "passes": false
+  },
+  {
+    "id": 161,
+    "category": "docker",
+    "description": "环境变量配置",
+    "steps": [
+      "验证通过环境变量配置各环境"
+    ],
+    "passes": false
+  },
+  {
+    "id": 162,
+    "category": "docker",
+    "description": "备份脚本",
+    "steps": [
+      "验证数据库备份脚本"
+    ],
+    "passes": false
+  },
+  {
+    "id": 163,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #163",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 164,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #164",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 165,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #165",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 166,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #166",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 167,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #167",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 168,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #168",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 169,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #169",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 170,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #170",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 171,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #171",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 172,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #172",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 173,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #173",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 174,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #174",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 175,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #175",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 176,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #176",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 177,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #177",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 178,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #178",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 179,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #179",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 180,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #180",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 181,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #181",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 182,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #182",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 183,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #183",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 184,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #184",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 185,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #185",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 186,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #186",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 187,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #187",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 188,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #188",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 189,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #189",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 190,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #190",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 191,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #191",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 192,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #192",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 193,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #193",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 194,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #194",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 195,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #195",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 196,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #196",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 197,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #197",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 198,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #198",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 199,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #199",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  },
+  {
+    "id": 200,
+    "category": "quality",
+    "description": "UI打磨和质量检查 #200",
+    "steps": [
+      "检查样式一致性",
+      "无控制台错误",
+      "响应式适配"
+    ],
+    "passes": false
+  }
+]
