@@ -150,7 +150,11 @@ export default function PracticePage({ user }: { user: any }) {
       if (e.key === '=') { const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
       if (e.key === '-') { /* 原音 - 后续实现 */ return; }
       if (e.key === '\\') { loadSentence(); return; }
-      if (e.key === '[' && mode === 'dictation') { setShowCn(c => !c); return; }
+      if (e.key === '[') {
+        if (mode === 'dictation') { setShowCn(c => !c); }
+        else { /* 中译英模式中文始终显示 */ }
+        return;
+      }
       if (e.key === ']') { setShowEn(e => !e); return; }
     };
     window.addEventListener('keydown', handler);
@@ -315,7 +319,8 @@ export default function PracticePage({ user }: { user: any }) {
       {/* 快捷键提示 */}
       <div className="shortcuts-hint">
         <kbd>=</kbd> 音色 <kbd>-</kbd> 原音 <kbd>Enter</kbd> 提交 <kbd>\</kbd> 下一句
-        <kbd>[</kbd> 中文 <kbd>]</kbd> 英文
+        {mode === 'dictation' ? <><kbd>[</kbd> 中文 </> : '中文始终显示 '}
+        <kbd>]</kbd> 英文
       </div>
     </div>
   );
