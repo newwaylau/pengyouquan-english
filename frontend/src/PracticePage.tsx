@@ -46,11 +46,18 @@ export default function PracticePage({ user }: { user: any }) {
     api.shows().then(r => { if (r.code === 200) setShowList(r.data); });
   }, []);
 
-  // 加载统计
+  // 加载已保存的设置 + 统计
   useEffect(() => {
-    if (user) {
-      api.stats().then(r => { if (r.code === 200) setDailyStats({ done: r.data.totalPractices, correct: r.data.totalCorrect }); });
-    }
+    if (!user) return;
+    api.stats().then(r => { if (r.code === 200) setDailyStats({ done: r.data.totalPractices, correct: r.data.totalCorrect }); });
+    api.getSettings().then(r => {
+      if (r.code !== 200) return;
+      const s = r.data;
+      if (s.mode) setMode(s.mode as any);
+      if (s.voice) setVoice(s.voice);
+      if (s.speed) setSpeed(Number(s.speed));
+      if (s.showId) setSelectedShowId(Number(s.showId));
+    });
   }, [user]);
 
   // 加载句子
@@ -193,8 +200,10 @@ export default function PracticePage({ user }: { user: any }) {
           <option value="dictation">🖊️ 听写</option>
         </select>
         <select value={selectedShowId || ''} onChange={e => {
-          setSelectedShowId(e.target.value ? Number(e.target.value) : null);
+          const v = e.target.value ? Number(e.target.value) : null;
+          setSelectedShowId(v);
           setHistoryIds([]);
+          if (user) api.saveSettings({ showId: String(v || '') });
         }}>
           <option value="">🎬 全部剧集</option>
           {showList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
