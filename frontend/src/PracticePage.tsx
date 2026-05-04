@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
 
 /** 从字幕文本中提取英文 */
@@ -36,6 +37,7 @@ export default function PracticePage({ user }: { user: any }) {
   const [showList, setShowList] = useState<any[]>([]);
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // 加载剧集列表
   useEffect(() => {
@@ -229,6 +231,9 @@ export default function PracticePage({ user }: { user: any }) {
         </div>
       )}
 
+      {/* 设置按钮 */}
+      <button className="settings-btn" onClick={() => setSettingsOpen(true)}>⚙️ 设置</button>
+
       {/* 操作按钮 */}
       <div className="actions">
         {!answered ? (
@@ -257,6 +262,20 @@ export default function PracticePage({ user }: { user: any }) {
       {retryCount === 1 && !answered && (
         <div className="feedback retry">⚠️ 有错误，再试一次</div>
       )}
+
+      {/* 设置面板 */}
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        mode={mode}
+        onModeChange={setMode}
+        voice={voice}
+        onVoiceChange={setVoice}
+        speed={speed}
+        onSpeedChange={setSpeed}
+        showId={selectedShowId}
+        onShowChange={setSelectedShowId}
+      />
 
       {/* 快捷键提示 */}
       <div className="shortcuts-hint">
