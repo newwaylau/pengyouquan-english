@@ -18,12 +18,14 @@ const VOICES = [
 export default function PracticePage({ user }: { user: any }) {
   const [sentence, setSentence] = useState<any>(null);
   const [mode, setMode] = useState<'translation' | 'dictation'>('translation');
+  // 中译英模式：中文始终显示；听写模式：中文默认模糊
   const [showCn, setShowCn] = useState(true);
   const [showEn, setShowEn] = useState(false);
   const [speed, setSpeed] = useState(0.75);
   const [voice, setVoice] = useState('en-GB-RyanNeural');
   const [answered, setAnswered] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [revealed, setRevealed] = useState(false);
   const [words, setWords] = useState<string[]>([]);
   const [inputs, setInputs] = useState<string[]>([]);
   const [hints, setHints] = useState<Set<number>>(new Set());
@@ -50,9 +52,12 @@ export default function PracticePage({ user }: { user: any }) {
     setSentence(r.data[0]);
     setAnswered(false);
     setRetryCount(0);
+    setRevealed(false);
     setCorrectWords(new Set());
     setWrongWords(new Set());
     setShowEn(false);
+    // 中译英模式：中文始终可见；听写模式：中文默认模糊
+    setShowCn(mode === 'translation');
 
     const en = extractEn(r.data[0].text);
     const wds = en.split(/\s+/).filter(Boolean);
@@ -102,14 +107,20 @@ export default function PracticePage({ user }: { user: any }) {
     setWrongWords(wrong);
 
     if (wrong.size === 0) {
+      // 全部正确 → 完成
       setAnswered(true);
       setShowEn(true);
+      setShowCn(true);
       api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: correct.size, totalWords: words.length, mode });
     } else if (retryCount >= 1) {
+      // 第二次错误 → 显示答案
       setAnswered(true);
       setShowEn(true);
+      setShowCn(true);
+      setRevealed(true);
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: correct.size, totalWords: words.length, mode });
     } else {
+      // 第一次错误 → 标红重试
       setRetryCount(1);
     }
   };
@@ -186,15 +197,16 @@ export default function PracticePage({ user }: { user: any }) {
         {en}
       </div>
 
-      {/* 中文显示区 */}
-      {mode === 'translation' && cn && (
-        <div className="sentence-cn">{cn}</div>
-      )}
-      {mode === 'dictation' && cn && (
-        <div className={`sentence-cn ${!showCn ? 'blurred' : ''}`}>{cn}</div>
+      {/* 中文显示区
+          中译英模式：中文始终清晰显示（不可隐藏）
+          听写模式：中文默认模糊，点击可切换 */}
+      {cn && (
+        <div className={`sentence-cn ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
+          {cn}
+        </div>
       )}
 
-      {/* 逐词输入 */}
+      {/* 逐词输入（未完成时显示） */}
       {!answered && (
         <div className="word-inputs">
           {words.map((w, i) => (
@@ -225,16 +237,21 @@ export default function PracticePage({ user }: { user: any }) {
           <button className="btn-primary" onClick={() => { setHistoryIds(h => [...h, sentence.id]); loadSentence(); }}>⏭️ 下一句</button>
         )}
         <button onClick={() => playTts(en)}>🔊 音色</button>
-        <button onClick={() => setShowEn(s => !s)}>{showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}</button>
-        {mode === 'dictation' && (
-          <button onClick={() => setShowCn(s => !s)}>{showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}</button>
+        <button onClick={() => setShowEn(s => !s)}>
+          {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
+        </button>
+        {mode === 'dictation' && !answered && (
+          <button onClick={() => setShowCn(s => !s)}>
+            {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
+          </button>
         )}
       </div>
 
       {/* 反馈 */}
       {answered && (
-        <div className="feedback">
+        <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
           {wrongWords.size === 0 ? '✅ 完全正确！' : `❌ 正确 ${correctWords.size}/${words.length} 个词`}
+          {revealed && <div className="answer-reveal">正确答案：{en}</div>}
         </div>
       )}
       {retryCount === 1 && !answered && (
