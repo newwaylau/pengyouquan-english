@@ -61,3 +61,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .shortcut-list kbd{background:#f0f0f0;padding:2px 6px;border-radius:4px;border:1px solid #ddd;font-size:11px}
 .settings-btn{position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;padding:4px}
 .practice-page{position:relative}
+.search-page{padding:16px 0}
+.search-input{width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:10px;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:12px}
+.search-input:focus{border-color:#1677ff}
+.search-loading{text-align:center;color:#999;padding:20px}
+.search-result{background:#fff;padding:12px 16px;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background .15s}
+.search-result:hover{background:#f0f5ff}
+.result-text{font-size:14px;margin-bottom:4px}
+.result-meta{font-size:12px;color:#999}
