@@ -3,10 +3,11 @@ import { api, setToken, getToken, clearToken } from './api/client';
 import PracticePage from './PracticePage';
 import LoginPage from './LoginPage';
 import WrongPage from './WrongPage';
+import SearchPage from './SearchPage';
 import './index.css';
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search'>('practice');
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function App() {
         <div className="nav-links">
           <button onClick={() => setPage('practice')} className={page === 'practice' ? 'active' : ''}>练习</button>
           <button onClick={() => setPage('wrong')} className={page === 'wrong' ? 'active' : ''}>错题本</button>
+          <button onClick={() => setPage('search')} className={page === 'search' ? 'active' : ''}>搜索</button>
           {user ? (
             <>
               <span className="user-badge">{user.nickname}</span>
@@ -46,6 +48,7 @@ export default function App() {
       <main>
         {page === 'practice' && <PracticePage user={user} />}
         {page === 'wrong' && <WrongPage />}
+        {page === 'search' && <SearchPage onJump={(id) => { setPage('practice'); }} />}
       </main>
     </div>
   );
