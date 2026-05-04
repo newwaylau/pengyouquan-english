@@ -1,5 +1,6 @@
 package com.pengyouquan.english.config;
 
+import com.pengyouquan.english.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +26,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -36,11 +44,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             // 无状态会话（不用 Session）
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // 全部接口放行（JWT 过滤器后面再加）
+            // 全部放行，认证由 JwtAuthFilter 处理
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
             )
+            // 添加 JWT 过滤器（解析Token并设置userId到请求属性）
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             // 禁用默认的登录页面
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());

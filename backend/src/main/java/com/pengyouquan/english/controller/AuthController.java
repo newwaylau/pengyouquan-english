@@ -1,6 +1,7 @@
 package com.pengyouquan.english.controller;
 
 import com.pengyouquan.english.dto.*;
+import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -29,5 +30,14 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success(authService.login(request));
+    }
+
+    /** 获取当前用户信息（需要 JWT Token） */
+    @GetMapping("/me")
+    public ApiResponse<UserInfoResponse> me(@CurrentUserId Long userId) {
+        if (userId == null) {
+            return ApiResponse.unauthorized("未登录");
+        }
+        return ApiResponse.success(authService.getUserInfo(userId));
     }
 }

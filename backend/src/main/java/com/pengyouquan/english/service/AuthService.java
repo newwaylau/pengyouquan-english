@@ -1,9 +1,7 @@
 package com.pengyouquan.english.service;
 
 import com.pengyouquan.english.config.GlobalExceptionHandler.BusinessException;
-import com.pengyouquan.english.dto.LoginRequest;
-import com.pengyouquan.english.dto.LoginResponse;
-import com.pengyouquan.english.dto.RegisterRequest;
+import com.pengyouquan.english.dto.*;
 import com.pengyouquan.english.model.User;
 import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.security.JwtUtil;
@@ -77,5 +75,14 @@ public class AuthService {
 
         return new LoginResponse(token, user.getEmail(), user.getNickname(),
                 user.getAvatar(), user.getRole());
+    }
+
+    /**
+     * 获取用户信息
+     */
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+        return UserInfoResponse.fromUser(user);
     }
 }
