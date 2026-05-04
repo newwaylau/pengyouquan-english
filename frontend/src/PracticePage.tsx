@@ -117,28 +117,28 @@ export default function PracticePage({ user }: { user: any }) {
     const correct = new Set<number>();
     const wrong = new Set<number>();
     words.forEach((w, i) => {
-      if (hints.has(i)) { correct.add(i); return; }
+      if (hints.has(i)) { correct.add(i); return; } // 提示词默认正确，不计入用户输入
       if (inputs[i]?.trim().toLowerCase() === w.toLowerCase()) { correct.add(i); }
       else { wrong.add(i); }
     });
+    // 用户实际输入的词数（排除预填提示词）
+    const userInputCount = words.filter((_, i) => !hints.has(i)).length;
+    const userCorrectCount = words.filter((_, i) => !hints.has(i) && correct.has(i)).length;
     setCorrectWords(correct);
     setWrongWords(wrong);
 
     if (wrong.size === 0) {
-      // 全部正确 → 完成
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
-      api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: correct.size, totalWords: words.length, mode });
+      api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: userCorrectCount, totalWords: userInputCount, mode });
     } else if (retryCount >= 1) {
-      // 第二次错误 → 显示答案
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
       setRevealed(true);
-      api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: correct.size, totalWords: words.length, mode });
+      api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
     } else {
-      // 第一次错误 → 标红重试
       setRetryCount(1);
     }
   };
@@ -279,10 +279,18 @@ export default function PracticePage({ user }: { user: any }) {
         )}
       </div>
 
+      {/* 用户实际输入数 */}
+      {(() => {
+        const total = words.filter((_, i) => !hints.has(i)).length;
+        const correct = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
+        return null;
+      })()}
       {/* 反馈 */}
       {answered && (
         <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
-          {wrongWords.size === 0 ? '✅ 完全正确！' : `❌ 正确 ${correctWords.size}/${words.length} 个词`}
+          {wrongWords.size === 0
+            ? '✅ 完全正确！'
+            : `❌ 正确 ${words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length}/${words.filter((_, i) => !hints.has(i)).length} 个词`}
           {revealed && <div className="answer-reveal">正确答案：{en}</div>}
         </div>
       )}
