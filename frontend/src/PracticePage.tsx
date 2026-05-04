@@ -148,7 +148,16 @@ export default function PracticePage({ user }: { user: any }) {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') { handleSubmit(); return; }
       if (e.key === '=') { const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
-      if (e.key === '-') { /* 原音 - 后续实现 */ return; }
+      if (e.key === '-') {
+        if (sentence?.audioFile) {
+          if (audioRef.current) audioRef.current.pause();
+          const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
+          a.playbackRate = speed;
+          a.play();
+          audioRef.current = a;
+        }
+        return;
+      }
       if (e.key === '\\') { loadSentence(); return; }
       if (e.key === '[') {
         if (mode === 'dictation') { setShowCn(c => !c); }
@@ -272,7 +281,16 @@ export default function PracticePage({ user }: { user: any }) {
         ) : (
           <button className="btn-primary" onClick={() => { setHistoryIds(h => [...h, sentence.id]); loadSentence(); }}>⏭️ 下一句</button>
         )}
-        <button onClick={() => playTts(en)}>🔊 音色</button>
+        <button onClick={() => {
+          if (sentence.audioFile) {
+            if (audioRef.current) audioRef.current.pause();
+            const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
+            a.playbackRate = speed;
+            a.play();
+            audioRef.current = a;
+          } else { playTts(en); }
+        }}>🎬 原音</button>
+        <button onClick={() => playTts(en)}>🎙️ {(VOICES.find(v => v.id === voice) || {}).label || '音色'}</button>
         <button onClick={() => setShowEn(s => !s)}>
           {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
         </button>
