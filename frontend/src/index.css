@@ -1285,4 +1285,48 @@ body {
   /* 跳转按钮窄一点 */
   .jump-input button { font-size: 12px; padding: 6px 10px; }
 }
+/* ---------- 通知列表（公开区域） ---------- */
+.notification-list {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.notification-item {
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.notification-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.notification-content {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.notification-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- 通知管理（管理后台） ---------- */
+.notification-management { max-width: 600px; }
+.notification-management h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.notification-form {
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 16px;
+}
 /* ===== END ===== */
