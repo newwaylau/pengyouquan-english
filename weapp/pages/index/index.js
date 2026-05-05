@@ -89,6 +89,13 @@ Page({
     if (!this.data.currentSentence && !this.data.loading) {
       this.loadSentence()
     }
+    // 处理从错题本传过来的句子ID
+    const practiceSentenceId = wx.getStorageSync('practiceSentenceId')
+    if (practiceSentenceId) {
+      wx.removeStorageSync('practiceSentenceId')
+      this.setData({ searchPracticeId: practiceSentenceId })
+      this.loadSentence()
+    }
     // 加载统计
     this.loadStats()
   },
