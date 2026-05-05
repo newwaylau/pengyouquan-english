@@ -191,28 +191,30 @@ export default function PracticePage({
     }
   }, [showIdsParam]);
 
-  // 首次从设置加载（仅一次）
+  // 首次加载句子（登录/未登录都触发）
   const initialLoadRef = useRef(false);
   useEffect(() => {
-    if (initialLoadRef.current || !user) return;
-    initialLoadRef.current = true;
+    if (initialLoadRef.current) return;
     if (showList.length === 0) return;
+    initialLoadRef.current = true;
     (async () => {
-      const r = await api.getSettings();
-      if (r.code !== 200) return;
-      const s = r.data;
-      if (s.showId && s.selectedShow && s.selectedSeason) {
-        const found = showList.find((sh: any) => {
-          const m = sh.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
-          return m && m[1] === s.selectedShow && m[2] === s.selectedSeason && m[3] === s.showId;
-        });
-        if (found) setShowIdsParam(String(found.id));
-      } else {
-        // 没有保存的设置，直接加载随机
-        loadSentence(undefined, true);
+      if (user) {
+        const r = await api.getSettings();
+        if (r.code === 200) {
+          const s = r.data;
+          if (s.showId && s.selectedShow && s.selectedSeason) {
+            const found = showList.find((sh: any) => {
+              const m = sh.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
+              return m && m[1] === s.selectedShow && m[2] === s.selectedSeason && m[3] === s.showId;
+            });
+            if (found) { setShowIdsParam(String(found.id)); return; }
+          }
+        }
       }
+      // 未登录或没有保存的设置，加载随机句子
+      loadSentence(undefined, true);
     })();
-  }, [showList, user]);
+  }, [showList]);
 
   // 切换模式时更新中文显示状态
   useEffect(() => {
