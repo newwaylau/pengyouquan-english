@@ -135,19 +135,26 @@ export default function PracticePage({
   }, [historyIds]);
 
   // 从showId转换到数据库ID（showList加载完成后）
+  // 页面加载时先从showId转数据库ID，再加载句子
   useEffect(() => {
     if (showList.length === 0 || !user) return;
-    api.getSettings().then(r => {
+    (async () => {
+      const r = await api.getSettings();
       if (r.code !== 200) return;
       const s = r.data;
+      let id = '';
       if (s.showId && s.selectedShow && s.selectedSeason) {
         const found = showList.find((sh: any) => {
           const m = sh.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
           return m && m[1] === s.selectedShow && m[2] === s.selectedSeason && m[3] === s.showId;
         });
-        if (found) setShowIdsParam(String(found.id));
+        if (found) id = String(found.id);
       }
-    });
+      setShowIdsParam(id);
+      setHistoryIds([]);
+      // 直接加载句子（等showIdsParam更新后再触发useEffect）
+      setTimeout(() => loadSentence(undefined, true), 50);
+    })();
   }, [showList, user]);
 
   // 加载句子
