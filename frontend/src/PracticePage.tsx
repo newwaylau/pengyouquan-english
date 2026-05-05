@@ -10,6 +10,13 @@ function extractEn(text: string) {
 /** 从字幕文本中提取中文 */
 function extractCn(text: string) { return text.includes(' / ') ? text.split(' / ')[1] : ''; }
 
+/** 把单词拆成字母部分和标点部分（标点放在输入框外面） */
+function splitWordParts(w: string): { letters: string; prefix: string; suffix: string } {
+  const match = w.match(/^([^\w]*)([\w']*)([^\w]*)$/);
+  if (!match) return { letters: w, prefix: '', suffix: '' };
+  return { letters: match[2], prefix: match[1], suffix: match[3] };
+}
+
 /** 校正大小写（和老版5000项目一致） */
 function normalizeCase(s: string) {
   const words = s.split(/\s+/).filter(Boolean);
@@ -201,7 +208,8 @@ export default function PracticePage({
     const wrong = new Set<number>();
     words.forEach((w, i) => {
       if (hints.has(i)) { correct.add(i); return; }
-      if (inputs[i]?.trim().toLowerCase() === w.toLowerCase()) correct.add(i);
+      const cleanWord = w.replace(/[^\w]/g, '').toLowerCase();
+      if (inputs[i]?.trim().toLowerCase() === cleanWord) correct.add(i);
       else wrong.add(i);
     });
     const userInputCount = words.filter((_, i) => !hints.has(i)).length;
@@ -253,7 +261,8 @@ export default function PracticePage({
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    if (val.length >= (words[i] || '').length && i < words.length - 1) {
+    const wordLen = (words[i] || '').replace(/[^\w]/g, '').length;
+    if (val.length >= wordLen && i < words.length - 1) {
       inputRefs.current[i + 1]?.focus();
     }
   };
@@ -367,21 +376,27 @@ export default function PracticePage({
         {/* 逐词输入（未完成时显示） */}
         {!answered && (
           <div className="word-inputs">
-            {words.map((w, i) => (
-              <div key={i} className="word-input-wrapper">
+            {words.map((w, i) => {
+              const parts = splitWordParts(w);
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    style={{ width: Math.max(28, w.replace(/[^\w]/g,'').length * 10 + 8) }}
-                    placeholder={w.replace(/[\w']/g, '_')}
-                    value={hints.has(i) ? w : inputs[i]}
+                    style={{ width: Math.max(28, parts.letters.length * 10 + 8) }}
+                    placeholder={Array(parts.letters.length).fill('_').join(' ')}
+                    value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
                     autoFocus={i === 0}
                   />
-              </div>
-            ))}
+                  {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
+                  {i < words.length - 1 && <span className="word-sep"> </span>}
+                </div>
+              );
+            })}
           </div>
         )}
 
