@@ -363,13 +363,13 @@ body {
 }
 
 /* ---------- 逐词输入 ---------- */
-.word-inputs {
+.word-inputs { font-size: 1rem; 
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
-.word-input {
+.word-input { font-size: 1rem; 
   width: 80px;
   border: none;
   border-bottom: 2px solid var(--border-strong);
@@ -381,9 +381,9 @@ body {
   outline: none;
   transition: border-color 0.2s;
 }
-.word-input:focus { border-color: var(--primary); }
-.word-input.correct { border-color: var(--success); }
-.word-input.wrong {
+.word-input:focus { font-size: 1rem;  border-color: var(--primary); }
+.word-input.correct { font-size: 1rem;  border-color: var(--success); }
+.word-input.wrong { font-size: 1rem; 
   border-color: var(--danger);
   background: var(--error-bg);
 }
@@ -871,7 +871,7 @@ body {
 }
 .sentence-body { flex: 1; min-width: 0; }
 .browse-en { font-size: 14px; line-height: 1.5; color: var(--text); }
-.sentence-cn-browse { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.sentence-cn-browse { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
 
 /* ---------- 搜索页面 ---------- */
 .search-page { padding: 16px 0; }
@@ -1360,7 +1360,7 @@ body {
   .user-badge { display: none; }
   .logout-btn { font-size: 11px; padding: 3px 6px; }
 
-  .word-input { width: 60px; font-size: 16px; }
+  .word-input { font-size: 1rem;  width: 60px; font-size: 16px; }
   .sentence-en { font-size: 18px; padding: 12px; }
   .sentence-cn { font-size: 14px; }
 
@@ -1495,5 +1495,5 @@ body {
 
 /* ---------- PC 大屏缩放（和老版5000项目一致，用zoom整体放大） ---------- */
 @media (min-width: 900px) {
-  .app { zoom: 1.75; }
+  html { font-size: 28px; }
 }
