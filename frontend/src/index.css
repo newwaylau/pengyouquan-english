@@ -1590,7 +1590,7 @@ body {
 }
 
 /* 超小屏手机 (≤400px) 适配 */
-@media (max-width: 400px) {
+@media (max-width: 550px) {
   .action-row { gap: 3px; }
   .btn-action,
   .btn-speed { font-size: 0.625rem; padding: calc(3/16*1rem) calc(4/16*1rem); }
