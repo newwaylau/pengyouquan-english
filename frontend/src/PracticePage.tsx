@@ -218,16 +218,6 @@ export default function PracticePage({
         }
       }, 500);
     }
-      if (preferOriginalRef.current && s.audioFile) {
-        if (audioRef.current) audioRef.current.pause();
-        const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
-        a.playbackRate = speedRef.current;
-        a.play().catch(() => {});
-        audioRef.current = a;
-      } else {
-        const clean = extractEn(s.text);
-        if (clean) playTts(clean);
-      }
   };
 
   // TTS
