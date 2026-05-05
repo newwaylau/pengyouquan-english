@@ -454,9 +454,11 @@ export default function PracticePage({
             ))}
           </div>
           <div className="action-row-half">
-            <button className="btn-action" onClick={() => setShowCn(s => !s)}>
-              {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
-            </button>
+            {mode === 'dictation' && (
+              <button className="btn-action" onClick={() => setShowCn(s => !s)}>
+                {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
+              </button>
+            )}
             <button className="btn-action" onClick={() => setShowEn(s => !s)}>
               {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
             </button>
