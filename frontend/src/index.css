@@ -322,19 +322,18 @@ body {
 /* ---------- 主卡片 ---------- */
 .practice-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   padding: 20px;
   box-shadow: var(--shadow-card);
-  margin-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  height: 480px;
+  margin-bottom: 0;
 }
 
-.practice-card-content {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
+.button-area {
+  background: var(--card-bg);
+  border-radius: 0 0 12px 12px;
+  padding: 0 20px 12px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 4px;
 }
 
 .action-divider {
