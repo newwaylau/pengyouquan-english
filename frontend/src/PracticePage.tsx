@@ -6,6 +6,8 @@ import { api } from './api/client';
 function extractEn(text: string) { return text.includes(' / ') ? text.split(' / ')[0].replace(/^#\d+\s+/, '') : text.replace(/^#\d+\s+/, ''); }
 /** 从字幕文本中提取中文 */
 function extractCn(text: string) { return text.includes(' / ') ? text.split(' / ')[1] : ''; }
+/** 模式中文名 */
+const MODE_LABELS: Record<string, string> = { translation: '📝 中译英模式', dictation: '🖊️ 纯听写模式' };
 
 const VOICES = [
   { id: 'en-US-JennyNeural', label: 'Jenny' },
@@ -16,10 +18,20 @@ const VOICES = [
   { id: 'en-AU-WilliamNeural', label: 'William' },
 ];
 
-export default function PracticePage({ user }: { user: any }) {
+const SPEEDS = [0.5, 0.75, 1, 1.5];
+
+export default function PracticePage({
+  user,
+  jumpId,
+  onNavigate,
+}: {
+  user: any;
+  jumpId?: number | null;
+  onNavigate?: (page: string, data?: any) => void;
+}) {
+  // 句子
   const [sentence, setSentence] = useState<any>(null);
   const [mode, setMode] = useState<'translation' | 'dictation'>('translation');
-  // 中译英模式：中文始终显示；听写模式：中文默认模糊
   const [showCn, setShowCn] = useState(true);
   const [showEn, setShowEn] = useState(false);
   const [speed, setSpeed] = useState(0.75);
@@ -40,10 +52,20 @@ export default function PracticePage({ user }: { user: any }) {
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
-  const [dailyStats, setDailyStats] = useState({ done: 0, correct: 0 });
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
+  const jumpDoneRef = useRef(false);
+
+  // 统计
+  const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
+  const [wrongCount, setWrongCount] = useState(0);
+
+  // 搜索
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // 加载剧集列表
   useEffect(() => {
@@ -53,7 +75,10 @@ export default function PracticePage({ user }: { user: any }) {
   // 加载已保存的设置 + 统计
   useEffect(() => {
     if (!user) return;
-    api.stats().then(r => { if (r.code === 200) setDailyStats({ done: r.data.totalPractices, correct: r.data.totalCorrect }); });
+    api.stats().then(r => {
+      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
+    });
+    api.wrongSentences().then(r => { if (r.code === 200) setWrongCount(r.data.length); });
     api.getSettings().then(r => {
       if (r.code !== 200) return;
       const s = r.data;
@@ -70,13 +95,37 @@ export default function PracticePage({ user }: { user: any }) {
   }, [historyIds]);
 
   // 加载句子
-  const loadSentence = useCallback(async () => {
+  const loadSentence = useCallback(async (specificId?: number) => {
+    if (specificId) {
+      const r = await api.sentence(specificId);
+      if (r.code !== 200 || !r.data) return;
+      setupSentence(r.data);
+      return;
+    }
     const exclude = historyIds.join(',');
     let url = `limit=15&exclude=${encodeURIComponent(exclude)}`;
     if (selectedShowId) url += `&showId=${selectedShowId}`;
     const r = await api.random(url);
     if (r.code !== 200 || !r.data?.length) return;
-    setSentence(r.data[0]);
+    setupSentence(r.data[0]);
+  }, [historyIds, selectedShowId]);
+
+  // 处理跳转ID
+  useEffect(() => {
+    if (jumpId && !jumpDoneRef.current) {
+      jumpDoneRef.current = true;
+      loadSentence(jumpId);
+    }
+  }, [jumpId, loadSentence]);
+
+  // 第一次加载
+  useEffect(() => {
+    if (!jumpId) loadSentence();
+  }, []);
+
+  // 设置句子
+  const setupSentence = (s: any) => {
+    setSentence(s);
     setAnswered(false);
     setRetryCount(0);
     setRevealed(false);
@@ -86,17 +135,16 @@ export default function PracticePage({ user }: { user: any }) {
     // 中译英模式：中文始终可见；听写模式：中文默认模糊
     setShowCn(mode === 'translation');
 
-    const en = extractEn(r.data[0].text);
+    const en = extractEn(s.text);
     const wds = en.split(/\s+/).filter(Boolean);
     setWords(wds);
     setInputs(wds.map(() => ''));
 
-    // 撇号词预填+随机提示
+    // 撇号词预填 + 随机提示
     const hintsSet = new Set<number>();
     wds.forEach((w, i) => {
-      if (w.includes("'") && w.length > 2) { hintsSet.add(i); }
+      if (w.includes("'") && w.length > 2) hintsSet.add(i);
     });
-    // 随机提示一个非撇号词
     const nonHint = wds.map((_, i) => i).filter(i => !hintsSet.has(i));
     if (nonHint.length > 0) {
       hintsSet.add(nonHint[Math.floor(Math.random() * nonHint.length)]);
@@ -105,20 +153,28 @@ export default function PracticePage({ user }: { user: any }) {
 
     // 自动播放
     setTimeout(() => {
-      const clean = extractEn(r.data[0].text);
+      const clean = extractEn(s.text);
       if (clean) playTts(clean);
     }, 500);
-  }, [historyIds, selectedShowId]);
+  };
 
-  useEffect(() => { loadSentence(); }, []);
-
-  // TTS（静默处理浏览器自动播放限制）
+  // TTS
   const playTts = (text: string) => {
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(`/api/tts?text=${encodeURIComponent(text)}&voice=${voice}`);
     audio.playbackRate = speed;
-    audio.play().catch(() => {}); // 忽略浏览器自动播放限制
+    audio.play().catch(() => {});
     audioRef.current = audio;
+  };
+
+  // 播放原音
+  const playOriginal = () => {
+    if (!sentence?.audioFile) { playTts(extractEn(sentence?.text || '')); return; }
+    if (audioRef.current) audioRef.current.pause();
+    const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
+    a.playbackRate = speed;
+    a.play().catch(() => {});
+    audioRef.current = a;
   };
 
   // 提交
@@ -126,11 +182,10 @@ export default function PracticePage({ user }: { user: any }) {
     const correct = new Set<number>();
     const wrong = new Set<number>();
     words.forEach((w, i) => {
-      if (hints.has(i)) { correct.add(i); return; } // 提示词默认正确，不计入用户输入
-      if (inputs[i]?.trim().toLowerCase() === w.toLowerCase()) { correct.add(i); }
-      else { wrong.add(i); }
+      if (hints.has(i)) { correct.add(i); return; }
+      if (inputs[i]?.trim().toLowerCase() === w.toLowerCase()) correct.add(i);
+      else wrong.add(i);
     });
-    // 用户实际输入的词数（排除预填提示词）
     const userInputCount = words.filter((_, i) => !hints.has(i)).length;
     const userCorrectCount = words.filter((_, i) => !hints.has(i) && correct.has(i)).length;
     setCorrectWords(correct);
@@ -152,28 +207,24 @@ export default function PracticePage({ user }: { user: any }) {
     }
   };
 
+  // 下一句
+  const goNext = () => {
+    setHistoryIds(h => [...h, sentence.id]);
+    loadSentence();
+  };
+
   // 快捷键
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') { handleSubmit(); return; }
       if (e.key === '=') { const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
-      if (e.key === '-') {
-        if (sentence?.audioFile) {
-          if (audioRef.current) audioRef.current.pause();
-          const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
-          a.playbackRate = speed;
-          a.play().catch(() => {});
-          audioRef.current = a;
-        }
-        return;
-      }
-      if (e.key === '\\') { loadSentence(); return; }
+      if (e.key === '-') { playOriginal(); return; }
+      if (e.key === '\\') { goNext(); return; }
       if (e.key === '[') {
-        if (mode === 'dictation') { setShowCn(c => !c); }
-        else { /* 中译英模式中文始终显示 */ }
+        if (mode === 'dictation') setShowCn(c => !c);
         return;
       }
-      if (e.key === ']') { setShowEn(e => !e); return; }
+      if (e.key === ']') setShowEn(e => !e);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -184,7 +235,6 @@ export default function PracticePage({ user }: { user: any }) {
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    // 输完自动跳下一框
     if (val.length >= (words[i] || '').length && i < words.length - 1) {
       inputRefs.current[i + 1]?.focus();
     }
@@ -199,9 +249,40 @@ export default function PracticePage({ user }: { user: any }) {
     }
   };
 
+  // 搜索
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    clearTimeout(searchTimer.current);
+    if (q.length < 2) { setSearchResults([]); return; }
+    searchTimer.current = setTimeout(async () => {
+      const r = await api.search(q);
+      if (r.code === 200) setSearchResults(r.data || []);
+    }, 300);
+  };
+
+  // 从搜索结果跳转练习
+  const jumpToSearchResult = (id: number) => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    loadSentence(id);
+  };
+
+  // 计算正确率
+  const accuracy = stats.totalPractices > 0
+    ? Math.round((stats.totalCorrect / stats.totalPractices) * 100)
+    : 0;
+
+  // 骨架屏
   if (!sentence) return (
     <div className="practice-page">
-      <div className="skeleton" style={{ height: 20, width: '60%', marginBottom: 16 }} />
+      <div className="stats-bar">
+        <div className="stat-card skeleton" style={{ height: 60 }} />
+        <div className="stat-card skeleton" style={{ height: 60 }} />
+        <div className="stat-card skeleton" style={{ height: 60 }} />
+        <div className="stat-card skeleton" style={{ height: 60 }} />
+      </div>
+      <div className="mode-badge skeleton" style={{ height: 24, width: 120, marginBottom: 16 }} />
       <div className="skeleton" style={{ height: 40, width: '100%', marginBottom: 12 }} />
       <div className="skeleton" style={{ height: 60, width: '100%', marginBottom: 16 }} />
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -215,130 +296,151 @@ export default function PracticePage({ user }: { user: any }) {
   const en = extractEn(sentence.text);
   const cn = extractCn(sentence.text);
 
+  // 用户实际输入词统计
+  const userTotal = words.filter((_, i) => !hints.has(i)).length;
+  const userCorrectCount = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
+
   return (
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''}`}>
-      {/* 进度条 */}
+      {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
       {user && (
-        <div className="progress-bar">
-          <span>📊 今日练习 {dailyStats.done} 次</span>
-          <span className="focus-toggle" onClick={() => setFocusMode(f => !f)}>
-            {focusMode ? '🎯 退出专注' : '🎯 专注'}
-          </span>
-        </div>
-      )}
-      {/* 控制栏 */}
-      <div className="controls">
-        <select value={mode} onChange={e => setMode(e.target.value as any)}>
-          <option value="translation">📝 中译英</option>
-          <option value="dictation">🖊️ 听写</option>
-        </select>
-        <select value={selectedShowId || ''} onChange={e => {
-          const v = e.target.value ? Number(e.target.value) : null;
-          setSelectedShowId(v);
-          setHistoryIds([]);
-          if (user) api.saveSettings({ showId: String(v || '') });
-        }}>
-          <option value="">🎬 全部剧集</option>
-          {showList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-        <select value={voice} onChange={e => setVoice(e.target.value)}>
-          {VOICES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
-        </select>
-        <select value={speed} onChange={e => setSpeed(Number(e.target.value))}>
-          {[0.5, 0.75, 1, 1.5].map(s => <option key={s} value={s}>{s}x</option>)}
-        </select>
-      </div>
-
-      {/* 剧集名 */}
-      <div className="sentence-meta">
-        {sentence.showName} · #{sentence.id}
-      </div>
-
-      {/* 英文显示区（模糊遮住） */}
-      <div className={`sentence-en sentence-fade-in ${!showEn ? 'blurred' : ''}`}>
-        {en}
-      </div>
-
-      {/* 中文显示区
-          中译英模式：中文始终清晰显示（不可隐藏）
-          听写模式：中文默认模糊，点击可切换 */}
-      {cn && (
-        <div className={`sentence-cn sentence-fade-in ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
-          {cn}
+        <div className="stats-bar">
+          <div className="stat-card" onClick={() => {}}>
+            <span className="stat-value">{stats.totalPractices}</span>
+            <span className="stat-label">总句子</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value">{stats.totalPractices}</span>
+            <span className="stat-label">今日练习</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value">{accuracy}%</span>
+            <span className="stat-label">正确率</span>
+          </div>
+          <div className="stat-card clickable" onClick={() => onNavigate?.('wrong')}>
+            <span className="stat-value">{wrongCount}</span>
+            <span className="stat-label">错题</span>
+          </div>
         </div>
       )}
 
-      {/* 逐词输入（未完成时显示） */}
-      {!answered && (
-        <div className="word-inputs">
-          {words.map((w, i) => (
-            <div key={i} className="word-input-wrapper">
-              {hints.has(i) ? (
-                <span className="hint-word">{w}</span>
-              ) : (
-                <input
-                  ref={el => { inputRefs.current[i] = el; }}
-                  className={`word-input ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                  value={inputs[i]}
-                  onChange={e => handleInputChange(i, e.target.value)}
-                  onKeyDown={e => handleKeyDown(i, e)}
-                  disabled={hints.has(i) || answered}
-                  autoFocus={i === 0}
-                />
-              )}
-            </div>
+      {/* Mode Badge */}
+      <div className="mode-badge">{MODE_LABELS[mode] || '📝 练习模式'}</div>
+
+      {/* 主卡片 */}
+      <div className="practice-card">
+        {/* 剧集名 + ID */}
+        <div className="sentence-meta">
+          {sentence.showName} · #{sentence.id}
+        </div>
+
+        {/* 英文显示区 */}
+        <div className={`sentence-en sentence-fade-in ${!showEn ? 'blurred' : ''}`}>
+          {en}
+        </div>
+
+        {/* 中文显示区 */}
+        {cn && (
+          <div className={`sentence-cn sentence-fade-in ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
+            {cn}
+          </div>
+        )}
+
+        {/* 逐词输入（未完成时显示） */}
+        {!answered && (
+          <div className="word-inputs">
+            {words.map((w, i) => (
+              <div key={i} className="word-input-wrapper">
+                {hints.has(i) ? (
+                  <span className="hint-word">{w}</span>
+                ) : (
+                  <input
+                    ref={el => { inputRefs.current[i] = el; }}
+                    className={`word-input ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
+                    value={inputs[i]}
+                    onChange={e => handleInputChange(i, e.target.value)}
+                    onKeyDown={e => handleKeyDown(i, e)}
+                    disabled={hints.has(i) || answered}
+                    autoFocus={i === 0}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 反馈区域 */}
+        {answered && (
+          <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
+            {wrongWords.size === 0
+              ? '✅ 完全正确！'
+              : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
+            {revealed && <div className="answer-reveal">正确答案：{en}</div>}
+          </div>
+        )}
+        {retryCount === 1 && !answered && (
+          <div className="feedback retry">⚠️ 有错误，再试一次</div>
+        )}
+
+        {/* 操作行1：提交 */}
+        <div className="action-row">
+          {!answered ? (
+            <button className="btn-primary" onClick={handleSubmit}>⏎ 提交</button>
+          ) : (
+            <button className="btn-primary" onClick={goNext}>⏭️ 下一句</button>
+          )}
+        </div>
+
+        {/* 操作行2：原音 / 音色 / 下一句 / 速度按钮 */}
+        <div className="action-row">
+          <button className="btn-action" onClick={playOriginal}>🎬 剧集原音</button>
+          <button className="btn-action" onClick={() => playTts(en)}>🎙️ 服务器音色</button>
+          <button className="btn-action" onClick={goNext}>⏭️ 下一句</button>
+          {SPEEDS.map(s => (
+            <button
+              key={s}
+              className={`btn-speed ${speed === s ? 'active' : ''}`}
+              onClick={() => setSpeed(s)}
+            >
+              {s}x
+            </button>
           ))}
         </div>
-      )}
 
-      {/* 设置按钮 */}
-      <button className="settings-btn" onClick={() => setSettingsOpen(true)}>⚙️ 设置</button>
-
-      {/* 操作按钮 */}
-      <div className="actions">
-        {!answered ? (
-          <button className="btn-primary" onClick={handleSubmit}>⏎ 提交</button>
-        ) : (
-          <button className="btn-primary" onClick={() => { setHistoryIds(h => [...h, sentence.id]); loadSentence(); }}>⏭️ 下一句</button>
-        )}
-        <button onClick={() => {
-          if (sentence.audioFile) {
-            if (audioRef.current) audioRef.current.pause();
-            const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
-            a.playbackRate = speed;
-            a.play().catch(() => {});
-            audioRef.current = a;
-          } else { playTts(en); }
-        }}>🎬 原音</button>
-        <button onClick={() => playTts(en)}>🎙️ {(VOICES.find(v => v.id === voice) || {}).label || '音色'}</button>
-        <button onClick={() => setShowEn(s => !s)}>
-          {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
-        </button>
-        {mode === 'dictation' && !answered && (
-          <button onClick={() => setShowCn(s => !s)}>
+        {/* 操作行3：显示中文 / 显示英文 */}
+        <div className="action-row">
+          <button className="btn-action" onClick={() => setShowCn(s => !s)}>
             {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
           </button>
-        )}
+          <button className="btn-action" onClick={() => setShowEn(s => !s)}>
+            {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
+          </button>
+        </div>
       </div>
 
-      {/* 用户实际输入数 */}
-      {(() => {
-        const total = words.filter((_, i) => !hints.has(i)).length;
-        const correct = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
-        return null;
-      })()}
-      {/* 反馈 */}
-      {answered && (
-        <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
-          {wrongWords.size === 0
-            ? '✅ 完全正确！'
-            : `❌ 正确 ${words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length}/${words.filter((_, i) => !hints.has(i)).length} 个词`}
-          {revealed && <div className="answer-reveal">正确答案：{en}</div>}
-        </div>
-      )}
-      {retryCount === 1 && !answered && (
-        <div className="feedback retry">⚠️ 有错误，再试一次</div>
-      )}
+      {/* 底部导航 */}
+      <div className="bottom-nav">
+        <button className="bottom-nav-btn" onClick={() => onNavigate?.('browse')}>
+          <span className="bottom-nav-icon">📖</span>
+          <span className="bottom-nav-label">浏览</span>
+        </button>
+        <button className="bottom-nav-btn" onClick={() => onNavigate?.('wrong')}>
+          <span className="bottom-nav-icon">❌</span>
+          <span className="bottom-nav-label">错题</span>
+        </button>
+        <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
+          <span className="bottom-nav-icon">⚙️</span>
+          <span className="bottom-nav-label">设置</span>
+        </button>
+        <button className="bottom-nav-btn" onClick={() => setSearchOpen(true)}>
+          <span className="bottom-nav-icon">🔍</span>
+          <span className="bottom-nav-label">搜索</span>
+        </button>
+        <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
+          <span className="bottom-nav-icon">🧘</span>
+          <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
+        </button>
+      </div>
 
       {/* 设置面板 */}
       <SettingsPanel
@@ -358,11 +460,41 @@ export default function PracticePage({ user }: { user: any }) {
         onPreferOriginalChange={setPreferOriginal}
       />
 
+      {/* 搜索面板 */}
+      {searchOpen && (
+        <div className="settings-overlay" onClick={() => setSearchOpen(false)}>
+          <div className="search-panel" onClick={e => e.stopPropagation()}>
+            <div className="settings-header">
+              <h3>🔍 搜索句子</h3>
+              <button className="close-btn" onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}>✕</button>
+            </div>
+            <input
+              className="search-input"
+              type="text"
+              placeholder="搜索句子（中英文）..."
+              value={searchQuery}
+              onChange={e => handleSearch(e.target.value)}
+              autoFocus
+            />
+            <div className="search-results-inline">
+              {searchResults.map((s: any) => (
+                <div key={s.id} className="search-result-item" onClick={() => jumpToSearchResult(s.id)}>
+                  <div className="result-text">{s.text}</div>
+                  <div className="result-meta">{s.showName} · #{s.id}</div>
+                </div>
+              ))}
+              {searchQuery.length >= 2 && searchResults.length === 0 && (
+                <div className="empty-state">无结果</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 快捷键提示 */}
       <div className="shortcuts-hint">
         <kbd>=</kbd> 音色 <kbd>-</kbd> 原音 <kbd>Enter</kbd> 提交 <kbd>\</kbd> 下一句
-        {mode === 'dictation' ? <><kbd>[</kbd> 中文 </> : '中文始终显示 '}
-        <kbd>]</kbd> 英文
+        <kbd>[</kbd> 中文 <kbd>]</kbd> 英文
       </div>
     </div>
   );

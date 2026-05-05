@@ -37,6 +37,12 @@ export default function App() {
 
   const handleLogout = () => { clearToken(); setUser(null); setPage('login'); };
 
+  // 处理从实践页底部导航来的跳转
+  const handleNavigate = (target: string, data?: any) => {
+    setPage(target as any);
+    if (data?.jumpId) setJumpId(data.jumpId);
+  };
+
   if (page === 'login' || (!getToken() && page !== 'practice')) {
     return <LoginPage onLogin={handleLogin} />;
   }
@@ -46,18 +52,13 @@ export default function App() {
       <nav className="topnav">
         <span className="logo">朋友圈英语</span>
         <div className="nav-links">
-          <button onClick={() => setPage('practice')} className={page === 'practice' ? 'active' : ''}>练习</button>
-          <button onClick={() => setPage('browse')} className={page === 'browse' ? 'active' : ''}>浏览</button>
-          <button onClick={() => setPage('wrong')} className={page === 'wrong' ? 'active' : ''}>错题本</button>
-          <button onClick={() => setPage('search')} className={page === 'search' ? 'active' : ''}>搜索</button>
-          <button onClick={() => setPage('subtitle')} className={page === 'subtitle' ? 'active' : ''}>导入</button>
-          {user?.role === 'admin' && (
-            <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
-          )}
           {user ? (
             <>
               <span className="user-badge">{user.nickname}</span>
               <button onClick={handleLogout} className="logout-btn">退出</button>
+              {user?.role === 'admin' && (
+                <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
+              )}
             </>
           ) : (
             <button onClick={() => setPage('login')}>登录</button>
@@ -83,7 +84,7 @@ export default function App() {
         </div>
       )}
       <main>
-        {page === 'practice' && <PracticePage user={user} jumpId={jumpId} />}
+        {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
         {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
         {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
         {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
