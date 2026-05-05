@@ -4,6 +4,9 @@ import { api } from './api/client';
 /** 上传状态 */
 type UploadState = 'idle' | 'uploading' | 'parsing' | 'done' | 'error';
 
+/** 批量导入状态 */
+type BatchImportState = 'idle' | 'importing' | 'done' | 'error';
+
 interface ImportRecord {
   id: number;
   showId: number;
@@ -25,6 +28,11 @@ export default function SubtitlePage() {
   const [history, setHistory] = useState<ImportRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 批量导入状态
+  const [batchDir, setBatchDir] = useState('');
+  const [batchState, setBatchState] = useState<BatchImportState>('idle');
+  const [batchMsg, setBatchMsg] = useState('');
 
   // 加载支持的字幕格式
   useEffect(() => {
@@ -194,6 +202,54 @@ export default function SubtitlePage() {
           {uploadMsg}
         </div>
       )}
+
+      {/* ── 批量导入 ── */}
+      <div className="batch-import-section">
+        <h3>📂 批量导入（目录）</h3>
+        <div className="subtitle-form-row">
+          <label>目录路径</label>
+          <input
+            className="subtitle-input"
+            value={batchDir}
+            onChange={e => setBatchDir(e.target.value)}
+            placeholder="/path/to/subtitle/folder"
+            disabled={batchState === 'importing'}
+          />
+        </div>
+        <button
+          className="upload-btn"
+          disabled={!batchDir.trim() || batchState === 'importing'}
+          onClick={async () => {
+            setBatchState('importing');
+            setBatchMsg('正在扫描目录并导入字幕...');
+            try {
+              const r = await api.subtitleBatchImport(batchDir.trim());
+              if (r.code === 200) {
+                const d = r.data;
+                const parts = [`✅ 导入完成：共导入 ${d.totalImported} 句`];
+                if (d.totalDuplicate > 0) parts.push(`重复跳过 ${d.totalDuplicate} 句`);
+                if (d.totalFailed > 0) parts.push(`失败 ${d.totalFailed} 个文件`);
+                setBatchMsg(parts.join('，'));
+                setBatchState('done');
+                loadHistory();
+              } else {
+                setBatchMsg(`❌ 导入失败：${r.message || '未知错误'}`);
+                setBatchState('error');
+              }
+            } catch {
+              setBatchMsg('❌ 请求失败，请检查网络');
+              setBatchState('error');
+            }
+          }}
+        >
+          {batchState === 'importing' ? '🔄 导入中...' : '📥 批量导入'}
+        </button>
+        {batchState !== 'idle' && batchMsg && (
+          <div className={`upload-feedback ${batchState === 'done' ? 'success' : 'error'}`}>
+            {batchMsg}
+          </div>
+        )}
+      </div>
 
       {/* 导入历史 */}
       <div className="history-section">

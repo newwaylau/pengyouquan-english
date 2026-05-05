@@ -61,4 +61,6 @@ export const api = {
   subtitleHistory: () => request('/api/subtitle/history'),
   subtitleDelete: (id: number) => request(`/api/subtitle/${id}`, { method: 'DELETE' }),
   subtitleFormats: () => request('/api/subtitle/formats'),
+  subtitleBatchImport: (directoryPath: string) =>
+    request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
 };

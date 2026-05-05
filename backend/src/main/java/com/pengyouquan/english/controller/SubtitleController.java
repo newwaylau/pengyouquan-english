@@ -88,6 +88,33 @@ public class SubtitleController {
     }
 
     /**
+     * 批量导入目录下所有字幕文件
+     * POST /api/subtitle/batch-import
+     * 请求体: { "directoryPath": "/path/to/subtitles" }
+     */
+    @PostMapping("/batch-import")
+    public ApiResponse<Map<String, Object>> batchImport(@RequestBody Map<String, String> request) {
+        String directoryPath = request.get("directoryPath");
+        if (directoryPath == null || directoryPath.isBlank()) {
+            return ApiResponse.badRequest("请提供目录路径");
+        }
+
+        SubtitleService.BatchImportResult result = subtitleService.batchImport(directoryPath.trim());
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("totalImported", result.totalImported);
+        data.put("totalDuplicate", result.totalDuplicate);
+        data.put("totalFailed", result.totalFailed);
+        data.put("directoryPath", directoryPath);
+
+        if (!result.isSuccess()) {
+            return ApiResponse.badRequest(result.error);
+        }
+
+        return ApiResponse.success(data);
+    }
+
+    /**
      * 获取支持的字幕格式
      * GET /api/subtitle/formats
      */
