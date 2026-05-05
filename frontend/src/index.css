@@ -349,13 +349,15 @@ body {
   user-select: none;
 }
 .sentence-cn {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  padding: calc(8/16*1rem) calc(16/16*1rem);
-  background: var(--cn-bg);
-  border-radius: 8px;
-  transition: filter 0.3s, opacity 0.3s;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  text-align: center;
+  color: #a8a8c8;
+  margin-top: 14px;
+  padding: 6px 12px;
+  width: 100%;
+  border-top: 1px solid rgba(108, 92, 231, 0.15);
+  transition: filter 0.3s;
 }
 .sentence-cn.blurred {
   filter: blur(6px);
