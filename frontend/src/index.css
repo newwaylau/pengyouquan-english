@@ -1492,3 +1492,8 @@ body {
   margin-bottom: 16px;
 }
 /* ===== END ===== */
+
+/* PC 大屏缩放（与5000老版一致） */
+@media (min-width: 900px) {
+  html { font-size: 28px; }
+}
