@@ -188,11 +188,13 @@ export default function PracticePage({
     }
     setHints(hintsSet);
 
-    // 自动播放 + 聚焦到第一个输入框
+    // 自动播放 + 聚焦到第一个可输入框
     preferOriginalRef.current = preferOriginal;
     speedRef.current = speed;
     setTimeout(() => {
-      inputRefs.current[0]?.focus();
+      let first = 0;
+      while (first < wds.length && hintsSet.has(first)) first++;
+      inputRefs.current[first]?.focus();
       if (preferOriginalRef.current && s.audioFile) {
         if (audioRef.current) audioRef.current.pause();
         const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
