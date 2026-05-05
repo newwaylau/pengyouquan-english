@@ -413,7 +413,7 @@ export default function PracticePage({
         )}
 
         {/* 逐词输入（未完成时显示） */}
-        {!answered && (
+        {/* 输入框始终显示，回答后变为只读 */}
           <div className="word-inputs">
             {words.map((w, i) => {
               const parts = splitWordParts(w);
