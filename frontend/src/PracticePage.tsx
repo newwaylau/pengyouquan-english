@@ -247,7 +247,7 @@ export default function PracticePage({
   // 快捷键（在输入框内按快捷键不会输入字符）
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); return; }
+      if (e.key === 'Enter') { e.preventDefault(); if (answered) goNext(); else handleSubmit(); return; }
       if (e.key === '=') { e.preventDefault(); const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
       if (e.key === '-') { e.preventDefault(); playOriginal(); return; }
       if (e.key === '\\') { e.preventDefault(); goNext(); return; }
