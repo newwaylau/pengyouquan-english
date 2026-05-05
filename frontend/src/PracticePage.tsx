@@ -205,13 +205,14 @@ export default function PracticePage({
   };
 
   // 提交
-  const handleSubmit = () => {
+  const handleSubmit = (inputOverrides?: string[]) => {
+    const currentInputs = inputOverrides || inputs;
     const correct = new Set<number>();
     const wrong = new Set<number>();
     words.forEach((w, i) => {
       if (hints.has(i)) { correct.add(i); return; }
       const cleanWord = w.replace(/[^\w]/g, '').toLowerCase();
-      if (inputs[i]?.trim().toLowerCase() === cleanWord) correct.add(i);
+      if (currentInputs[i]?.trim().toLowerCase() === cleanWord) correct.add(i);
       else wrong.add(i);
     });
     const userInputCount = words.filter((_, i) => !hints.has(i)).length;
@@ -265,11 +266,19 @@ export default function PracticePage({
     setInputs(newInputs);
     // 标点/撇号在输入框外，只用字母长度判断是否跳转
     const parts = splitWordParts(words[i] || '');
-    if (val.length >= parts.letters.length && i < words.length - 1) {
-      // 跳过后面的提示输入框（disabled），跳到下一个可输入的
-      let next = i + 1;
-      while (next < words.length && hints.has(next)) next++;
-      if (next < words.length) inputRefs.current[next]?.focus();
+    if (val.length >= parts.letters.length) {
+      setInputs(newInputs);
+      if (i < words.length - 1) {
+        // 跳过后面的提示输入框（disabled），跳到下一个可输入的
+        let next = i + 1;
+        while (next < words.length && hints.has(next)) next++;
+        if (next < words.length) inputRefs.current[next]?.focus();
+        else handleSubmit(newInputs);
+      } else {
+        // 最后一个词输入完，自动提交
+        handleSubmit(newInputs);
+      }
+      return; // 不重复setInputs
     }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
