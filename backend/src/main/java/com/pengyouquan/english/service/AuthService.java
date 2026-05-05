@@ -2,7 +2,9 @@ package com.pengyouquan.english.service;
 
 import com.pengyouquan.english.config.GlobalExceptionHandler.BusinessException;
 import com.pengyouquan.english.dto.*;
+import com.pengyouquan.english.model.SystemSetting;
 import com.pengyouquan.english.model.User;
+import com.pengyouquan.english.repository.SystemSettingRepository;
 import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,19 +20,28 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final SystemSettingRepository systemSettingRepository;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil) {
+                       JwtUtil jwtUtil,
+                       SystemSettingRepository systemSettingRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.systemSettingRepository = systemSettingRepository;
     }
 
     /**
      * 用户注册
      */
     public LoginResponse register(RegisterRequest request) {
+        // 检查注册是否开放
+        SystemSetting regSetting = systemSettingRepository.findById("registrationEnabled").orElse(null);
+        if (regSetting != null && "false".equals(regSetting.getSettingValue())) {
+            throw new BusinessException("注册已关闭");
+        }
+
         // 检查邮箱是否已注册
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException("该邮箱已注册");

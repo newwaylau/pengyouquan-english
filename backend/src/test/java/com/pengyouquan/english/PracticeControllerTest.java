@@ -1,9 +1,7 @@
 package com.pengyouquan.english;
 
 import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -29,13 +28,15 @@ class PracticeControllerTest {
     private MockMvc mockMvc;
 
     private String token;
+    private static int userCounter = 100;
 
     @BeforeEach
     void setUp() throws Exception {
-        // 注册一个测试用户并获取 token
+        // 每次注册不同邮箱，避免重复注册冲突
+        String email = "practice-test-" + (userCounter++) + "@example.com";
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"practice-test@example.com\",\"password\":\"Practice1\"}"))
+                        .content("{\"email\":\"" + email + "\",\"password\":\"Practice1\"}"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -143,7 +144,7 @@ class PracticeControllerTest {
 
         String resultBody = result.getResponse().getContentAsString();
         Integer sentenceId = JsonPath.read(resultBody, "$.data[0].sentenceId");
-        assert sentenceId == 10 : "错题本应包含sentenceId=10的句子";
+        assertEquals(10, sentenceId, "错题本应包含sentenceId=10的句子");
     }
 
     @Test
@@ -187,7 +188,7 @@ class PracticeControllerTest {
 
         String resultBody = result.getResponse().getContentAsString();
         Integer errorCount = JsonPath.read(resultBody, "$.data[0].errorCount");
-        assert errorCount >= 2 : "重复错误应增加errorCount";
+        assertTrue(errorCount >= 2, "重复错误应增加errorCount");
     }
 
     @Test

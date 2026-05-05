@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/shows/shows",
+    "pages/wrong/wrong",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "navigationBarTitleText": "朋友圈英语",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "练习",
+        "iconPath": "images/practice.png",
+        "selectedIconPath": "images/practice-active.png"
+      },
+      {
+        "pagePath": "pages/shows/shows",
+        "text": "剧集",
+        "iconPath": "images/shows.png",
+        "selectedIconPath": "images/shows-active.png"
+      },
+      {
+        "pagePath": "pages/wrong/wrong",
+        "text": "错题",
+        "iconPath": "images/wrong.png",
+        "selectedIconPath": "images/wrong-active.png"
+      }
+    ]
+  },
+  "usingComponents": {},
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

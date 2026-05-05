@@ -53,9 +53,16 @@ public class PracticeService {
                         WrongSentence w = new WrongSentence();
                         w.setUserId(userId);
                         w.setSentenceId(sentenceId);
+                        w.setErrorCount(1);
                         return w;
                     });
-            ws.setErrorCount(ws.getErrorCount() == null ? 1 : ws.getErrorCount() + 1);
+            if (ws.getErrorCount() == null || ws.getId() == null) {
+                // 新创建的实体：设为1
+                ws.setErrorCount(1);
+            } else {
+                // 已有记录：增加错误次数
+                ws.setErrorCount(ws.getErrorCount() + 1);
+            }
             wrongSentenceRepository.save(ws);
         }
     }
@@ -94,5 +101,10 @@ public class PracticeService {
     @Transactional
     public void removeWrongSentence(Long userId, Long sentenceId) {
         wrongSentenceRepository.deleteByUserIdAndSentenceId(userId, sentenceId);
+    }
+
+    /** 获取练习记录导出数据（含句子文本） */
+    public List<Object[]> getExportRecords(Long userId) {
+        return practiceLogRepository.findPracticeRecordsForExport(userId);
     }
 }

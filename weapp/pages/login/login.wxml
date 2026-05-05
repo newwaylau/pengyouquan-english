@@ -1,0 +1,27 @@
+<!-- 朋友圈英语 — 微信登录页 -->
+<view class="login-container">
+  <view class="login-box">
+    <view class="logo-area">
+      <text class="logo-icon">📖</text>
+      <text class="logo-title">朋友圈英语</text>
+      <text class="logo-subtitle">看美剧，学英语</text>
+    </view>
+
+    <view class="login-btn-area" wx:if="{{!hasLoggedIn}}">
+      <button class="btn-primary" bindtap="handleWechatLogin">
+        <text>微信一键登录</text>
+      </button>
+      <view class="login-info">
+        <text class="login-hint">首次登录自动注册，无需密码</text>
+      </view>
+    </view>
+
+    <view class="logged-in" wx:else>
+      <view class="user-avatar">
+        <image src="{{avatar || '/images/practice.png'}}" mode="aspectFill"></image>
+      </view>
+      <text class="user-nickname">{{nickname}}</text>
+      <button class="btn-primary" bindtap="goToPractice">开始练习</button>
+    </view>
+  </view>
+</view>

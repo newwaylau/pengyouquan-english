@@ -82,7 +82,7 @@ class AuthControllerTest {
                         .content("{\"email\":\"not-an-email\",\"password\":\"Test1234\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
-                .andExpect(jsonPath("$.message").org.hamcrest.Matchers.containsString("邮箱格式不正确"));
+                .andExpect(jsonPath("$.message").value(containsString("邮箱格式不正确")));
     }
 
     @Test
@@ -93,7 +93,7 @@ class AuthControllerTest {
                         .content("{\"email\":\"test-weak@example.com\",\"password\":\"ab\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
-                .andExpect(jsonPath("$.message").org.hamcrest.Matchers.containsString("密码长度6-50位"));
+                .andExpect(jsonPath("$.message").value(containsString("密码长度6-50位")));
     }
 
     @Test
@@ -179,12 +179,9 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/auth/me")
                         .header("Authorization", "Bearer " + expiredToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("success"))
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("未登录"))
                 .andExpect(jsonPath("$.data").doesNotExist());
-        // 注意：CURRENT DESIGN — JWT 过滤器对无效 token 仅不做处理，
-        // controller 中 userId 为 null，返回 401 {"code":401,"message":"未登录","data":null}
-        // 所以这里返回 200（HTTP status），但 body 有 code=401
     }
 
     @Test

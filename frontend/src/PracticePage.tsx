@@ -42,6 +42,8 @@ export default function PracticePage({ user }: { user: any }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [dailyStats, setDailyStats] = useState({ done: 0, correct: 0 });
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [preferOriginal, setPreferOriginal] = useState(false);
 
   // 加载剧集列表
   useEffect(() => {
@@ -197,7 +199,18 @@ export default function PracticePage({ user }: { user: any }) {
     }
   };
 
-  if (!sentence) return <div className="loading">加载中...</div>;
+  if (!sentence) return (
+    <div className="practice-page">
+      <div className="skeleton" style={{ height: 20, width: '60%', marginBottom: 16 }} />
+      <div className="skeleton" style={{ height: 40, width: '100%', marginBottom: 12 }} />
+      <div className="skeleton" style={{ height: 60, width: '100%', marginBottom: 16 }} />
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <div className="skeleton" style={{ height: 36, width: 80 }} />
+        <div className="skeleton" style={{ height: 36, width: 80 }} />
+        <div className="skeleton" style={{ height: 36, width: 100 }} />
+      </div>
+    </div>
+  );
 
   const en = extractEn(sentence.text);
   const cn = extractCn(sentence.text);
@@ -242,7 +255,7 @@ export default function PracticePage({ user }: { user: any }) {
       </div>
 
       {/* 英文显示区（模糊遮住） */}
-      <div className={`sentence-en ${!showEn ? 'blurred' : ''}`}>
+      <div className={`sentence-en sentence-fade-in ${!showEn ? 'blurred' : ''}`}>
         {en}
       </div>
 
@@ -250,10 +263,10 @@ export default function PracticePage({ user }: { user: any }) {
           中译英模式：中文始终清晰显示（不可隐藏）
           听写模式：中文默认模糊，点击可切换 */}
       {cn && (
-        <div className={`sentence-cn ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
+        <div className={`sentence-cn sentence-fade-in ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
           {cn}
         </div>
-      )}
+      )
 
       {/* 逐词输入（未完成时显示） */}
       {!answered && (
