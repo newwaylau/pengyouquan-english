@@ -126,11 +126,11 @@ export default function PracticePage({
 
   // 加载句子
   const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
-  const loadSentence = async (specificId?: number) => {
+  const loadSentence = async (specificId?: number, skipAutoPlay?: boolean) => {
     if (specificId) {
       const r = await api.sentence(specificId);
       if (r.code !== 200 || !r.data) return;
-      setupSentence(r.data);
+      setupSentence(r.data, skipAutoPlay);
       return;
     }
     const exclude = historyIds.join(',');
@@ -138,7 +138,7 @@ export default function PracticePage({
     if (showIdsParam) url += `&showIds=${showIdsParam}`;
     const r = await api.random(url);
     if (r.code !== 200 || !r.data?.length) return;
-    setupSentence(r.data[0]);
+    setupSentence(r.data[0], skipAutoPlay);
   };
   loadSentenceRef.current = loadSentence;
 
@@ -155,11 +155,11 @@ export default function PracticePage({
     if (!jumpId) loadSentence();
   }, []);
 
-  // 切换剧集时重新加载句子
+  // 切换剧集时重新加载句子（不自动播放音频）
   useEffect(() => {
     if (showIdsParam !== undefined) {
       setHistoryIds([]);
-      loadSentence();
+      loadSentence(undefined, true);
     }
   }, [showIdsParam]);
 
@@ -169,7 +169,7 @@ export default function PracticePage({
   }, [mode]);
 
   // 设置句子
-  const setupSentence = (s: any) => {
+  const setupSentence = (s: any, skipAutoPlay?: boolean) => {
     setSentence(s);
     setAnswered(false);
     setRetryCount(0);
@@ -196,13 +196,28 @@ export default function PracticePage({
     }
     setHints(hintsSet);
 
-    // 自动播放 + 聚焦到第一个可输入框
-    preferOriginalRef.current = preferOriginal;
-    speedRef.current = speed;
-    setTimeout(() => {
-      let first = 0;
-      while (first < wds.length && hintsSet.has(first)) first++;
-      inputRefs.current[first]?.focus();
+    // 聚焦第一个可输入框
+    let first = 0;
+    while (first < wds.length && hintsSet.has(first)) first++;
+    setTimeout(() => inputRefs.current[first]?.focus(), 100);
+
+    // 自动播放（下一句时触发，切剧集时不触发）
+    if (!skipAutoPlay) {
+      preferOriginalRef.current = preferOriginal;
+      speedRef.current = speed;
+      setTimeout(() => {
+        if (preferOriginalRef.current && s.audioFile) {
+          if (audioRef.current) audioRef.current.pause();
+          const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
+          a.playbackRate = speedRef.current;
+          a.play().catch(() => {});
+          audioRef.current = a;
+        } else {
+          const clean = extractEn(s.text);
+          if (clean) playTts(clean);
+        }
+      }, 500);
+    }
       if (preferOriginalRef.current && s.audioFile) {
         if (audioRef.current) audioRef.current.pause();
         const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
