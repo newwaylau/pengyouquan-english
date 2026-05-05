@@ -333,7 +333,7 @@ body {
   border-radius: 0 0 12px 12px;
   padding: 0 20px 12px;
   box-shadow: var(--shadow-card);
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .action-divider {
