@@ -436,7 +436,7 @@ export default function PracticePage({
         {/* 操作行2：剧集原音 / 服务器音色 / 下一句 */}
         <div className="action-row">
           <button className="btn-action" onClick={playOriginal}>🎬 剧集原音</button>
-          <button className="btn-action" onClick={() => playTts(en)}>🎙️ 服务器音色</button>
+          <button className="btn-action" onClick={() => playTts(en)}>🎙️ 导播</button>
           <button className="btn-action" onClick={goNext}>⏭️ 下一句</button>
         </div>
 
