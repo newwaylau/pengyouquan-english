@@ -1628,6 +1628,7 @@ body {
 .voice-pills {
   display: flex;
   flex-wrap: wrap;
+  text-align: center;
   gap: 5px;
 }
 .voice-pills-grid {
