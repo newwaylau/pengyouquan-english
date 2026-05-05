@@ -1,0 +1,87 @@
+<!-- 朋友圈英语 — 首页练习 -->
+<view class="page-container">
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索句子（中/英文）" bindinput="onSearchInput" bindconfirm="doSearch" confirm-type="search" value="{{searchQuery}}" />
+    <text class="search-btn" bindtap="doSearch">🔍</text>
+  </view>
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{searchResults.length > 0}}">
+    <view class="search-result-item" wx:for="{{searchResults}}" wx:key="id" bindtap="startSearchPractice" data-id="{{item.id}}">
+      <text class="search-en">{{item.text}}</text>
+      <text class="search-show">{{item.showName}} {{item.episodeInfo}}</text>
+    </view>
+  </view>
+
+  <!-- 剧集信息 & 进度 -->
+  <view class="practice-header">
+    <text class="show-name">{{showName || '全部剧集'}}</text>
+    <text class="progress">今日练习 {{todayCount}} 句</text>
+  </view>
+
+  <!-- 练习主区 -->
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:else class="practice-area">
+    <!-- 句子详情 -->
+    <view class="sentence-detail" wx:if="{{currentSentence}}">
+      <text class="sentence-id">#{{currentSentence.id}} {{currentSentence.showName}} {{currentSentence.episodeInfo}}</text>
+      <view class="chinese-text">{{mode === 'dictation' ? (showChinese ? currentChinese : '🔊 听写模式') : currentChinese}}</view>
+    </view>
+
+    <!-- 英文（模糊/显示切换） -->
+    <view class="english-text" wx:if="{{showEnglish}}" bindtap="toggleEnglish">
+      <text>{{currentSentence.text}}</text>
+    </view>
+
+    <!-- 逐词输入区 -->
+    <view class="word-input-area">
+      <view class="word-inputs">
+        <block wx:for="{{wordInputs}}" wx:key="index">
+          <view class="word-input-wrapper {{item.status}}">
+            <input class="word-input"
+              value="{{item.value}}"
+              data-index="{{index}}"
+              focus="{{item.focused}}"
+              bindinput="onWordInput"
+              bindconfirm="onWordConfirm"
+              bindblur="onWordBlur"
+              adjust-position="false"
+              type="text"
+              disabled="{{item.disabled}}"
+              placeholder="{{item.hint || (item.status === 'correct' ? '✓' : '')}}" />
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 反馈信息 -->
+    <view class="feedback" wx:if="{{feedbackMessage}}">
+      <text class="feedback-text {{feedbackType}}">{{feedbackMessage}}</text>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button class="btn-submit {{submitBtnClass}}" bindtap="handleSubmit" disabled="{{submitDisabled}}">
+      <text>{{submitBtnText}}</text>
+    </button>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <view class="action-btn {{hasAudio ? 'active' : ''}}" bindtap="playOriginal">
+        <text>🔊 原音</text>
+      </view>
+      <view class="action-btn active" bindtap="playTts">
+        <text>🗣️ TTS</text>
+      </view>
+      <view class="action-btn active" bindtap="nextSentence">
+        <text>⏭️ 下一句</text>
+      </view>
+    </view>
+
+    <!-- 快捷键提示 -->
+    <view class="shortcut-hint">
+      <text>[=] TTS [<span>-</span>] 原音 [\] 下一句 [\[] 中文切换 [\]] 英文切换</text>
+    </view>
+  </view>
+</view>

@@ -13,11 +13,16 @@ export default function App() {
   const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
+  const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
     if (getToken()) {
       api.me().then(r => { if (r.code === 200) setUser(r.data); });
     }
+    // 加载公告（无需登录）
+    fetch('/api/admin/public/announcement')
+      .then(r => r.json())
+      .then(r => { if (r.code === 200) setAnnouncement(r.data?.announcement || ''); });
   }, []);
 
   const handleLogin = (token: string) => {
@@ -54,6 +59,11 @@ export default function App() {
           )}
         </div>
       </nav>
+      {announcement && (
+        <div className="announcement-bar">
+          {announcement}
+        </div>
+      )}
       <main>
         {page === 'practice' && <PracticePage user={user} jumpId={jumpId} />}
         {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
