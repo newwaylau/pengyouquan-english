@@ -116,6 +116,8 @@ export default function PracticePage({
       if (s.voice) setVoice(s.voice);
       if (s.speed) setSpeed(Number(s.speed));
       if (s.showId) setShowIdsParam(String(s.showId));
+      if (s.autoPlay !== undefined) setAutoPlay(s.autoPlay === 'true');
+      if (s.preferOriginal !== undefined) setPreferOriginal(s.preferOriginal === 'true');
     });
   }, [user]);
 
