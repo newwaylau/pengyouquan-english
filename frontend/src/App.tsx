@@ -14,6 +14,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     if (getToken()) {
@@ -23,6 +24,10 @@ export default function App() {
     fetch('/api/admin/public/announcement')
       .then(r => r.json())
       .then(r => { if (r.code === 200) setAnnouncement(r.data?.announcement || ''); });
+    // 加载通知列表（公开）
+    fetch('/api/notifications')
+      .then(r => r.json())
+      .then(r => { if (r.code === 200) setNotifications(r.data || []); });
   }, []);
 
   const handleLogin = (token: string) => {
@@ -62,6 +67,19 @@ export default function App() {
       {announcement && (
         <div className="announcement-bar">
           {announcement}
+        </div>
+      )}
+      {notifications.length > 0 && (
+        <div className="notification-list">
+          {notifications.map((n: any) => (
+            <div key={n.id} className="notification-item">
+              <div className="notification-title">{n.title}</div>
+              {n.content && <div className="notification-content">{n.content}</div>}
+              <div className="notification-time">
+                {n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ''}
+              </div>
+            </div>
+          ))}
         </div>
       )}
       <main>
