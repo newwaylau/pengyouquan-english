@@ -121,6 +121,18 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     }
   };
 
+  // 集下拉框选中时
+  const handleEpisodeChange = (val: string) => {
+    if (!val) {
+      save('showId', '');
+      onShowChange('');
+      return;
+    }
+    const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
+      ?.find((ep: any) => ep.episode === val);
+    handleEpisodeSelect(ep);
+  };
+
   // 选剧集/季时，计算所有匹配的showIds
   const handleShowOrSeasonChange = () => {
     if (!selectedShowTitle) {
@@ -184,14 +196,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             </select>
             <select className="show-select" style={{width:'100%'}}
               value={showId ?? ''}
-              onChange={e => {
-                const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
-                  ?.find((ep: any) => ep.id === Number(e.target.value));
-                if (ep) {
-                  onShowChange(String(ep.id));
-                  save('showId', String(ep.id));
-                }
-              }}>
+              onChange={e => { handleEpisodeChange(e.target.value); }}>
               <option value="">🎬 全部集</option>
               {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
                 .sort((a: any, b: any) => parseInt(a.episode.replace('E','')) - parseInt(b.episode.replace('E','')))
