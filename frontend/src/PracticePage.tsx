@@ -415,6 +415,9 @@ export default function PracticePage({
           <div className="feedback retry">⚠️ 有错误，再试一次</div>
         )}
 
+        {/* 分割线 */}
+        <hr className="action-divider" />
+
         {/* 操作行1：提交 */}
         <div className="action-row">
           {!answered ? (

@@ -325,7 +325,14 @@ body {
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow-card);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+}
+
+.action-divider {
+  border: none;
+  border-top: 1px solid var(--border-strong);
+  margin: 16px 0 12px;
+  opacity: 0.5;
 }
 
 /* ---------- 句子显示 ---------- */
