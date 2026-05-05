@@ -89,7 +89,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
       if (password !== password2) { setError('两次密码不一致'); return; }
       if (phone && !isValidPhone(phone)) { setError('手机号格式不正确（11位数字）'); return; }
 
-      const r = await api.register({ email, code, password, phone: phone || undefined, invitedBy: invitedBy || undefined });
+      const r = await api.register({ email, code, password, phone, invitedBy: invitedBy || undefined });
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '注册失败'); }
     }
@@ -149,7 +149,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
                 style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
 
               {/* ── 手机号（可选） ── */}
-              <input type="tel" placeholder="手机号（可选）" value={phone}
+              <input type="tel" placeholder="手机号" required value={phone}
                 onChange={e => setPhone(e.target.value)}
                 style={phone && !isValidPhone(phone) ? { borderColor: '#e17055' } : {}} />
 
