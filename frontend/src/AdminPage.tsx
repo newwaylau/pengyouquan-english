@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 const COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2'];
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<'stats' | 'users' | 'settings'>('stats');
+  const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications'>('stats');
 
   return (
     <div className="admin-page">
@@ -14,11 +14,13 @@ export default function AdminPage() {
         <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}>仪表盘</button>
         <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>用户管理</button>
         <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>系统设置</button>
+        <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>通知管理</button>
       </aside>
       <main className="admin-content">
         {tab === 'stats' && <AdminDashboard />}
         {tab === 'users' && <UserManagement />}
         {tab === 'settings' && <SystemSettings />}
+        {tab === 'notifications' && <NotificationManagement />}
       </main>
     </div>
   );
@@ -345,6 +347,139 @@ function SystemSettings() {
           {message}
         </div>
       )}
+    </div>
+  );
+}
+
+function NotificationManagement() {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [published, setPublished] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const token = localStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const fetchNotifications = async () => {
+    const r = await fetch('/api/admin/notifications', { headers }).then(r => r.json());
+    if (r.code === 200) setNotifications(r.data || []);
+  };
+
+  useEffect(() => { fetchNotifications(); }, []);
+
+  const handleCreate = async () => {
+    if (!title.trim()) { setMessage('请输入通知标题'); return; }
+    setMessage('');
+    const r = await fetch('/api/admin/notifications', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ title: title.trim(), content: content.trim(), published })
+    }).then(r => r.json());
+    if (r.code === 200) {
+      setMessage('创建成功');
+      setTitle('');
+      setContent('');
+      setPublished(false);
+      fetchNotifications();
+    } else {
+      setMessage('创建失败');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const r = await fetch(`/api/admin/notifications/${id}`, {
+      method: 'DELETE',
+      headers
+    }).then(r => r.json());
+    if (r.code === 200) {
+      fetchNotifications();
+    }
+  };
+
+  return (
+    <div className="notification-management">
+      <h2>📢 通知管理</h2>
+
+      <div className="notification-form">
+        <h3>新建通知</h3>
+        <div className="settings-section">
+          <label>标题</label>
+          <input
+            className="subtitle-input"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="通知标题"
+          />
+        </div>
+        <div className="settings-section">
+          <label>内容</label>
+          <textarea
+            className="settings-textarea"
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="通知内容（可选）"
+            rows={4}
+          />
+        </div>
+        <div className="settings-section">
+          <label>发布状态</label>
+          <div className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={published}
+              onChange={e => setPublished(e.target.checked)}
+            />
+            <span>创建后立即发布</span>
+          </div>
+        </div>
+        <button className="btn-primary save-btn" onClick={handleCreate}>创建通知</button>
+        {message && (
+          <div className={`upload-feedback ${message === '创建成功' ? 'success' : 'error'}`}>
+            {message}
+          </div>
+        )}
+      </div>
+
+      <div className="settings-section" style={{ marginTop: 32 }}>
+        <h3>通知列表</h3>
+        {notifications.length === 0 ? (
+          <div className="empty-state" style={{ padding: '20px 0' }}>暂无通知</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>标题</th>
+                <th>状态</th>
+                <th>发布时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notifications.map((n: any) => (
+                <tr key={n.id}>
+                  <td>{n.id}</td>
+                  <td>{n.title}</td>
+                  <td>
+                    <span className={`role-badge ${n.published ? 'role-admin' : ''}`}>
+                      {n.published ? '已发布' : '草稿'}
+                    </span>
+                  </td>
+                  <td style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    {n.createdAt ? new Date(n.createdAt).toLocaleString() : '-'}
+                  </td>
+                  <td>
+                    <button onClick={() => handleDelete(n.id)} className="small-btn" style={{ color: 'var(--danger)' }}>
+                      删除
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
