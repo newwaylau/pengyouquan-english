@@ -28,7 +28,7 @@ const VOICES = [
 ];
 
 const DEFAULTS = {
-  mode: 'sentry',
+  mode: 'translation',
   voice: 'en-GB-RyanNeural',
   speed: 0.75,
   showId: null as number | null,
@@ -61,11 +61,11 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         <div className="settings-section">
           <label>练习模式</label>
           <div className="voice-pills">
-            {['sentry', 'dictation'].map(m => (
+            {['translation', 'dictation'].map(m => (
               <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
                 onClick={() => { onModeChange(m); save('mode', m); }}>
                 <input type="radio" name="mode" checked={mode === m} readOnly />
-                <span>{m === 'sentry' ? '📝 中译英听写模式' : '🖊️ 纯听写模式'}</span>
+                <span>{m === 'translation' ? '📝 中译英听写模式' : '🖊️ 纯听写模式'}</span>
               </label>
             ))}
           </div>
