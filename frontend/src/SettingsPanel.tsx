@@ -56,6 +56,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   const [showGroups, setShowGroups] = useState<Record<string, any>>({});
   const [selectedShowTitle, setSelectedShowTitle] = useState('');
   const [selectedSeason, setSelectedSeason] = useState('');
+  const [internalShowId, setInternalShowId] = useState('');
 
   useEffect(() => {
     if (open) api.shows().then(r => {
@@ -71,6 +72,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             if (savedTitle && groups[savedTitle]) {
               setSelectedShowTitle(savedTitle);
               if (savedSeason) setSelectedSeason(savedSeason);
+              if (sr.data.showId) setInternalShowId(sr.data.showId);
             }
           }
         });
@@ -115,15 +117,9 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   };
 
   // 选具体集时
-  const handleEpisodeSelect = (ep: any) => {
-    if (ep) {
-      save('showId', ep.episode);
-      onShowChange(ep.episode);
-    }
-  };
-
   // 集下拉框选中时
   const handleEpisodeChange = (val: string) => {
+    setInternalShowId(val);
     save('showId', val);
     // 传数据库ID到外部（用于过滤句子）
     if (val && selectedShowTitle && selectedSeason) {
@@ -198,7 +194,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               ))}
             </select>
             <select className="show-select" style={{width:'100%'}}
-              value={showId ?? ''}
+              value={internalShowId}
               onChange={e => { handleEpisodeChange(e.target.value); }}>
               <option value="">🎬 全部集</option>
               {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
