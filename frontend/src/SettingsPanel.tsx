@@ -81,7 +81,10 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   }, [open]);
 
   const save = async (key: string, value: string) => {
-    await api.saveSettings({ [key]: value });
+    const r = await api.saveSettings({ [key]: value });
+    if (r.code === 401) {
+      alert('请先登录才能保存设置');
+    }
   };
 
   // 选剧集时
