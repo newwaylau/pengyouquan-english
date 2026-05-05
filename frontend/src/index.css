@@ -277,19 +277,6 @@ body {
   gap: 8px;
   margin-bottom: 12px;
 }
-.code-row .code-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  background: var(--input-bg);
-  color: var(--text);
-  text-align: center;
-  letter-spacing: 4px;
-}
-.code-row .code-input {
-  flex: 1;
   padding: 10px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
