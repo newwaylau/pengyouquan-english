@@ -2,10 +2,28 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
 
-/** 从字幕文本中提取英文 */
-function extractEn(text: string) { return text.includes(' / ') ? text.split(' / ')[0].replace(/^#\d+\s+/, '') : text.replace(/^#\d+\s+/, ''); }
+/** 从字幕文本中提取英文（含大小写校正） */
+function extractEn(text: string) {
+  const raw = text.includes(' / ') ? text.split(' / ')[0].replace(/^#\d+\s+/, '') : text.replace(/^#\d+\s+/, '');
+  return normalizeCase(raw);
+}
 /** 从字幕文本中提取中文 */
 function extractCn(text: string) { return text.includes(' / ') ? text.split(' / ')[1] : ''; }
+
+/** 校正大小写（和老版5000项目一致） */
+function normalizeCase(s: string) {
+  const words = s.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return s;
+  const upperCount = words.filter(w => w.length > 0 && w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()).length;
+  const isTitleCase = upperCount >= words.length * 0.6;
+  if (!isTitleCase) return s;
+  return words.map((w, i) => {
+    if (!w) return w;
+    if (/^I(?:'[mvd]|'ll)?$/i.test(w)) return w[0].toUpperCase() + w.slice(1).toLowerCase();
+    if (i === 0) return w[0].toUpperCase() + w.slice(1).toLowerCase();
+    return w.toLowerCase();
+  }).join(' ');
+}
 /** 模式中文名 */
 const MODE_LABELS: Record<string, string> = { translation: '📝 中译英模式', dictation: '🖊️ 纯听写模式' };
 
