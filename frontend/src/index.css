@@ -1493,14 +1493,7 @@ body {
 }
 /* ===== END ===== */
 
-/* ---------- PC 大屏缩放（和老版5000项目一致） ---------- */
+/* ---------- PC 大屏缩放（和老版5000项目一致，用zoom整体放大） ---------- */
 @media (min-width: 900px) {
-  html { font-size: 28px; }
-  body { padding: 16px; }
-  .app-container { max-width: 1000px; }
-  .sentence-area { min-height: 120px; }
-  .bottom-nav { gap: 8px; margin-top: 12px; }
-  .stats-bar { padding: 8px 10px; }
-  .feedback { padding: 10px 14px; }
-  .word-input-container { gap: 4px; }
+  .app { zoom: 1.75; }
 }
