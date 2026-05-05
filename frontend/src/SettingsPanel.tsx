@@ -19,16 +19,16 @@ interface Props {
 }
 
 const VOICES = [
-  { id: 'en-US-JennyNeural', label: 'Jenny (US Female)' },
-  { id: 'en-US-GuyNeural', label: 'Guy (US Male)' },
-  { id: 'en-GB-SoniaNeural', label: 'Sonia (UK Female)' },
-  { id: 'en-GB-RyanNeural', label: 'Ryan (UK Male)' },
-  { id: 'en-AU-NatashaNeural', label: 'Natasha (AU Female)' },
-  { id: 'en-AU-WilliamNeural', label: 'William (AU Male)' },
+  { id: 'en-US-JennyNeural', label: '🇺🇸 Jenny 美式女声' },
+  { id: 'en-US-GuyNeural', label: '🇺🇸 Guy 美式男声' },
+  { id: 'en-GB-SoniaNeural', label: '🇬🇧 Sonia 英式女声' },
+  { id: 'en-GB-RyanNeural', label: '🇬🇧 Ryan 英式男声' },
+  { id: 'en-AU-NatashaNeural', label: '🇦🇺 Natasha 澳式女声' },
+  { id: 'en-AU-WilliamNeural', label: '🇦🇺 William 澳式男声' },
 ];
 
 const DEFAULTS = {
-  mode: 'translation',
+  mode: 'sentry',
   voice: 'en-GB-RyanNeural',
   speed: 0.75,
   showId: null as number | null,
@@ -53,47 +53,83 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     <div className="settings-overlay" onClick={onClose}>
       <div className="settings-panel" onClick={e => e.stopPropagation()}>
         <div className="settings-header">
-          <h3>设置</h3>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <h3>⚙️ 设置</h3>
+          <button className="close-btn" onClick={onClose}>✕ 关闭</button>
         </div>
 
+        {/* 练习模式 */}
         <div className="settings-section">
           <label>练习模式</label>
-          <div className="pill-group">
-            {['translation', 'dictation'].map(m => (
-              <button key={m} className={`pill ${mode === m ? 'active' : ''}`}
+          <div className="voice-pills">
+            {['sentry', 'dictation'].map(m => (
+              <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
                 onClick={() => { onModeChange(m); save('mode', m); }}>
-                {m === 'translation' ? '📝 中译英' : '🖊️ 听写'}
-              </button>
+                <input type="radio" name="mode" checked={mode === m} readOnly />
+                <span>{m === 'sentry' ? '📝 中译英听写模式' : '🖊️ 纯听写模式'}</span>
+              </label>
             ))}
           </div>
         </div>
 
+        {/* 剧集选择 */}
         <div className="settings-section">
           <label>剧集选择</label>
-          <select value={showId ?? ''} onChange={e => onShowChange(e.target.value ? Number(e.target.value) : null)}>
+          <select className="show-select" value={showId ?? ''} onChange={e => onShowChange(e.target.value ? Number(e.target.value) : null)}>
             <option value="">🎬 全部剧集</option>
             {shows.map(s => <option key={s.id} value={s.id}>{s.name} ({s.sentenceCount}句)</option>)}
           </select>
         </div>
 
+        {/* 音色 */}
         <div className="settings-section">
           <label>音色</label>
-          <div className="pill-group">
-            {VOICES.map(v => (
-              <button key={v.id} className={`pill ${voice === v.id ? 'active' : ''}`}
-                onClick={() => { onVoiceChange(v.id); save('voice', v.id); }}>
-                {v.label}
-              </button>
+          <div className="voice-radio-group">
+            <div className="voice-section-label">剧集原音</div>
+            <div className="voice-pills">
+              <label className="voice-pill">
+                <input type="checkbox" checked={preferOriginal}
+                  onChange={e => { onPreferOriginalChange(e.target.checked); save('preferOriginal', String(e.target.checked)); }} />
+                <span>默认</span>
+              </label>
+            </div>
+            <hr className="voice-radio-divider" />
+            <div className="voice-section-label">导播</div>
+            <div className="voice-pills voice-pills-grid">
+              {VOICES.map(v => (
+                <label key={v.id} className="voice-pill">
+                  <input type="radio" name="voice" checked={voice === v.id}
+                    onChange={() => { onVoiceChange(v.id); save('voice', v.id); }} />
+                  <span>{v.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 自动播放 */}
+        <div className="settings-section">
+          <label>自动播放（建议选择导播）</label>
+          <div className="voice-pills">
+            {['browser', 'server'].map(val => (
+              <label key={val} className="voice-pill">
+                <input type="radio" name="autoPlay"
+                  checked={val === 'browser' ? preferOriginal : !preferOriginal}
+                  onChange={() => {
+                    if (val === 'browser') { onPreferOriginalChange(true); save('preferOriginal', 'true'); }
+                    else { onPreferOriginalChange(false); save('preferOriginal', 'false'); }
+                  }} />
+                <span>{val === 'browser' ? '🔊 剧集原音' : '🎙️ 导播'}</span>
+              </label>
             ))}
           </div>
         </div>
 
+        {/* 播放速度 */}
         <div className="settings-section">
           <label>播放速度</label>
-          <div className="pill-group">
+          <div className="voice-pills">
             {[0.5, 0.75, 1, 1.5].map(s => (
-              <button key={s} className={`pill ${speed === s ? 'active' : ''}`}
+              <button key={s} className={`btn-sm speed-btn ${speed === s ? 'speed-active' : ''}`}
                 onClick={() => { onSpeedChange(s); save('speed', String(s)); }}>
                 {s}x
               </button>
@@ -101,50 +137,14 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
           </div>
         </div>
 
+        {/* 快捷键 */}
         <div className="settings-section">
-          <label>语音自动播放</label>
-          <label className="checkbox-row">
-            <input type="checkbox" checked={autoPlay} onChange={e => { onAutoPlayChange(e.target.checked); save('autoPlay', String(e.target.checked)); }} />
-            加载句子后自动播报语音
-          </label>
-        </div>
-
-        <div className="settings-section">
-          <label>原音优先</label>
-          <label className="checkbox-row">
-            <input type="checkbox" checked={preferOriginal} onChange={e => { onPreferOriginalChange(e.target.checked); save('preferOriginal', String(e.target.checked)); }} />
-            有原音文件时优先播放原音
-          </label>
-        </div>
-
-        <div className="settings-section shortcuts">
           <label>快捷键</label>
-          <div className="shortcut-list">
-            <span><kbd>=</kbd> 音色播放</span>
-            <span><kbd>-</kbd> 原音播放</span>
-            <span><kbd>Enter</kbd> 提交</span>
-            <span><kbd>\</kbd> 下一句</span>
-            <span><kbd>[</kbd> 中文切换（听写模式）</span>
-            <span><kbd>]</kbd> 英文切换</span>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 2 }}>
+            <kbd>-</kbd> 剧集原音 &nbsp; <kbd>=</kbd> 选中的音色 / 默认 Ryan &nbsp; <kbd>\</kbd> 下一句<br />
+            <kbd>[</kbd> 中文 &nbsp; <kbd>]</kbd> 答案<br />
+            <kbd>Enter</kbd> 提交
           </div>
-        </div>
-        <div className="settings-section">
-          <button className="reset-btn" onClick={() => {
-            onModeChange(DEFAULTS.mode);
-            onVoiceChange(DEFAULTS.voice);
-            onSpeedChange(DEFAULTS.speed);
-            onShowChange(DEFAULTS.showId);
-            onAutoPlayChange(DEFAULTS.autoPlay);
-            onPreferOriginalChange(DEFAULTS.preferOriginal);
-            api.saveSettings({
-              mode: DEFAULTS.mode,
-              voice: DEFAULTS.voice,
-              speed: String(DEFAULTS.speed),
-              showId: '',
-              autoPlay: String(DEFAULTS.autoPlay),
-              preferOriginal: String(DEFAULTS.preferOriginal),
-            });
-          }}>🔄 重置为默认值</button>
         </div>
       </div>
     </div>
