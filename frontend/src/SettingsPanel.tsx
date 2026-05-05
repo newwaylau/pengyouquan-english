@@ -123,14 +123,8 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
 
   // 集下拉框选中时
   const handleEpisodeChange = (val: string) => {
-    if (!val) {
-      save('showId', '');
-      onShowChange('');
-      return;
-    }
-    const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
-      ?.find((ep: any) => ep.episode === val);
-    handleEpisodeSelect(ep);
+    save('showId', val);
+    onShowChange(val);
   };
 
   // 选剧集/季时，计算所有匹配的showIds
