@@ -5,7 +5,7 @@ import com.pengyouquan.english.model.Show;
 import com.pengyouquan.english.model.Sentence;
 import com.pengyouquan.english.repository.ShowRepository;
 import com.pengyouquan.english.repository.SentenceRepository;
-import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +31,6 @@ public class ShowController {
 
     /** 获取所有剧集（含句子数），缓存 10 分钟 */
     @GetMapping("/shows")
-    @Cacheable(value = "shows", key = "'all'")
     public ApiResponse<List<ShowDto>> listShows() {
         List<Show> shows = showRepository.findAllByOrderByImportedAtDesc();
         List<ShowDto> dtos = shows.stream()
