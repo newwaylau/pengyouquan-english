@@ -179,10 +179,18 @@ export default function PracticePage({
     }
     setHints(hintsSet);
 
-    // 自动播放
+    // 自动播放（按设置：剧集原音优先 / 导播TTS）
     setTimeout(() => {
-      const clean = extractEn(s.text);
-      if (clean) playTts(clean);
+      if (preferOriginal && s.audioFile) {
+        if (audioRef.current) audioRef.current.pause();
+        const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
+        a.playbackRate = speed;
+        a.play().catch(() => {});
+        audioRef.current = a;
+      } else {
+        const clean = extractEn(s.text);
+        if (clean) playTts(clean);
+      }
     }, 500);
   };
 
