@@ -155,6 +155,11 @@ export default function PracticePage({
     if (!jumpId) loadSentence();
   }, []);
 
+  // 切换模式时更新中文显示状态
+  useEffect(() => {
+    setShowCn(mode === 'translation');
+  }, [mode]);
+
   // 设置句子
   const setupSentence = (s: any) => {
     setSentence(s);
