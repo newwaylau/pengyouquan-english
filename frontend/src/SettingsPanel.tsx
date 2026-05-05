@@ -10,8 +10,8 @@ interface Props {
   onVoiceChange: (v: string) => void;
   speed: number;
   onSpeedChange: (s: number) => void;
-  showId: number | null;
-  onShowChange: (id: number | null) => void;
+  showId: string;
+  onShowChange: (id: string) => void;
   autoPlay: boolean;
   onAutoPlayChange: (v: boolean) => void;
   preferOriginal: boolean;
@@ -31,7 +31,7 @@ const DEFAULTS = {
   mode: 'translation',
   voice: 'en-GB-RyanNeural',
   speed: 0.75,
-  showId: null as number | null,
+  showId: '',
   autoPlay: true,
   preferOriginal: false,
 };
@@ -57,6 +57,16 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   const [selectedShowTitle, setSelectedShowTitle] = useState('');
   const [selectedSeason, setSelectedSeason] = useState('');
 
+  // 当选择变化时，自动计算showIds
+  useEffect(() => {
+    if (!selectedShowTitle) { onShowChange(''); save('showId', ''); return; }
+    const ids = shows
+      .filter(s => s.name.startsWith(selectedShowTitle + ' '))
+      .filter(s => !selectedSeason || s.name.includes(' ' + selectedSeason))
+      .map((s: any) => s.id);
+    if (ids.length > 0) { onShowChange(ids.join(',')); save('showId', ids.join(',')); }
+  }, [selectedShowTitle, selectedSeason]);
+
   useEffect(() => {
     if (open) api.shows().then(r => { if (r.code === 200) { setShows(r.data); setShowGroups(parseShowGroups(r.data)); } });
   }, [open]);
@@ -69,20 +79,27 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   const handleEpisodeSelect = (ep: any) => {
     if (ep) {
       setSelectedSeason(ep.parentSeason);
-      onShowChange(ep.id);
-      save('showId', String(ep.id));
+      if (ep) {
+        onShowChange(String(ep.id));
+        save('showId', String(ep.id));
+      }
     }
   };
 
-  const handleSeasonSelect = (seasonKey: string) => {
-    setSelectedSeason(seasonKey);
-    // 选季时，取该季第一集
-    const eps = showGroups[selectedShowTitle]?.seasons[seasonKey];
-    if (eps && eps.length > 0) {
-      onShowChange(eps[0].id);
-      save('showId', String(eps[0].id));
-    } else {
-      onShowChange(null);
+  // 选剧集/季时，计算所有匹配的showIds
+  const handleShowOrSeasonChange = () => {
+    if (!selectedShowTitle) {
+      onShowChange('');
+      save('showId', '');
+      return;
+    }
+    const ids = shows
+      .filter(s => s.name.startsWith(selectedShowTitle + ' '))
+      .filter(s => !selectedSeason || s.name.includes(' ' + selectedSeason))
+      .map(s => s.id);
+    if (ids.length > 0) {
+      onShowChange(ids.join(','));
+      save('showId', ids.join(','));
     }
   };
 
@@ -119,7 +136,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               onChange={e => {
                 setSelectedShowTitle(e.target.value);
                 setSelectedSeason('');
-                if (!e.target.value) { onShowChange(null); save('showId', ''); }
               }}>
               <option value="">🎬 全部剧集</option>
               {Object.keys(showGroups).sort().map(title => (
@@ -130,13 +146,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               value={selectedSeason}
               onChange={e => {
                 setSelectedSeason(e.target.value);
-                if (e.target.value && selectedShowTitle) {
-                  const eps = showGroups[selectedShowTitle]?.seasons[e.target.value];
-                  if (eps && eps.length > 0) {
-                    onShowChange(eps[0].id);
-                    save('showId', String(eps[0].id));
-                  }
-                }
               }}>
               <option value="">📺 全部季</option>
               {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
@@ -149,7 +158,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
                 const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
                   ?.find((ep: any) => ep.id === Number(e.target.value));
                 if (ep) {
-                  onShowChange(ep.id);
+                  onShowChange(String(ep.id));
                   save('showId', String(ep.id));
                 }
               }}>

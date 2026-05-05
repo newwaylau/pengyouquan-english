@@ -76,7 +76,7 @@ export default function PracticePage({
     () => JSON.parse(localStorage.getItem('historyIds') || '[]')
   );
   const [showList, setShowList] = useState<any[]>([]);
-  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
+  const [showIdsParam, setShowIdsParam] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const submitRef = useRef<HTMLButtonElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function PracticePage({
       if (s.mode) setMode(s.mode as any);
       if (s.voice) setVoice(s.voice);
       if (s.speed) setSpeed(Number(s.speed));
-      if (s.showId) setSelectedShowId(Number(s.showId));
+      if (s.showId) setShowIdsParam(String(s.showId));
     });
   }, [user]);
 
@@ -135,7 +135,7 @@ export default function PracticePage({
     }
     const exclude = historyIds.join(',');
     let url = `limit=15&exclude=${encodeURIComponent(exclude)}`;
-    if (selectedShowId) url += `&showId=${selectedShowId}`;
+    if (showIdsParam) url += `&showIds=${showIdsParam}`;
     const r = await api.random(url);
     if (r.code !== 200 || !r.data?.length) return;
     setupSentence(r.data[0]);
@@ -551,8 +551,8 @@ export default function PracticePage({
         onVoiceChange={setVoice}
         speed={speed}
         onSpeedChange={setSpeed}
-        showId={selectedShowId}
-        onShowChange={setSelectedShowId}
+        showId={showIdsParam}
+        onShowChange={setShowIdsParam}
         autoPlay={autoPlay}
         onAutoPlayChange={setAutoPlay}
         preferOriginal={preferOriginal}
