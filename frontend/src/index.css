@@ -150,7 +150,7 @@ body {
 
 /* ---------- 应用布局 ---------- */
 .app {
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 10px;
   min-height: 100vh;
@@ -1496,4 +1496,5 @@ body {
 /* PC 大屏缩放（与5000老版一致） */
 @media (min-width: 900px) {
   html { font-size: 28px; }
+  .app { max-width: 1000px; }
 }
