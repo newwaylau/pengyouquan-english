@@ -372,6 +372,8 @@ export default function PracticePage({
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
+                    style={{ width: Math.max(28, w.replace(/[^\w]/g,'').length * 10 + 8) }}
+                    placeholder={w.replace(/[\w']/g, '_')}
                     value={hints.has(i) ? w : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
