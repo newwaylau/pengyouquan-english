@@ -502,8 +502,7 @@ export default function PracticePage({
 
         {/* 快捷键提示 */}
         <div className="shortcuts-hint">
-          <kbd>=</kbd> 音色 <kbd>-</kbd> 原音 <kbd>Enter</kbd> 提交 <kbd>\</kbd> 下一句
-          <kbd>[</kbd> 中文 <kbd>]</kbd> 英文
+          <kbd>-</kbd> 原音 <kbd>=</kbd> 音色 <kbd>\</kbd> 下一句 <kbd>[</kbd> 中文 <kbd>]</kbd> 英文 <kbd>Enter</kbd> 提交
         </div>
       </div>
 
