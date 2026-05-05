@@ -296,8 +296,8 @@ body {
   letter-spacing: 0;
 }
 .send-code-btn {
-  flex: 1;
-  padding: 10px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
   border: 1px solid var(--primary);
   border-radius: 8px;
   background: var(--primary);
@@ -305,13 +305,10 @@ body {
   font-size: 0.9375rem;
   white-space: nowrap;
   cursor: pointer;
-  line-height: normal;
+  line-height: 1.4;
   text-align: center;
   transition: all 0.15s;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .send-code-btn:hover:not(:disabled) {
   background: var(--primary);
