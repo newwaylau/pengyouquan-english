@@ -1,18 +1,23 @@
-# 朋友圈英语 - 完整部署 Docker Compose
-# 启动：docker compose -f docker/docker-compose.yml up -d
+# ====================================
+# 朋友圈英语 — 完整部署 Docker Compose
+# 启动：docker compose -f docker/docker-compose.yml --env-file docker/.env up -d
 # 停止：docker compose -f docker/docker-compose.yml down
+# 日志：docker compose -f docker/docker-compose.yml logs -f
+# 查看状态：docker compose -f docker/docker-compose.yml ps
+# ====================================
 
 services:
   mysql:
     image: mysql:8.0
     container_name: pengyouquan-mysql
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: REMOVED
-      MYSQL_DATABASE: pengyouquan_english
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-REMOVED}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pengyouquan_english}
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -20,12 +25,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    # 日志限制：每个日志文件最大10MB，保留3个
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
     container_name: pengyouquan-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -33,35 +45,62 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
     container_name: pengyouquan-backend
+    restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pengyouquan_english?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: REMOVED
-      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/pengyouquan_english?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-REMOVED}
+      SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST:-redis}
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_TIMEOUT: ${SPRING_DATA_REDIS_TIMEOUT:-2000ms}
+      JWT_SECRET: ${JWT_SECRET:-REMOVED}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # 挂载后端日志目录
+    volumes:
+      - backend-logs:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   frontend:
     build:
       context: ..
       dockerfile: docker/Dockerfile.frontend
     container_name: pengyouquan-frontend
+    restart: unless-stopped
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mysql-data:
   redis-data:
+  backend-logs:
