@@ -1590,6 +1590,25 @@ body {
   .bottom-nav { max-width: 1000px; }
 }
 
+/* 返回按钮 */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  margin-bottom: 12px;
+  transition: background 0.15s;
+}
+.back-btn:hover {
+  background: var(--hover-bg);
+}
+
 /* 超小屏手机 (≤400px) 适配 */
 @media (max-width: 550px) {
   .action-row { gap: 3px; }
