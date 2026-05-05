@@ -59,7 +59,7 @@ export default function PracticePage({
   // 句子
   const [sentence, setSentence] = useState<any>(null);
   const [mode, setMode] = useState<'translation' | 'dictation'>('translation');
-  const [showCn, setShowCn] = useState(true);
+  const [showCn, setShowCn] = useState(false);
   const [showEn, setShowEn] = useState(false);
   const [speed, setSpeed] = useState(0.75);
   const [voice, setVoice] = useState('en-GB-RyanNeural');
