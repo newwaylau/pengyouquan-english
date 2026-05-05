@@ -1,6 +1,24 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { api } from './api/client';
 
+/** 校验邮箱格式 */
+function isValidEmail(v: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+/** 校验手机号格式 */
+function isValidPhone(v: string) { return !v || /^1[3-9]\d{9}$/.test(v); }
+/** 密码强度：至少8位，含字母+数字 */
+function isStrongPassword(v: string) { return v.length >= 8 && /[a-zA-Z]/.test(v) && /[0-9]/.test(v); }
+/** 密码强度等级 */
+function pwdLevel(pwd: string): { label: string; color: string; percent: number } {
+  if (!pwd) return { label: '', color: 'transparent', percent: 0 };
+  if (pwd.length < 6) return { label: '太短', color: '#e17055', percent: 20 };
+  const hasLetter = /[a-zA-Z]/.test(pwd);
+  const hasNumber = /[0-9]/.test(pwd);
+  const hasBoth = hasLetter && hasNumber;
+  if (pwd.length >= 8 && hasBoth) return { label: '强', color: '#00b894', percent: 100 };
+  if (pwd.length >= 6 && (hasLetter || hasNumber)) return { label: '中', color: '#fdcb6e', percent: 60 };
+  return { label: '弱', color: '#e17055', percent: 35 };
+}
+
 export default function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -32,6 +50,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
 
   const handleSendCode = async () => {
     if (!email) { setError('请先输入邮箱'); return; }
+    if (!isValidEmail(email)) { setError('邮箱格式不正确'); return; }
     setCodeSending(true);
     setError('');
     setSuccessMsg('');
@@ -56,11 +75,20 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
     setSuccessMsg('');
 
     if (mode === 'login') {
+      if (!email || !password) { setError('请填写邮箱和密码'); return; }
       const r = await api.login(email, password);
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '登录失败'); }
     } else {
+      // 注册校验
+      if (!email) { setError('请填写邮箱'); return; }
+      if (!isValidEmail(email)) { setError('邮箱格式不正确'); return; }
+      if (!code) { setError('请填写验证码'); return; }
+      if (!password) { setError('请设置密码'); return; }
+      if (!isStrongPassword(password)) { setError('密码至少8位，需包含字母和数字'); return; }
       if (password !== password2) { setError('两次密码不一致'); return; }
+      if (phone && !isValidPhone(phone)) { setError('手机号格式不正确（11位数字）'); return; }
+
       const r = await api.register({ email, code, password, phone: phone || undefined, invitedBy: invitedBy || undefined });
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '注册失败'); }
@@ -73,22 +101,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
     setSuccessMsg('');
   };
 
-  // 密码强度
-  const getPwdStrength = (pwd: string): { label: string; color: string; percent: number } => {
-    if (!pwd) return { label: '', color: 'transparent', percent: 0 };
-    if (pwd.length < 6) return { label: '太短', color: '#e17055', percent: 20 };
-    let score = 0;
-    if (pwd.length >= 8) score += 25;
-    if (/[a-z]/.test(pwd)) score += 20;
-    if (/[A-Z]/.test(pwd)) score += 20;
-    if (/[0-9]/.test(pwd)) score += 20;
-    if (/[^a-zA-Z0-9]/.test(pwd)) score += 15;
-    if (score >= 90) return { label: '强', color: '#00b894', percent: 100 };
-    if (score >= 60) return { label: '中', color: '#fdcb6e', percent: 65 };
-    return { label: '弱', color: '#e17055', percent: 35 };
-  };
-
-  const pwdStrength = getPwdStrength(password);
+  const pwdStrength = pwdLevel(password);
   const pwd2Match = password2 && password === password2;
 
   return (
@@ -100,7 +113,8 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
 
           {/* ── 邮箱（必填） ── */}
           <input type="email" placeholder="邮箱" value={email}
-            onChange={e => setEmail(e.target.value)} required />
+            onChange={e => setEmail(e.target.value)} required
+            style={email && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
 
           {mode === 'register' && (
             <>
@@ -116,9 +130,9 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
                 </button>
               </div>
 
-              {/* ── 密码（必填，填两次） ── */}
-              <input type="password" placeholder="密码" value={password}
-                onChange={e => setPassword(e.target.value)} required minLength={6} />
+              {/* ── 密码（必填，至少8位含字母+数字） ── */}
+              <input type="password" placeholder="密码（至少8位，含字母和数字）" value={password}
+                onChange={e => setPassword(e.target.value)} required />
               {password && (
                 <div className="pwd-strength-bar">
                   <div className="pwd-strength-fill" style={{
@@ -131,12 +145,13 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
                 </div>
               )}
               <input type="password" placeholder="确认密码" value={password2}
-                onChange={e => setPassword2(e.target.value)} required minLength={6}
+                onChange={e => setPassword2(e.target.value)} required
                 style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
 
               {/* ── 手机号（可选） ── */}
               <input type="tel" placeholder="手机号（可选）" value={phone}
-                onChange={e => setPhone(e.target.value)} />
+                onChange={e => setPhone(e.target.value)}
+                style={phone && !isValidPhone(phone) ? { borderColor: '#e17055' } : {}} />
 
               {/* ── 邀请码（可选） ── */}
               <input type="text" placeholder="邀请码（可选）" value={invitedBy}
