@@ -228,7 +228,6 @@ export default function PracticePage({
         const clean = extractEn(s.text);
         if (clean) playTts(clean);
       }
-    }, 500);
   };
 
   // TTS
