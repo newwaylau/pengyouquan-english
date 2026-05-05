@@ -152,8 +152,6 @@ export default function PracticePage({
       }
       setShowIdsParam(id);
       setHistoryIds([]);
-      // 直接加载句子（等showIdsParam更新后再触发useEffect）
-      setTimeout(() => loadSentence(undefined, true), 50);
     })();
   }, [showList, user]);
 
@@ -185,12 +183,36 @@ export default function PracticePage({
 
   // 第一次加载（等showList加载完后通过另一个useEffect触发）
   // 切换剧集时重新加载句子（不自动播放音频）
+  // showIdsParam变化时加载句子（初始''不加载，避免随机）
   useEffect(() => {
-    if (showIdsParam !== undefined) {
+    if (showIdsParam) {
       setHistoryIds([]);
       loadSentence(undefined, true);
     }
   }, [showIdsParam]);
+
+  // 首次从设置加载（仅一次）
+  const initialLoadRef = useRef(false);
+  useEffect(() => {
+    if (initialLoadRef.current || !user) return;
+    initialLoadRef.current = true;
+    if (showList.length === 0) return;
+    (async () => {
+      const r = await api.getSettings();
+      if (r.code !== 200) return;
+      const s = r.data;
+      if (s.showId && s.selectedShow && s.selectedSeason) {
+        const found = showList.find((sh: any) => {
+          const m = sh.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
+          return m && m[1] === s.selectedShow && m[2] === s.selectedSeason && m[3] === s.showId;
+        });
+        if (found) setShowIdsParam(String(found.id));
+      } else {
+        // 没有保存的设置，直接加载随机
+        loadSentence(undefined, true);
+      }
+    })();
+  }, [showList, user]);
 
   // 切换模式时更新中文显示状态
   useEffect(() => {
