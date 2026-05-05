@@ -126,29 +126,38 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
                 <option key={title} value={title}>{title}</option>
               ))}
             </select>
-            {selectedShowTitle && (
-              <select className="show-select" style={{flex:1,minWidth:80}}
-                value={selectedSeason}
-                onChange={e => handleSeasonSelect(e.target.value)}>
-                <option value="">📺 全部季</option>
-                {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            )}
-            {selectedShowTitle && selectedSeason && (
-              <select className="show-select" style={{flex:1,minWidth:100}}
-                value={showId ?? ''}
-                onChange={e => {
-                  const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
-                    ?.find((ep: any) => ep.id === Number(e.target.value));
-                  handleEpisodeSelect(ep);
-                }}>
-                {(showGroups[selectedShowTitle]?.seasons[selectedSeason] || []).map((ep: any) => (
-                  <option key={ep.id} value={ep.id}>{ep.name} ({ep.sentenceCount}句)</option>
-                ))}
-              </select>
-            )}
+            <select className="show-select" style={{flex:1,minWidth:80}}
+              value={selectedSeason}
+              onChange={e => {
+                setSelectedSeason(e.target.value);
+                if (e.target.value && selectedShowTitle) {
+                  const eps = showGroups[selectedShowTitle]?.seasons[e.target.value];
+                  if (eps && eps.length > 0) {
+                    onShowChange(eps[0].id);
+                    save('showId', String(eps[0].id));
+                  }
+                }
+              }}>
+              <option value="">📺 全部季</option>
+              {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <select className="show-select" style={{flex:1,minWidth:100}}
+              value={showId ?? ''}
+              onChange={e => {
+                const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
+                  ?.find((ep: any) => ep.id === Number(e.target.value));
+                if (ep) {
+                  onShowChange(ep.id);
+                  save('showId', String(ep.id));
+                }
+              }}>
+              <option value="">🎬 全部集</option>
+              {(showGroups[selectedShowTitle]?.seasons[selectedSeason] || []).map((ep: any) => (
+                <option key={ep.id} value={ep.id}>{ep.name} ({ep.sentenceCount}句)</option>
+              ))}
+            </select>
           </div>
         </div>
 
