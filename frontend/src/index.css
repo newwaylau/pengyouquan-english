@@ -130,3 +130,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .search-bar{display:flex;gap:8px;margin-bottom:16px}
 .search-bar input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px}
 .search-bar button{padding:8px 16px;background:#1677ff;color:#fff;border:none;border-radius:6px;cursor:pointer}
+
+/* ===== 字幕导入页面 ===== */
+.subtitle-page{padding:16px 0}
+.subtitle-page h2{margin-bottom:16px}
+.upload-zone{border:2px dashed #d9d9d9;border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;margin-bottom:16px}
+.upload-zone:hover,.upload-zone.drag-over{border-color:#1677ff;background:#f0f5ff}
+.upload-icon{font-size:40px;margin-bottom:8px}
+.upload-text{font-size:15px;color:#666;margin-bottom:8px}
+.upload-text strong{color:#1677ff}
+.upload-hint{font-size:12px;color:#999}
+.file-selected{color:#333;font-weight:600}
+.format-badge{display:inline-block;padding:2px 8px;background:#e6f7ff;border:1px solid #91d5ff;border-radius:4px;margin:0 4px;font-size:11px;color:#1890ff;font-weight:600}
+.subtitle-form-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.subtitle-form-row label{font-size:14px;color:#666;white-space:nowrap;font-weight:600}
+.subtitle-input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.subtitle-input:focus{border-color:#1677ff}
+.upload-btn{width:100%;padding:10px;background:#1677ff;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;transition:opacity .2s}
+.upload-btn:disabled{opacity:0.5;cursor:not-allowed}
+.upload-btn:hover:not(:disabled){background:#4096ff}
+.upload-feedback{padding:10px 16px;border-radius:8px;margin-top:12px;font-size:14px;text-align:center}
+.upload-feedback.success{background:#f6ffed;border:1px solid #b7eb8f;color:#52c41a}
+.upload-feedback.error{background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f}
+.upload-feedback.info{background:#e6f7ff;border:1px solid #91d5ff;color:#1890ff}
+.history-section{margin-top:24px}
+.history-section h3{margin-bottom:12px;font-size:16px}
+.history-list{display:flex;flex-direction:column;gap:6px}
+.history-item{display:flex;align-items:center;justify-content:space-between;background:#fff;padding:12px 16px;border-radius:8px;gap:12px;transition:box-shadow .15s}
+.history-item:hover{box-shadow:0 1px 6px rgba(0,0,0,0.08)}
+.history-info{flex:1;min-width:0}
+.history-show{font-size:14px;font-weight:600;color:#333;margin-bottom:2px}
+.history-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:#999}
+.history-file{font-size:11px;color:#bbb;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.format-tag{padding:1px 6px;background:#f0f0f0;border-radius:4px;font-size:11px;color:#666;font-weight:600}
+.dup-badge{background:#fffbe6;color:#faad14;padding:1px 6px;border-radius:4px;font-size:11px}
+.history-time{color:#bbb}
+.delete-btn{color:#ff4d4f;border-color:#ff4d4f;flex-shrink:0}
+.delete-btn:hover{background:#ff4d4f;color:#fff}

@@ -6,10 +6,11 @@ import WrongPage from './WrongPage';
 import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
+import SubtitlePage from './SubtitlePage';
 import './index.css';
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
 
@@ -39,6 +40,7 @@ export default function App() {
           <button onClick={() => setPage('browse')} className={page === 'browse' ? 'active' : ''}>浏览</button>
           <button onClick={() => setPage('wrong')} className={page === 'wrong' ? 'active' : ''}>错题本</button>
           <button onClick={() => setPage('search')} className={page === 'search' ? 'active' : ''}>搜索</button>
+          <button onClick={() => setPage('subtitle')} className={page === 'subtitle' ? 'active' : ''}>导入</button>
           {user?.role === 'admin' && (
             <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
           )}
@@ -58,6 +60,7 @@ export default function App() {
         {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
         {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
         {page === 'admin' && <AdminPage />}
+        {page === 'subtitle' && <SubtitlePage />}
       </main>
     </div>
   );

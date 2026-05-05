@@ -58,20 +58,24 @@ public class SubtitleService {
             return new ImportResult(0, 0, "未解析到任何字幕条目");
         }
 
-        // 3. 确定剧集名
+        // 3. 确定剧集名（用 final 变量支持 lambda）
+        final String finalShowName;
         if (showName == null || showName.isBlank()) {
-            showName = extractShowName(fileName);
+            finalShowName = extractShowName(fileName);
+        } else {
+            finalShowName = showName;
         }
+        final String finalFileName = fileName;
 
         // 4. 查找或创建剧集
-        Show show = showRepository.findByNameContaining(showName)
+        Show show = showRepository.findByNameContaining(finalShowName)
                 .stream()
-                .filter(s -> s.getName().equals(showName))
+                .filter(s -> s.getName().equals(finalShowName))
                 .findFirst()
                 .orElseGet(() -> {
                     Show newShow = new Show();
-                    newShow.setName(showName);
-                    newShow.setSourceFile(fileName);
+                    newShow.setName(finalShowName);
+                    newShow.setSourceFile(finalFileName);
                     return showRepository.save(newShow);
                 });
 

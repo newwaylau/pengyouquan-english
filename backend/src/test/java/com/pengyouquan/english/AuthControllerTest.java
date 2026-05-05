@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import static org.hamcrest.Matchers.containsString;
+
 /**
  * 认证接口单元测试
  * 测试注册、登录、JWT过期等场景
