@@ -279,11 +279,11 @@ export default function PracticePage({
     const parts = splitWordParts(words[i] || '');
     if (val.length >= parts.letters.length) {
       if (i < words.length - 1) {
-        // 跳过后面的提示输入框（disabled），跳到下一个可输入的
+        // 跳过后面的提示/已正确输入框，跳到下一个需要输入的
         let next = i + 1;
-        while (next < words.length && hints.has(next)) next++;
+        while (next < words.length && (hints.has(next) || (retryCount === 1 && newInputs[next]?.length > 0))) next++;
         if (next < words.length) inputRefs.current[next]?.focus();
-        else submitRef.current?.focus(); // 最后一个可输入框输完，跳到提交按钮
+        else submitRef.current?.focus();
       } else {
         // 最后一个词输入完，跳到提交按钮
         submitRef.current?.focus();
