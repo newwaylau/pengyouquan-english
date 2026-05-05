@@ -2,7 +2,9 @@ package com.pengyouquan.english.controller;
 
 import com.pengyouquan.english.config.RequestLoggingInterceptor;
 import com.pengyouquan.english.dto.ApiResponse;
+import com.pengyouquan.english.model.Notification;
 import com.pengyouquan.english.model.SystemSetting;
+import com.pengyouquan.english.repository.NotificationRepository;
 import com.pengyouquan.english.repository.PracticeLogRepository;
 import com.pengyouquan.english.repository.SentenceRepository;
 import com.pengyouquan.english.repository.ShowRepository;
@@ -49,6 +51,7 @@ public class AdminController {
     private final SentenceRepository sentenceRepository;
     private final SystemSettingRepository systemSettingRepository;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
+    private final NotificationRepository notificationRepository;
 
     public AdminController(UserService userService,
                            PracticeLogRepository practiceLogRepository,
@@ -56,7 +59,8 @@ public class AdminController {
                            ShowRepository showRepository,
                            SentenceRepository sentenceRepository,
                            SystemSettingRepository systemSettingRepository,
-                           RequestLoggingInterceptor requestLoggingInterceptor) {
+                           RequestLoggingInterceptor requestLoggingInterceptor,
+                           NotificationRepository notificationRepository) {
         this.userService = userService;
         this.practiceLogRepository = practiceLogRepository;
         this.userRepository = userRepository;
@@ -64,6 +68,7 @@ public class AdminController {
         this.sentenceRepository = sentenceRepository;
         this.systemSettingRepository = systemSettingRepository;
         this.requestLoggingInterceptor = requestLoggingInterceptor;
+        this.notificationRepository = notificationRepository;
     }
 
     /** 管理后台统计数据总览 */
@@ -368,6 +373,49 @@ public class AdminController {
         result.put("totalPages", userPage.getTotalPages());
 
         return ApiResponse.success(result);
+    }
+
+    /**
+     * 创建通知
+     */
+    @PostMapping("/notifications")
+    public ApiResponse<Notification> createNotification(@CurrentUserId Long userId,
+                                                         @RequestBody Notification notification) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        notification.setPublished(notification.getPublished() != null && notification.getPublished());
+        Notification saved = notificationRepository.save(notification);
+        return ApiResponse.success(saved);
+    }
+
+    /**
+     * 通知列表（管理员，包含未发布）
+     */
+    @GetMapping("/notifications")
+    public ApiResponse<List<Notification>> listNotifications(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        List<Notification> list = notificationRepository.findAll();
+        list.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        return ApiResponse.success(list);
+    }
+
+    /**
+     * 删除通知
+     */
+    @DeleteMapping("/notifications/{id}")
+    public ApiResponse<Void> deleteNotification(@CurrentUserId Long userId,
+                                                 @PathVariable Long id) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        if (!notificationRepository.existsById(id)) {
+            return ApiResponse.notFound("通知不存在");
+        }
+        notificationRepository.deleteById(id);
+        return ApiResponse.success(null);
     }
 
     /** CSV 转义：如果包含逗号/引号/换行则包裹引号 */

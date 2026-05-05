@@ -107,7 +107,7 @@ describe('SettingsPanel 设置面板', () => {
     render(<SettingsPanel {...defaultProps} voice="en-US-JennyNeural" />);
     const activePills = document.querySelectorAll('.pill-group .pill.active');
     // 音色是第2个 pill-group（第1个是模式，第3个是速度）
-    const voicePills = document.querySelectorAll('.settings-section:nth-child(3) .pill.active');
+    const voicePills = document.querySelectorAll('.settings-section:nth-child(4) .pill.active');
     expect(voicePills.length).toBe(1);
     expect(voicePills[0].textContent).toContain('Jenny (US Female)');
   });
