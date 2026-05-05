@@ -265,6 +265,82 @@ body {
   font-size: 0.8125rem;
   margin-bottom: 8px;
 }
+.success-msg {
+  color: var(--success);
+  font-size: 0.8125rem;
+  margin-bottom: 8px;
+}
+
+/* 验证码行 */
+.code-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.code-row .code-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--input-bg);
+  color: var(--text);
+  text-align: center;
+  letter-spacing: 4px;
+}
+.send-code-btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.send-code-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: #fff;
+}
+.send-code-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 密码强度条 */
+.pwd-strength-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  height: 20px;
+}
+.pwd-strength-fill {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.3s, background 0.3s;
+}
+.pwd-strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: right;
+}
+
+/* 注册手机号 */
+.login-card input[type="tel"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
 
 /* =====================================================
    练习页 — 布局

@@ -21,19 +21,22 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final SystemSettingRepository systemSettingRepository;
+    private final EmailCodeService emailCodeService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil,
-                       SystemSettingRepository systemSettingRepository) {
+                       SystemSettingRepository systemSettingRepository,
+                       EmailCodeService emailCodeService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.systemSettingRepository = systemSettingRepository;
+        this.emailCodeService = emailCodeService;
     }
 
     /**
-     * 用户注册
+     * 用户注册（升级版：邮箱 + 手机号 + 验证码 + 密码 + 可选邀请码）
      */
     public LoginResponse register(RegisterRequest request) {
         // 检查注册是否开放
@@ -47,11 +50,16 @@ public class AuthService {
             throw new BusinessException("该邮箱已注册");
         }
 
+        // 校验邮箱验证码
+        emailCodeService.verifyCode(request.getEmail(), request.getCode());
+
         // 创建用户
         User user = new User();
         user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setNickname(request.getNickname() != null ? request.getNickname() : request.getEmail().split("@")[0]);
+        user.setInvitedBy(request.getInvitedBy() != null ? request.getInvitedBy() : "");
         user.setEnabled(true);
         user.setRole("user");
         user = userRepository.save(user);

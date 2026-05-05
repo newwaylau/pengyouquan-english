@@ -96,6 +96,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Mail (发送验证码) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Actuator 健康检查 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
