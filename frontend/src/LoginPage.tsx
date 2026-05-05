@@ -4,9 +4,10 @@ import { api } from './api/client';
 export default function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [phone, setPhone] = useState('');
   const [invitedBy, setInvitedBy] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -59,7 +60,8 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '登录失败'); }
     } else {
-      const r = await api.register({ email, phone, code, password, invitedBy: invitedBy || undefined });
+      if (password !== password2) { setError('两次密码不一致'); return; }
+      const r = await api.register({ email, code, password, phone: phone || undefined, invitedBy: invitedBy || undefined });
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '注册失败'); }
     }
@@ -71,7 +73,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
     setSuccessMsg('');
   };
 
-  // 密码强度提示
+  // 密码强度
   const getPwdStrength = (pwd: string): { label: string; color: string; percent: number } => {
     if (!pwd) return { label: '', color: 'transparent', percent: 0 };
     if (pwd.length < 6) return { label: '太短', color: '#e17055', percent: 20 };
@@ -87,6 +89,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
   };
 
   const pwdStrength = getPwdStrength(password);
+  const pwd2Match = password2 && password === password2;
 
   return (
     <div className="login-page">
@@ -94,17 +97,14 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
         <h1>朋友圈英语</h1>
         <p className="subtitle">从美剧中学英语</p>
         <form onSubmit={handleSubmit}>
-          {/* 邮箱 */}
+
+          {/* ── 邮箱（必填） ── */}
           <input type="email" placeholder="邮箱" value={email}
             onChange={e => setEmail(e.target.value)} required />
 
           {mode === 'register' && (
             <>
-              {/* 手机号 */}
-              <input type="tel" placeholder="手机号" value={phone}
-                onChange={e => setPhone(e.target.value)} required />
-
-              {/* 发送验证码 + 验证码输入 */}
+              {/* ── 验证码（必填） ── */}
               <div className="code-row">
                 <input type="text" placeholder="验证码" value={code}
                   onChange={e => setCode(e.target.value)} required maxLength={6}
@@ -116,27 +116,37 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
                 </button>
               </div>
 
-              {/* 邀请码（可选） */}
+              {/* ── 密码（必填，填两次） ── */}
+              <input type="password" placeholder="密码" value={password}
+                onChange={e => setPassword(e.target.value)} required minLength={6} />
+              {password && (
+                <div className="pwd-strength-bar">
+                  <div className="pwd-strength-fill" style={{
+                    width: `${pwdStrength.percent}%`,
+                    background: pwdStrength.color
+                  }} />
+                  <span className="pwd-strength-label" style={{ color: pwdStrength.color }}>
+                    {pwdStrength.label}
+                  </span>
+                </div>
+              )}
+              <input type="password" placeholder="确认密码" value={password2}
+                onChange={e => setPassword2(e.target.value)} required minLength={6}
+                style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
+
+              {/* ── 手机号（可选） ── */}
+              <input type="tel" placeholder="手机号（可选）" value={phone}
+                onChange={e => setPhone(e.target.value)} />
+
+              {/* ── 邀请码（可选） ── */}
               <input type="text" placeholder="邀请码（可选）" value={invitedBy}
                 onChange={e => setInvitedBy(e.target.value)} />
             </>
           )}
 
-          {/* 密码 */}
-          <input type="password" placeholder="密码（至少6位）" value={password}
-            onChange={e => setPassword(e.target.value)} required minLength={6} />
-
-          {/* 密码强度提示 */}
-          {mode === 'register' && password && (
-            <div className="pwd-strength-bar">
-              <div className="pwd-strength-fill" style={{
-                width: `${pwdStrength.percent}%`,
-                background: pwdStrength.color
-              }} />
-              <span className="pwd-strength-label" style={{ color: pwdStrength.color }}>
-                {pwdStrength.label}
-              </span>
-            </div>
+          {mode === 'login' && (
+            <input type="password" placeholder="密码" value={password}
+              onChange={e => setPassword(e.target.value)} required />
           )}
 
           {error && <div className="error-msg">{error}</div>}

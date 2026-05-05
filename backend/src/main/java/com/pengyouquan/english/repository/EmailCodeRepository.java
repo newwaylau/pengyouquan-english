@@ -16,6 +16,9 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
     /** 按邮箱查找最新未使用的验证码 */
     Optional<EmailCode> findTopByEmailOrderByCreatedAtDesc(String email);
 
+    /** 按邮箱和验证码查找 */
+    Optional<EmailCode> findByEmailAndCode(String email, String code);
+
     /** 删除某邮箱的所有验证码 */
     void deleteByEmail(String email);
 
