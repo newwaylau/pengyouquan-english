@@ -10,11 +10,11 @@ function extractEn(text: string) {
 /** 从字幕文本中提取中文 */
 function extractCn(text: string) { return text.includes(' / ') ? text.split(' / ')[1] : ''; }
 
-/** 把单词拆成字母部分和标点部分（标点放在输入框外面） */
+/** 把单词拆成字母+前后标点（标点撇号放输入框外） */
 function splitWordParts(w: string): { letters: string; prefix: string; suffix: string } {
-  const match = w.match(/^([^\w]*)([\w']*)([^\w]*)$/);
-  if (!match) return { letters: w, prefix: '', suffix: '' };
-  return { letters: match[2], prefix: match[1], suffix: match[3] };
+  const m = w.match(/^([^a-zA-Z]*)([a-zA-Z]+)(.*)$/);
+  if (!m) return { letters: w, prefix: '', suffix: '' };
+  return { letters: m[2], prefix: m[1], suffix: m[3] };
 }
 
 /** 校正大小写（和老版5000项目一致） */
@@ -384,7 +384,7 @@ export default function PracticePage({
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    style={{ width: Math.max(28, parts.letters.length * 10 + 8) }}
+                    size={Math.max(1, parts.letters.length)}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
