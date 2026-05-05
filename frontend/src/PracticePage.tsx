@@ -306,7 +306,10 @@ export default function PracticePage({
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
-      inputRefs.current[i - 1]?.focus();
+      // 跳到前一个需要输入的框（retry时跳过已正确的）
+      let prev = i - 1;
+      while (prev > 0 && (hints.has(prev) || (retryCount === 1 && !wrongWords.has(prev) && inputs[prev]?.length > 0))) prev--;
+      inputRefs.current[prev]?.focus();
     }
     if (e.key === ' ' && i < words.length - 1) {
       e.preventDefault();
@@ -437,7 +440,6 @@ export default function PracticePage({
               );
             })}
           </div>
-        )}
 
         {/* 反馈区域 */}
         {answered && (
