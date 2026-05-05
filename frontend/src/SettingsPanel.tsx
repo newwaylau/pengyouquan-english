@@ -121,7 +121,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
                 onClick={() => { onModeChange(m); save('mode', m); }}>
                 <input type="radio" name="mode" checked={mode === m} readOnly />
-                <span>{m === 'translation' ? '📝 中译英听写模式' : '🖊️ 纯听写模式'}</span>
+                <span>{m === 'translation' ? '📝 中译英' : '🖊️ 听写'}</span>
               </label>
             ))}
           </div>
