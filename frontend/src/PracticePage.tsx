@@ -155,6 +155,14 @@ export default function PracticePage({
     if (!jumpId) loadSentence();
   }, []);
 
+  // 切换剧集时重新加载句子
+  useEffect(() => {
+    if (showIdsParam !== undefined) {
+      setHistoryIds([]);
+      loadSentence();
+    }
+  }, [showIdsParam]);
+
   // 切换模式时更新中文显示状态
   useEffect(() => {
     setShowCn(mode === 'translation');
