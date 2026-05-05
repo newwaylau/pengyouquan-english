@@ -326,6 +326,15 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-card);
   margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 480px;
+}
+
+.practice-card-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .action-divider {
