@@ -277,6 +277,7 @@ body {
   gap: 8px;
   margin-bottom: 12px;
   width: 100%;
+  align-items: stretch;
 }
 .code-row .code-input {
   flex: 3;
