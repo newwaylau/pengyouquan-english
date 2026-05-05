@@ -68,7 +68,28 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   }, [selectedShowTitle, selectedSeason]);
 
   useEffect(() => {
-    if (open) api.shows().then(r => { if (r.code === 200) { setShows(r.data); setShowGroups(parseShowGroups(r.data)); } });
+    if (open) api.shows().then(r => {
+      if (r.code === 200) {
+        setShows(r.data);
+        const groups = parseShowGroups(r.data);
+        setShowGroups(groups);
+        // 从已保存的showId反解析出剧集/季
+        if (showId && showId !== '') {
+          const ids = showId.split(',').map(Number);
+          for (const titleKey of Object.keys(groups)) {
+            for (const seasonKey of Object.keys(groups[titleKey].seasons)) {
+              for (const ep of groups[titleKey].seasons[seasonKey]) {
+                if (ids.includes(ep.id)) {
+                  setSelectedShowTitle(titleKey);
+                  setSelectedSeason(seasonKey);
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    });
   }, [open]);
 
   const save = async (key: string, value: string) => {
