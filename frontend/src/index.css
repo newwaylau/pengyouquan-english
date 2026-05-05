@@ -790,11 +790,11 @@ body {
   align-items: center;
   margin-bottom: 20px;
 }
-.settings-header h3 { margin: 0; font-size: 1.125rem; color: var(--text); }
+.settings-header h3 { margin: 0; font-size: 1rem; color: var(--text); }
 .close-btn {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1rem;
   cursor: pointer;
   color: var(--text-secondary);
   padding: 4px;
