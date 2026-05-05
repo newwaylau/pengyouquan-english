@@ -195,7 +195,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
                 .sort((a: any, b: any) => parseInt(a.episode.replace('E','')) - parseInt(b.episode.replace('E','')))
                 .map((ep: any) => (
-                <option key={ep.id} value={ep.id}>{ep.name} ({ep.sentenceCount}句)</option>
+                <option key={ep.id} value={ep.episode}>{ep.name} ({ep.sentenceCount}句)</option>
               ))}
             </select>
           </div>
