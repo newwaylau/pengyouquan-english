@@ -11,6 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -406,6 +411,71 @@ public class SubtitleService {
     }
 
     /**
+     * 批量导入目录下所有字幕文件
+     *
+     * @param directoryPath 服务器上的目录路径
+     * @return 批量导入汇总结果
+     */
+    @Transactional
+    public BatchImportResult batchImport(String directoryPath) {
+        Path dir = Paths.get(directoryPath);
+
+        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
+            return new BatchImportResult(0, 0, 0, "目录不存在或不是文件夹: " + directoryPath);
+        }
+
+        // 提取目录名作为默认剧集名
+        String defaultShowName = dir.getFileName().toString();
+
+        List<Path> subtitleFiles = new ArrayList<>();
+        try (var stream = Files.walk(dir, 3)) {
+            stream.filter(Files::isRegularFile)
+                  .filter(p -> {
+                      String name = p.getFileName().toString().toLowerCase();
+                      return name.endsWith(".srt") || name.endsWith(".ass") || name.endsWith(".vtt");
+                  })
+                  .forEach(subtitleFiles::add);
+        } catch (IOException e) {
+            return new BatchImportResult(0, 0, 0, "遍历目录失败: " + e.getMessage());
+        }
+
+        if (subtitleFiles.isEmpty()) {
+            return new BatchImportResult(0, 0, 0, "目录下未找到 .srt / .ass / .vtt 文件");
+        }
+
+        int totalSuccess = 0;
+        int totalDuplicate = 0;
+        int totalFailed = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (Path filePath : subtitleFiles) {
+            try {
+                byte[] bytes = Files.readAllBytes(filePath);
+                String content = new String(bytes, StandardCharsets.UTF_8);
+                if (content.contains("\uFFFD")) {
+                    content = new String(bytes, Charset.forName("GBK"));
+                }
+
+                String fileName = filePath.getFileName().toString();
+                ImportResult result = importSubtitle(fileName, content, defaultShowName);
+
+                totalSuccess += result.importedCount;
+                totalDuplicate += result.duplicateCount;
+
+                if (!result.isSuccess()) {
+                    totalFailed++;
+                    errors.add(fileName + ": " + result.error);
+                }
+            } catch (IOException e) {
+                totalFailed++;
+                errors.add(filePath.getFileName().toString() + ": 读取失败 - " + e.getMessage());
+            }
+        }
+
+        return new BatchImportResult(totalSuccess, totalDuplicate, totalFailed, errors.isEmpty() ? null : String.join("\n", errors));
+    }
+
+    /**
      * 解析导入记录 DTO
      */
     public List<Map<String, Object>> getAllImportHistory() {
@@ -461,6 +531,25 @@ public class SubtitleService {
         public ImportResult(int importedCount, int duplicateCount, String error) {
             this.importedCount = importedCount;
             this.duplicateCount = duplicateCount;
+            this.error = error;
+        }
+
+        public boolean isSuccess() {
+            return error == null;
+        }
+    }
+
+    /** 批量导入汇总结果 */
+    public static class BatchImportResult {
+        public final int totalImported;
+        public final int totalDuplicate;
+        public final int totalFailed;
+        public final String error;
+
+        public BatchImportResult(int totalImported, int totalDuplicate, int totalFailed, String error) {
+            this.totalImported = totalImported;
+            this.totalDuplicate = totalDuplicate;
+            this.totalFailed = totalFailed;
             this.error = error;
         }
 
