@@ -92,6 +92,15 @@ export default function PracticePage({
   const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
   const [wrongCount, setWrongCount] = useState(0);
 
+  // 刷新统计
+  const refreshStats = () => {
+    if (!user) return;
+    api.stats().then(r => {
+      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
+    });
+    api.wrongSentences().then(r => { if (r.code === 200) setWrongCount(r.data.length); });
+  };
+
   // 搜索
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -262,11 +271,13 @@ export default function PracticePage({
       setShowEn(true);
       setShowCn(true);
       api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: userCorrectCount, totalWords: userInputCount, mode });
+      refreshStats();
     } else if (retryCount >= 1) {
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
+      refreshStats();
     } else {
       setRetryCount(1);
       // 清空错误输入 + 聚焦到第一个错误框
