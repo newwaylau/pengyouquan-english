@@ -125,6 +125,7 @@ export default function PracticePage({
   }, [historyIds]);
 
   // 加载句子
+  const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
   const loadSentence = async (specificId?: number) => {
     if (specificId) {
       const r = await api.sentence(specificId);
@@ -139,14 +140,15 @@ export default function PracticePage({
     if (r.code !== 200 || !r.data?.length) return;
     setupSentence(r.data[0]);
   };
+  loadSentenceRef.current = loadSentence;
 
   // 处理跳转ID
   useEffect(() => {
     if (jumpId && !jumpDoneRef.current) {
       jumpDoneRef.current = true;
-      loadSentence(jumpId);
+      loadSentenceRef.current?.(jumpId);
     }
-  }, [jumpId, loadSentence]);
+  }, [jumpId]);
 
   // 第一次加载
   useEffect(() => {
