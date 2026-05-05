@@ -234,10 +234,15 @@ export default function PracticePage({
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
     } else {
       setRetryCount(1);
-      // 聚焦到第一个错误的输入框
-      const firstWrong = Array.from(wrong).sort()[0];
-      if (firstWrong !== undefined) {
-        setTimeout(() => inputRefs.current[firstWrong]?.focus(), 100);
+      // 清空错误输入 + 聚焦到第一个错误框
+      const firstWrongIdx = Array.from(wrong).sort()[0];
+      const clearedInputs = [...currentInputs];
+      wrong.forEach(idx => { clearedInputs[idx] = ''; });
+      setInputs(clearedInputs);
+      setCorrectWords(new Set());
+      setWrongWords(new Set());
+      if (firstWrongIdx !== undefined) {
+        setTimeout(() => inputRefs.current[firstWrongIdx]?.focus(), 100);
       }
     }
   };
