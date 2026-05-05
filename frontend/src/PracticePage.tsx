@@ -183,11 +183,7 @@ export default function PracticePage({
     }
   }, [jumpId]);
 
-  // 第一次加载
-  useEffect(() => {
-    if (!jumpId) loadSentence();
-  }, []);
-
+  // 第一次加载（等showList加载完后通过另一个useEffect触发）
   // 切换剧集时重新加载句子（不自动播放音频）
   useEffect(() => {
     if (showIdsParam !== undefined) {
