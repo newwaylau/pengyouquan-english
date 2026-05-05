@@ -326,8 +326,8 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-card);
   margin-bottom: 16px;
-  min-height: 400px;
-  transition: min-height 0s;
+  height: 440px;
+  overflow-y: auto;
 }
 
 /* ---------- 句子显示 ---------- */
@@ -346,8 +346,6 @@ body {
   word-break: break-word;
   width: 100%;
   min-height: 4rem;
-  max-height: 8rem;
-  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,8 +385,6 @@ body {
   padding: 8px 4px;
   margin-bottom: 16px;
   min-height: 4rem;
-  max-height: 10rem;
-  overflow-y: auto;
   align-items: center;
 }
 .word-input {
