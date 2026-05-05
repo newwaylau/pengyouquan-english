@@ -418,6 +418,7 @@ export default function PracticePage({
       </div>
 
       {/* 按钮区 */}
+      <div className="bottom-section">
       <div className="button-area">
         <hr className="action-divider" />
 
@@ -491,6 +492,7 @@ export default function PracticePage({
         </button>
       </div>
 
+      </div>
       {/* 设置面板 */}
       <SettingsPanel
         open={settingsOpen}

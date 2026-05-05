@@ -269,7 +269,12 @@ body {
    练习页 — 布局
    ===================================================== */
 
-.practice-page { position: relative; }
+.practice-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 90px);
+}
 
 /* ---------- Stats Bar ---------- */
 .stats-bar {
@@ -326,6 +331,16 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-card);
   margin-bottom: 0;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.bottom-section {
+  flex: 0 0 33%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .button-area {
@@ -548,19 +563,14 @@ body {
 
 /* ---------- 底部导航 ---------- */
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
-  max-width: 900px;
+  max-width: 100%;
   display: flex;
   background: var(--bottom-nav-bg);
   border-top: 1px solid var(--bottom-nav-border);
   border-radius: 12px 12px 0 0;
   padding: calc(6/16*1rem) calc(8/16*1rem);
   padding-bottom: max(6px, env(safe-area-inset-bottom));
-  z-index: 50;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
 }
 .bottom-nav-btn {
