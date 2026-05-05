@@ -154,6 +154,10 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
   min-height: 100vh;
   padding-bottom: 80px; /* 为底部导航留空间 */
 }
@@ -274,7 +278,8 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 90px);
+  flex: 1;
+  min-height: 0;
 }
 
 /* ---------- Stats Bar ---------- */
