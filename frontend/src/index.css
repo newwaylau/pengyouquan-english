@@ -332,8 +332,33 @@ body {
   box-shadow: var(--shadow-card);
   margin-bottom: 0;
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-body .sentence-en {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card-body .sentence-cn {
+  flex: 0 0 auto;
+}
+
+.card-body .word-inputs {
+  flex: 0 0 auto;
+  margin-top: auto;
 }
 
 .bottom-section {
