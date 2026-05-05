@@ -60,11 +60,14 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   // 当选择变化时，自动计算showIds
   useEffect(() => {
     if (!selectedShowTitle) { onShowChange(''); save('showId', ''); return; }
-    const ids = shows
-      .filter(s => s.name.startsWith(selectedShowTitle + ' '))
-      .filter(s => !selectedSeason || s.name.includes(' ' + selectedSeason))
-      .map((s: any) => s.id);
-    if (ids.length > 0) { onShowChange(ids.join(',')); save('showId', ids.join(',')); }
+    // 只在选了剧集但没有选集时自动保存showIds（选集时由选集下拉框单独保存）
+    if (!selectedSeason) {
+      const ids = shows
+        .filter(s => s.name.startsWith(selectedShowTitle + ' '))
+        .filter(s => !selectedSeason || s.name.includes(' ' + selectedSeason))
+        .map((s: any) => s.id);
+      if (ids.length > 0) { onShowChange(ids.join(',')); save('showId', ids.join(',')); }
+    }
   }, [selectedShowTitle, selectedSeason]);
 
   useEffect(() => {
