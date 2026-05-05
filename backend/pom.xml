@@ -96,6 +96,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Actuator 健康检查 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- DevTools（开发时热重载） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
