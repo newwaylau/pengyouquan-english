@@ -1,6 +1,8 @@
 package com.pengyouquan.english.repository;
 
 import com.pengyouquan.english.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** 按微信 openId 查找用户 */
     Optional<User> findByWechatOpenId(String wechatOpenId);
+
+    /** 按角色查找（分页，管理员用） */
+    Page<User> findByRole(String role, Pageable pageable);
 }
