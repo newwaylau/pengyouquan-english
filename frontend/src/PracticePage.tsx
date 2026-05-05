@@ -234,6 +234,11 @@ export default function PracticePage({
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
     } else {
       setRetryCount(1);
+      // 聚焦到第一个错误的输入框
+      const firstWrong = Array.from(wrong).sort()[0];
+      if (firstWrong !== undefined) {
+        setTimeout(() => inputRefs.current[firstWrong]?.focus(), 100);
+      }
     }
   };
 
@@ -427,7 +432,7 @@ export default function PracticePage({
           </div>
         )}
         {retryCount === 1 && !answered && (
-          <div className="feedback retry">⚠️ 有错误，再试一次</div>
+          <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
         )}
 
         </div>
