@@ -12,6 +12,10 @@ interface Props {
   onSpeedChange: (s: number) => void;
   showId: number | null;
   onShowChange: (id: number | null) => void;
+  autoPlay: boolean;
+  onAutoPlayChange: (v: boolean) => void;
+  preferOriginal: boolean;
+  onPreferOriginalChange: (v: boolean) => void;
 }
 
 const VOICES = [
@@ -23,7 +27,16 @@ const VOICES = [
   { id: 'en-AU-WilliamNeural', label: 'William (AU Male)' },
 ];
 
-export default function SettingsPanel({ open, onClose, mode, onModeChange, voice, onVoiceChange, speed, onSpeedChange, showId, onShowChange }: Props) {
+const DEFAULTS = {
+  mode: 'translation',
+  voice: 'en-GB-RyanNeural',
+  speed: 0.75,
+  showId: null as number | null,
+  autoPlay: true,
+  preferOriginal: false,
+};
+
+export default function SettingsPanel({ open, onClose, mode, onModeChange, voice, onVoiceChange, speed, onSpeedChange, showId, onShowChange, autoPlay, onAutoPlayChange, preferOriginal, onPreferOriginalChange }: Props) {
   const [shows, setShows] = useState<any[]>([]);
 
   useEffect(() => {
@@ -88,6 +101,22 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
           </div>
         </div>
 
+        <div className="settings-section">
+          <label>语音自动播放</label>
+          <label className="checkbox-row">
+            <input type="checkbox" checked={autoPlay} onChange={e => { onAutoPlayChange(e.target.checked); save('autoPlay', String(e.target.checked)); }} />
+            加载句子后自动播报语音
+          </label>
+        </div>
+
+        <div className="settings-section">
+          <label>原音优先</label>
+          <label className="checkbox-row">
+            <input type="checkbox" checked={preferOriginal} onChange={e => { onPreferOriginalChange(e.target.checked); save('preferOriginal', String(e.target.checked)); }} />
+            有原音文件时优先播放原音
+          </label>
+        </div>
+
         <div className="settings-section shortcuts">
           <label>快捷键</label>
           <div className="shortcut-list">
@@ -98,6 +127,24 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <span><kbd>[</kbd> 中文切换（听写模式）</span>
             <span><kbd>]</kbd> 英文切换</span>
           </div>
+        </div>
+        <div className="settings-section">
+          <button className="reset-btn" onClick={() => {
+            onModeChange(DEFAULTS.mode);
+            onVoiceChange(DEFAULTS.voice);
+            onSpeedChange(DEFAULTS.speed);
+            onShowChange(DEFAULTS.showId);
+            onAutoPlayChange(DEFAULTS.autoPlay);
+            onPreferOriginalChange(DEFAULTS.preferOriginal);
+            api.saveSettings({
+              mode: DEFAULTS.mode,
+              voice: DEFAULTS.voice,
+              speed: String(DEFAULTS.speed),
+              showId: '',
+              autoPlay: String(DEFAULTS.autoPlay),
+              preferOriginal: String(DEFAULTS.preferOriginal),
+            });
+          }}>🔄 重置为默认值</button>
         </div>
       </div>
     </div>
