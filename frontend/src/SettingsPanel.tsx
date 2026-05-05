@@ -87,8 +87,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <div className="voice-section-label">剧集原音</div>
             <div className="voice-pills">
               <label className="voice-pill">
-                <input type="checkbox" checked={preferOriginal}
-                  onChange={e => { onPreferOriginalChange(e.target.checked); save('preferOriginal', String(e.target.checked)); }} />
+                <input type="checkbox" checked={true} readOnly />
                 <span>默认</span>
               </label>
             </div>
