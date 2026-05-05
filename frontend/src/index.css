@@ -474,6 +474,24 @@ body {
   border-color: var(--primary);
 }
 
+.action-row-split {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.action-row-half {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.action-row-half .btn-action,
+.action-row-half .btn-speed {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ---------- 反馈 ---------- */
 .feedback {
   text-align: center;

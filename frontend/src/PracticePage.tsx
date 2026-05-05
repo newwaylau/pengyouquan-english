@@ -431,23 +431,27 @@ export default function PracticePage({
           <button className="btn-action" onClick={goNext}>⏭️ 下一句</button>
         </div>
 
-        {/* 操作行3：速度 + 显示中文 / 显示英文 */}
-        <div className="action-row">
-          {SPEEDS.map(s => (
-            <button
-              key={s}
-              className={`btn-speed ${speed === s ? 'active' : ''}`}
-              onClick={() => setSpeed(s)}
-            >
-              {s}x
+        {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
+        <div className="action-row-split">
+          <div className="action-row-half">
+            {SPEEDS.map(s => (
+              <button
+                key={s}
+                className={`btn-speed ${speed === s ? 'active' : ''}`}
+                onClick={() => setSpeed(s)}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
+          <div className="action-row-half">
+            <button className="btn-action" onClick={() => setShowCn(s => !s)}>
+              {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
             </button>
-          ))}
-          <button className="btn-action" onClick={() => setShowCn(s => !s)}>
-            {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
-          </button>
-          <button className="btn-action" onClick={() => setShowEn(s => !s)}>
-            {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
-          </button>
+            <button className="btn-action" onClick={() => setShowEn(s => !s)}>
+              {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
+            </button>
+          </div>
         </div>
       </div>
 
