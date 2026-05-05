@@ -130,8 +130,8 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         {/* 剧集选择（三级联动） */}
         <div className="settings-section">
           <label>剧集选择</label>
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-            <select className="show-select" style={{flex:1,minWidth:120}}
+          <div style={{display:'flex',flexDirection:'column',gap:4}}>
+            <select className="show-select" style={{width:'100%'}}
               value={selectedShowTitle}
               onChange={e => {
                 setSelectedShowTitle(e.target.value);
@@ -142,7 +142,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
                 <option key={title} value={title}>{title}</option>
               ))}
             </select>
-            <select className="show-select" style={{flex:1,minWidth:80}}
+            <select className="show-select" style={{width:'100%'}}
               value={selectedSeason}
               onChange={e => {
                 setSelectedSeason(e.target.value);
@@ -152,7 +152,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            <select className="show-select" style={{flex:1,minWidth:100}}
+            <select className="show-select" style={{width:'100%'}}
               value={showId ?? ''}
               onChange={e => {
                 const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
