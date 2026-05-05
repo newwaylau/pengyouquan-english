@@ -390,8 +390,6 @@ body {
   text-align: center;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
-  min-width: 24px;
-  max-width: 140px;
 }
 .word-input:focus {
   border-bottom-color: var(--primary);
@@ -404,6 +402,10 @@ body {
 .word-input.wrong {
   border-bottom-color: var(--danger);
   background: rgba(225, 112, 85, 0.1);
+}
+.word-input::placeholder {
+  color: rgba(136, 136, 170, 0.3);
+  font-size: 0.7rem;
 }
 .word-sep {
   display: flex;
