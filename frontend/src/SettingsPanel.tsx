@@ -76,35 +76,45 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         setShows(r.data);
         const groups = parseShowGroups(r.data);
         setShowGroups(groups);
-        // 从已保存的showId反解析出剧集/季
-        if (showId && showId !== '') {
-          const ids = showId.split(',').map(Number);
-          for (const titleKey of Object.keys(groups)) {
-            for (const seasonKey of Object.keys(groups[titleKey].seasons)) {
-              for (const ep of groups[titleKey].seasons[seasonKey]) {
-                if (ids.includes(ep.id)) {
-                  setSelectedShowTitle(titleKey);
-                  setSelectedSeason(seasonKey);
-                  return;
-                }
-              }
+        // 从已保存的selectedShow/selectedSeason回显
+        api.getSettings().then(sr => {
+          if (sr.code === 200) {
+            const savedTitle = sr.data.selectedShow;
+            const savedSeason = sr.data.selectedSeason;
+            if (savedTitle && groups[savedTitle]) {
+              setSelectedShowTitle(savedTitle);
+              if (savedSeason) setSelectedSeason(savedSeason);
             }
           }
-        }
+        });
       }
     });
   }, [open]);
 
   const save = async (key: string, value: string) => {
-    // showId 以JSON数组格式保存，支持多组选择
-    if (key === 'showId') {
-      await api.saveSettings({ showId: value });
-    } else {
-      await api.saveSettings({ [key]: value });
+    await api.saveSettings({ [key]: value });
+  };
+
+  // 选剧集时
+  const handleShowSelect = (title: string) => {
+    setSelectedShowTitle(title);
+    setSelectedSeason('');
+    save('selectedShow', title);
+    save('selectedSeason', '');
+    // 当选集为空时，根据选剧计算showIds
+    if (!title) {
+      onShowChange('');
+      save('showId', '');
     }
   };
 
-  // 当选择变化时更新外部showId
+  // 选季时
+  const handleSeasonSelect = (seasonKey: string) => {
+    setSelectedSeason(seasonKey);
+    save('selectedSeason', seasonKey);
+  };
+
+  // 选具体集时
   const handleEpisodeSelect = (ep: any) => {
     if (ep) {
       setSelectedSeason(ep.parentSeason);
@@ -162,10 +172,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
           <div style={{display:'flex',flexDirection:'column',gap:4}}>
             <select className="show-select" style={{width:'100%'}}
               value={selectedShowTitle}
-              onChange={e => {
-                setSelectedShowTitle(e.target.value);
-                setSelectedSeason('');
-              }}>
+              onChange={e => { handleShowSelect(e.target.value); }}>
               <option value="">🎬 全部剧集</option>
               {Object.keys(showGroups).sort().map(title => (
                 <option key={title} value={title}>{title}</option>
@@ -173,9 +180,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             </select>
             <select className="show-select" style={{width:'100%'}}
               value={selectedSeason}
-              onChange={e => {
-                setSelectedSeason(e.target.value);
-              }}>
+              onChange={e => { handleSeasonSelect(e.target.value); }}>
               <option value="">📺 全部季</option>
               {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
                 <option key={s} value={s}>{s}</option>
