@@ -374,7 +374,9 @@ body {
 .word-inputs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px 4px;
   margin-bottom: 16px;
 }
 .word-input {
@@ -427,6 +429,7 @@ body {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
   margin-bottom: 8px;
 }
 .action-row:last-child { margin-bottom: 0; }
