@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * API 请求拦截器
- * 统计每个 API 端点的调用次数，用于管理后台监控
+ * 统计每个 API 端点的调用次数和最后调用时间，用于管理后台监控
  */
 @Component
 public class RequestLoggingInterceptor implements HandlerInterceptor {
@@ -23,6 +23,9 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     /** 按路径统计的请求数 */
     private final ConcurrentHashMap<String, AtomicLong> pathCounts = new ConcurrentHashMap<>();
 
+    /** 每个路径的最后调用时间戳 */
+    private final ConcurrentHashMap<String, Long> lastCalledAt = new ConcurrentHashMap<>();
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String path = request.getRequestURI();
@@ -32,6 +35,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
 
         String key = method + " " + path;
         pathCounts.computeIfAbsent(key, k -> new AtomicLong(0)).incrementAndGet();
+        lastCalledAt.put(key, System.currentTimeMillis());
 
         return true;
     }
@@ -60,5 +64,12 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                         Map.Entry::getValue,
                         (a, b) -> a,
                         java.util.LinkedHashMap::new));
+    }
+
+    /**
+     * 获取每个路径的最后调用时间（毫秒时间戳）
+     */
+    public Map<String, Long> getLastCalledAt() {
+        return new java.util.LinkedHashMap<>(lastCalledAt);
     }
 }

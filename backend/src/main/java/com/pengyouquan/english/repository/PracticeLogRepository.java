@@ -45,4 +45,18 @@ public interface PracticeLogRepository extends JpaRepository<PracticeLog, Long> 
 
     /** 管理员：统计总练习量 */
     long count();
+
+    /** 管理员：统计近30天每日活跃用户数（有练习记录的用户） */
+    @Query(value = "SELECT DATE(practiced_at) as day, COUNT(DISTINCT user_id) as cnt " +
+           "FROM practice_logs " +
+           "WHERE practiced_at >= :since " +
+           "GROUP BY DATE(practiced_at) " +
+           "ORDER BY day", nativeQuery = true)
+    List<Object[]> dailyActiveUsers(@Param("since") LocalDateTime since);
+
+    /** 获取用户的所有练习记录（含句子文本），用于 CSV 导出 */
+    @Query(value = "SELECT p.id, p.practiced_at, p.sentence_id, s.text, p.correct, p.correct_count, p.total_words, p.mode " +
+           "FROM practice_logs p JOIN sentences s ON p.sentence_id = s.id " +
+           "WHERE p.user_id = :userId ORDER BY p.practiced_at DESC", nativeQuery = true)
+    List<Object[]> findPracticeRecordsForExport(@Param("userId") Long userId);
 }

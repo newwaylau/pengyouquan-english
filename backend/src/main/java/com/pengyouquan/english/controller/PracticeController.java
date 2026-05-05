@@ -3,8 +3,13 @@ package com.pengyouquan.english.controller;
 import com.pengyouquan.english.dto.*;
 import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.PracticeService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -58,5 +63,60 @@ public class PracticeController {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         practiceService.removeWrongSentence(userId, sentenceId);
         return ApiResponse.success();
+    }
+
+    /** 导出当前用户的练习记录为 CSV */
+    @GetMapping("/practice/export")
+    public void exportPractice(@CurrentUserId Long userId, HttpServletResponse response) throws IOException {
+        if (userId == null) {
+            response.setStatus(401);
+            return;
+        }
+
+        String filename = "pengyouquan-practice-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+
+        // CSV 表头
+        response.getWriter().write("日期,句子ID,中文,英文,正确率,模式\n");
+
+        // 查询该用户的所有练习记录
+        var records = practiceService.getExportRecords(userId);
+        for (var row : records) {
+            // row: [id, practiced_at, sentence_id, text, correct, correct_count, total_words, mode]
+            Object practicedAt = row[1];
+            Object sentenceId = row[2];
+            Object text = row[3];
+            boolean correct = row[4] != null && Boolean.parseBoolean(row[4].toString());
+            int correctCount = row[5] != null ? Integer.parseInt(row[5].toString()) : 0;
+            int totalWords = row[6] != null ? Integer.parseInt(row[6].toString()) : 0;
+            Object mode = row[7];
+
+            String accuracy = totalWords > 0 ? Math.round(correctCount * 100.0 / totalWords) + "%" : "";
+
+            // 句子文本中可能包含中英文，用转义处理
+            String sentenceText = text != null ? text.toString() : "";
+
+            String line = String.format("%s,%s,%s,%s,%s,%s\n",
+                practicedAt != null ? practicedAt.toString().substring(0, 19).replace("T", " ") : "",
+                sentenceId != null ? sentenceId.toString() : "",
+                "", // 中文（单独提取后续可优化）
+                escapeCsv(sentenceText),
+                accuracy,
+                mode != null ? escapeCsv(mode.toString()) : ""
+            );
+            response.getWriter().write(line);
+        }
+
+        response.getWriter().flush();
+    }
+
+    /** CSV 转义：如果包含逗号/引号/换行则包裹引号 */
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 }
