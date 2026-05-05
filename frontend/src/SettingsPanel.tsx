@@ -36,15 +36,54 @@ const DEFAULTS = {
   preferOriginal: false,
 };
 
+// 解析剧集名称为层级结构
+function parseShowGroups(shows: any[]) {
+  const groups: Record<string, any> = {};
+  shows.forEach((s: any) => {
+    const match = s.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
+    const showTitle = match ? match[1] : s.name;
+    const season = match ? match[2] : '';
+    const episode = match ? match[3] : '';
+    if (!groups[showTitle]) groups[showTitle] = { seasons: {} };
+    if (!groups[showTitle].seasons[season]) groups[showTitle].seasons[season] = [];
+    groups[showTitle].seasons[season].push({ ...s, episode });
+  });
+  return groups;
+}
+
 export default function SettingsPanel({ open, onClose, mode, onModeChange, voice, onVoiceChange, speed, onSpeedChange, showId, onShowChange, autoPlay, onAutoPlayChange, preferOriginal, onPreferOriginalChange }: Props) {
   const [shows, setShows] = useState<any[]>([]);
+  const [showGroups, setShowGroups] = useState<Record<string, any>>({});
+  const [selectedShowTitle, setSelectedShowTitle] = useState('');
+  const [selectedSeason, setSelectedSeason] = useState('');
 
   useEffect(() => {
-    if (open) api.shows().then(r => { if (r.code === 200) setShows(r.data); });
+    if (open) api.shows().then(r => { if (r.code === 200) { setShows(r.data); setShowGroups(parseShowGroups(r.data)); } });
   }, [open]);
 
   const save = async (key: string, value: string) => {
     await api.saveSettings({ [key]: value });
+  };
+
+  // 当选择变化时更新外部showId
+  const handleEpisodeSelect = (ep: any) => {
+    if (ep) {
+      setSelectedSeason(ep.parentSeason);
+      onShowChange(ep.id);
+      save('showId', String(ep.id));
+    }
+  };
+
+  const handleSeasonSelect = (seasonKey: string) => {
+    setSelectedSeason(seasonKey);
+    // 选季时，取该季第一集
+    const eps = showGroups[selectedShowTitle]?.seasons[seasonKey];
+    if (eps && eps.length > 0) {
+      onShowChange(eps[0].id);
+      save('showId', String(eps[0].id));
+    } else {
+      onShowChange(null);
+    }
   };
 
   if (!open) return null;
@@ -71,13 +110,46 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
           </div>
         </div>
 
-        {/* 剧集选择 */}
+        {/* 剧集选择（三级联动） */}
         <div className="settings-section">
           <label>剧集选择</label>
-          <select className="show-select" value={showId ?? ''} onChange={e => onShowChange(e.target.value ? Number(e.target.value) : null)}>
-            <option value="">🎬 全部剧集</option>
-            {shows.map(s => <option key={s.id} value={s.id}>{s.name} ({s.sentenceCount}句)</option>)}
-          </select>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            <select className="show-select" style={{flex:1,minWidth:120}}
+              value={selectedShowTitle}
+              onChange={e => {
+                setSelectedShowTitle(e.target.value);
+                setSelectedSeason('');
+                if (!e.target.value) { onShowChange(null); save('showId', ''); }
+              }}>
+              <option value="">🎬 全部剧集</option>
+              {Object.keys(showGroups).sort().map(title => (
+                <option key={title} value={title}>{title}</option>
+              ))}
+            </select>
+            {selectedShowTitle && (
+              <select className="show-select" style={{flex:1,minWidth:80}}
+                value={selectedSeason}
+                onChange={e => handleSeasonSelect(e.target.value)}>
+                <option value="">📺 全部季</option>
+                {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            )}
+            {selectedShowTitle && selectedSeason && (
+              <select className="show-select" style={{flex:1,minWidth:100}}
+                value={showId ?? ''}
+                onChange={e => {
+                  const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
+                    ?.find((ep: any) => ep.id === Number(e.target.value));
+                  handleEpisodeSelect(ep);
+                }}>
+                {(showGroups[selectedShowTitle]?.seasons[selectedSeason] || []).map((ep: any) => (
+                  <option key={ep.id} value={ep.id}>{ep.name} ({ep.sentenceCount}句)</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
         {/* 音色 */}
