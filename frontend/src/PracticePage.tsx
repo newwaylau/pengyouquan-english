@@ -188,11 +188,11 @@ export default function PracticePage({
     }
     setHints(hintsSet);
 
-    // 自动播放（按设置：剧集原音优先 / 导播TTS）
-    // 使用ref避免闭包陈旧值
+    // 自动播放 + 聚焦到第一个输入框
     preferOriginalRef.current = preferOriginal;
     speedRef.current = speed;
     setTimeout(() => {
+      inputRefs.current[0]?.focus();
       if (preferOriginalRef.current && s.audioFile) {
         if (audioRef.current) audioRef.current.pause();
         const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
