@@ -112,12 +112,12 @@ export default function PracticePage({ user }: { user: any }) {
 
   useEffect(() => { loadSentence(); }, []);
 
-  // TTS
+  // TTS（静默处理浏览器自动播放限制）
   const playTts = (text: string) => {
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(`/api/tts?text=${encodeURIComponent(text)}&voice=${voice}`);
     audio.playbackRate = speed;
-    audio.play();
+    audio.play().catch(() => {}); // 忽略浏览器自动播放限制
     audioRef.current = audio;
   };
 
@@ -162,7 +162,7 @@ export default function PracticePage({ user }: { user: any }) {
           if (audioRef.current) audioRef.current.pause();
           const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
           a.playbackRate = speed;
-          a.play();
+          a.play().catch(() => {});
           audioRef.current = a;
         }
         return;
@@ -306,7 +306,7 @@ export default function PracticePage({ user }: { user: any }) {
             if (audioRef.current) audioRef.current.pause();
             const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
             a.playbackRate = speed;
-            a.play();
+            a.play().catch(() => {});
             audioRef.current = a;
           } else { playTts(en); }
         }}>🎬 原音</button>
