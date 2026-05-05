@@ -339,6 +339,10 @@ export default function PracticePage({ user }: { user: any }) {
         onSpeedChange={setSpeed}
         showId={selectedShowId}
         onShowChange={setSelectedShowId}
+        autoPlay={autoPlay}
+        onAutoPlayChange={setAutoPlay}
+        preferOriginal={preferOriginal}
+        onPreferOriginalChange={setPreferOriginal}
       />
 
       {/* 快捷键提示 */}
