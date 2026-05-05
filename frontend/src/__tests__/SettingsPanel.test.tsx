@@ -105,8 +105,11 @@ describe('SettingsPanel 设置面板', () => {
 
   it('当前音色高亮', () => {
     render(<SettingsPanel {...defaultProps} voice="en-US-JennyNeural" />);
-    const activePill = document.querySelector('.pill.active');
-    expect(activePill?.textContent).toContain('Jenny (US Female)');
+    const activePills = document.querySelectorAll('.pill-group .pill.active');
+    // 音色是第2个 pill-group（第1个是模式，第3个是速度）
+    const voicePills = document.querySelectorAll('.settings-section:nth-child(3) .pill.active');
+    expect(voicePills.length).toBe(1);
+    expect(voicePills[0].textContent).toContain('Jenny (US Female)');
   });
 
   it('点击音色按钮切换并保存', async () => {
@@ -127,8 +130,9 @@ describe('SettingsPanel 设置面板', () => {
 
   it('当前速度高亮', () => {
     render(<SettingsPanel {...defaultProps} speed={1} />);
-    const activePill = document.querySelector('.pill.active');
-    expect(activePill?.textContent).toContain('1x');
+    const speedPills = document.querySelectorAll('.settings-section:nth-child(5) .pill.active');
+    expect(speedPills.length).toBe(1);
+    expect(speedPills[0].textContent).toContain('1x');
   });
 
   it('点击速度按钮切换并保存', async () => {
