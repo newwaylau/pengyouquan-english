@@ -370,28 +370,48 @@ body {
   margin-bottom: 16px;
 }
 .word-input {
-  width: 80px;
+  padding: 8px 2px;
   border: none;
-  border-bottom: 2px solid var(--border-strong);
-  text-align: center;
-  font-size: 1.125rem;
-  padding: 4px;
-  background: var(--input-bg);
+  border-bottom: 2px solid var(--card-border);
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
+  font-size: 1rem;
+  text-align: center;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
+  min-width: 24px;
+  max-width: 140px;
 }
-.word-input:focus { border-color: var(--primary); }
-.word-input.correct { border-color: var(--success); }
+.word-input:focus {
+  border-bottom-color: var(--primary);
+  background: rgba(108, 92, 231, 0.06);
+}
+.word-input.correct {
+  border-bottom-color: var(--success);
+  background: rgba(0, 184, 148, 0.1);
+}
 .word-input.wrong {
-  border-color: var(--danger);
-  background: var(--error-bg);
+  border-bottom-color: var(--danger);
+  background: rgba(225, 112, 85, 0.1);
+}
+.word-sep {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  padding: 0 2px;
+  user-select: none;
 }
 .hint-word {
   display: inline-block;
-  font-size: 1.125rem;
-  padding: calc(4/16*1rem) calc(8/16*1rem);
-  color: var(--text-secondary);
+  font-size: 1rem;
+  padding: 8px 4px;
+  color: var(--primary);
+  opacity: 0.85;
+  cursor: default;
+  border-bottom: 2px solid rgba(108, 92, 231, 0.4);
+  background: rgba(108, 92, 231, 0.08);
 }
 
 /* ---------- 操作行 ---------- */
