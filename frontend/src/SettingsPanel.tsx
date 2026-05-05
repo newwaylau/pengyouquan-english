@@ -96,7 +96,12 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   }, [open]);
 
   const save = async (key: string, value: string) => {
-    await api.saveSettings({ [key]: value });
+    // showId 以JSON数组格式保存，支持多组选择
+    if (key === 'showId') {
+      await api.saveSettings({ showId: value });
+    } else {
+      await api.saveSettings({ [key]: value });
+    }
   };
 
   // 当选择变化时更新外部showId
