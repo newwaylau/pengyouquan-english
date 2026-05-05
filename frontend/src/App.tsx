@@ -10,6 +10,7 @@ import './index.css';
 export default function App() {
   const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'admin'>('practice');
   const [user, setUser] = useState<any>(null);
+  const [jumpId, setJumpId] = useState<number | null>(null);
 
   useEffect(() => {
     if (getToken()) {
@@ -50,8 +51,8 @@ export default function App() {
         </div>
       </nav>
       <main>
-        {page === 'practice' && <PracticePage user={user} />}
-        {page === 'wrong' && <WrongPage />}
+        {page === 'practice' && <PracticePage user={user} jumpId={jumpId} />}
+        {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
         {page === 'search' && <SearchPage onJump={(id) => { setPage('practice'); }} />}
         {page === 'admin' && <AdminPage />}
       </main>
