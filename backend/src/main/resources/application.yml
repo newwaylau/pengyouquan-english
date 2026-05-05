@@ -36,14 +36,14 @@ spring:
       port: 6379
       timeout: 2000ms
   mail:
-    host: smtp-mail.outlook.com
-    port: 587
-    username: newwaylau@hotmail.com
-    password: 20211025Lw!
+    host: smtp.163.com
+    port: 465
+    username: newwaylau@163.com
+    password: REMOVED
     properties:
       mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
+      mail.smtp.ssl.enable: true
+
 
 # Actuator 健康检查
 management:
