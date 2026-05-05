@@ -7,6 +7,7 @@ import com.pengyouquan.english.repository.ShowRepository;
 import com.pengyouquan.english.repository.SentenceRepository;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.PageRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,26 @@ public class ShowController {
         String showName = showRepository.findById(s.getShowId())
                 .map(Show::getName).orElse("");
         return ApiResponse.success(SentenceDto.from(s, showName));
+    }
+
+    /** 浏览指定剧集的句子列表（分页） */
+    @GetMapping("/show/{showId}/sentences")
+    public ApiResponse<Map<String, Object>> browseSentences(
+            @PathVariable Long showId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        size = Math.min(size, 100);
+        long total = sentenceRepository.countByShowId(showId);
+        List<Sentence> list = sentenceRepository.findByShowIdOrderById(showId, PageRequest.of(page, size));
+        List<SentenceDto> dtos = enrichWithShowName(list);
+        String showName = showRepository.findById(showId).map(Show::getName).orElse("");
+        return ApiResponse.success(Map.of(
+                "sentences", dtos,
+                "total", total,
+                "showName", showName,
+                "page", page,
+                "totalPages", (int) Math.ceil((double) total / size)
+        ));
     }
 
     /** 统计数据 */
