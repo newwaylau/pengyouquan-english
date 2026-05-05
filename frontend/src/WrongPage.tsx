@@ -3,6 +3,7 @@ import { api } from './api/client';
 
 interface Props {
   onJump: (id: number) => void;
+  onBack: () => void;
 }
 
 const PAGE_SIZE = 20;
@@ -28,10 +29,16 @@ export default function WrongPage({ onJump }: Props) {
     setItems([]);
   };
 
-  if (items.length === 0) return <div className="empty-state">暂无错题 🎉</div>;
+  if (items.length === 0) return (
+    <div className="wrong-page">
+      <button className="back-btn" onClick={onBack}>← 返回练习</button>
+      <div className="empty-state">暂无错题 🎉</div>
+    </div>
+  );
 
   return (
     <div className="wrong-page">
+      <button className="back-btn" onClick={onBack}>← 返回练习</button>
       <div className="wrong-header">
         <h2>📕 错题本（{items.length}题）</h2>
         <button className="clear-btn" onClick={clearAll}>🗑️ 清空全部</button>
