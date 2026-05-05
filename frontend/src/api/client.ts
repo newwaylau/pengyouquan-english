@@ -18,8 +18,10 @@ async function request(path: string, options: RequestInit = {}) {
 
 export const api = {
   // 认证
-  register: (email: string, password: string) =>
-    request('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  sendCode: (email: string) =>
+    request('/api/auth/send-code', { method: 'POST', body: JSON.stringify({ email }) }),
+  register: (data: { email: string; phone: string; code: string; password: string; invitedBy?: string }) =>
+    request('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (email: string, password: string) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   me: () => request('/api/auth/me'),

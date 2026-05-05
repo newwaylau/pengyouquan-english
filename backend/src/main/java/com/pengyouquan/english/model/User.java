@@ -20,6 +20,9 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(length = 20)
+    private String phone = "";
+
     @Column(nullable = false)
     private String password;
 
@@ -37,6 +40,9 @@ public class User {
 
     @Column(nullable = false)
     private String role = "user";
+
+    @Column(name = "invited_by", length = 100)
+    private String invitedBy = "";
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
