@@ -125,7 +125,7 @@ export default function PracticePage({
   }, [historyIds]);
 
   // 加载句子
-  const loadSentence = useCallback(async (specificId?: number) => {
+  const loadSentence = async (specificId?: number) => {
     if (specificId) {
       const r = await api.sentence(specificId);
       if (r.code !== 200 || !r.data) return;
@@ -138,7 +138,7 @@ export default function PracticePage({
     const r = await api.random(url);
     if (r.code !== 200 || !r.data?.length) return;
     setupSentence(r.data[0]);
-  }, [historyIds, selectedShowId]);
+  };
 
   // 处理跳转ID
   useEffect(() => {
