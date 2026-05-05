@@ -293,12 +293,12 @@ body {
 }
 .send-code-btn {
   flex: 1;
-  padding: 10px 14px;
-  border: 1px solid var(--primary);
+  padding: 10px;
+  border: none;
   border-radius: 8px;
-  background: transparent;
-  color: var(--primary);
-  font-size: 0.8125rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9375rem;
   white-space: nowrap;
   cursor: pointer;
   line-height: 1;
