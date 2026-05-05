@@ -164,7 +164,27 @@ function AdminDashboard() {
 
 function UserManagement() {
   const [users, setUsers] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [roleFilter, setRoleFilter] = useState('');
   const [search, setSearch] = useState('');
+
+  const fetchUsers = async (p: number) => {
+    let url = `/api/admin/users?page=${p}&size=20`;
+    if (roleFilter) url += `&role=${encodeURIComponent(roleFilter)}`;
+    const r = await fetch(url, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    }).then(r => r.json());
+    if (r.code === 200) {
+      setUsers(r.data.users);
+      setPage(r.data.page);
+      setTotalPages(r.data.totalPages);
+      setTotal(r.data.total);
+    }
+  };
+
+  useEffect(() => { fetchUsers(0); }, [roleFilter]);
 
   const doSearch = async () => {
     if (!search || search.length < 2) return;
@@ -179,23 +199,42 @@ function UserManagement() {
       method: 'PUT',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
-    doSearch();
+    fetchUsers(page);
   };
 
   return (
     <div className="user-management">
-      <h2>👤 用户管理</h2>
-      <div className="search-bar">
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索用户（邮箱/昵称）" />
-        <button onClick={doSearch}>搜索</button>
+      <h2>👤 用户管理 <span className="user-total">（共 {total} 人）</span></h2>
+
+      <div className="user-toolbar">
+        {/* 角色筛选下拉框 */}
+        <select value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(0); }}
+                className="role-filter">
+          <option value="">🎭 全部角色</option>
+          <option value="admin">管理员</option>
+          <option value="user">普通用户</option>
+        </select>
+
+        {/* 搜索框 */}
+        <div className="search-bar">
+          <input value={search} onChange={e => setSearch(e.target.value)}
+                 onKeyDown={e => e.key === 'Enter' && doSearch()}
+                 placeholder="搜索用户（邮箱/昵称）" />
+          <button onClick={doSearch}>搜索</button>
+        </div>
       </div>
+
       <table className="admin-table">
-        <thead><tr><th>ID</th><th>邮箱</th><th>昵称</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
+        <thead><tr><th>ID</th><th>邮箱</th><th>昵称</th><th>🎭 角色</th><th>状态</th><th>操作</th></tr></thead>
         <tbody>
           {users.map((u: any) => (
-            <tr key={u.id}>
+            <tr key={u.id} className={u.role === 'admin' ? 'row-admin' : ''}>
               <td>{u.id}</td><td>{u.email}</td><td>{u.nickname}</td>
-              <td>{u.role}</td>
+              <td>
+                <span className={`role-badge role-${u.role}`}>
+                  {u.role === 'admin' ? '管理员' : '用户'}
+                </span>
+              </td>
               <td>{u.enabled !== false ? '正常' : '禁用'}</td>
               <td><button onClick={() => toggleUser(u.id)} className="small-btn">
                 {u.enabled !== false ? '禁用' : '启用'}
@@ -204,6 +243,15 @@ function UserManagement() {
           ))}
         </tbody>
       </table>
+
+      {/* 分页控件 */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button disabled={page <= 0} onClick={() => fetchUsers(page - 1)}>上一页</button>
+          <span className="page-info">第 {page + 1} / {totalPages} 页</span>
+          <button disabled={page >= totalPages - 1} onClick={() => fetchUsers(page + 1)}>下一页</button>
+        </div>
+      )}
     </div>
   );
 }

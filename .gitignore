@@ -21,6 +21,9 @@ Thumbs.db
 .env
 *.log
 
+# Backup
+backup/
+
 # Python (weapp)
 __pycache__/
 *.pyc

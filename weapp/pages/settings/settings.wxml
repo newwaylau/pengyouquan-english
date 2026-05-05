@@ -1,0 +1,45 @@
+<!-- 朋友圈英语 — 设置页 -->
+<view class="page-container">
+  <view class="page-title">设置</view>
+
+  <!-- 练习模式 -->
+  <view class="card">
+    <text class="setting-label">练习模式</text>
+    <view class="pill-group">
+      <view class="pill {{mode === 'sentry' ? 'active' : ''}}" bindtap="setMode" data-mode="sentry">中译英</view>
+      <view class="pill {{mode === 'dictation' ? 'active' : ''}}" bindtap="setMode" data-mode="dictation">听写</view>
+    </view>
+  </view>
+
+  <!-- 音色选择 -->
+  <view class="card">
+    <text class="setting-label">音色选择</text>
+    <view class="voice-list">
+      <block wx:for="{{voices}}" wx:key="id">
+        <view class="voice-item {{voice === item.id ? 'active' : ''}}" bindtap="setVoice" data-voice="{{item.id}}">
+          <text class="voice-name">{{item.name}}</text>
+          <text class="voice-check" wx:if="{{voice === item.id}}">✓</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 播放速度 -->
+  <view class="card">
+    <text class="setting-label">播放速度</text>
+    <view class="pill-group">
+      <block wx:for="{{speeds}}" wx:key="*this">
+        <view class="pill {{speed === item ? 'active' : ''}}" bindtap="setSpeed" data-speed="{{item}}">{{item}}x</view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="card">
+    <text class="setting-label">关于</text>
+    <view class="about-info">
+      <text class="about-item">朋友圈英语 v1.0.0</text>
+      <text class="about-item">看美剧，学英语</text>
+    </view>
+  </view>
+</view>
