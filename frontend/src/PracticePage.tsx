@@ -85,6 +85,8 @@ export default function PracticePage({
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
   const jumpDoneRef = useRef(false);
+  const preferOriginalRef = useRef(preferOriginal);
+  const speedRef = useRef(speed);
 
   // 统计
   const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
@@ -180,11 +182,14 @@ export default function PracticePage({
     setHints(hintsSet);
 
     // 自动播放（按设置：剧集原音优先 / 导播TTS）
+    // 使用ref避免闭包陈旧值
+    preferOriginalRef.current = preferOriginal;
+    speedRef.current = speed;
     setTimeout(() => {
-      if (preferOriginal && s.audioFile) {
+      if (preferOriginalRef.current && s.audioFile) {
         if (audioRef.current) audioRef.current.pause();
         const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
-        a.playbackRate = speed;
+        a.playbackRate = speedRef.current;
         a.play().catch(() => {});
         audioRef.current = a;
       } else {
