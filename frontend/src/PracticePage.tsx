@@ -10,8 +10,10 @@ function extractEn(text: string) {
 /** 从字幕文本中提取中文 */
 function extractCn(text: string) { return text.includes(' / ') ? text.split(' / ')[1] : ''; }
 
-/** 把单词拆成字母+前后标点（标点撇号放输入框外） */
+/** 把单词拆成字母+前后标点（撇号词不拆分，保持完整） */
 function splitWordParts(w: string): { letters: string; prefix: string; suffix: string } {
+  // 带撇号的词（I'm, don't 等）保持完整，不拆分
+  if (w.includes("'")) return { letters: w, prefix: '', suffix: '' };
   const m = w.match(/^([^a-zA-Z]*)([a-zA-Z]+)(.*)$/);
   if (!m) return { letters: w, prefix: '', suffix: '' };
   return { letters: m[2], prefix: m[1], suffix: m[3] };
