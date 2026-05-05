@@ -266,7 +266,7 @@ export default function PracticePage({ user }: { user: any }) {
         <div className={`sentence-cn sentence-fade-in ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
           {cn}
         </div>
-      )
+      )}
 
       {/* 逐词输入（未完成时显示） */}
       {!answered && (
