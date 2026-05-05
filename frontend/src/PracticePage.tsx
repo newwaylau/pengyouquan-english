@@ -12,8 +12,8 @@ function extractCn(text: string) { return text.includes(' / ') ? text.split(' / 
 
 /** 把单词拆成字母+前后标点（撇号词不拆分，保持完整） */
 function splitWordParts(w: string): { letters: string; prefix: string; suffix: string } {
-  // 带撇号的词（I'm, don't 等）保持完整，不拆分
-  if (w.includes("'")) return { letters: w, prefix: '', suffix: '' };
+  // 带撇号的词（I'm, don't）和连字符词（blue-eyed）保持完整，不拆分
+  if (w.includes("'") || w.includes('-')) return { letters: w, prefix: '', suffix: '' };
   const m = w.match(/^([^a-zA-Z]*)([a-zA-Z]+)(.*)$/);
   if (!m) return { letters: w, prefix: '', suffix: '' };
   return { letters: m[2], prefix: m[1], suffix: m[3] };
@@ -172,10 +172,10 @@ export default function PracticePage({
     setWords(wds);
     setInputs(wds.map(() => ''));
 
-    // 撇号词预填 + 随机提示
+    // 撇号词/连字符词预填 + 随机提示
     const hintsSet = new Set<number>();
     wds.forEach((w, i) => {
-      if (w.includes("'") && w.length > 2) hintsSet.add(i);
+      if ((w.includes("'") || w.includes('-')) && w.length > 2) hintsSet.add(i);
     });
     const nonHint = wds.map((_, i) => i).filter(i => !hintsSet.has(i));
     if (nonHint.length > 0) {
