@@ -123,9 +123,8 @@ export default function PracticePage({
       const s = r.data;
       if (s.mode) setMode(s.mode as any);
       if (s.voice) setVoice(s.voice);
-      if (s.speed) setSpeed(Number(s.speed));
-      if (s.showId) setShowIdsParam(String(s.showId));
       if (s.autoPlay !== undefined) setAutoPlay(s.autoPlay === 'true');
+      if (s.speed) setSpeed(Number(s.speed));
       if (s.preferOriginal !== undefined) setPreferOriginal(s.preferOriginal === 'true');
     });
   }, [user]);
@@ -134,6 +133,22 @@ export default function PracticePage({
   useEffect(() => {
     localStorage.setItem('historyIds', JSON.stringify(historyIds.slice(-200)));
   }, [historyIds]);
+
+  // 从showId转换到数据库ID（showList加载完成后）
+  useEffect(() => {
+    if (showList.length === 0 || !user) return;
+    api.getSettings().then(r => {
+      if (r.code !== 200) return;
+      const s = r.data;
+      if (s.showId && s.selectedShow && s.selectedSeason) {
+        const found = showList.find((sh: any) => {
+          const m = sh.name.match(/^(.+?)\s+(S\d+)(E\d+)$/);
+          return m && m[1] === s.selectedShow && m[2] === s.selectedSeason && m[3] === s.showId;
+        });
+        if (found) setShowIdsParam(String(found.id));
+      }
+    });
+  }, [showList, user]);
 
   // 加载句子
   const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
