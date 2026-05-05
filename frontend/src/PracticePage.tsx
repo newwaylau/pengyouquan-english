@@ -266,7 +266,10 @@ export default function PracticePage({
     // 标点/撇号在输入框外，只用字母长度判断是否跳转
     const parts = splitWordParts(words[i] || '');
     if (val.length >= parts.letters.length && i < words.length - 1) {
-      inputRefs.current[i + 1]?.focus();
+      // 跳过后面的提示输入框（disabled），跳到下一个可输入的
+      let next = i + 1;
+      while (next < words.length && hints.has(next)) next++;
+      if (next < words.length) inputRefs.current[next]?.focus();
     }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
