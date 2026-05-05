@@ -1688,7 +1688,7 @@ body {
 }
 
 .speed-btn {
-  min-width: 40px;
+  flex: 1;
   text-align: center;
 }
 .speed-btn.speed-active {
