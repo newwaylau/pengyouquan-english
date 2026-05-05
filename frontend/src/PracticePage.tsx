@@ -358,7 +358,6 @@ export default function PracticePage({
 
       {/* 主卡片 */}
       <div className="practice-card">
-        <div className="practice-card-content">
         {/* 剧集名 + ID */}
         <div className="sentence-meta">
           {sentence.showName} · #{sentence.id}
@@ -416,9 +415,10 @@ export default function PracticePage({
           <div className="feedback retry">⚠️ 有错误，再试一次</div>
         )}
 
-        </div>
+      </div>
 
-        {/* 分割线 */}
+      {/* 按钮区 */}
+      <div className="button-area">
         <hr className="action-divider" />
 
         {/* 操作行1：提交 */}
