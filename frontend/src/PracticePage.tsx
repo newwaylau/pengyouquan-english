@@ -424,11 +424,15 @@ export default function PracticePage({
           )}
         </div>
 
-        {/* 操作行2：原音 / 音色 / 下一句 / 速度按钮 */}
+        {/* 操作行2：剧集原音 / 服务器音色 / 下一句 */}
         <div className="action-row">
           <button className="btn-action" onClick={playOriginal}>🎬 剧集原音</button>
           <button className="btn-action" onClick={() => playTts(en)}>🎙️ 服务器音色</button>
           <button className="btn-action" onClick={goNext}>⏭️ 下一句</button>
+        </div>
+
+        {/* 操作行3：速度 + 显示中文 / 显示英文 */}
+        <div className="action-row">
           {SPEEDS.map(s => (
             <button
               key={s}
@@ -438,10 +442,6 @@ export default function PracticePage({
               {s}x
             </button>
           ))}
-        </div>
-
-        {/* 操作行3：显示中文 / 显示英文 */}
-        <div className="action-row">
           <button className="btn-action" onClick={() => setShowCn(s => !s)}>
             {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
           </button>
