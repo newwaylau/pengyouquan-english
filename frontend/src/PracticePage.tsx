@@ -244,17 +244,19 @@ export default function PracticePage({
   };
 
   // 快捷键
+  // 快捷键（在输入框内按快捷键不会输入字符）
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') { handleSubmit(); return; }
-      if (e.key === '=') { const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
-      if (e.key === '-') { playOriginal(); return; }
-      if (e.key === '\\') { goNext(); return; }
+      if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); return; }
+      if (e.key === '=') { e.preventDefault(); const clean = extractEn(sentence?.text || ''); playTts(clean); return; }
+      if (e.key === '-') { e.preventDefault(); playOriginal(); return; }
+      if (e.key === '\\') { e.preventDefault(); goNext(); return; }
       if (e.key === '[') {
+        e.preventDefault();
         if (mode === 'dictation') setShowCn(c => !c);
         return;
       }
-      if (e.key === ']') setShowEn(e => !e);
+      if (e.key === ']') { e.preventDefault(); setShowEn(e => !e); return; }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
