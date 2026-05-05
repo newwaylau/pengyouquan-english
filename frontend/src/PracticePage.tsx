@@ -245,7 +245,6 @@ export default function PracticePage({
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
-      setRevealed(true);
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
     } else {
       setRetryCount(1);
@@ -446,7 +445,7 @@ export default function PracticePage({
             {wrongWords.size === 0
               ? '✅ 完全正确！'
               : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
-            {revealed && <div className="answer-reveal">正确答案：{en}</div>}
+
           </div>
         )}
         {retryCount === 1 && !answered && (
