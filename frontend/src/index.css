@@ -1598,3 +1598,103 @@ body {
   .action-row-split { gap: 4px; }
   .action-row-half { gap: 3px; }
 }
+
+/* ── 设置面板 (匹配5000老版) ─── */
+.show-select {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-family: var(--font);
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+.show-select:focus { border-color: var(--primary); }
+
+.voice-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.voice-section-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 2px 2px 0;
+}
+.voice-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.voice-pills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.voice-pills-grid .voice-pill {
+  flex: 1 1 calc(50% - 5px);
+  min-width: 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+.voice-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+  user-select: none;
+}
+.voice-pill:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.06); }
+.voice-pill input { display: none; }
+.voice-pill:has(input:checked) {
+  border-color: var(--primary);
+  background: rgba(108, 92, 231, 0.12);
+}
+.voice-radio-divider {
+  border: none;
+  border-top: 1px solid var(--card-border);
+  margin: 4px 0 2px;
+}
+
+.mode-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.15s;
+  user-select: none;
+}
+.mode-pill:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.08); }
+.mode-pill input { display: none; }
+.mode-pill.active {
+  border-color: var(--primary);
+  background: rgba(108, 92, 231, 0.12);
+}
+
+.speed-btn {
+  min-width: 40px;
+  text-align: center;
+}
+.speed-btn.speed-active {
+  background: var(--primary) !important;
+  color: white !important;
+}
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.75rem;
+}
