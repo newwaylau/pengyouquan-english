@@ -430,12 +430,13 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 8px;
+  width: 100%;
 }
 .action-row:last-child { margin-bottom: 0; }
 
 .action-row .btn-primary {
   flex: 1;
-  max-width: 200px;
+  width: 100%;
   padding: calc(10/16*1rem) calc(20/16*1rem);
   border: none;
   border-radius: 8px;
@@ -448,31 +449,21 @@ body {
 }
 .action-row .btn-primary:hover { background: var(--primary-hover); }
 
-.btn-action {
-  padding: calc(6/16*1rem) calc(14/16*1rem);
+.btn-action,
+.btn-speed {
+  flex: 1;
+  min-width: 0;
+  padding: calc(6/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--card-bg);
   cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text);
+  text-align: center;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.btn-action:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.btn-speed {
-  padding: calc(6/16*1rem) calc(10/16*1rem);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--card-bg);
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
+.btn-action:hover,
 .btn-speed:hover {
   border-color: var(--primary);
   color: var(--primary);
@@ -1397,9 +1388,9 @@ body {
   .practice-card { padding: 14px; }
 
   .action-row { gap: 4px; }
-  .action-row .btn-primary { padding: calc(8/16*1rem) calc(16/16*1rem); font-size: 0.875rem; max-width: none; }
-  .btn-action { font-size: 0.75rem; padding: calc(5/16*1rem) calc(10/16*1rem); }
-  .btn-speed { font-size: 0.6875rem; padding: calc(5/16*1rem) calc(8/16*1rem); }
+  .action-row .btn-primary { padding: calc(8/16*1rem) calc(16/16*1rem); font-size: 0.875rem; }
+  .btn-action,
+  .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); }
 
   /* Stats Bar 在手机上4列 */
   .stats-bar { gap: 4px; }
