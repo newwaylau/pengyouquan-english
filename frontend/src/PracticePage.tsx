@@ -260,7 +260,7 @@ export default function PracticePage({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [sentence, words, inputs, retryCount, mode]);
+  }, [sentence, words, inputs, retryCount, mode, answered, goNext]);
 
   // 输入跳转
   const handleInputChange = (i: number, val: string) => {
