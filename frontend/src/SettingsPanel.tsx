@@ -101,27 +101,23 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     setSelectedSeason('');
     save('selectedShow', title);
     save('selectedSeason', '');
-    // 当选集为空时，根据选剧计算showIds
-    if (!title) {
-      onShowChange('');
-      save('showId', '');
-    }
+    save('showId', '');
+    onShowChange('');
   };
 
   // 选季时
   const handleSeasonSelect = (seasonKey: string) => {
     setSelectedSeason(seasonKey);
     save('selectedSeason', seasonKey);
+    save('showId', '');
+    onShowChange('');
   };
 
   // 选具体集时
   const handleEpisodeSelect = (ep: any) => {
     if (ep) {
-      setSelectedSeason(ep.parentSeason);
-      if (ep) {
-        onShowChange(String(ep.id));
-        save('showId', String(ep.id));
-      }
+      save('showId', ep.episode);
+      onShowChange(ep.episode);
     }
   };
 
