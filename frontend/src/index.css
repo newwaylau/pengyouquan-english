@@ -1667,6 +1667,7 @@ body {
 }
 
 .mode-pill {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
