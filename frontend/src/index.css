@@ -326,8 +326,6 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-card);
   margin-bottom: 16px;
-  height: 440px;
-  overflow-y: auto;
 }
 
 /* ---------- 句子显示 ---------- */
@@ -345,10 +343,6 @@ body {
   color: var(--text);
   word-break: break-word;
   width: 100%;
-  min-height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: filter 0.3s;
 }
 .sentence-en.blurred {
@@ -384,8 +378,6 @@ body {
   justify-content: center;
   padding: 8px 4px;
   margin-bottom: 16px;
-  min-height: 4rem;
-  align-items: center;
 }
 .word-input {
   padding: 8px 2px;
