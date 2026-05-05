@@ -239,8 +239,6 @@ export default function PracticePage({
       const clearedInputs = [...currentInputs];
       wrong.forEach(idx => { clearedInputs[idx] = ''; });
       setInputs(clearedInputs);
-      setCorrectWords(new Set());
-      setWrongWords(new Set());
       if (firstWrongIdx !== undefined) {
         setTimeout(() => inputRefs.current[firstWrongIdx]?.focus(), 100);
       }
