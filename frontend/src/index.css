@@ -302,14 +302,16 @@ body {
 }
 .send-code-btn {
   flex: 0 0 auto;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border: 1px solid var(--primary);
   border-radius: 8px;
   background: transparent;
   color: var(--primary);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   white-space: nowrap;
   cursor: pointer;
+  min-width: 80px;
+  text-align: center;
   white-space: nowrap;
   transition: all 0.15s;
 }
@@ -1612,7 +1614,13 @@ body {
   .stat-value { font-size: 1.375rem; }
 
   /* 登录卡片宽度自适应 */
-  .login-card { width: calc(100% - 32px); padding: 24px; }
+  .login-card { width: calc(100% - 32px); padding: 16px; }
+  .login-card .subtitle { margin-bottom: 16px; }
+  .login-card input { padding: 8px; margin-bottom: 8px; font-size: 0.875rem; }
+  .code-row { gap: 4px; }
+  .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; }
+  .send-code-btn { font-size: 0.6875rem; padding: 8px 8px; min-width: 70px; }
+  .login-card button { padding: 8px; font-size: 0.875rem; }
 
   /* 浏览页 */
   .browse-controls select { min-width: 140px; font-size: 0.8125rem; }
