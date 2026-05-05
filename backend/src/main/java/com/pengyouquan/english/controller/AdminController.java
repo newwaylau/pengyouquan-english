@@ -185,6 +185,7 @@ public class AdminController {
         result.put("totalRequests", requestLoggingInterceptor.getTotalRequests());
         result.put("pathCounts", requestLoggingInterceptor.getPathCounts());
         result.put("lastCalledAt", requestLoggingInterceptor.getLastCalledAt());
+        result.put("avgResponseTime", requestLoggingInterceptor.getAvgResponseTime());
 
         return ApiResponse.success(result);
     }
