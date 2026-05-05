@@ -12,7 +12,7 @@ spring:
     password: REMOVED
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-  # JPA 配置（仅用于自动建表验证，实际用 Flyway 管理）
+  # JPA 配置(仅用于自动建表验证,实际用 Flyway 管理)
   jpa:
     hibernate:
       ddl-auto: validate
@@ -35,11 +35,15 @@ spring:
       host: localhost
       port: 6379
       timeout: 2000ms
-  # 文件上传限制
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 50MB
+  mail:
+    host: smtp-mail.outlook.com
+    port: 587
+    username: newwaylau@hotmail.com
+    password: 20211025Lw!
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
 
 # Actuator 健康检查
 management:
@@ -57,9 +61,9 @@ management:
 # JWT 配置
 jwt:
   secret: REMOVED
-  expiration: 86400000  # 24小时，单位毫秒
+  expiration: 86400000  # 24小时,单位毫秒
 
-# 微信小程序配置（需要从小程序后台获取）
+# 微信小程序配置(需要从小程序后台获取)
 wechat:
   app-id:
   app-secret:
