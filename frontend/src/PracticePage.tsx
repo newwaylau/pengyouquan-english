@@ -263,8 +263,9 @@ export default function PracticePage({
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    const wordLen = (words[i] || '').replace(/[^\w]/g, '').length;
-    if (val.length >= wordLen && i < words.length - 1) {
+    // 标点/撇号在输入框外，只用字母长度判断是否跳转
+    const parts = splitWordParts(words[i] || '');
+    if (val.length >= parts.letters.length && i < words.length - 1) {
       inputRefs.current[i + 1]?.focus();
     }
   };
