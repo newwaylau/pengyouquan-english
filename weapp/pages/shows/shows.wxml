@@ -1,0 +1,30 @@
+<!-- 朋友圈英语 — 剧集选择页 -->
+<view class="page-container">
+  <view class="page-title">选择剧集</view>
+
+  <view class="shows-list">
+    <view class="show-card {{showId === null ? 'active' : ''}}" bindtap="selectShow" data-id="" data-name="全部剧集">
+      <view class="show-info">
+        <text class="show-name">🎬 全部剧集</text>
+        <text class="show-count">随机出题</text>
+      </view>
+      <text class="check-mark" wx:if="{{showId === null}}">✓</text>
+    </view>
+
+    <block wx:for="{{shows}}" wx:key="id">
+      <view class="show-card {{showId === item.id ? 'active' : ''}}" bindtap="selectShow" data-id="{{item.id}}" data-name="{{item.name}}">
+        <view class="show-info">
+          <text class="show-name">{{item.name}}</text>
+          <text class="show-count">{{item.sentenceCount}} 句</text>
+        </view>
+        <text class="check-mark" wx:if="{{showId === item.id}}">✓</text>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <view wx:if="{{!loading && shows.length === 0}}" class="empty-state">
+    <text>📭</text>
+    <text>暂无剧集</text>
+  </view>
+</view>

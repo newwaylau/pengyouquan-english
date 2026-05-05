@@ -1,0 +1,26 @@
+<!-- 朋友圈英语 — 错题本页 -->
+<view class="page-container">
+  <view class="wrong-header">
+    <view class="page-title">错题本</view>
+    <button class="clear-btn" wx:if="{{wrongList.length > 0}}" bindtap="clearAll">清空</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:elif="{{wrongList.length === 0}}" class="empty-state">
+    <text>🎉</text>
+    <text>暂无错题，继续加油！</text>
+  </view>
+
+  <view wx:else class="wrong-list">
+    <view class="wrong-item" wx:for="{{wrongList}}" wx:key="id" data-id="{{item.id}}" data-text="{{item.text}}" data-errorCount="{{item.errorCount}}" bindtap="practiceWrong" data="{{item}}">
+      <view class="wrong-content">
+        <text class="wrong-en">{{item.text}}</text>
+        <text class="wrong-meta" wx:if="{{item.showName}}">{{item.showName}} · 错误 {{item.errorCount}} 次</text>
+      </view>
+      <view class="wrong-actions">
+        <text class="remove-btn" bindtap="removeItem" data-id="{{item.id}}" catchtap>✕</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -61,6 +61,9 @@
   --success-bg: #f6ffed;
   --success-border: #b7eb8f;
   --ranking-bar-bg: #1677ff;
+  --warning-bg: #fffbe6;
+  --warning-border: #ffe58f;
+  --warning-text: #ad8b00;
   --subtitle-input-border: #ddd;
 }
 
@@ -118,6 +121,9 @@
     --success-bg: #162312;
     --success-border: #1f5c1f;
     --ranking-bar-bg: #1677ff;
+    --warning-bg: #2b1d0f;
+    --warning-border: #5c4a1a;
+    --warning-text: #d9b300;
     --subtitle-input-border: #444;
   }
 }
@@ -927,6 +933,56 @@ body {
   transition: opacity 0.15s;
 }
 .search-bar button:hover { opacity: 0.9; }
+
+/* ---------- 公告栏 ---------- */
+.announcement-bar {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--warning-text);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* ---------- 系统设置 ---------- */
+.system-settings { max-width: 500px; }
+.system-settings .settings-section { margin-bottom: 24px; }
+.system-settings label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.settings-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  font-family: inherit;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.settings-textarea:focus { border-color: var(--primary); }
+.settings-hint { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+.save-btn {
+  padding: 10px 24px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.save-btn:hover:not(:disabled) { background: var(--primary-hover); }
 
 /* ---------- 字幕导入页面 ---------- */
 .subtitle-page { padding: 16px 0; }

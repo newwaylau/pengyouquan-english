@@ -1,0 +1,52 @@
+/**
+ * 朋友圈英语 — 剧集选择页样式
+ */
+.shows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.show-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.show-card.active {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.show-card:active {
+  opacity: 0.7;
+}
+
+.show-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.show-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.show-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.check-mark {
+  font-size: 36rpx;
+  color: #667eea;
+  font-weight: 700;
+}

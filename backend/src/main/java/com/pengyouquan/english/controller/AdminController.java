@@ -11,6 +11,9 @@ import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
@@ -325,6 +328,45 @@ public class AdminController {
         SystemSetting announcement = systemSettingRepository.findById("announcement").orElse(null);
         Map<String, String> result = new LinkedHashMap<>();
         result.put("announcement", announcement != null ? announcement.getSettingValue() : "");
+        return ApiResponse.success(result);
+    }
+
+    /**
+     * 用户列表（分页+角色筛选）
+     * 管理员专用
+     * @param page 页码（从0开始）
+     * @param size 每页条数（默认20）
+     * @param role 角色筛选（可选，如 "admin" 或 "user"）
+     */
+    @GetMapping("/users")
+    public ApiResponse<Map<String, Object>> listUsers(
+            @CurrentUserId Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String role) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        size = Math.min(size, 100);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+
+        Page<com.pengyouquan.english.model.User> userPage;
+        if (role != null && !role.isBlank()) {
+            userPage = userRepository.findByRole(role, pageRequest);
+        } else {
+            userPage = userRepository.findAll(pageRequest);
+        }
+
+        List<com.pengyouquan.english.dto.UserInfoResponse> userList = userPage.getContent().stream()
+                .map(com.pengyouquan.english.dto.UserInfoResponse::fromUser)
+                .toList();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("users", userList);
+        result.put("total", userPage.getTotalElements());
+        result.put("page", page);
+        result.put("totalPages", userPage.getTotalPages());
+
         return ApiResponse.success(result);
     }
 
