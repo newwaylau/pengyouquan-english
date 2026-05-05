@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,9 @@ public interface SentenceRepository extends JpaRepository<Sentence, Long> {
 
     /** 按剧集ID查所有句子 */
     List<Sentence> findByShowIdOrderById(Long showId);
+
+    /** 按剧集ID分页查句子 */
+    List<Sentence> findByShowIdOrderById(Long showId, Pageable pageable);
 
     /** 按多个剧集ID查句子 */
     @Query("SELECT s FROM Sentence s WHERE s.showId IN :showIds ORDER BY RANDOM()")

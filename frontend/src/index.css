@@ -75,6 +75,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .shortcut-list kbd{background:#f0f0f0;padding:2px 6px;border-radius:4px;border:1px solid #ddd;font-size:11px}
 .settings-btn{position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;padding:4px}
 .practice-page{position:relative}
+.browse-page{padding:16px 0}
+.browse-header{margin-bottom:16px}
+.browse-header h2{margin-bottom:12px}
+.browse-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.browse-controls select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;flex:1;min-width:200px}
+.jump-input{display:flex;gap:4px;align-items:center}
+.jump-input input{width:120px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+.jump-input button{padding:8px 14px;border:1px solid #1677ff;border-radius:8px;background:#1677ff;color:#fff;cursor:pointer;font-size:13px}
+.browse-info{font-size:13px;color:#999;margin-bottom:12px}
+.sentence-list{display:flex;flex-direction:column;gap:4px}
+.sentence-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:#fff;border-radius:8px;cursor:pointer;transition:background .15s}
+.sentence-item:hover{background:#f0f5ff}
+.sentence-no{font-size:13px;color:#999;white-space:nowrap;min-width:40px;padding-top:2px}
+.sentence-body{flex:1;min-width:0}
+.browse-en{font-size:14px;line-height:1.5}
+.sentence-cn-browse{font-size:13px;color:#888;margin-top:2px}
 .search-page{padding:16px 0}
 .search-input{width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:10px;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:12px}
 .search-input:focus{border-color:#1677ff}
