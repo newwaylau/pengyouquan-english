@@ -111,6 +111,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;
 .admin-sidebar button:hover:not(.active){background:#f5f5f5}
 .admin-content{flex:1;padding:24px}
 .stats-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.chart-container{background:#fff;padding:16px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:16px}
+.chart-pie{display:flex;justify-content:center}
+.chart-row{display:flex;gap:16px;flex-wrap:wrap}
+.chart-half{flex:1;min-width:300px}
+.show-ranking{background:#fff;padding:16px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);max-height:300px;overflow-y:auto}
+.ranking-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px}
+.ranking-num{width:24px;text-align:center;color:#999;font-weight:600}
+.ranking-name{min-width:80px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ranking-bar{height:16px;background:#1677ff;border-radius:8px;min-width:4px;transition:width .3s}
+.ranking-count{margin-left:auto;color:#999;font-size:12px;white-space:nowrap}
 .stat-card{background:#fff;padding:20px;border-radius:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .stat-value{font-size:28px;font-weight:bold;color:#1677ff}
 .stat-label{font-size:13px;color:#999;margin-top:4px}
