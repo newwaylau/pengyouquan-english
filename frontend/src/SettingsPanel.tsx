@@ -89,7 +89,14 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     save('selectedShow', title);
     save('selectedSeason', '');
     save('showId', '');
-    onShowChange('');
+    // 传所有匹配的数据库ID
+    if (title) {
+      const ids = shows.filter(s => s.name.startsWith(title + ' ')).map((s: any) => s.id);
+      if (ids.length > 0) onShowChange(ids.join(','));
+      else onShowChange('');
+    } else {
+      onShowChange('');
+    }
   };
 
   // 选季时
@@ -97,7 +104,14 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     setSelectedSeason(seasonKey);
     save('selectedSeason', seasonKey);
     save('showId', '');
-    onShowChange('');
+    // 传该季所有集的数据库ID
+    if (seasonKey && selectedShowTitle) {
+      const ids = shows.filter(s => s.name.startsWith(selectedShowTitle + ' ') && s.name.includes(' ' + seasonKey)).map((s: any) => s.id);
+      if (ids.length > 0) onShowChange(ids.join(','));
+      else onShowChange('');
+    } else {
+      onShowChange('');
+    }
   };
 
   // 选具体集时
@@ -111,7 +125,15 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   // 集下拉框选中时
   const handleEpisodeChange = (val: string) => {
     save('showId', val);
-    onShowChange(val);
+    // 传数据库ID到外部（用于过滤句子）
+    if (val && selectedShowTitle && selectedSeason) {
+      const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
+        ?.find((ep: any) => ep.episode === val);
+      if (ep) onShowChange(String(ep.id));
+      else onShowChange('');
+    } else {
+      onShowChange('');
+    }
   };
 
   // 选剧集/季时，计算所有匹配的showIds
