@@ -369,19 +369,15 @@ export default function PracticePage({
           <div className="word-inputs">
             {words.map((w, i) => (
               <div key={i} className="word-input-wrapper">
-                {hints.has(i) ? (
-                  <span className="hint-word">{w}</span>
-                ) : (
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
-                    className={`word-input ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    value={inputs[i]}
-                    onChange={e => handleInputChange(i, e.target.value)}
+                    className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
+                    value={hints.has(i) ? w : inputs[i]}
+                    onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
                     autoFocus={i === 0}
                   />
-                )}
               </div>
             ))}
           </div>

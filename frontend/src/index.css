@@ -413,15 +413,12 @@ body {
   padding: 0 2px;
   user-select: none;
 }
-.hint-word {
-  display: inline-block;
-  font-size: 1rem;
-  padding: 8px 4px;
-  color: var(--primary);
+.word-input.hint-word {
+  border-bottom-color: rgba(108, 92, 231, 0.4) !important;
+  background: rgba(108, 92, 231, 0.08) !important;
+  color: var(--primary) !important;
   opacity: 0.85;
   cursor: default;
-  border-bottom: 2px solid rgba(108, 92, 231, 0.4);
-  background: rgba(108, 92, 231, 0.08);
 }
 
 /* ---------- 操作行 ---------- */
