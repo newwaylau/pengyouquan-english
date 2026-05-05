@@ -276,9 +276,10 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  width: 100%;
 }
 .code-row .code-input {
-  flex: 1;
+  flex: 3;
   padding: 10px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
@@ -288,9 +289,10 @@ body {
   text-align: center;
   letter-spacing: 4px;
   min-width: 0;
+  width: auto;
 }
 .send-code-btn {
-  flex: 0 0 auto;
+  flex: 1;
   padding: 10px 14px;
   border: 1px solid var(--primary);
   border-radius: 8px;
@@ -1606,8 +1608,8 @@ body {
   .login-card .subtitle { margin-bottom: 16px; }
   .login-card input { padding: 8px; margin-bottom: 8px; font-size: 0.875rem; }
   .code-row { gap: 4px; }
-  .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 1; }
-  .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; }
+  .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 3; }
+  .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; flex: 1; }
   .login-card button { padding: 8px; font-size: 0.875rem; }
 
   /* 浏览页 */
