@@ -1590,6 +1590,27 @@ body {
   .bottom-nav { max-width: 1000px; }
 }
 
+/* Toast 提示 */
+.toast-msg {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card-bg);
+  border: 1px solid var(--danger);
+  color: var(--text);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  z-index: 200;
+  box-shadow: var(--shadow-card);
+  animation: toast-in 0.3s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* 返回按钮 */
 .back-btn {
   display: inline-flex;

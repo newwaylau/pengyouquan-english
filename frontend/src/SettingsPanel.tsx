@@ -80,10 +80,13 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     });
   }, [open]);
 
+  const [toastMsg, setToastMsg] = useState('');
+
   const save = async (key: string, value: string) => {
     const r = await api.saveSettings({ [key]: value });
     if (r.code === 401) {
-      alert('请先登录才能保存设置');
+      setToastMsg('请先登录才能保存设置');
+      setTimeout(() => setToastMsg(''), 3000);
     }
   };
 
@@ -156,6 +159,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
 
   return (
     <div className="settings-overlay" onClick={onClose}>
+      {toastMsg && <div className="toast-msg">{toastMsg}</div>}
       <div className="settings-panel" onClick={e => e.stopPropagation()}>
         <div className="settings-header">
           <h3>⚙️ 设置</h3>
