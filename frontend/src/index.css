@@ -299,7 +299,6 @@ body {
   font-size: 0.8125rem;
   white-space: nowrap;
   cursor: pointer;
-  min-width: 90px;
   line-height: 1;
   text-align: center;
   transition: all 0.15s;
@@ -1607,8 +1606,8 @@ body {
   .login-card .subtitle { margin-bottom: 16px; }
   .login-card input { padding: 8px; margin-bottom: 8px; font-size: 0.875rem; }
   .code-row { gap: 4px; }
-  .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px;  }
-  .send-code-btn { font-size: 0.75rem; padding: 8px 8px; min-width: 70px;  }
+  .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 1; }
+  .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; }
   .login-card button { padding: 8px; font-size: 0.875rem; }
 
   /* 浏览页 */
