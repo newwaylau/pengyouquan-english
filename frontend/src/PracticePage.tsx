@@ -78,6 +78,7 @@ export default function PracticePage({
   const [showList, setShowList] = useState<any[]>([]);
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const submitRef = useRef<HTMLButtonElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
@@ -267,18 +268,16 @@ export default function PracticePage({
     // 标点/撇号在输入框外，只用字母长度判断是否跳转
     const parts = splitWordParts(words[i] || '');
     if (val.length >= parts.letters.length) {
-      setInputs(newInputs);
       if (i < words.length - 1) {
         // 跳过后面的提示输入框（disabled），跳到下一个可输入的
         let next = i + 1;
         while (next < words.length && hints.has(next)) next++;
         if (next < words.length) inputRefs.current[next]?.focus();
-        else handleSubmit(newInputs);
+        else submitRef.current?.focus(); // 最后一个可输入框输完，跳到提交按钮
       } else {
-        // 最后一个词输入完，自动提交
-        handleSubmit(newInputs);
+        // 最后一个词输入完，跳到提交按钮
+        submitRef.current?.focus();
       }
-      return; // 不重复setInputs
     }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
@@ -440,7 +439,7 @@ export default function PracticePage({
         {/* 操作行1：提交 */}
         <div className="action-row">
           {!answered ? (
-            <button className="btn-primary" onClick={handleSubmit}>⏎ 提交</button>
+            <button className="btn-primary" ref={submitRef} onClick={handleSubmit}>⏎ 提交</button>
           ) : (
             <button className="btn-primary" onClick={goNext}>⏭️ 下一句</button>
           )}
