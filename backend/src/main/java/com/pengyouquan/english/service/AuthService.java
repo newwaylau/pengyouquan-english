@@ -72,21 +72,23 @@ public class AuthService {
     }
 
     /**
-     * 用户登录
+     * 用户登录（支持邮箱或手机号）
      */
     public LoginResponse login(LoginRequest request) {
-        // 查找用户
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BusinessException("邮箱或密码错误"));
+        String account = request.getAccount();
 
-        // 检查是否被禁用
-        if (!user.getEnabled()) {
-            throw new BusinessException("账号已被禁用");
+        // 根据输入内容判断是邮箱还是手机号
+        User user;
+        if (account.contains("@")) {
+            user = userRepository.findByEmail(account).orElse(null);
+        } else {
+            user = userRepository.findByPhone(account).orElse(null);
         }
 
-        // 验证密码
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BusinessException("邮箱或密码错误");
+        // 统一提示，不暴露账号类型
+        if (user == null || !user.getEnabled()
+                || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BusinessException("账号或密码错误");
         }
 
         // 生成 JWT

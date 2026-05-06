@@ -101,6 +101,18 @@ export default function PracticePage({
     api.wrongSentences().then(r => { if (r.code === 200) setWrongCount(r.data.length); });
   };
 
+  const [toastMsg, setToastMsg] = useState('');
+
+  // 检查是否登录
+  const checkLogin = () => {
+    if (!user) {
+      setToastMsg('请先登录才能查看');
+      setTimeout(() => setToastMsg(''), 3000);
+      return false;
+    }
+    return true;
+  };
+
   // 搜索
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -418,6 +430,7 @@ export default function PracticePage({
   // 骨架屏
   if (!sentence) return (
     <div className="practice-page">
+      {toastMsg && <div className="toast-msg">{toastMsg}</div>}
       <div className="stats-bar">
         <div className="stat-card skeleton" style={{ height: 60 }} />
         <div className="stat-card skeleton" style={{ height: 60 }} />
@@ -444,6 +457,7 @@ export default function PracticePage({
 
   return (
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''}`}>
+      {toastMsg && <div className="toast-msg">{toastMsg}</div>}
       {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
       {user && (
         <div className="stats-bar">
@@ -459,7 +473,7 @@ export default function PracticePage({
             <span className="stat-value">{accuracy}%</span>
             <span className="stat-label">正确率</span>
           </div>
-          <div className="stat-card clickable" onClick={() => onNavigate?.('wrong')}>
+          <div className="stat-card clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
             <span className="stat-value">{wrongCount}</span>
             <span className="stat-label">错题</span>
           </div>
@@ -585,11 +599,11 @@ export default function PracticePage({
 
       {/* 底部导航 */}
       <div className="bottom-nav">
-        <button className="bottom-nav-btn" onClick={() => onNavigate?.('browse')}>
-          <span className="bottom-nav-icon">📖</span>
-          <span className="bottom-nav-label">浏览</span>
+        <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+          <span className="bottom-nav-icon">🚧</span>
+          <span className="bottom-nav-label">浏览(建设中)</span>
         </button>
-        <button className="bottom-nav-btn" onClick={() => onNavigate?.('wrong')}>
+        <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
           <span className="bottom-nav-icon">❌</span>
           <span className="bottom-nav-label">错题</span>
         </button>
@@ -597,9 +611,9 @@ export default function PracticePage({
           <span className="bottom-nav-icon">⚙️</span>
           <span className="bottom-nav-label">设置</span>
         </button>
-        <button className="bottom-nav-btn" onClick={() => setSearchOpen(true)}>
-          <span className="bottom-nav-icon">🔍</span>
-          <span className="bottom-nav-label">搜索</span>
+        <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+          <span className="bottom-nav-icon">🚧</span>
+          <span className="bottom-nav-label">搜索(建设中)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
           <span className="bottom-nav-icon">🧘</span>
