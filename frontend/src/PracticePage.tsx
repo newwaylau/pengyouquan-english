@@ -109,6 +109,8 @@ export default function PracticePage({
   };
 
   const [toastMsg, setToastMsg] = useState('');
+  // 错题再练提示
+  const [wrongBookPrompt, setWrongBookPrompt] = useState<{ sentenceId: number; errorCount: number; newErrorCount: number } | null>(null);
 
   // 检查是否登录
   const checkLogin = () => {
@@ -385,7 +387,17 @@ export default function PracticePage({
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
-      api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: userCorrectCount, totalWords: userInputCount, mode });
+      // 调用练习日志，检查是否在错题本中
+      api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: userCorrectCount, totalWords: userInputCount, mode }).then(r => {
+        if (r.data?.inWrongBook) {
+          // 这句在错题本中，显示再练提示
+          setWrongBookPrompt({
+            sentenceId: sentence.id,
+            errorCount: r.data.errorCount,
+            newErrorCount: r.data.newErrorCount,
+          });
+        }
+      });
       refreshStats();
     } else if (retryCount >= 1) {
       setAnswered(true);
@@ -404,6 +416,30 @@ export default function PracticePage({
         setTimeout(() => inputRefs.current[firstWrongIdx]?.focus(), 100);
       }
     }
+  };
+
+  // 再练一遍（同一句重新练习）
+  const retryWrongSentence = () => {
+    if (!wrongBookPrompt) return;
+    setWrongBookPrompt(null);
+    // 重置回答状态，保持当前句子不变
+    setAnswered(false);
+    setRetryCount(0);
+    setRevealed(false);
+    setCorrectWords(new Set());
+    setWrongWords(new Set());
+    setShowEn(false);
+    setInputs(words.map(() => ''));
+    // 重置提示（撇号词+随机提示保持不变，已在hints中）
+    let first = 0;
+    while (first < words.length && hints.has(first)) first++;
+    setTimeout(() => inputRefs.current[first]?.focus(), 100);
+  };
+
+  // 跳过再练，继续下一句
+  const skipRetry = () => {
+    setWrongBookPrompt(null);
+    goNext();
   };
 
   // 下一句
@@ -826,6 +862,27 @@ export default function PracticePage({
               {searchQuery.length >= 2 && searchResults.length === 0 && (
                 <div className="empty-state">无结果</div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 错题再练提示 */}
+      {wrongBookPrompt && (
+        <div className="settings-overlay">
+          <div className="search-panel wrong-retry-panel">
+            <div className="wrong-retry-content">
+              <div className="wrong-retry-icon">📝</div>
+              <div className="wrong-retry-title">这句之前错过 {wrongBookPrompt.errorCount} 次</div>
+              <div className="wrong-retry-subtitle">再练一遍，巩固记忆？</div>
+              <div className="wrong-retry-actions">
+                <button className="btn-primary" onClick={retryWrongSentence}>
+                  🔄 再练一遍
+                </button>
+                <button className="btn-action" onClick={skipRetry}>
+                  ⏭️ 跳过
+                </button>
+              </div>
             </div>
           </div>
         </div>

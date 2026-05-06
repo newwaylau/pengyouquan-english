@@ -746,6 +746,35 @@ body {
   line-height: 1;
 }
 
+/* ---------- 错题再练提示 ---------- */
+.wrong-retry-panel {
+  max-width: 380px;
+  text-align: center;
+}
+.wrong-retry-content {
+  padding: 24px 0;
+}
+.wrong-retry-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+.wrong-retry-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.wrong-retry-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+.wrong-retry-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
 /* ---------- 搜索面板 ---------- */
 .search-panel {
   background: var(--card-bg);
