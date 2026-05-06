@@ -93,5 +93,4 @@ export const api = {
     request(`/api/admin/sentences/${sentenceId}/disable`, { method: 'PUT', body: JSON.stringify({ reason: reason || '' }) }),
   adminEnableSentence: (sentenceId: number) =>
     request(`/api/admin/sentences/${sentenceId}/enable`, { method: 'PUT' }),
-    request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
 };

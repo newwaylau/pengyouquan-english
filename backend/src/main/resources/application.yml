@@ -1,21 +1,19 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: pengyouquan-english
 
+  # 默认使用 sit profile
+  profiles:
+    active: sit
+
   # 数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/pengyouquan_english?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
-    username: root
-    password: pengyouquan123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # JPA 配置(仅用于自动建表验证,实际用 Flyway 管理)
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
