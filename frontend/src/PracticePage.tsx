@@ -34,7 +34,11 @@ function normalizeCase(s: string) {
   }).join(' ');
 }
 /** 模式中文名 */
-const MODE_LABELS: Record<string, string> = { translation: '📝 中译英模式', dictation: '🖊️ 纯听写模式' };
+const MODE_LABELS: Record<string, string> = {
+  translation: '📝 中译英模式',
+  dictation: '🖊️ 纯听写模式',
+  wrong: '❌ 错题复习模式',
+};
 
 const VOICES = [
   { id: 'en-US-JennyNeural', label: 'Jenny' },
@@ -58,7 +62,10 @@ export default function PracticePage({
 }) {
   // 句子
   const [sentence, setSentence] = useState<any>(null);
-  const [mode, setMode] = useState<'translation' | 'dictation'>('translation');
+  const [mode, setMode] = useState<'translation' | 'dictation' | 'wrong'>('translation');
+  // 错题练习相关
+  const [wrongSentences, setWrongSentences] = useState<any[]>([]);
+  const [wrongIndex, setWrongIndex] = useState(0);
   const [showCn, setShowCn] = useState(false);
   const [showEn, setShowEn] = useState(false);
   const [speed, setSpeed] = useState(0.75);
@@ -170,6 +177,27 @@ export default function PracticePage({
   // 加载句子
   const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
   const loadSentence = async (specificId?: number, skipAutoPlay?: boolean) => {
+    // 错题练习模式
+    if (mode === 'wrong') {
+      const r = await api.wrongPractice(20);
+      if (r.code !== 200) return;
+      const sentences = r.data?.sentences || [];
+      if (sentences.length === 0) return;
+      setWrongSentences(sentences);
+      setWrongIndex(0);
+      if (specificId) {
+        // 如果传了 specificId，找到它在列表里的索引
+        const idx = sentences.findIndex((s: any) => s.sentenceId === specificId);
+        if (idx >= 0) {
+          setWrongIndex(idx);
+          setupSentence(sentences[idx], skipAutoPlay);
+          return;
+        }
+      }
+      setupSentence(sentences[0], skipAutoPlay);
+      return;
+    }
+
     if (specificId) {
       const r = await api.sentence(specificId);
       if (r.code !== 200 || !r.data) return;
@@ -232,6 +260,39 @@ export default function PracticePage({
   useEffect(() => {
     setShowCn(mode === 'translation');
   }, [mode]);
+
+  // 进入错题模式时加载错题句子
+  useEffect(() => {
+    if (mode === 'wrong' && user) {
+      loadSentence();
+    }
+  }, [mode, user]);
+
+  // 从 WrongPage 批量练习入口进入时自动切换错题模式
+  useEffect(() => {
+    const practiceMode = localStorage.getItem('practiceMode');
+    if (practiceMode === 'wrong') {
+      localStorage.removeItem('practiceMode');
+      setMode('wrong');
+      // 已有 showList 时直接加载
+      if (showList.length > 0 && user) {
+        loadSentence();
+      }
+    }
+  }, [showList, user]);
+
+  /** 加载错题句子（下一题） */
+  const loadWrongNext = () => {
+    if (wrongSentences.length === 0) return;
+    const nextIdx = wrongIndex + 1;
+    if (nextIdx >= wrongSentences.length) {
+      // 没有更多错题了，显示结束状态
+      setSentence(null);
+      return;
+    }
+    setWrongIndex(nextIdx);
+    setupSentence(wrongSentences[nextIdx], false);
+  };
 
   // 设置句子
   const setupSentence = (s: any, skipAutoPlay?: boolean) => {
@@ -347,6 +408,10 @@ export default function PracticePage({
 
   // 下一句
   const goNext = () => {
+    if (mode === 'wrong') {
+      loadWrongNext();
+      return;
+    }
     setHistoryIds(h => [...h, sentence.id]);
     loadSentence();
   };
@@ -427,26 +492,94 @@ export default function PracticePage({
     ? Math.round((stats.totalCorrect / stats.totalPractices) * 100)
     : 0;
 
-  // 骨架屏
-  if (!sentence) return (
-    <div className="practice-page">
-      {toastMsg && <div className="toast-msg">{toastMsg}</div>}
-      <div className="stats-bar">
-        <div className="stat-card skeleton" style={{ height: 60 }} />
-        <div className="stat-card skeleton" style={{ height: 60 }} />
-        <div className="stat-card skeleton" style={{ height: 60 }} />
-        <div className="stat-card skeleton" style={{ height: 60 }} />
+  // 骨架屏 / 错题练习已完成
+  if (!sentence) {
+    // 错题练习完成状态
+    if (mode === 'wrong' && wrongSentences.length > 0) {
+      return (
+        <div className="practice-page">
+          {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+          {user && (
+            <div className="stats-bar">
+              <div className="stat-card">
+                <span className="stat-value">{stats.totalPractices}</span>
+                <span className="stat-label">总句子</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value">{stats.totalPractices}</span>
+                <span className="stat-label">今日练习</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value">{accuracy}%</span>
+                <span className="stat-label">正确率</span>
+              </div>
+              <div className="stat-card clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
+                <span className="stat-value">{wrongCount}</span>
+                <span className="stat-label">错题</span>
+              </div>
+            </div>
+          )}
+          <div className="wrong-review-done">
+            <div className="wrong-review-icon">🎉</div>
+            <div className="wrong-review-title">错题复习完成！</div>
+            <div className="wrong-review-subtitle">共复习了 {wrongSentences.length} 句错题</div>
+            <div className="wrong-review-actions">
+              <button className="btn-primary" onClick={() => onNavigate?.('wrong')}>
+                📕 返回错题本
+              </button>
+              <button className="btn-action" onClick={() => setMode('translation')}>
+                📝 继续普通练习
+              </button>
+            </div>
+          </div>
+          <div className="bottom-section">
+            <div className="bottom-nav">
+              <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+                <span className="bottom-nav-icon">🚧</span>
+                <span className="bottom-nav-label">浏览(建设中)</span>
+              </button>
+              <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
+                <span className="bottom-nav-icon">❌</span>
+                <span className="bottom-nav-label">错题</span>
+              </button>
+              <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
+                <span className="bottom-nav-icon">⚙️</span>
+                <span className="bottom-nav-label">设置</span>
+              </button>
+              <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+                <span className="bottom-nav-icon">🚧</span>
+                <span className="bottom-nav-label">搜索(建设中)</span>
+              </button>
+              <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
+                <span className="bottom-nav-icon">🧘</span>
+                <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="practice-page">
+        {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+        <div className="stats-bar">
+          <div className="stat-card skeleton" style={{ height: 60 }} />
+          <div className="stat-card skeleton" style={{ height: 60 }} />
+          <div className="stat-card skeleton" style={{ height: 60 }} />
+          <div className="stat-card skeleton" style={{ height: 60 }} />
+        </div>
+        <div className="mode-badge skeleton" style={{ height: 24, width: 120, marginBottom: 16 }} />
+        <div className="skeleton" style={{ height: 40, width: '100%', marginBottom: 12 }} />
+        <div className="skeleton" style={{ height: 60, width: '100%', marginBottom: 16 }} />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <div className="skeleton" style={{ height: 36, width: 80 }} />
+          <div className="skeleton" style={{ height: 36, width: 80 }} />
+          <div className="skeleton" style={{ height: 36, width: 100 }} />
+        </div>
       </div>
-      <div className="mode-badge skeleton" style={{ height: 24, width: 120, marginBottom: 16 }} />
-      <div className="skeleton" style={{ height: 40, width: '100%', marginBottom: 12 }} />
-      <div className="skeleton" style={{ height: 60, width: '100%', marginBottom: 16 }} />
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <div className="skeleton" style={{ height: 36, width: 80 }} />
-        <div className="skeleton" style={{ height: 36, width: 80 }} />
-        <div className="skeleton" style={{ height: 36, width: 100 }} />
-      </div>
-    </div>
-  );
+    );
+  }
 
   const en = extractEn(sentence.text);
   const cn = extractCn(sentence.text);
@@ -483,12 +616,39 @@ export default function PracticePage({
       {/* Mode Badge */}
       <div className="mode-badge">{MODE_LABELS[mode] || '📝 练习模式'}</div>
 
+      {/* 错题练习进度 */}
+      {mode === 'wrong' && wrongSentences.length > 0 && (
+        <div className="wrong-progress-bar">
+          <div className="wrong-progress-text">
+            第 {wrongIndex + 1}/{wrongSentences.length} 句
+          </div>
+          <div className="wrong-progress-track">
+            <div
+              className="wrong-progress-fill"
+              style={{ width: `${((wrongIndex + 1) / wrongSentences.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 专注模式退出按钮 */}
+      {focusMode && (
+        <div style={{textAlign:'center',marginBottom:8}}>
+          <button className="exit-focus-btn" onClick={() => setFocusMode(false)}>
+            ✕ 退出专注模式
+          </button>
+        </div>
+      )}
+
       {/* 主卡片 */}
       <div className="practice-card">
         <div className="card-body">
         {/* 剧集名 + ID */}
         <div className="sentence-meta">
           {sentence.showName} · #{sentence.id}
+          {mode === 'wrong' && sentence.errorCount !== undefined && (
+            <span className="wrong-error-badge">❌ 错{sentence.errorCount}次</span>
+          )}
         </div>
 
         {/* 英文显示区 */}
