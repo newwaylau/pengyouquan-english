@@ -20,7 +20,7 @@ public class RegisterRequest {
     private String phone;
 
     @NotBlank(message = "验证码不能为空")
-    @Size(min = 6, max = 6, message = "验证码为6位")
+    @Size(min = 6, max = 6, message = "验证码必须是6位数字")
     private String code;
 
     @NotBlank(message = "密码不能为空")

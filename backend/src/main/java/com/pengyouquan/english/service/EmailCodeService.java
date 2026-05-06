@@ -7,7 +7,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.pengyouquan.english.config.GlobalExceptionHandler.BusinessException;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * 邮箱验证码服务
@@ -52,7 +55,23 @@ public class EmailCodeService {
         return sendCode(email);
     }
 
-    public boolean verifyCode(String email, String code) {
-        return emailCodeRepository.findByEmailAndCode(email, code).isPresent();
+    /**
+     * 校验邮箱验证码（检查存在性 + 5分钟有效期），校验成功后删除已使用
+     */
+    public void verifyCode(String email, String code) {
+        Optional<EmailCode> record = emailCodeRepository.findByEmailAndCode(email, code);
+        if (record.isEmpty()) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 检查5分钟有效期
+        EmailCode ec = record.get();
+        if (ec.getCreatedAt().plusMinutes(5).isBefore(java.time.LocalDateTime.now())) {
+            emailCodeRepository.delete(ec);
+            throw new BusinessException("验证码已过期，请重新获取");
+        }
+
+        // 校验通过后删除已使用验证码
+        emailCodeRepository.delete(ec);
     }
 }

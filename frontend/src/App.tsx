@@ -86,8 +86,8 @@ export default function App() {
       <main>
         {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
         {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-        {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
-        {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} />}
+        {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+        {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
         {page === 'admin' && <AdminPage />}
         {page === 'subtitle' && <SubtitlePage />}
       </main>

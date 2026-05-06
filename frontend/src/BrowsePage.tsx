@@ -3,9 +3,10 @@ import { api } from './api/client';
 
 interface Props {
   onJump: (id: number) => void;
+  onBack?: () => void;
 }
 
-export default function BrowsePage({ onJump }: Props) {
+export default function BrowsePage({ onJump, onBack }: Props) {
   const [shows, setShows] = useState<any[]>([]);
   const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   const [sentences, setSentences] = useState<any[]>([]);
@@ -53,6 +54,7 @@ export default function BrowsePage({ onJump }: Props) {
     <div className="browse-page">
       <div className="browse-header">
         <h2>📖 句子浏览</h2>
+        {onBack && <button className="back-btn" onClick={onBack}>← 返回</button>}
         <div className="browse-controls">
           <select value={selectedShowId ?? ''} onChange={e =>
             handleShowSelect(e.target.value ? Number(e.target.value) : null)}>
@@ -62,10 +64,10 @@ export default function BrowsePage({ onJump }: Props) {
             ))}
           </select>
           <div className="jump-input">
-            <input type="number" placeholder="跳转句子编号"
+            <input type="number" placeholder="句子ID"
               value={jumpNo} onChange={e => setJumpNo(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleJump()} />
-            <button onClick={handleJump}>跳转</button>
+            <button onClick={handleJump}>练习</button>
           </div>
         </div>
       </div>

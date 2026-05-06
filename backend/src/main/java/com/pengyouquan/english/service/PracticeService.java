@@ -118,12 +118,11 @@ public class PracticeService {
     }
 
     /**
-     * 填充冗余字段（中文翻译和剧集名）
+     * 填充冗余字段（剧集名）
      */
     private void fillRedundantFields(WrongSentence ws) {
         Optional<Sentence> optS = sentenceRepository.findById(ws.getSentenceId());
         optS.ifPresent(s -> {
-            ws.setChineseTranslation(s.getText() != null ? s.getText() : "");
             Optional<Show> optShow = showRepository.findById(s.getShowId());
             optShow.ifPresent(show -> ws.setShowName(show.getName() != null ? show.getName() : ""));
         });
@@ -192,7 +191,6 @@ public class PracticeService {
             item.put("sentenceId", ws.getSentenceId());
             item.put("text", text);
             item.put("showName", ws.getShowName() != null ? ws.getShowName() : "");
-            item.put("chineseTranslation", ws.getChineseTranslation() != null ? ws.getChineseTranslation() : "");
             item.put("errorCount", ws.getErrorCount() != null ? ws.getErrorCount() : 0);
             item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?
                     ws.getLastPracticedAt().toString() : "");
@@ -256,7 +254,6 @@ public class PracticeService {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("sentenceId", ws.getSentenceId());
             item.put("text", s.getText());
-            item.put("chineseTranslation", ws.getChineseTranslation() != null ? ws.getChineseTranslation() : "");
             item.put("showName", ws.getShowName() != null ? ws.getShowName() : "");
             item.put("errorCount", ws.getErrorCount() != null ? ws.getErrorCount() : 0);
             item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?

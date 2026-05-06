@@ -36,11 +36,7 @@ public class WrongSentence {
     @Column(name = "is_mastered", columnDefinition = "TINYINT", length = 1)
     private Boolean isMastered = false;
 
-    /** 中文翻译（冗余存储） */
-    @Column(name = "chinese_translation")
-    private String chineseTranslation = "";
-
-    /** 剧集名（冗余存储，方便筛选） */
+    /** 剧集名（冗余存储，方便筛选和排序） */
     @Column(name = "show_name")
     private String showName = "";
 

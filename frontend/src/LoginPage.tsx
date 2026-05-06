@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { api } from './api/client';
+import { EyeOpen, EyeClosed } from './eye-icons';
 
 /** 校验邮箱格式 */
 function isValidEmail(v: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
@@ -29,6 +30,8 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
   const [invitedBy, setInvitedBy] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showPwd2, setShowPwd2] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [codeSending, setCodeSending] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -76,7 +79,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
 
     if (mode === 'login') {
       if (!email || !password) { setError('请填写邮箱和密码'); return; }
-      const r = await api.login(email, password);
+      const r = await api.login(email, password); // 支持邮箱或手机号
       if (r.code === 200) { onLogin(r.data.token); }
       else { setError(r.message || '登录失败'); }
     } else {
@@ -112,15 +115,16 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
         <form onSubmit={handleSubmit}>
 
           {/* ── 邮箱（必填） ── */}
-          <input type="email" placeholder="邮箱" value={email}
+          <input type={mode === 'login' ? 'text' : 'email'} placeholder={mode === 'login' ? '邮箱/手机号' : '邮箱'}
+            value={email}
             onChange={e => setEmail(e.target.value)} required
-            style={email && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
+            style={email && (mode === 'register' || email.includes('@')) && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
 
           {mode === 'register' && (
             <>
               {/* ── 验证码（必填） ── */}
               <div className="code-row">
-                <input type="text" placeholder="验证码" value={code}
+                <input type="text" placeholder="邮箱验证码" value={code}
                   onChange={e => setCode(e.target.value)} required maxLength={6}
                   className="code-input" />
                 <button type="button" className="send-code-btn"
@@ -131,8 +135,13 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
               </div>
 
               {/* ── 密码（必填，至少8位含字母+数字） ── */}
-              <input type="password" placeholder="密码（至少8位，含字母和数字）" value={password}
-                onChange={e => setPassword(e.target.value)} required />
+              <div className="pwd-wrapper">
+                <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
+                  onChange={e => setPassword(e.target.value)} required />
+                <span className="eye-btn" onClick={() => setShowPwd(!showPwd)}>
+                  {showPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
               {password && (
                 <div className="pwd-strength-bar">
                   <div className="pwd-strength-fill" style={{
@@ -144,9 +153,14 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
                   </span>
                 </div>
               )}
-              <input type="password" placeholder="确认密码" value={password2}
-                onChange={e => setPassword2(e.target.value)} required
-                style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
+              <div className="pwd-wrapper">
+                <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
+                  onChange={e => setPassword2(e.target.value)} required
+                  style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
+                <span className="eye-btn" onClick={() => setShowPwd2(!showPwd2)}>
+                  {showPwd2 ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
 
               {/* ── 手机号（可选） ── */}
               <input type="tel" placeholder="手机号（可选）" value={phone}
@@ -166,7 +180,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
 
           {error && <div className="error-msg">{error}</div>}
           {successMsg && <div className="success-msg">{successMsg}</div>}
-          <button type="submit">{mode === 'login' ? '登录' : '注册'}</button>
+          <button type="submit" className="submit">{mode === 'login' ? '登录' : '注册'}</button>
         </form>
         <p className="toggle-mode" onClick={switchMode}>
           {mode === 'login' ? '没有账号？点击注册' : '已有账号？点击登录'}

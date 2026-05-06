@@ -8,7 +8,7 @@ interface Props {
 
 const PAGE_SIZE = 20;
 
-export default function WrongPage({ onJump }: Props) {
+export default function WrongPage({ onJump, onBack }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));

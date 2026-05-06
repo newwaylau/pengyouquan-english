@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { api } from './api/client';
 
-export default function SearchPage({ onJump }: { onJump: (id: number) => void }) {
+export default function SearchPage({ onJump, onBack }: { onJump: (id: number) => void; onBack?: () => void }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,6 +21,7 @@ export default function SearchPage({ onJump }: { onJump: (id: number) => void })
 
   return (
     <div className="search-page">
+      {onBack && <button className="back-btn" onClick={onBack}>← 返回</button>}
       <input className="search-input" type="text" placeholder="搜索句子（中英文）..."
         value={query} onChange={e => handleSearch(e.target.value)} autoFocus />
       {loading && <div className="search-loading">搜索中...</div>}
