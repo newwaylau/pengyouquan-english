@@ -36,6 +36,14 @@ public class WrongSentence {
     @Column(name = "is_mastered", columnDefinition = "TINYINT", length = 1)
     private Boolean isMastered = false;
 
+    /** 连续答对次数（间隔复习用） */
+    @Column(name = "review_count")
+    private Integer reviewCount = 0;
+
+    /** 下次复习时间 */
+    @Column(name = "next_review_at")
+    private LocalDateTime nextReviewAt;
+
     /** 剧集名（冗余存储，方便筛选和排序） */
     @Column(name = "show_name")
     private String showName = "";

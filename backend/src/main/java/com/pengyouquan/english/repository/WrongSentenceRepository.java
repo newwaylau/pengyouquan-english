@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,20 @@ public interface WrongSentenceRepository extends JpaRepository<WrongSentence, Lo
     /** 获取用户错题中所有不同的剧集名 */
     @Query("SELECT DISTINCT ws.showName FROM WrongSentence ws WHERE ws.userId = :userId AND ws.showName != ''")
     List<String> findDistinctShowNamesByUserId(@Param("userId") Long userId);
+
+    /** 获取今天要复习的错题（next_review_at <= now 或为null，且未掌握） */
+    @Query("SELECT ws FROM WrongSentence ws WHERE ws.userId = :userId " +
+           "AND ws.isMastered = false " +
+           "AND (ws.nextReviewAt IS NULL OR ws.nextReviewAt <= :now) " +
+           "ORDER BY ws.nextReviewAt ASC")
+    List<WrongSentence> findDueByUserId(@Param("userId") Long userId, @Param("now") LocalDateTime now);
+
+    /** 获取以后才需要复习的错题 */
+    @Query("SELECT ws FROM WrongSentence ws WHERE ws.userId = :userId " +
+           "AND ws.isMastered = false " +
+           "AND ws.nextReviewAt IS NOT NULL AND ws.nextReviewAt > :now " +
+           "ORDER BY ws.nextReviewAt ASC")
+    List<WrongSentence> findUpcomingByUserId(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 
     @Transactional
     void deleteByUserId(Long userId);

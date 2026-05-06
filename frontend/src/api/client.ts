@@ -53,6 +53,11 @@ export const api = {
     request(`/api/wrong-sentences/practice${limit ? `?limit=${limit}` : ''}`),
   removeWrong: (sid: number) =>
     request(`/api/wrong-sentences/${sid}`, { method: 'DELETE' }),
+  wrongSentencesGrouped: () => request('/api/wrong-sentences/grouped'),
+  wrongSentencesWithReview: () => request('/api/wrong-sentences/with-review'),
+  updateWrongReview: (data: { sentenceId: number; correct: boolean }) =>
+    request('/api/wrong-sentences/review', { method: 'POST', body: JSON.stringify(data) }),
+  wrongSentenceStats: () => request('/api/wrong-sentences/stats'),
 
   // 设置
   getSettings: () => request('/api/settings'),

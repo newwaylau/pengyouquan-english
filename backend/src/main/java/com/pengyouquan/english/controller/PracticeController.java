@@ -78,7 +78,7 @@ public class PracticeController {
         return ApiResponse.success();
     }
 
-    /** 获取批量练习的错题句子 */
+    /** 获取批量练习的错题句子（仅今天要复习的） */
     @GetMapping("/wrong-sentences/practice")
     public ApiResponse<Map<String, Object>> getWrongPractice(
             @CurrentUserId Long userId,
@@ -87,12 +87,57 @@ public class PracticeController {
         return ApiResponse.success(practiceService.getWrongPractice(userId, limit));
     }
 
+    /**
+     * 记录间隔复习结果
+     * 调用此接口后，服务端自动更新 review_count 和 next_review_at
+     */
+    @PostMapping("/wrong-sentences/review")
+    public ApiResponse<Void> updateReview(@CurrentUserId Long userId,
+                                          @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        Long sentenceId = Long.valueOf(body.get("sentenceId").toString());
+        boolean correct = Boolean.parseBoolean(body.get("correct").toString());
+        practiceService.updateReview(userId, sentenceId, correct);
+        return ApiResponse.success();
+    }
+
+    /** 获取今天要复习的错题列表 */
+    @GetMapping("/wrong-sentences/due")
+    public ApiResponse<?> getDueWrongSentences(
+            @CurrentUserId Long userId,
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getDueWrongSentences(userId));
+    }
+
+    /** 获取间隔复习统计 */
+    @GetMapping("/wrong-sentences/stats")
+    public ApiResponse<Map<String, Object>> getReviewStats(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getReviewStats(userId));
+    }
+
+    /** 获取按间隔分组的错题列表 */
+    @GetMapping("/wrong-sentences/grouped")
+    public ApiResponse<Map<String, Object>> getWrongSentencesGrouped(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getWrongSentencesGrouped(userId));
+    }
+
     /** 清空错题本 */
     @DeleteMapping("/wrong-sentences")
     public ApiResponse<Void> clearWrongSentences(@CurrentUserId Long userId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         practiceService.clearWrongSentences(userId);
         return ApiResponse.success();
+    }
+
+    /** 批量练习预览（按间隔分组排序） */
+    @GetMapping("/wrong-sentences/with-review")
+    public ApiResponse<List<Map<String, Object>>> getWrongSentencesWithReview(
+            @CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getWrongSentencesWithReviewInfo(userId));
     }
 
     /** 删除一条错题 */
