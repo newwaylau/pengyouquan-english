@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 const COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2'];
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications'>('stats');
+  const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications' | 'sentence-flags'>('stats');
 
   return (
     <div className="admin-page">
@@ -15,12 +15,14 @@ export default function AdminPage() {
         <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>用户管理</button>
         <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>系统设置</button>
         <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>通知管理</button>
+        <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}>🚩 句子报告</button>
       </aside>
       <main className="admin-content">
         {tab === 'stats' && <AdminDashboard />}
         {tab === 'users' && <UserManagement />}
         {tab === 'settings' && <SystemSettings />}
         {tab === 'notifications' && <NotificationManagement />}
+        {tab === 'sentence-flags' && <SentenceFlagManagement />}
       </main>
     </div>
   );
@@ -480,6 +482,133 @@ function NotificationManagement() {
           </table>
         )}
       </div>
+    </div>
+  );
+}
+
+/** 🚩 句子报告管理 */
+function SentenceFlagManagement() {
+  const [flaggedSentences, setFlaggedSentences] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
+  const token = localStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const fetchFlagged = async () => {
+    setLoading(true);
+    const r = await api.adminFlaggedSentences();
+    setLoading(false);
+    if (r.code === 200) setFlaggedSentences(r.data || []);
+  };
+
+  useEffect(() => { fetchFlagged(); }, []);
+
+  const handleDisable = async (sentenceId: number) => {
+    const reason = prompt('请输入停用原因：');
+    if (reason === null) return; // 用户取消
+    setMessage('');
+    const r = await api.adminDisableSentence(sentenceId, reason || '');
+    if (r.code === 200) {
+      setMessage('已停用该句子');
+      fetchFlagged();
+    } else {
+      setMessage('操作失败');
+    }
+  };
+
+  const handleEnable = async (sentenceId: number) => {
+    setMessage('');
+    const r = await api.adminEnableSentence(sentenceId);
+    if (r.code === 200) {
+      setMessage('已恢复该句子');
+      fetchFlagged();
+    } else {
+      setMessage('操作失败');
+    }
+  };
+
+  const handleApprove = async (sentenceId: number) => {
+    // 审核通过：不做任何修改，只是标记为已审核（在提示中记录）
+    setMessage('已标记为审核通过');
+  };
+
+  if (loading) return <div className="loading">加载中...</div>;
+
+  return (
+    <div className="notification-management">
+      <h2>🚩 句子报告</h2>
+      {message && (
+        <div className={`upload-feedback ${message.includes('失败') ? 'error' : 'success'}`}>
+          {message}
+        </div>
+      )}
+
+      {flaggedSentences.length === 0 ? (
+        <div className="empty-state" style={{ padding: '40px 0' }}>暂无被举报的句子</div>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>句子原文</th>
+              <th>剧集名</th>
+              <th>举报数</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flaggedSentences.map((s: any) => (
+              <tr key={s.sentenceId} className={s.isDisabled ? 'row-disabled' : ''}>
+                <td>{s.sentenceId}</td>
+                <td style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {s.text}
+                </td>
+                <td>{s.showName}</td>
+                <td><span className="flag-count-badge">{s.flagCount}</span></td>
+                <td>
+                  {s.isDisabled ? (
+                    <span className="role-badge" style={{ background: 'var(--danger)', color: '#fff' }}>
+                      已停用
+                    </span>
+                  ) : (
+                    <span className="role-badge role-admin">正常</span>
+                  )}
+                </td>
+                <td>
+                  {s.isDisabled ? (
+                    <button
+                      className="small-btn"
+                      style={{ color: 'var(--success)' }}
+                      onClick={() => handleEnable(s.sentenceId)}
+                    >
+                      恢复
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="small-btn"
+                        style={{ color: 'var(--success)', marginRight: 6 }}
+                        onClick={() => handleApprove(s.sentenceId)}
+                      >
+                        ✅ 审核通过
+                      </button>
+                      <button
+                        className="small-btn"
+                        style={{ color: 'var(--danger)' }}
+                        onClick={() => handleDisable(s.sentenceId)}
+                      >
+                        ⛔ 停用
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

@@ -207,6 +207,11 @@ export default function WrongPage({ onJump, onBack }: Props) {
                 <span className="wrong-meta-tag review-label">
                   ⏰ {getReviewLabel(item.nextReviewAt)}
                 </span>
+                {item.isDisabled && (
+                  <span className="wrong-meta-tag disabled-label">
+                    ⛔ 该句子已停用
+                  </span>
+                )}
               </div>
             </div>
 

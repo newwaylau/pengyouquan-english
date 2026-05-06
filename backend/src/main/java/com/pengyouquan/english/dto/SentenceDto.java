@@ -18,12 +18,14 @@ public class SentenceDto {
     private String audioFile;
     private Double startTime;
     private Double endTime;
+    private Boolean isDisabled;
 
     public static SentenceDto from(Sentence s, String showName) {
         return new SentenceDto(
             s.getId(), s.getText(), s.getShowId(), showName,
             s.getEpisodeInfo(), s.getAudioFile(),
-            s.getStartTime(), s.getEndTime()
+            s.getStartTime(), s.getEndTime(),
+            s.getIsDisabled() != null && s.getIsDisabled()
         );
     }
 }
