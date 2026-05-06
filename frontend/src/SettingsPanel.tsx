@@ -269,14 +269,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
           </div>
         </div>
 
-        {/* 快捷键 */}
-        <div className="settings-section">
-          <label>快捷键</label>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 2 }}>
-            <kbd>-</kbd> 剧集原音 &nbsp; <kbd>=</kbd> 音色(默认 Ryan) &nbsp; <kbd>\</kbd> 下一句<br />
-            <kbd>[</kbd> 中文 &nbsp; <kbd>]</kbd> 答案 &nbsp; <kbd>Enter</kbd> 提交
-          </div>
-        </div>
       </div>
     </div>
   );
