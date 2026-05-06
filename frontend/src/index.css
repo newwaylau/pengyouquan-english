@@ -782,24 +782,30 @@ body {
 .focus-mode .mode-badge,
 .focus-mode .shortcuts-hint { display: none; }
 
+/* 专注模式退出按钮 */
+.exit-focus-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.exit-focus-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
 /* =====================================================
    以下页面级样式（错题本、设置面板、浏览、搜索、管理、字幕等）
    ===================================================== */
 
 /* ---------- 错题本 ---------- */
 .wrong-page { padding: 16px 0; }
-.wrong-item {
-  background: var(--card-bg);
-  padding: calc(12/16*1rem) calc(16/16*1rem);
-  border-radius: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow-soft);
-}
-.wrong-text { flex: 1; font-size: 0.875rem; color: var(--text); }
-.wrong-meta { color: var(--text-secondary); font-size: 0.75rem; }
+/*.wrong-item moved to enhanced section below*/
 .small-btn {
   padding: calc(4/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
@@ -835,8 +841,174 @@ body {
   background: var(--danger);
   color: #fff;
 }
+
+/* ---------- 错题页增强 ---------- */
+.wrong-count { color: var(--text-secondary); font-size: 0.875rem; }
+.wrong-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.wrong-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wrong-filter-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.wrong-filter-select {
+  padding: calc(6/16*1rem) calc(10/16*1rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  outline: none;
+  min-width: 120px;
+}
+.wrong-filter-select:focus { border-color: var(--primary); }
+.batch-review-btn {
+  margin-left: auto;
+  padding: calc(8/16*1rem) calc(18/16*1rem);
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), #f59e0b);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+.batch-review-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.batch-review-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.wrong-item {
+  background: var(--card-bg);
+  padding: calc(12/16*1rem) calc(16/16*1rem);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 0.15s;
+}
 .wrong-item.clickable { cursor: pointer; }
-.wrong-item.clickable:hover { background: var(--hover-bg); }
+.wrong-item.clickable:hover {
+  box-shadow: var(--shadow-medium);
+}
+.wrong-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.wrong-text {
+  font-size: 0.875rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+.wrong-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.wrong-meta-tag {
+  font-size: 0.6875rem;
+  padding: calc(2/16*1rem) calc(8/16*1rem);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  background: var(--hover-bg);
+  white-space: nowrap;
+}
+.wrong-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.small-btn.practice-btn {
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 500;
+}
+.small-btn.master-btn {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+/* ---------- 错题练习进度条 ---------- */
+.wrong-progress-bar {
+  margin: 8px 0 12px;
+}
+.wrong-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.wrong-progress-track {
+  height: 4px;
+  background: var(--hover-bg);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.wrong-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ---------- 错题练习完成页 ---------- */
+.wrong-review-done {
+  text-align: center;
+  padding: 60px 20px;
+}
+.wrong-review-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+.wrong-review-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.wrong-review-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+.wrong-review-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- 练习页错题错误次数徽标 ---------- */
+.wrong-error-badge {
+  font-size: 0.6875rem;
+  padding: calc(1/16*1rem) calc(6/16*1rem);
+  border-radius: 4px;
+  background: var(--feedback-wrong-bg);
+  margin-left: 8px;
+  color: var(--danger);
+}
 
 /* ---------- 分页 ---------- */
 .pagination {
