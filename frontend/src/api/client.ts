@@ -22,8 +22,8 @@ export const api = {
     request('/api/auth/send-code', { method: 'POST', body: JSON.stringify({ email }) }),
   register: (data: { email: string; phone: string; code: string; password: string; invitedBy?: string }) =>
     request('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
-  login: (email: string, password: string) =>
-    request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  login: (account: string, password: string) =>
+    request('/api/auth/login', { method: 'POST', body: JSON.stringify({ account, password }) }),
   me: () => request('/api/auth/me'),
 
   // 剧集
@@ -37,7 +37,20 @@ export const api = {
     request('/api/practice/log', { method: 'POST', body: JSON.stringify(data) }),
 
   // 错题
-  wrongSentences: () => request('/api/wrong-sentences'),
+  wrongSentences: (params?: { showName?: string; sortBy?: string; sortDir?: string; includeMastered?: boolean }) => {
+    const q = params ? Object.entries(params)
+      .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+      .join('&') : '';
+    return request(`/api/wrong-sentences${q ? '?' + q : ''}`);
+  },
+  wrongSentenceShows: () => request('/api/wrong-sentences/shows'),
+  masterSentence: (sid: number) =>
+    request(`/api/wrong-sentences/${sid}/master`, { method: 'PUT' }),
+  unmasterSentence: (sid: number) =>
+    request(`/api/wrong-sentences/${sid}/unmaster`, { method: 'PUT' }),
+  wrongPractice: (limit?: number) =>
+    request(`/api/wrong-sentences/practice${limit ? `?limit=${limit}` : ''}`),
   removeWrong: (sid: number) =>
     request(`/api/wrong-sentences/${sid}`, { method: 'DELETE' }),
 

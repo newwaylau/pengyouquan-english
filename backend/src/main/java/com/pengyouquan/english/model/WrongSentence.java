@@ -32,9 +32,22 @@ public class WrongSentence {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    /** 是否已掌握（标记而非删除） */
+    @Column(name = "is_mastered", columnDefinition = "TINYINT", length = 1)
+    private Boolean isMastered = false;
+
+    /** 中文翻译（冗余存储） */
+    @Column(name = "chinese_translation")
+    private String chineseTranslation = "";
+
+    /** 剧集名（冗余存储，方便筛选） */
+    @Column(name = "show_name")
+    private String showName = "";
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (lastPracticedAt == null) lastPracticedAt = LocalDateTime.now();
+        if (isMastered == null) isMastered = false;
     }
 }

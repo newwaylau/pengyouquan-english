@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -27,25 +26,65 @@ public class PracticeController {
         this.practiceService = practiceService;
     }
 
-    /** 记录一次练习结果 */
+    /** 记录一次练习结果（增强版：返回错题检查信息） */
     @PostMapping("/practice/log")
-    public ApiResponse<Void> logPractice(@CurrentUserId Long userId,
-                                         @RequestBody Map<String, Object> body) {
+    public ApiResponse<Map<String, Object>> logPractice(@CurrentUserId Long userId,
+                                                        @RequestBody Map<String, Object> body) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         Long sentenceId = Long.valueOf(body.get("sentenceId").toString());
         boolean correct = Boolean.parseBoolean(body.get("correct").toString());
         int correctCount = Integer.parseInt(body.getOrDefault("correctCount", "0").toString());
         int totalWords = Integer.parseInt(body.getOrDefault("totalWords", "0").toString());
         String mode = (String) body.getOrDefault("mode", "sentry");
-        practiceService.logPractice(userId, sentenceId, correct, correctCount, totalWords, mode);
+        Map<String, Object> result = practiceService.logPractice(userId, sentenceId, correct, correctCount, totalWords, mode);
+        return ApiResponse.success(result);
+    }
+
+    /** 获取错题本（增强版：支持排序和筛选） */
+    @GetMapping("/wrong-sentences")
+    public ApiResponse<List<Map<String, Object>>> getWrongSentences(
+            @CurrentUserId Long userId,
+            @RequestParam(required = false) String showName,
+            @RequestParam(required = false, defaultValue = "errorCount") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDir,
+            @RequestParam(required = false, defaultValue = "false") Boolean includeMastered) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(
+            practiceService.getWrongSentences(userId, showName, sortBy, sortDir, includeMastered));
+    }
+
+    /** 获取错题本中所有不同的剧集名（用于筛选下拉） */
+    @GetMapping("/wrong-sentences/shows")
+    public ApiResponse<List<String>> getDistinctShowNames(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getDistinctShowNames(userId));
+    }
+
+    /** 标记已掌握 */
+    @PutMapping("/wrong-sentences/{sentenceId}/master")
+    public ApiResponse<Void> markMastered(@CurrentUserId Long userId,
+                                          @PathVariable Long sentenceId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        practiceService.markMastered(userId, sentenceId);
         return ApiResponse.success();
     }
 
-    /** 获取错题本 */
-    @GetMapping("/wrong-sentences")
-    public ApiResponse<List<Map<String, Object>>> getWrongSentences(@CurrentUserId Long userId) {
+    /** 撤销已掌握 */
+    @PutMapping("/wrong-sentences/{sentenceId}/unmaster")
+    public ApiResponse<Void> unmarkMastered(@CurrentUserId Long userId,
+                                            @PathVariable Long sentenceId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
-        return ApiResponse.success(practiceService.getWrongSentences(userId));
+        practiceService.unmarkMastered(userId, sentenceId);
+        return ApiResponse.success();
+    }
+
+    /** 获取批量练习的错题句子 */
+    @GetMapping("/wrong-sentences/practice")
+    public ApiResponse<Map<String, Object>> getWrongPractice(
+            @CurrentUserId Long userId,
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(practiceService.getWrongPractice(userId, limit));
     }
 
     /** 清空错题本 */
