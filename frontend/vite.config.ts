@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    allowedHosts: ['english.pengyouquan.top'],
+    allowedHosts: ['english.pengyouquan.top', 'english-sit.pengyouquan.top', 'english-uat.pengyouquan.top'],
     // API代理到Spring Boot后端
     proxy: {
       '/api': {
