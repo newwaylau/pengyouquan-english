@@ -36,6 +36,7 @@ public class PracticeService {
     /**
      * 记录一次练习
      * 增强：响应中增加错题检查信息，用于前端"再练一遍"判断
+     * 已集成间隔复习逻辑（SM-2简化版）
      * @return 包含 inWrongBook / errorCount / newErrorCount 的 Map
      */
     @Transactional
@@ -70,7 +71,7 @@ public class PracticeService {
                         return w;
                     });
             if (ws.getId() == null) {
-                // 新创建的实体：errorCount 已在构造函数中设为 1
+                // 新创建的实体
                 ws.setErrorCount(ws.getErrorCount() != null ? ws.getErrorCount() + 1 : 1);
                 newErrorCount = ws.getErrorCount();
             } else {
@@ -79,6 +80,9 @@ public class PracticeService {
                 newErrorCount = ws.getErrorCount();
             }
             ws.setLastPracticedAt(LocalDateTime.now());
+            // 间隔复习：答错重置 reviewCount
+            ws.setReviewCount(0);
+            ws.setNextReviewAt(LocalDateTime.now().plusDays(1));
             // 如果之前标记已掌握，出错后自动取消掌握标记
             if (Boolean.TRUE.equals(ws.getIsMastered())) {
                 ws.setIsMastered(false);
@@ -87,7 +91,7 @@ public class PracticeService {
             inWrongBook = true;
             errorCount = ws.getErrorCount();
         } else {
-            // 答对了，但检查这个句子是否在错题本中
+            // 答对了，检查这个句子是否在错题本中
             Optional<WrongSentence> optWs = wrongSentenceRepository
                     .findByUserIdAndSentenceId(userId, sentenceId);
             if (optWs.isPresent()) {
@@ -95,17 +99,25 @@ public class PracticeService {
                 inWrongBook = true;
                 errorCount = ws.getErrorCount();
 
-                // 减少错误计数，如果减到 0 或以下则标记已掌握
-                int newErr = ws.getErrorCount() - 1;
-                if (newErr <= 0) {
+                // 间隔复习：更新 review_count 和 next_review_at
+                ws.setReviewCount(ws.getReviewCount() != null ? ws.getReviewCount() + 1 : 1);
+                int rc = ws.getReviewCount();
+                if (rc >= 5) {
+                    // 第5次答对：自动标记已掌握
                     ws.setIsMastered(true);
-                    ws.setErrorCount(0);
+                    ws.setNextReviewAt(null);
                 } else {
-                    ws.setErrorCount(newErr);
+                    // 计算间隔天数
+                    int intervalDays = getIntervalDays(rc);
+                    ws.setNextReviewAt(LocalDateTime.now().plusDays(intervalDays));
                 }
+
+                // 旧逻辑：减少 errorCount
+                int newErr = Math.max(0, ws.getErrorCount() - 1);
+                ws.setErrorCount(newErr);
                 ws.setLastPracticedAt(LocalDateTime.now());
                 wrongSentenceRepository.save(ws);
-                newErrorCount = Math.max(0, newErr);
+                newErrorCount = newErr;
             }
         }
 
@@ -115,6 +127,19 @@ public class PracticeService {
         result.put("errorCount", errorCount);
         result.put("newErrorCount", newErrorCount);
         return result;
+    }
+
+    /**
+     * SM-2简化版：根据连续答对次数获取下次复习间隔天数
+     */
+    private int getIntervalDays(int reviewCount) {
+        switch (reviewCount) {
+            case 1: return 1;
+            case 2: return 3;
+            case 3: return 7;
+            case 4: return 15;
+            default: return 15;
+        }
     }
 
     /**
@@ -234,11 +259,12 @@ public class PracticeService {
     }
 
     /**
-     * 获取批量练习的错题句子（按优先级排序，仅未掌握）
+     * 获取批量练习的错题句子（仅出 today's due）
      */
     public Map<String, Object> getWrongPractice(Long userId, int limit) {
+        // 只出今天要复习的
         List<WrongSentence> wrongs = wrongSentenceRepository
-                .findByUserIdAndIsMasteredFalseOrderByErrorCountDesc(userId);
+                .findDueByUserId(userId, LocalDateTime.now());
 
         // 限制返回数量
         if (wrongs.size() > limit) {
@@ -256,6 +282,7 @@ public class PracticeService {
             item.put("text", s.getText());
             item.put("showName", ws.getShowName() != null ? ws.getShowName() : "");
             item.put("errorCount", ws.getErrorCount() != null ? ws.getErrorCount() : 0);
+            item.put("reviewCount", ws.getReviewCount() != null ? ws.getReviewCount() : 0);
             item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?
                     ws.getLastPracticedAt().toString() : "");
             sentences.add(item);
@@ -267,9 +294,121 @@ public class PracticeService {
         return result;
     }
 
+    /**
+     * 更新间隔复习（新API：由前端在错题练习模式下调用）
+     * @param correct 是否答对
+     */
+    @Transactional
+    public void updateReview(Long userId, Long sentenceId, boolean correct) {
+        wrongSentenceRepository.findByUserIdAndSentenceId(userId, sentenceId)
+                .ifPresent(ws -> {
+                    ws.setLastPracticedAt(LocalDateTime.now());
+                    if (correct) {
+                        // 答对：递增 review_count
+                        ws.setReviewCount(ws.getReviewCount() != null ? ws.getReviewCount() + 1 : 1);
+                        int rc = ws.getReviewCount();
+                        if (rc >= 5) {
+                            // 第5次答对：标记已掌握
+                            ws.setIsMastered(true);
+                            ws.setNextReviewAt(null);
+                        } else {
+                            int intervalDays = getIntervalDays(rc);
+                            ws.setNextReviewAt(LocalDateTime.now().plusDays(intervalDays));
+                        }
+                    } else {
+                        // 答错：重置
+                        ws.setReviewCount(0);
+                        ws.setNextReviewAt(LocalDateTime.now().plusDays(1));
+                    }
+                    wrongSentenceRepository.save(ws);
+                });
+    }
+
+    /**
+     * 获取今天要复习的错题列表
+     */
+    public List<WrongSentence> getDueWrongSentences(Long userId) {
+        return wrongSentenceRepository.findDueByUserId(userId, LocalDateTime.now());
+    }
+
+    /**
+     * 获取复习统计
+     * 返回：{ due: 今天待复习数, upcoming: 以后复习数, total: 未掌握总数 }
+     */
+    public Map<String, Object> getReviewStats(Long userId) {
+        List<WrongSentence> due = wrongSentenceRepository.findDueByUserId(userId, LocalDateTime.now());
+        List<WrongSentence> upcoming = wrongSentenceRepository.findUpcomingByUserId(userId, LocalDateTime.now());
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("due", due.size());
+        result.put("upcoming", upcoming.size());
+        result.put("total", due.size() + upcoming.size());
+        return result;
+    }
+
     /** 获取错题本（旧版，保持兼容） */
     public List<Map<String, Object>> getWrongSentences(Long userId) {
         return getWrongSentences(userId, null, null, null, true);
+    }
+
+    /**
+     * 获取错题列表（增强版：间隔复习分组）
+     * 将结果分为 "due"（今天）和 "upcoming"（以后）两组
+     */
+    public Map<String, Object> getWrongSentencesGrouped(Long userId) {
+        List<WrongSentence> due = wrongSentenceRepository.findDueByUserId(userId, LocalDateTime.now());
+        List<WrongSentence> upcoming = wrongSentenceRepository.findUpcomingByUserId(userId, LocalDateTime.now());
+
+        List<Map<String, Object>> dueList = new ArrayList<>();
+        for (WrongSentence ws : due) {
+            dueList.add(toWrongSentenceMap(ws));
+        }
+
+        List<Map<String, Object>> upcomingList = new ArrayList<>();
+        for (WrongSentence ws : upcoming) {
+            upcomingList.add(toWrongSentenceMap(ws));
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("due", dueList);
+        result.put("upcoming", upcomingList);
+        result.put("dueCount", dueList.size());
+        result.put("upcomingCount", upcomingList.size());
+        result.put("total", dueList.size() + upcomingList.size());
+        return result;
+    }
+
+    /** 将 WrongSentence 转为前端需要的 Map */
+    private Map<String, Object> toWrongSentenceMap(WrongSentence ws) {
+        Optional<Sentence> optS = sentenceRepository.findById(ws.getSentenceId());
+        String text = optS.map(Sentence::getText).orElse("");
+
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("sentenceId", ws.getSentenceId());
+        item.put("text", text);
+        item.put("showName", ws.getShowName() != null ? ws.getShowName() : "");
+        item.put("errorCount", ws.getErrorCount() != null ? ws.getErrorCount() : 0);
+        item.put("reviewCount", ws.getReviewCount() != null ? ws.getReviewCount() : 0);
+        item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?
+                ws.getLastPracticedAt().toString() : "");
+        item.put("nextReviewAt", ws.getNextReviewAt() != null ?
+                ws.getNextReviewAt().toString() : "");
+        item.put("isMastered", ws.getIsMastered() != null && ws.getIsMastered());
+        return item;
+    }
+
+    /**
+     * 根据 next_review_at 生成可读的复习时间标签
+     */
+    public static String getReviewLabel(LocalDateTime nextReviewAt) {
+        if (nextReviewAt == null) return "";
+        LocalDateTime now = LocalDateTime.now();
+        long diffDays = java.time.Duration.between(now.toLocalDate().atStartOfDay(),
+                nextReviewAt.toLocalDate().atStartOfDay()).toDays();
+
+        if (diffDays <= 0) return "今天复习";
+        if (diffDays == 1) return "明天复习";
+        return diffDays + "天后复习";
     }
 
     /** 清空错题本 */
@@ -282,6 +421,29 @@ public class PracticeService {
     @Transactional
     public void removeWrongSentence(Long userId, Long sentenceId) {
         wrongSentenceRepository.deleteByUserIdAndSentenceId(userId, sentenceId);
+    }
+
+    /** 批量练习预览：返回按间隔分组的错题 */
+    public List<Map<String, Object>> getWrongSentencesWithReviewInfo(Long userId) {
+        List<WrongSentence> wrongs = wrongSentenceRepository
+                .findByUserIdAndIsMasteredFalseOrderByErrorCountDesc(userId);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (WrongSentence ws : wrongs) {
+            result.add(toWrongSentenceMap(ws));
+        }
+        // 排序：今天复习的排前面
+        LocalDateTime now = LocalDateTime.now();
+        result.sort((a, b) -> {
+            String nextA = (String) a.get("nextReviewAt");
+            String nextB = (String) b.get("nextReviewAt");
+            boolean aDue = nextA.isEmpty() || nextA.compareTo(now.toString()) <= 0;
+            boolean bDue = nextB.isEmpty() || nextB.compareTo(now.toString()) <= 0;
+            if (aDue && !bDue) return -1;
+            if (!aDue && bDue) return 1;
+            return nextA.compareTo(nextB);
+        });
+        return result;
     }
 
     /** 获取练习记录导出数据（含句子文本） */

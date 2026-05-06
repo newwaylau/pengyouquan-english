@@ -98,6 +98,8 @@ export default function PracticePage({
   // 统计
   const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
   const [wrongCount, setWrongCount] = useState(0);
+  // 本次错题复习的正确统计
+  const [wrongReviewStats, setWrongReviewStats] = useState({ correct: 0, total: 0 });
 
   // 刷新统计
   const refreshStats = () => {
@@ -105,7 +107,7 @@ export default function PracticePage({
     api.stats().then(r => {
       if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
     });
-    api.wrongSentences().then(r => { if (r.code === 200) setWrongCount(r.data.length); });
+    api.wrongSentenceStats().then(r => { if (r.code === 200) setWrongCount(r.data.due + r.data.upcoming); });
   };
 
   const [toastMsg, setToastMsg] = useState('');
@@ -138,7 +140,7 @@ export default function PracticePage({
     api.stats().then(r => {
       if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
     });
-    api.wrongSentences().then(r => { if (r.code === 200) setWrongCount(r.data.length); });
+    api.wrongSentenceStats().then(r => { if (r.code === 200) setWrongCount(r.data.due + r.data.upcoming); });
     api.getSettings().then(r => {
       if (r.code !== 200) return;
       const s = r.data;
@@ -387,23 +389,45 @@ export default function PracticePage({
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
-      // 调用练习日志，检查是否在错题本中
+      // 调用练习日志
       api.logPractice({ sentenceId: sentence.id, correct: true, correctCount: userCorrectCount, totalWords: userInputCount, mode }).then(r => {
-        if (r.data?.inWrongBook) {
-          // 这句在错题本中，显示再练提示
+        // 错题模式下答对：更新间隔复习 + 自动下一题
+        if (mode === 'wrong' && r.data?.inWrongBook) {
+          // 更新间隔复习（SM-2）
+          api.updateWrongReview({ sentenceId: sentence.id, correct: true }).then(() => {
+            setWrongReviewStats(prev => ({ correct: prev.correct + 1, total: prev.total + 1 }));
+            refreshStats();
+            // 如果 review_count >= 5，会自动标记已掌握并从下次错题练习移除
+            // 立即从列表移除
+            setWrongSentences(prev => prev.filter(s => s.sentenceId !== sentence.id));
+            // 自动加载下一题
+            setTimeout(() => goNext(), 600);
+          });
+        } else if (r.data?.inWrongBook) {
+          // 普通模式下错题答对，显示再练提示
           setWrongBookPrompt({
             sentenceId: sentence.id,
             errorCount: r.data.errorCount,
             newErrorCount: r.data.newErrorCount,
           });
+          refreshStats();
+        } else {
+          refreshStats();
         }
       });
-      refreshStats();
     } else if (retryCount >= 1) {
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
+      // 错题模式下答错：重置间隔复习
+      if (mode === 'wrong') {
+        api.updateWrongReview({ sentenceId: sentence.id, correct: false });
+        setWrongReviewStats(prev => ({ correct: prev.correct, total: prev.total + 1 }));
+        // 不过这里只是更新间隔，句子还在错题本，但需要从本次复习列表中移除
+        setWrongSentences(prev => prev.filter(s => s.sentenceId !== sentence.id));
+        setTimeout(() => goNext(), 600);
+      }
       refreshStats();
     } else {
       setRetryCount(1);
@@ -558,7 +582,8 @@ export default function PracticePage({
           <div className="wrong-review-done">
             <div className="wrong-review-icon">🎉</div>
             <div className="wrong-review-title">错题复习完成！</div>
-            <div className="wrong-review-subtitle">共复习了 {wrongSentences.length} 句错题</div>
+            <div className="wrong-review-subtitle">复习摘要：正确 {wrongReviewStats.correct}/{wrongReviewStats.total} 句</div>
+            <div className="wrong-review-subtitle">共 {wrongSentences.length} 句错题</div>
             <div className="wrong-review-actions">
               <button className="btn-primary" onClick={() => onNavigate?.('wrong')}>
                 📕 返回错题本
