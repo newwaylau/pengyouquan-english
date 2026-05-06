@@ -35,6 +35,8 @@ export const api = {
   // 练习
   logPractice: (data: any) =>
     request('/api/practice/log', { method: 'POST', body: JSON.stringify(data) }),
+  flagSentence: (sentenceId: number, flag: boolean) =>
+    request(`/api/sentences/${sentenceId}/flag`, { method: 'POST', body: JSON.stringify({ flag }) }),
 
   // 错题
   wrongSentences: (params?: { showName?: string; sortBy?: string; sortDir?: string; includeMastered?: boolean }) => {
@@ -82,5 +84,14 @@ export const api = {
   subtitleDelete: (id: number) => request(`/api/subtitle/${id}`, { method: 'DELETE' }),
   subtitleFormats: () => request('/api/subtitle/formats'),
   subtitleBatchImport: (directoryPath: string) =>
+    request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
+
+  // 管理后台——句子报告
+  adminFlaggedSentences: () =>
+    request('/api/admin/sentence-flags'),
+  adminDisableSentence: (sentenceId: number, reason?: string) =>
+    request(`/api/admin/sentences/${sentenceId}/disable`, { method: 'PUT', body: JSON.stringify({ reason: reason || '' }) }),
+  adminEnableSentence: (sentenceId: number) =>
+    request(`/api/admin/sentences/${sentenceId}/enable`, { method: 'PUT' }),
     request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
 };

@@ -37,6 +37,14 @@ public class Sentence {
 
     private Double accuracy;
 
+    /** 句子是否已停用（管理员审核通过停用） */
+    @Column(name = "is_disabled", nullable = false)
+    private Boolean isDisabled = false;
+
+    /** 停用原因 */
+    @Column(name = "disabled_reason")
+    private String disabledReason = "";
+
     @Column(name = "imported_at", updatable = false)
     private LocalDateTime importedAt;
 

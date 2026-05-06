@@ -1,6 +1,8 @@
 package com.pengyouquan.english.controller;
 
 import com.pengyouquan.english.dto.*;
+import com.pengyouquan.english.model.SentenceFlag;
+import com.pengyouquan.english.repository.SentenceFlagRepository;
 import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.PracticeService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,19 +13,23 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 练习系统接口
- * 记录练习/获取练习句子/错题本
+ * 记录练习/获取练习句子/错题本/举报句子
  */
 @RestController
 @RequestMapping("/api")
 public class PracticeController {
 
     private final PracticeService practiceService;
+    private final SentenceFlagRepository sentenceFlagRepository;
 
-    public PracticeController(PracticeService practiceService) {
+    public PracticeController(PracticeService practiceService,
+                              SentenceFlagRepository sentenceFlagRepository) {
         this.practiceService = practiceService;
+        this.sentenceFlagRepository = sentenceFlagRepository;
     }
 
     /** 记录一次练习结果（增强版：返回错题检查信息） */
@@ -147,6 +153,35 @@ public class PracticeController {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         practiceService.removeWrongSentence(userId, sentenceId);
         return ApiResponse.success();
+    }
+
+    /**
+     * 用户举报句子（标记"跟原音对不上"）
+     * body: { flag: true } 举报，{ flag: false } 取消举报
+     */
+    @PostMapping("/sentences/{id}/flag")
+    public ApiResponse<Map<String, Object>> flagSentence(@CurrentUserId Long userId,
+                                                         @PathVariable Long id,
+                                                         @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        boolean flag = Boolean.parseBoolean(body.getOrDefault("flag", "true").toString());
+
+        if (flag) {
+            // 举报：检查是否已经举报过
+            Optional<SentenceFlag> existing = sentenceFlagRepository.findBySentenceIdAndUserId(id, userId);
+            if (existing.isEmpty()) {
+                SentenceFlag sf = new SentenceFlag();
+                sf.setSentenceId(id);
+                sf.setUserId(userId);
+                sentenceFlagRepository.save(sf);
+            }
+        } else {
+            // 取消举报
+            sentenceFlagRepository.deleteBySentenceIdAndUserId(id, userId);
+        }
+
+        long count = sentenceFlagRepository.countBySentenceId(id);
+        return ApiResponse.success(Map.of("flagged", flag, "count", count));
     }
 
     /** 导出当前用户的练习记录为 CSV */

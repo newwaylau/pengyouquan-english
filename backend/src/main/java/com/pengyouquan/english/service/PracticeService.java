@@ -220,6 +220,7 @@ public class PracticeService {
             item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?
                     ws.getLastPracticedAt().toString() : "");
             item.put("isMastered", ws.getIsMastered() != null && ws.getIsMastered());
+            item.put("isDisabled", optS.map(s -> s.getIsDisabled() != null && s.getIsDisabled()).orElse(false));
             result.add(item);
         }
         return result;
@@ -285,6 +286,7 @@ public class PracticeService {
             item.put("reviewCount", ws.getReviewCount() != null ? ws.getReviewCount() : 0);
             item.put("lastPracticedAt", ws.getLastPracticedAt() != null ?
                     ws.getLastPracticedAt().toString() : "");
+            item.put("isDisabled", optS.map(sent -> sent.getIsDisabled() != null && sent.getIsDisabled()).orElse(false));
             sentences.add(item);
         }
 
@@ -394,6 +396,7 @@ public class PracticeService {
         item.put("nextReviewAt", ws.getNextReviewAt() != null ?
                 ws.getNextReviewAt().toString() : "");
         item.put("isMastered", ws.getIsMastered() != null && ws.getIsMastered());
+        item.put("isDisabled", optS.map(s -> s.getIsDisabled() != null && s.getIsDisabled()).orElse(false));
         return item;
     }
 

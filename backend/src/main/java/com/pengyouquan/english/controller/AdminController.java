@@ -3,9 +3,11 @@ package com.pengyouquan.english.controller;
 import com.pengyouquan.english.config.RequestLoggingInterceptor;
 import com.pengyouquan.english.dto.ApiResponse;
 import com.pengyouquan.english.model.Notification;
+import com.pengyouquan.english.model.Sentence;
 import com.pengyouquan.english.model.SystemSetting;
 import com.pengyouquan.english.repository.NotificationRepository;
 import com.pengyouquan.english.repository.PracticeLogRepository;
+import com.pengyouquan.english.repository.SentenceFlagRepository;
 import com.pengyouquan.english.repository.SentenceRepository;
 import com.pengyouquan.english.repository.ShowRepository;
 import com.pengyouquan.english.repository.SystemSettingRepository;
@@ -50,6 +52,7 @@ public class AdminController {
     private final ShowRepository showRepository;
     private final SentenceRepository sentenceRepository;
     private final SystemSettingRepository systemSettingRepository;
+    private final SentenceFlagRepository sentenceFlagRepository;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
     private final NotificationRepository notificationRepository;
 
@@ -57,6 +60,7 @@ public class AdminController {
                            PracticeLogRepository practiceLogRepository,
                            UserRepository userRepository,
                            ShowRepository showRepository,
+                           SentenceFlagRepository sentenceFlagRepository,
                            SentenceRepository sentenceRepository,
                            SystemSettingRepository systemSettingRepository,
                            RequestLoggingInterceptor requestLoggingInterceptor,
@@ -65,6 +69,7 @@ public class AdminController {
         this.practiceLogRepository = practiceLogRepository;
         this.userRepository = userRepository;
         this.showRepository = showRepository;
+        this.sentenceFlagRepository = sentenceFlagRepository;
         this.sentenceRepository = sentenceRepository;
         this.systemSettingRepository = systemSettingRepository;
         this.requestLoggingInterceptor = requestLoggingInterceptor;
@@ -417,6 +422,84 @@ public class AdminController {
         }
         notificationRepository.deleteById(id);
         return ApiResponse.success(null);
+    }
+
+    // ── 句子报告（举报管理） ──
+
+    /**
+     * 获取被举报的句子列表（按举报数排序）
+     * 管理员专用
+     */
+    @GetMapping("/sentence-flags")
+    public ApiResponse<List<Map<String, Object>>> getFlaggedSentences(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        List<Object[]> flaggedData = sentenceFlagRepository.findFlaggedSentenceIds();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Object[] row : flaggedData) {
+            Long sentenceId = (Long) row[0];
+            long flagCount = (Long) row[1];
+
+            Optional<Sentence> optSentence = sentenceRepository.findById(sentenceId);
+            if (optSentence.isEmpty()) continue;
+
+            Sentence s = optSentence.get();
+            String showName = showRepository.findById(s.getShowId())
+                    .map(show -> show.getName()).orElse("");
+
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("sentenceId", sentenceId);
+            item.put("text", s.getText());
+            item.put("showName", showName);
+            item.put("flagCount", flagCount);
+            item.put("isDisabled", s.getIsDisabled() != null && s.getIsDisabled());
+            item.put("disabledReason", s.getDisabledReason() != null ? s.getDisabledReason() : "");
+            result.add(item);
+        }
+
+        return ApiResponse.success(result);
+    }
+
+    /**
+     * 管理员停用句子
+     * 停用后句子不再展示给用户
+     */
+    @PutMapping("/sentences/{id}/disable")
+    public ApiResponse<Void> disableSentence(@CurrentUserId Long userId,
+                                              @PathVariable Long id,
+                                              @RequestBody Map<String, String> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        Sentence sentence = sentenceRepository.findById(id)
+                .orElse(null);
+        if (sentence == null) return ApiResponse.notFound("句子不存在");
+
+        sentence.setIsDisabled(true);
+        sentence.setDisabledReason(body.getOrDefault("reason", ""));
+        sentenceRepository.save(sentence);
+        return ApiResponse.success();
+    }
+
+    /**
+     * 管理员恢复句子（取消停用）
+     */
+    @PutMapping("/sentences/{id}/enable")
+    public ApiResponse<Void> enableSentence(@CurrentUserId Long userId,
+                                             @PathVariable Long id) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+
+        Sentence sentence = sentenceRepository.findById(id)
+                .orElse(null);
+        if (sentence == null) return ApiResponse.notFound("句子不存在");
+
+        sentence.setIsDisabled(false);
+        sentence.setDisabledReason("");
+        sentenceRepository.save(sentence);
+        return ApiResponse.success();
     }
 
     /** CSV 转义：如果包含逗号/引号/换行则包裹引号 */

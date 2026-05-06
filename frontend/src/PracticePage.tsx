@@ -72,6 +72,9 @@ export default function PracticePage({
   const [voice, setVoice] = useState('en-GB-RyanNeural');
   const [answered, setAnswered] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  // 举报状态
+  const [flaggedSentenceIds, setFlaggedSentenceIds] = useState<Set<number>>(new Set());
+  const [flagLoading, setFlagLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [words, setWords] = useState<string[]>([]);
   const [inputs, setInputs] = useState<string[]>([]);
@@ -476,6 +479,22 @@ export default function PracticePage({
     loadSentence();
   };
 
+  // 举报/取消举报句子
+  const toggleFlag = async () => {
+    if (!user || !sentence?.id || flagLoading || !answered) return;
+    setFlagLoading(true);
+    const isFlagged = flaggedSentenceIds.has(sentence.id);
+    const r = await api.flagSentence(sentence.id, !isFlagged);
+    setFlagLoading(false);
+    if (r.code === 200) {
+      if (isFlagged) {
+        setFlaggedSentenceIds(prev => { const s = new Set(prev); s.delete(sentence.id); return s; });
+      } else {
+        setFlaggedSentenceIds(prev => new Set(prev).add(sentence.id));
+      }
+    }
+  };
+
   // 快捷键
   // 快捷键（在输入框内按快捷键不会输入字符）
   useEffect(() => {
@@ -756,11 +775,24 @@ export default function PracticePage({
             {wrongWords.size === 0
               ? '✅ 完全正确！'
               : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
-
           </div>
         )}
         {retryCount === 1 && !answered && (
           <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
+        )}
+
+        {/* 举报按钮（仅答完题后显示） */}
+        {answered && user && (
+          <div className="flag-section">
+            <button
+              className={`flag-btn ${flaggedSentenceIds.has(sentence.id) ? 'flagged' : ''}`}
+              onClick={toggleFlag}
+              disabled={flagLoading}
+              title={flaggedSentenceIds.has(sentence.id) ? '取消举报' : '标记：这句台词跟原音对不上'}
+            >
+              🚩 {flaggedSentenceIds.has(sentence.id) ? '已标记' : '报告问题'}
+            </button>
+          </div>
         )}
 
         </div>
