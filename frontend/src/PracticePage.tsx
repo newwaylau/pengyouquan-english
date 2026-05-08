@@ -83,6 +83,7 @@ export default function PracticePage({
   const [correctWords, setCorrectWords] = useState<Set<number>>(new Set());
   const [wrongWords, setWrongWords] = useState<Set<number>>(new Set());
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const [historyIds, setHistoryIds] = useState<number[]>(
     () => JSON.parse(localStorage.getItem('historyIds') || '[]')
   );
@@ -98,6 +99,10 @@ export default function PracticePage({
   const jumpDoneRef = useRef(false);
   const preferOriginalRef = useRef(preferOriginal);
   const speedRef = useRef(speed);
+  const voiceRef = useRef(voice);
+  // 句子队列（API 一次返回 limit=15，逐个消费，预加载下一句 TTS）
+  const [sentenceQueue, setSentenceQueue] = useState<any[]>([]);
+  const [queueIndex, setQueueIndex] = useState(0);
 
   // 统计
   const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
@@ -209,6 +214,8 @@ export default function PracticePage({
     if (specificId) {
       const r = await api.sentence(specificId);
       if (r.code !== 200 || !r.data) return;
+      setSentenceQueue([r.data]);
+      setQueueIndex(0);
       setupSentence(r.data, skipAutoPlay);
       return;
     }
@@ -217,7 +224,18 @@ export default function PracticePage({
     if (showIdsParam) url += `&showIds=${showIdsParam}`;
     const r = await api.random(url);
     if (r.code !== 200 || !r.data?.length) return;
+    setSentenceQueue(r.data);
+    setQueueIndex(0);
     setupSentence(r.data[0], skipAutoPlay);
+
+    // 预加载下一句 TTS（用户练当前句时触发后端生成，不影响用户体验）
+    if (r.data.length > 1) {
+      const next = r.data[1];
+      const nextEn = extractEn(next.text);
+      if (nextEn && (!preferOriginal || !next.audioFile)) {
+        fetch(getTtsUrl(nextEn, voice)).catch(() => {});
+      }
+    }
   };
   loadSentenceRef.current = loadSentence;
 
@@ -268,6 +286,21 @@ export default function PracticePage({
   useEffect(() => {
     setShowCn(mode === 'translation');
   }, [mode]);
+
+  // 新句子加载后把焦点从隐藏输入框移到第一个单词输入框（手机键盘保持弹出）
+  useEffect(() => {
+    if (!sentence || words.length === 0) return;
+    // 用 RAF 确保 DOM 已完成渲染
+    const raf = requestAnimationFrame(() => {
+      let first = 0;
+      while (first < words.length && hints.has(first)) first++;
+      const el = inputRefs.current[first];
+      if (el && document.activeElement !== el) {
+        el.focus();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [sentence]);
 
   // 进入错题模式时加载错题句子
   useEffect(() => {
@@ -330,15 +363,11 @@ export default function PracticePage({
     }
     setHints(hintsSet);
 
-    // 聚焦第一个可输入框
-    let first = 0;
-    while (first < wds.length && hintsSet.has(first)) first++;
-    setTimeout(() => inputRefs.current[first]?.focus(), 100);
-
     // 自动播放（下一句时触发，切剧集时不触发）
     if (!skipAutoPlay) {
       preferOriginalRef.current = preferOriginal;
       speedRef.current = speed;
+      voiceRef.current = voice;
       setTimeout(() => {
         if (preferOriginalRef.current && s.audioFile) {
           if (audioRef.current) audioRef.current.pause();
@@ -441,7 +470,7 @@ export default function PracticePage({
       wrong.forEach(idx => { clearedInputs[idx] = ''; });
       setInputs(clearedInputs);
       if (firstWrongIdx !== undefined) {
-        setTimeout(() => inputRefs.current[firstWrongIdx]?.focus(), 100);
+        // 聚焦错误框由用户点击输入框触发，不做延迟聚焦
       }
     }
   };
@@ -460,8 +489,6 @@ export default function PracticePage({
     setInputs(words.map(() => ''));
     // 重置提示（撇号词+随机提示保持不变，已在hints中）
     let first = 0;
-    while (first < words.length && hints.has(first)) first++;
-    setTimeout(() => inputRefs.current[first]?.focus(), 100);
   };
 
   // 跳过再练，继续下一句
@@ -476,6 +503,27 @@ export default function PracticePage({
       loadWrongNext();
       return;
     }
+
+    const nextIdx = queueIndex + 1;
+    if (nextIdx < sentenceQueue.length) {
+      // 从队列取下一句（TTS 已预先在后台生成）
+      setQueueIndex(nextIdx);
+      setupSentence(sentenceQueue[nextIdx], false);
+      setHistoryIds(h => [...h, sentenceQueue[nextIdx].id]);
+
+      // 预加载再下一句
+      if (nextIdx + 1 < sentenceQueue.length) {
+        const next2 = sentenceQueue[nextIdx + 1];
+        const nextEn = extractEn(next2.text);
+        if (nextEn && (!preferOriginal || !next2.audioFile)) {
+          fetch(getTtsUrl(nextEn, voice)).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    // 队列用完，加载新一批
+    hiddenInputRef.current?.focus();
     setHistoryIds(h => [...h, sentence.id]);
     loadSentence();
   };
@@ -746,7 +794,17 @@ export default function PracticePage({
 
         {/* 逐词输入（未完成时显示） */}
         {/* 输入框始终显示，回答后变为只读 */}
-          <div className="word-inputs" key={sentence?.id}>
+          {/* 隐藏输入框（手机键盘触发用） */}
+          <input ref={hiddenInputRef}
+            style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+            onBlur={() => {
+              // 隐藏输入框失焦时，聚焦到实际输入框
+              let first = 0;
+              while (first < words.length && hints.has(first)) first++;
+              inputRefs.current[first]?.focus();
+            }}
+          />
+          <div className="word-inputs">
             {words.map((w, i) => {
               const parts = splitWordParts(w);
               return (

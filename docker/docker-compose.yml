@@ -75,9 +75,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # 挂载后端日志目录
+    # 挂载后端日志目录 + 音频持久化（原音+TTS）
     volumes:
       - backend-logs:/app/logs
+      - ../backend/data/audio:/app/data/audio
     logging:
       driver: "json-file"
       options:
@@ -94,6 +95,9 @@ services:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
+    # Nginx 代理缓存持久化（原音+TTS）
+    volumes:
+      - nginx-cache:/var/cache/nginx
     logging:
       driver: "json-file"
       options:
@@ -104,3 +108,4 @@ volumes:
   mysql-data:
   redis-data:
   backend-logs:
+  nginx-cache:
