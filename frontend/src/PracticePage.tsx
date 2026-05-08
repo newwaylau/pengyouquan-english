@@ -302,6 +302,20 @@ export default function PracticePage({
     return () => cancelAnimationFrame(raf);
   }, [sentence]);
 
+  // 提交报错后把焦点从隐藏输入框移到第一个单词输入框
+  useEffect(() => {
+    if (retryCount !== 1) return;
+    const raf = requestAnimationFrame(() => {
+      let first = 0;
+      while (first < words.length && hints.has(first)) first++;
+      const el = inputRefs.current[first];
+      if (el && document.activeElement !== el) {
+        el.focus();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [retryCount]);
+
   // 进入错题模式时加载错题句子
   useEffect(() => {
     if (mode === 'wrong' && user) {
@@ -470,7 +484,9 @@ export default function PracticePage({
       wrong.forEach(idx => { clearedInputs[idx] = ''; });
       setInputs(clearedInputs);
       if (firstWrongIdx !== undefined) {
-        // 聚焦错误框由用户点击输入框触发，不做延迟聚焦
+        // 先聚焦隐藏输入框（在用户手势上下文中，确保手机键盘弹出）
+        // 下一句场景已证实此方式有效
+        hiddenInputRef.current?.focus();
       }
     }
   };
