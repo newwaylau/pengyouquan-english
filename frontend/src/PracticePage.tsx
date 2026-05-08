@@ -357,7 +357,7 @@ export default function PracticePage({
   // TTS
   const playTts = (text: string) => {
     if (audioRef.current) audioRef.current.pause();
-    const audio = new Audio(`/api/tts?text=${encodeURIComponent(text)}&voice=${voice}`);
+    const audio = new Audio(getTtsUrl(text, voice));
     audio.playbackRate = speed;
     audio.play().catch(() => {});
     audioRef.current = audio;
@@ -367,7 +367,7 @@ export default function PracticePage({
   const playOriginal = () => {
     if (!sentence?.audioFile) { playTts(extractEn(sentence?.text || '')); return; }
     if (audioRef.current) audioRef.current.pause();
-    const a = new Audio('/api/audio/' + encodeURIComponent(sentence.audioFile));
+    const a = new Audio(getAudioUrl('/api/audio/' + encodeURIComponent(sentence.audioFile)));
     a.playbackRate = speed;
     a.play().catch(() => {});
     audioRef.current = a;
@@ -746,7 +746,7 @@ export default function PracticePage({
 
         {/* 逐词输入（未完成时显示） */}
         {/* 输入框始终显示，回答后变为只读 */}
-          <div className="word-inputs">
+          <div className="word-inputs" key={sentence?.id}>
             {words.map((w, i) => {
               const parts = splitWordParts(w);
               return (
