@@ -342,7 +342,7 @@ export default function PracticePage({
       setTimeout(() => {
         if (preferOriginalRef.current && s.audioFile) {
           if (audioRef.current) audioRef.current.pause();
-          const a = new Audio('/api/audio/' + encodeURIComponent(s.audioFile));
+          const a = new Audio(getAudioUrl('/api/audio/' + encodeURIComponent(s.audioFile)));
           a.playbackRate = speedRef.current;
           a.play().catch(() => {});
           audioRef.current = a;
