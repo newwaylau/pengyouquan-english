@@ -4,9 +4,12 @@ import com.pengyouquan.english.dto.ApiResponse;
 import com.pengyouquan.english.service.TtsService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,7 @@ public class TtsController {
         this.ttsService = ttsService;
     }
 
-    /** 获取 TTS 音频 */
+    /** 获取 TTS 音频（缓存7天） */
     @GetMapping("/tts")
     public ResponseEntity<Resource> tts(
             @RequestParam String text,
@@ -36,6 +39,8 @@ public class TtsController {
             java.io.File audio = ttsService.generateTts(text, voice);
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("audio/mpeg"))
+                    .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic())
+                    .eTag(Long.toString(audio.lastModified()))
                     .body(new FileSystemResource(audio));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -48,7 +53,7 @@ public class TtsController {
         return ApiResponse.success(ttsService.getVoices());
     }
 
-    /** 播放预生成音频 */
+    /** 播放预生成音频（缓存30天） */
     @GetMapping("/audio/{filename:.+}")
     public ResponseEntity<Resource> serveAudio(@PathVariable String filename) {
         java.io.File audio = ttsService.getAudioFile(filename);
@@ -57,6 +62,8 @@ public class TtsController {
         }
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic())
+                .eTag(Long.toString(audio.lastModified()))
                 .body(new FileSystemResource(audio));
     }
 }
