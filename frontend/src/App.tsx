@@ -7,7 +7,11 @@ import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
 import SubtitlePage from './SubtitlePage';
+import { initAudioBase } from './audioBase';
 import './index.css';
+
+// 应用启动时检测 IPv6 连通性
+initAudioBase();
 
 export default function App() {
   const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle'>('practice');

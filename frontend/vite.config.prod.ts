@@ -2,20 +2,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// PROD 环境专用 Vite 配置
+// PROD 后端运行在 8082 端口
 export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    allowedHosts: ['english.pengyouquan.top', 'english-sit.pengyouquan.top', 'english-uat.pengyouquan.top'],
-    // API代理到Spring Boot后端
+    port: 5175,
+    allowedHosts: ['english.pengyouquan.top', 'en6.pengyouquan.top'],
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8082',
         changeOrigin: true,
       },
       '/audio': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8082',
         changeOrigin: true,
       },
     },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
+import { getAudioUrl, getTtsUrl } from './audioBase';
 
 /** 从字幕文本中提取英文（含大小写校正） */
 function extractEn(text: string) {
