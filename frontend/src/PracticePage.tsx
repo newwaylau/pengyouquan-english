@@ -696,7 +696,7 @@ export default function PracticePage({
                 <span className="bottom-nav-icon">🚧</span>
                 <span className="bottom-nav-label">搜索(建设中)</span>
               </button>
-              <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
+              <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
                 <span className="bottom-nav-icon">🧘</span>
                 <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
               </button>
@@ -1019,7 +1019,7 @@ export default function PracticePage({
           <span className="bottom-nav-icon">🚧</span>
           <span className="bottom-nav-label">搜索(建设中)</span>
         </button>
-        <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
+        <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
           <span className="bottom-nav-icon">🧘</span>
           <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
         </button>

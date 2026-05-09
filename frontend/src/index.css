@@ -2235,7 +2235,8 @@ body {
 .phone-mode .mode-badge,
 .phone-mode .wrong-progress-bar,
 .phone-mode .practice-card,
-.phone-mode .bottom-section {
+.phone-mode .bottom-section,
+.phone-mode .bottom-nav {
   display: none !important;
 }
 /* 专注模式也给关闭，确保专注+手机叠加时干净 */
