@@ -857,6 +857,12 @@ body {
   color: var(--text);
   border-color: var(--text-muted);
 }
+.exit-focus-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+}
 
 /* =====================================================
    以下页面级样式（错题本、设置面板、浏览、搜索、管理、字幕等）
