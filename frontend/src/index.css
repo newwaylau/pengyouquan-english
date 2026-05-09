@@ -391,27 +391,7 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 90px);
-  overflow: hidden;
-}
-
-/* ---------- 内容区域（可滚动） ---------- */
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 4px;
-}
-
-/* ---------- 底部输入区（键盘弹出时固定到键盘上方） ---------- */
-.bottom-input-area {
-  flex-shrink: 0;
-  background: var(--card-bg);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.12);
-  z-index: 10;
-  padding: 8px 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  height: calc(100vh - 90px);
 }
 
 /* ---------- Stats Bar ---------- */
@@ -462,19 +442,62 @@ body {
   margin-bottom: 12px;
 }
 
-/* ---------- 主卡片（旧版，保留兼容） ---------- */
+/* ---------- 主卡片 ---------- */
 .practice-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   padding: 20px;
   box-shadow: var(--shadow-card);
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-body .sentence-en {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.card-body .sentence-cn {
+  flex: 0 0 auto;
+}
+
+.card-body .word-inputs {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+.bottom-section {
+  flex: 0 0 33%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.button-area {
+  background: var(--card-bg);
+  border-radius: 0 0 12px 12px;
+  padding: 0 20px 12px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 0;
 }
 
 .action-divider {
   border: none;
   border-top: 1px solid var(--border-strong);
-  margin: 8px 0 12px;
+  margin: 16px 0 12px;
   opacity: 0.5;
 }
 
@@ -583,14 +606,6 @@ body {
   width: 100%;
 }
 .action-row:last-child { margin-bottom: 0; }
-
-/* 底部输入区内的 action-row 间距更紧凑 */
-.bottom-input-area .action-row {
-  margin-bottom: 6px;
-}
-.bottom-input-area .action-row:last-child {
-  margin-bottom: 0;
-}
 
 .action-row .btn-primary {
   flex: 1;

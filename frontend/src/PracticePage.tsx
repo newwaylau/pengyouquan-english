@@ -734,7 +734,6 @@ export default function PracticePage({
   const userCorrectCount = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
 
   return (
-    <>
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''}`}>
       {toastMsg && <div className="toast-msg">{toastMsg}</div>}
       {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
@@ -786,8 +785,9 @@ export default function PracticePage({
         </div>
       )}
 
-      {/* 内容区域（可滚动） */}
-      <div className="content-area">
+      {/* 主卡片 */}
+      <div className="practice-card">
+        <div className="card-body">
         {/* 剧集名 + ID */}
         <div className="sentence-meta">
           {sentence.showName} · #{sentence.id}
@@ -808,13 +808,52 @@ export default function PracticePage({
           </div>
         )}
 
-        {/* 反馈区域（答完后） */}
+        {/* 逐词输入（未完成时显示） */}
+        {/* 输入框始终显示，回答后变为只读 */}
+          {/* 隐藏输入框（手机键盘触发用） */}
+          <input ref={hiddenInputRef}
+            style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+            onBlur={() => {
+              // 隐藏输入框失焦时，聚焦到实际输入框
+              let first = 0;
+              while (first < words.length && hints.has(first)) first++;
+              inputRefs.current[first]?.focus();
+            }}
+          />
+          <div className="word-inputs">
+            {words.map((w, i) => {
+              const parts = splitWordParts(w);
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
+                  <input
+                    ref={el => { inputRefs.current[i] = el; }}
+                    className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
+                    size={Math.max(1, parts.letters.length)}
+                    placeholder={Array(parts.letters.length).fill('_').join(' ')}
+                    value={hints.has(i) ? parts.letters : inputs[i]}
+                    onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
+                    onKeyDown={e => handleKeyDown(i, e)}
+                    disabled={hints.has(i) || answered}
+                    autoFocus={i === 0}
+                  />
+                  {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
+                  {i < words.length - 1 && <span className="word-sep"> </span>}
+                </div>
+              );
+            })}
+          </div>
+
+        {/* 反馈区域 */}
         {answered && (
           <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
             {wrongWords.size === 0
               ? '✅ 完全正确！'
               : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
           </div>
+        )}
+        {retryCount === 1 && !answered && (
+          <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
         )}
 
         {/* 举报按钮（仅答完题后显示） */}
@@ -830,51 +869,13 @@ export default function PracticePage({
             </button>
           </div>
         )}
+
+        </div>
       </div>
 
-      {/* 底部输入区（键盘弹出时固定到键盘上方） */}
-      <div className="bottom-input-area">
-        {/* 隐藏输入框（手机键盘触发用） */}
-        <input ref={hiddenInputRef}
-          style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
-          onBlur={() => {
-            // 隐藏输入框失焦时，聚焦到实际输入框
-            let first = 0;
-            while (first < words.length && hints.has(first)) first++;
-            inputRefs.current[first]?.focus();
-          }}
-        />
-
-        {/* 逐词输入 */}
-        <div className="word-inputs">
-          {words.map((w, i) => {
-            const parts = splitWordParts(w);
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
-                <input
-                  ref={el => { inputRefs.current[i] = el; }}
-                  className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                  size={Math.max(1, parts.letters.length)}
-                  placeholder={Array(parts.letters.length).fill('_').join(' ')}
-                  value={hints.has(i) ? parts.letters : inputs[i]}
-                  onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
-                  onKeyDown={e => handleKeyDown(i, e)}
-                  disabled={hints.has(i) || answered}
-                  autoFocus={i === 0}
-                />
-                {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
-                {i < words.length - 1 && <span className="word-sep"> </span>}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 重试反馈 */}
-        {retryCount === 1 && !answered && (
-          <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
-        )}
-
+      {/* 按钮区 */}
+      <div className="bottom-section">
+      <div className="button-area">
         <hr className="action-divider" />
 
         {/* 操作行1：提交 */}
@@ -949,7 +950,6 @@ export default function PracticePage({
       </div>
 
       </div>
-
       {/* 设置面板 */}
       <SettingsPanel
         open={settingsOpen}
@@ -1020,6 +1020,6 @@ export default function PracticePage({
         </div>
       )}
 
-    </>
+    </div>
   );
 }
