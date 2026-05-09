@@ -2230,6 +2230,7 @@ body {
 .phone-mode {
   height: 100dvh !important;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 .phone-mode .stats-bar,
 .phone-mode .mode-badge,
@@ -2253,6 +2254,9 @@ body {
   flex: 1;
   overflow: hidden;
   padding: 6px 12px 8px;
+}
+.phone-mode-overlay .word-inputs input:focus {
+  scroll-margin: 0;
 }
 /* 第1行: 英文句子（最多3行截断） */
 .phone-mode-overlay .sentence-en {
