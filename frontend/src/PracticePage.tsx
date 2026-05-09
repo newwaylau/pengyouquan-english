@@ -95,14 +95,28 @@ export default function PracticePage({
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [phoneMode, setPhoneMode] = useState(false);
-  // 手机模式锁住页面滚动（键盘弹出时不滑动）
+  // 手机模式锁住页面滚动（iOS 键盘弹出时不滑动）
   useEffect(() => {
     if (phoneMode) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+    };
   }, [phoneMode]);
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
