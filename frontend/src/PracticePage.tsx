@@ -95,26 +95,13 @@ export default function PracticePage({
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [phoneMode, setPhoneMode] = useState(false);
-  // 手机模式锁住页面滚动（iOS 键盘弹出时不滑动）
+  // 手机模式：输入框聚焦时阻止浏览器自动滚动
   useEffect(() => {
     if (!phoneMode) return;
-    const preventScroll = (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-    };
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.top = '0';
-    document.body.style.left = '0';
-    return () => {
-      document.removeEventListener('touchmove', preventScroll);
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-    };
+    const onFocus = () => window.scrollTo(0, 0);
+    // 所有 word input 聚焦时复位滚动位置
+    document.addEventListener('focusin', onFocus);
+    return () => document.removeEventListener('focusin', onFocus);
   }, [phoneMode]);
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
