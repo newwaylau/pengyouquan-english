@@ -2302,42 +2302,59 @@ body {
   margin-bottom: 4px;
   flex-shrink: 0;
 }
-/* 第3行: 按钮区 */
+/* 第3行: 按钮区（一行排满） */
 .phone-mode-actions {
   flex-shrink: 0;
   margin-top: auto;
-  padding-top: 8px;
-}
-.phone-mode-actions-row {
+  padding-top: 6px;
   display: flex;
-  gap: 8px;
-  margin-bottom: 6px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.phone-mode-actions-row .btn-primary {
-  flex: 1;
-  padding: 12px 16px;
+.phone-mode-actions .btn-phone-submit {
+  padding: 8px 10px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--primary);
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  white-space: nowrap;
+  line-height: 1;
 }
-.phone-mode-actions-row .btn-primary:hover {
-  background: var(--primary-hover);
-}
-.phone-mode-icons-row {
-  display: flex;
-  gap: 6px;
-}
-.phone-mode-icons-row .btn-action {
-  flex: 1;
+.phone-mode-actions .btn-phone-next {
   padding: 8px 10px;
-  font-size: 0.8rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+.phone-mode-actions .btn-phone-icon {
+  padding: 6px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+.phone-mode-actions .btn-phone-icon:active {
+  background: var(--hover-bg);
   background: var(--card-bg);
   color: var(--text);
   cursor: pointer;

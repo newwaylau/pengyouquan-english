@@ -804,24 +804,20 @@ export default function PracticePage({
             <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
           )}
 
-          {/* 第3行: 按钮区 */}
+          {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
-            <div className="phone-mode-actions-row">
-              <button className="btn-primary" onClick={() => { if (answered) goNext(); else handleSubmit(); }}>
-                {answered ? '⏭️ 下一句' : '⏎ 提交'}
+            <button className="btn-phone-submit" onClick={handleSubmit}>⏎提交</button>
+            <button className="btn-phone-next" onClick={goNext}>⏭下一句</button>
+            <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬</button>
+            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
+            {mode === 'dictation' && (
+              <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
+                {showCn ? '🙈' : '👁️'}
               </button>
-              <button className="btn-primary" onClick={goNext}>
-                ⏭️ 下一句
-              </button>
-            </div>
-            <div className="phone-mode-icons-row">
-              <button className="btn-action" onClick={playOriginal}>
-                🎬 原音
-              </button>
-              <button className="btn-action" onClick={() => playTts(en)}>
-                🎙 {VOICES.find(v => v.id === voice)?.label || '导播'}
-              </button>
-            </div>
+            )}
+            <button className="btn-phone-icon" onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>
+              {showEn ? '🙈' : '👁️'}
+            </button>
           </div>
         </div>
       )}

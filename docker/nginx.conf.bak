@@ -1,0 +1,78 @@
+# 朋友圈英语 - Nginx 配置（HTTPS + IPv6 + 音频缓存）
+
+proxy_cache_path /var/cache/nginx/tts levels=1:2 keys_zone=tts_cache:50m max_size=2g inactive=30d use_temp_path=off;
+
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name english.pengyouquan.top en6.pengyouquan.top;
+
+    ssl_certificate /etc/letsencrypt/live/english.pengyouquan.top/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/english.pengyouquan.top/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    client_max_body_size 50m;
+
+    # 原音音频 - 直接静态文件
+    location /api/audio/ {
+        alias /home/heaton/.openclaw/workspace-pengyouquan/pengyouquan-english/backend/data/audio/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        add_header X-Cache-Status "STATIC";
+    }
+
+    # 原音音频（旧路径兼容）
+    location /audio/ {
+        alias /home/heaton/.openclaw/workspace-pengyouquan/pengyouquan-english/backend/data/audio/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        add_header X-Cache-Status "STATIC";
+    }
+
+    # TTS 代理 + Nginx 缓存
+    location /api/tts {
+        proxy_cache tts_cache;
+        proxy_cache_key "$scheme$host$uri$is_args$args";
+        proxy_cache_valid 200 7d;
+        proxy_cache_lock on;
+        add_header X-Cache-Status $upstream_cache_status;
+        proxy_pass http://localhost:8082;
+        proxy_set_header Host $host;
+        proxy_read_timeout 120s;
+    }
+
+    # 其他 API
+    location /api/ {
+        proxy_pass http://localhost:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;
+    }
+
+    # 前端 SPA（构建产物）
+    location / {
+        root /home/heaton/.openclaw/workspace-pengyouquan/pengyouquan-english/frontend/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# SIT 环境
+server {
+    listen 80;
+    server_name english-sit.pengyouquan.top;
+    client_max_body_size 50m;
+
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
