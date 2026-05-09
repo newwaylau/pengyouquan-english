@@ -804,9 +804,11 @@ export default function PracticePage({
             <button className="btn-phone-next" onClick={goNext}>⏭下一句</button>
             <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬原音</button>
             <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
-            <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
-              👁️中文
-            </button>
+            {mode === 'dictation' && (
+              <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
+                👁️中文
+              </button>
+            )}
             <button className="btn-phone-icon" onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>
               👁️英文
             </button>
