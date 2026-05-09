@@ -790,6 +790,7 @@ export default function PracticePage({
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
+
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}

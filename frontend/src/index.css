@@ -2231,6 +2231,13 @@ body {
   height: 100dvh !important;
   overflow: hidden;
   overscroll-behavior: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--bg);
 }
 .phone-mode .stats-bar,
 .phone-mode .mode-badge,
@@ -2251,15 +2258,9 @@ body {
 .phone-mode-overlay {
   display: flex;
   flex-direction: column;
+  flex: 1;
   overflow: hidden;
   padding: 6px 12px 8px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  background: var(--bg);
 }
 .phone-mode-overlay .word-inputs input:focus {
   scroll-margin: 0;
