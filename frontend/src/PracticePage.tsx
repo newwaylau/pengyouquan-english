@@ -97,20 +97,18 @@ export default function PracticePage({
   const [phoneMode, setPhoneMode] = useState(false);
   // 手机模式锁住页面滚动（iOS 键盘弹出时不滑动）
   useEffect(() => {
-    if (phoneMode) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-    }
+    if (!phoneMode) return;
+    const preventScroll = (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+    };
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
     return () => {
+      document.removeEventListener('touchmove', preventScroll);
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';

@@ -2251,7 +2251,6 @@ body {
 .phone-mode-overlay {
   display: flex;
   flex-direction: column;
-  flex: 1;
   overflow: hidden;
   padding: 6px 12px 8px;
   position: fixed;
@@ -2260,7 +2259,7 @@ body {
   right: 0;
   bottom: 0;
   z-index: 50;
-  background: var(--app-bg);
+  background: var(--bg);
 }
 .phone-mode-overlay .word-inputs input:focus {
   scroll-margin: 0;
