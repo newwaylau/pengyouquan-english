@@ -840,10 +840,16 @@ export default function PracticePage({
         </div>
       )}
 
-      {/* 专注模式退出按钮 */}
+      {/* 专注模式：手机模式 + 退出专注模式 */}
       {focusMode && (
-        <div style={{textAlign:'center',marginBottom:8}}>
-          <button className="exit-focus-btn" onClick={() => setFocusMode(false)}>
+        <div style={{textAlign:'center',marginBottom:8,display:'flex',justifyContent:'center',gap:8}}>
+          <button
+            className={`exit-focus-btn ${phoneMode ? 'active' : ''}`}
+            onClick={() => setPhoneMode(p => !p)}
+          >
+            📱 手机模式
+          </button>
+          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>
             ✕ 退出专注模式
           </button>
         </div>
@@ -1010,10 +1016,6 @@ export default function PracticePage({
         <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
           <span className="bottom-nav-icon">🧘</span>
           <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
-        </button>
-        <button className="bottom-nav-btn" onClick={() => setPhoneMode(p => !p)}>
-          <span className="bottom-nav-icon">📱</span>
-          <span className="bottom-nav-label">{phoneMode ? '退出' : '手机'}</span>
         </button>
       </div>
 
