@@ -2250,8 +2250,8 @@ body {
 }
 /* 第1行: 英文句子（最多3行截断） */
 .phone-mode-overlay .sentence-en {
-  font-size: 1.1rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.45;
   text-align: center;
   font-weight: 500;
   word-break: break-word;
@@ -2259,93 +2259,86 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   flex-shrink: 0;
 }
 /* 第1行: 中文翻译（最多2行，灰色） */
 .phone-mode-overlay .sentence-cn {
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.7rem;
+  line-height: 1.4;
   text-align: center;
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: 6px;
-  padding: 4px 8px;
+  margin-top: 2px;
+  padding: 2px 8px;
   border-top: none;
   flex-shrink: 0;
 }
-/* 填充空间（把第2行和第3行推到下半部） */
-.phone-mode-spacer {
-  flex: 1;
-  min-height: 4px;
-}
-
 /* 第2行: 逐词输入区域（紧凑，自动换行） */
 .phone-mode-overlay .word-inputs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 6px;
+  gap: 3px 5px;
   justify-content: center;
   align-items: center;
-  padding: 4px 2px;
-  margin-bottom: 4px;
-  max-height: 6em;
+  padding: 2px 2px;
+  margin-bottom: 2px;
+  max-height: 5em;
   overflow-y: auto;
   flex-shrink: 1;
-  min-height: 36px;
+  min-height: 30px;
 }
 .phone-mode-overlay .word-input {
-  padding: 4px 2px;
-  font-size: 0.9rem;
-  min-height: 26px;
+  padding: 3px 2px;
+  font-size: 0.85rem;
+  min-height: 22px;
 }
 /* 第3行: 按钮区（一行排满） */
 .phone-mode-actions {
   flex-shrink: 0;
-  margin-top: auto;
-  padding-top: 6px;
+  padding-top: 4px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   flex-wrap: nowrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 .phone-mode-actions .btn-phone-submit {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--primary);
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;
 }
 .phone-mode-actions .btn-phone-next {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;
 }
 .phone-mode-actions .btn-phone-icon {
-  padding: 6px 6px;
+  padding: 5px 5px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;

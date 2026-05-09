@@ -750,9 +750,6 @@ export default function PracticePage({
             </div>
           )}
 
-          {/* 填充剩余空间 */}
-          <div className="phone-mode-spacer" />
-
           {/* 隐藏输入框（手机键盘触发用） */}
           <input ref={hiddenInputRef}
             style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
