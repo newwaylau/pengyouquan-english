@@ -94,6 +94,7 @@ export default function PracticePage({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  const [phoneMode, setPhoneMode] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
   const jumpDoneRef = useRef(false);
@@ -734,8 +735,96 @@ export default function PracticePage({
   const userCorrectCount = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
 
   return (
-    <div className={`practice-page ${focusMode ? 'focus-mode' : ''}`}>
+    <div className={`practice-page ${focusMode ? 'focus-mode' : ''} ${phoneMode ? 'phone-mode' : ''}`}>
       {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+      {/* 手机模式覆盖层 */}
+      {phoneMode && (
+        <div className="phone-mode-overlay">
+          {/* 退出手机模式按钮 */}
+          <div style={{textAlign:'center',marginBottom:8}}>
+            <button className="exit-focus-btn" onClick={() => setPhoneMode(false)}>
+              ✕ 退出手机模式
+            </button>
+          </div>
+
+          {/* 第1行: 英文 + 中文翻译 */}
+          <div className={`sentence-en ${!showEn ? 'blurred' : ''}`}>
+            {en}
+          </div>
+          {cn && (
+            <div className={`sentence-cn ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
+              {cn}
+            </div>
+          )}
+
+          {/* 隐藏输入框（手机键盘触发用） */}
+          <input ref={hiddenInputRef}
+            style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+            onBlur={() => {
+              let first = 0;
+              while (first < words.length && hints.has(first)) first++;
+              inputRefs.current[first]?.focus();
+            }}
+          />
+
+          {/* 第2行: 逐词输入框 */}
+          <div className="word-inputs">
+            {words.map((w, i) => {
+              const parts = splitWordParts(w);
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
+                  <input
+                    ref={el => { inputRefs.current[i] = el; }}
+                    className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
+                    size={Math.max(1, parts.letters.length)}
+                    placeholder={Array(parts.letters.length).fill('_').join(' ')}
+                    value={hints.has(i) ? parts.letters : inputs[i]}
+                    onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
+                    onKeyDown={e => handleKeyDown(i, e)}
+                    disabled={hints.has(i) || answered}
+                    autoFocus={i === 0}
+                  />
+                  {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
+                  {i < words.length - 1 && <span className="word-sep"> </span>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 反馈区域 */}
+          {answered && (
+            <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
+              {wrongWords.size === 0
+                ? '✅ 完全正确！'
+                : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
+            </div>
+          )}
+          {retryCount === 1 && !answered && (
+            <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
+          )}
+
+          {/* 第3行: 按钮区 */}
+          <div className="phone-mode-actions">
+            <div className="phone-mode-actions-row">
+              <button className="btn-primary" onClick={() => { if (answered) goNext(); else handleSubmit(); }}>
+                {answered ? '⏭️ 下一句' : '⏎ 提交'}
+              </button>
+              <button className="btn-primary" onClick={goNext}>
+                ⏭️ 下一句
+              </button>
+            </div>
+            <div className="phone-mode-icons-row">
+              <button className="btn-action" onClick={playOriginal}>
+                🎬 原音
+              </button>
+              <button className="btn-action" onClick={() => playTts(en)}>
+                🎙 {VOICES.find(v => v.id === voice)?.label || '导播'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
       {user && (
         <div className="stats-bar">
@@ -946,6 +1035,10 @@ export default function PracticePage({
         <button className="bottom-nav-btn" onClick={() => setFocusMode(f => !f)}>
           <span className="bottom-nav-icon">🧘</span>
           <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
+        </button>
+        <button className="bottom-nav-btn" onClick={() => setPhoneMode(p => !p)}>
+          <span className="bottom-nav-icon">📱</span>
+          <span className="bottom-nav-label">{phoneMode ? '退出' : '手机'}</span>
         </button>
       </div>
 
