@@ -740,6 +740,13 @@ export default function PracticePage({
       {/* 手机模式：三行占满上半屏，下半屏是键盘 */}
       {phoneMode && (
         <div className="phone-mode-overlay">
+          {/* 专注模式按钮 */}
+          <div style={{textAlign:'center',marginBottom:4,display:'flex',justifyContent:'center',gap:6,flexShrink:0}}>
+            <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}>🧘 专注</button>
+            <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}>📱 手机</button>
+            <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>✕ 退出</button>
+          </div>
+
           {/* 第1行: 英文(3行截断) + 中文(2行灰色) */}
           <div className={`sentence-en ${!showEn ? 'blurred' : ''}`}>
             {en}
@@ -840,24 +847,12 @@ export default function PracticePage({
         </div>
       )}
 
-      {/* 专注模式：专注 | 手机 | 退出 */}
-      {focusMode && (
+      {/* 专注模式：专注 | 手机 | 退出（非手机模式时显示） */}
+      {focusMode && !phoneMode && (
         <div style={{textAlign:'center',marginBottom:8,display:'flex',justifyContent:'center',gap:6}}>
-          <button
-            className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`}
-            onClick={() => setPhoneMode(false)}
-          >
-            🧘 专注
-          </button>
-          <button
-            className={`exit-focus-btn ${phoneMode ? 'active' : ''}`}
-            onClick={() => setPhoneMode(true)}
-          >
-            📱 手机
-          </button>
-          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>
-            ✕ 退出
-          </button>
+          <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}>🧘 专注</button>
+          <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}>📱 手机</button>
+          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>✕ 退出</button>
         </div>
       )}
 
