@@ -737,17 +737,10 @@ export default function PracticePage({
   return (
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''} ${phoneMode ? 'phone-mode' : ''}`}>
       {toastMsg && <div className="toast-msg">{toastMsg}</div>}
-      {/* 手机模式覆盖层 */}
+      {/* 手机模式：三行占满上半屏，下半屏是键盘 */}
       {phoneMode && (
         <div className="phone-mode-overlay">
-          {/* 退出手机模式按钮 */}
-          <div style={{textAlign:'center',marginBottom:8}}>
-            <button className="exit-focus-btn" onClick={() => setPhoneMode(false)}>
-              ✕ 退出手机模式
-            </button>
-          </div>
-
-          {/* 第1行: 英文 + 中文翻译 */}
+          {/* 第1行: 英文(3行截断) + 中文(2行灰色) */}
           <div className={`sentence-en ${!showEn ? 'blurred' : ''}`}>
             {en}
           </div>
@@ -756,6 +749,9 @@ export default function PracticePage({
               {cn}
             </div>
           )}
+
+          {/* 填充剩余空间 */}
+          <div className="phone-mode-spacer" />
 
           {/* 隐藏输入框（手机键盘触发用） */}
           <input ref={hiddenInputRef}
@@ -767,7 +763,7 @@ export default function PracticePage({
             }}
           />
 
-          {/* 第2行: 逐词输入框 */}
+          {/* 第2行: 逐词输入框(自动换行) */}
           <div className="word-inputs">
             {words.map((w, i) => {
               const parts = splitWordParts(w);
@@ -791,18 +787,6 @@ export default function PracticePage({
               );
             })}
           </div>
-
-          {/* 反馈区域 */}
-          {answered && (
-            <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
-              {wrongWords.size === 0
-                ? '✅ 完全正确！'
-                : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
-            </div>
-          )}
-          {retryCount === 1 && !answered && (
-            <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
-          )}
 
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
