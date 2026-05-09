@@ -789,7 +789,7 @@ export default function PracticePage({
           <div className="phone-mode-actions">
             <button className="btn-phone-submit" onClick={handleSubmit}>⏎提交</button>
             <button className="btn-phone-next" onClick={goNext}>⏭</button>
-            <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬</button>
+            <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬原音</button>
             <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
             <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
               👁️中文
