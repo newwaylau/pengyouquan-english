@@ -2303,6 +2303,8 @@ body {
   align-items: center;
   padding: 2px 2px;
   margin-bottom: 2px;
+  max-height: 5em;
+  overflow-y: auto;
   flex-shrink: 1;
   min-height: 30px;
 }
