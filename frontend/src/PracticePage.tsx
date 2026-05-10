@@ -588,37 +588,11 @@ export default function PracticePage({
   }, [sentence, words, inputs, retryCount, mode, answered, goNext]);
 
   // 输入跳转
-  // 下一跳目标索引（-1=提交按钮），用于 useEffect 聚焦
-  const nextFocusRef = useRef<number | null>(null);
-
   const handleInputChange = (i: number, val: string) => {
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    const parts = splitWordParts(words[i] || '');
-    if (val.length >= parts.letters.length) {
-      let next = i + 1;
-      while (next < words.length && (hints.has(next) || (retryCount === 1 && newInputs[next]?.length > 0))) next++;
-      nextFocusRef.current = next < words.length ? next : -1;
-    }
   };
-
-  // useEffect 在渲染后聚焦（绕过 iOS 从 input 事件直接 focus 的限制）
-  useEffect(() => {
-    if (nextFocusRef.current === null) return;
-    const idx = nextFocusRef.current;
-    nextFocusRef.current = null;
-    const el = idx === -1 ? submitRef.current : inputRefs.current[idx];
-    if (el) {
-      // 先直接聚焦
-      try { el.focus({ preventScroll: true }); } catch(e) {}
-      // iOS 兜底：如果没生效，延迟再试
-      if (document.activeElement !== el) {
-        const t = setTimeout(() => { try { el.focus({ preventScroll: true }); } catch(e) {} }, 50);
-        return () => clearTimeout(t);
-      }
-    }
-  });
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
       // 跳到前一个需要输入的框（retry时跳过已正确的）
@@ -629,6 +603,21 @@ export default function PracticePage({
     if (e.key === ' ' && i < words.length - 1) {
       e.preventDefault();
       inputRefs.current[i + 1]?.focus();
+    }
+    // iOS 聚焦方案：keydown 在用户手势链中，requestAnimationFrame 后 focus() 不会被拦
+    if (!answered && !hints.has(i) && e.key !== 'Backspace' && e.key !== ' ' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const idx = i;
+      requestAnimationFrame(() => {
+        const val = inputRefs.current[idx]?.value || '';
+        if (!val) return;
+        const parts = splitWordParts(words[idx] || '');
+        if (val.length >= parts.letters.length) {
+          let next = idx + 1;
+          while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
+          const target = next < words.length ? inputRefs.current[next] : submitRef.current;
+          try { target?.focus({ preventScroll: true }); } catch(e) {}
+        }
+      });
     }
   };
 
