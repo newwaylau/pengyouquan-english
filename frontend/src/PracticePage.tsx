@@ -588,10 +588,28 @@ export default function PracticePage({
   }, [sentence, words, inputs, retryCount, mode, answered, goNext]);
 
   // 输入跳转
+  const focusNextInput = (fromIdx: number, inputsCopy: string[]) => {
+    let next = fromIdx + 1;
+    while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputsCopy[next]?.length ?? 0) > 0))) next++;
+    const target = next < words.length ? inputRefs.current[next] : submitRef.current;
+    if (target) {
+      try { target.focus({ preventScroll: true }); } catch(e) {}
+      // iOS 双 focus 技巧：延时再调一次
+      if (document.activeElement !== target) {
+        setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 0);
+        setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 50);
+      }
+    }
+  };
+
   const handleInputChange = (i: number, val: string) => {
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
+    const parts = splitWordParts(words[i] || '');
+    if (val.length >= parts.letters.length) {
+      focusNextInput(i, newInputs);
+    }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
