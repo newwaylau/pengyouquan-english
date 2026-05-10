@@ -588,28 +588,28 @@ export default function PracticePage({
   }, [sentence, words, inputs, retryCount, mode, answered, goNext]);
 
   // 输入跳转
+  /** 聚焦到下一个可输入词框（手机模式下用 setTimeout 绕过移动端 focus 限制） */
+  const focusNextInput = (currentIdx: number) => {
+    let next = currentIdx + 1;
+    while (next < words.length && (hints.has(next) || (retryCount === 1 && inputs[next]?.length > 0))) next++;
+    const target = next < words.length ? inputRefs.current[next] : submitRef.current;
+    if (target) {
+      // 手机模式下直接同步聚焦（input事件在用户手势链中）
+      target.focus({ preventScroll: true });
+    }
+  };
+
   const handleInputChange = (i: number, val: string) => {
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    // 标点/撇号在输入框外，只用字母长度判断是否跳转
     const parts = splitWordParts(words[i] || '');
     if (val.length >= parts.letters.length) {
-      if (i < words.length - 1) {
-        // 跳过后面的提示/已正确输入框，跳到下一个需要输入的
-        let next = i + 1;
-        while (next < words.length && (hints.has(next) || (retryCount === 1 && newInputs[next]?.length > 0))) next++;
-        if (next < words.length) inputRefs.current[next]?.focus();
-        else submitRef.current?.focus();
-      } else {
-        // 最后一个词输入完，跳到提交按钮
-        submitRef.current?.focus();
-      }
+      focusNextInput(i);
     }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
-      // 跳到前一个需要输入的框（retry时跳过已正确的）
       let prev = i - 1;
       while (prev > 0 && (hints.has(prev) || (retryCount === 1 && !wrongWords.has(prev) && inputs[prev]?.length > 0))) prev--;
       inputRefs.current[prev]?.focus();
