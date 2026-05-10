@@ -790,7 +790,6 @@ export default function PracticePage({
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
                     size={Math.max(1, parts.letters.length)}
-                    maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
@@ -916,7 +915,6 @@ export default function PracticePage({
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
                     size={Math.max(1, parts.letters.length)}
-                    maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
