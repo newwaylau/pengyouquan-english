@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
 import { getAudioUrl, getTtsUrl } from './audioBase';
@@ -95,12 +95,13 @@ export default function PracticePage({
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [phoneMode, setPhoneMode] = useState(false);
-  // 手机模式：用隐藏输入框触发键盘，不上自动聚焦
+  // 手机模式：自动聚焦第一个可输入词框
+  // 手机模式：先聚焦隐藏输入框（在用户手势中）触发键盘，onBlur 后自动跳到第一个词框
+  // 从旧 react 到新句子渲染完成后，隐藏输入框失焦会自动触发 onBlur
+  const focusPhone = () => { hiddenInputRef.current?.focus(); };
+  // 初始进入手机模式时聚焦
   useEffect(() => {
-    if (!phoneMode) return;
-    requestAnimationFrame(() => {
-      hiddenInputRef.current?.focus();
-    });
+    if (phoneMode) setTimeout(focusPhone, 100);
   }, [phoneMode]);
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
@@ -534,7 +535,6 @@ export default function PracticePage({
       setQueueIndex(nextIdx);
       setupSentence(sentenceQueue[nextIdx], false);
       setHistoryIds(h => [...h, sentenceQueue[nextIdx].id]);
-
       // 预加载再下一句
       if (nextIdx + 1 < sentenceQueue.length) {
         const next2 = sentenceQueue[nextIdx + 1];
@@ -775,9 +775,14 @@ export default function PracticePage({
           />
 
           {/* 第2行: 逐词输入框(自动换行) */}
-          <div className="word-inputs">
+          <div className="word-inputs" key={sentence?.id}>
             {words.map((w, i) => {
               const parts = splitWordParts(w);
+              const firstEditable = (() => {
+                let idx = 0;
+                while (idx < words.length && hints.has(idx)) idx++;
+                return idx;
+              })();
               return (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
@@ -790,7 +795,7 @@ export default function PracticePage({
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
-
+                    autoFocus={i === firstEditable}
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}
