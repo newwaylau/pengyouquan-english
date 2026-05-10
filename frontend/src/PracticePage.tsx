@@ -604,20 +604,16 @@ export default function PracticePage({
       e.preventDefault();
       inputRefs.current[i + 1]?.focus();
     }
-    // iOS 聚焦方案：keydown 在用户手势链中，requestAnimationFrame 后 focus() 不会被拦
-    if (!answered && !hints.has(i) && e.key !== 'Backspace' && e.key !== ' ' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      const idx = i;
-      requestAnimationFrame(() => {
-        const val = inputRefs.current[idx]?.value || '';
-        if (!val) return;
-        const parts = splitWordParts(words[idx] || '');
-        if (val.length >= parts.letters.length) {
-          let next = idx + 1;
-          while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
-          const target = next < words.length ? inputRefs.current[next] : submitRef.current;
-          try { target?.focus({ preventScroll: true }); } catch(e) {}
-        }
-      });
+    // iOS 聚焦方案：keydown 同步调 focus() 不会被拦
+    // 预测：当前已输入字符数 +1 >= 单词长度 → 提前聚焦下一格
+    if (!answered && !hints.has(i) && (e.key.length === 1 || e.key === 'Process') && e.key !== ' ') {
+      const parts = splitWordParts(words[i] || '');
+      if ((inputs[i]?.length || 0) + 1 >= parts.letters.length) {
+        let next = i + 1;
+        while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
+        const target = next < words.length ? inputRefs.current[next] : submitRef.current;
+        try { target?.focus({ preventScroll: true }); } catch(e) {}
+      }
     }
   };
 
