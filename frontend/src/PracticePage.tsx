@@ -785,12 +785,12 @@ export default function PracticePage({
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
                     size={Math.max(1, parts.letters.length)}
+                    maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
-
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}
@@ -910,6 +910,7 @@ export default function PracticePage({
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
                     size={Math.max(1, parts.letters.length)}
+                    maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
