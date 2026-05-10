@@ -588,18 +588,21 @@ export default function PracticePage({
   }, [sentence, words, inputs, retryCount, mode, answered, goNext]);
 
   // 输入跳转
-  /** 聚焦到下一个可输入词框（手机浏览器从 input 事件聚焦需用 setTimeout 绕过限制） */
+  /** 聚焦到下一个可输入词框（keyup 在用户手势链中，手机浏览器不会拦截 focus） */
   const focusNextInput = (currentIdx: number) => {
     let next = currentIdx + 1;
     while (next < words.length && (hints.has(next) || (retryCount === 1 && inputs[next]?.length > 0))) next++;
     const target = next < words.length ? inputRefs.current[next] : submitRef.current;
-    if (target) setTimeout(() => target.focus(), 0);
+    if (target) target.focus();
   };
 
   const handleInputChange = (i: number, val: string) => {
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
+  };
+  const handleKeyUp = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    const val = e.currentTarget.value;
     const parts = splitWordParts(words[i] || '');
     if (val.length >= parts.letters.length) {
       focusNextInput(i);
@@ -788,6 +791,7 @@ export default function PracticePage({
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
+                    onKeyUp={e => { if (!hints.has(i)) handleKeyUp(i, e); }}
                     disabled={hints.has(i) || answered}
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
@@ -913,6 +917,7 @@ export default function PracticePage({
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
+                    onKeyUp={e => { if (!hints.has(i)) handleKeyUp(i, e); }}
                     disabled={hints.has(i) || answered}
                     autoFocus={i === 0}
                   />
