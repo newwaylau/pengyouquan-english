@@ -1,5 +1,5 @@
 /* =====================================================
-   朋友圈英语 — 全局样式
+   英语剧场 — 全局样式
    使用 CSS 变量支持深色/浅色模式切换
    统一 border-radius: 8px，统一卡片样式
    ===================================================== */
@@ -1916,7 +1916,7 @@ body {
   .user-badge { display: none; }
   .logout-btn { font-size: 0.6875rem; padding: calc(3/16*1rem) calc(6/16*1rem); }
 
-  .word-input { width: 60px; font-size: 1rem; }
+  .word-input { font-size: 1rem; }
   .sentence-en { font-size: 1.125rem; padding: 12px; }
   .sentence-cn { font-size: 0.875rem; }
 

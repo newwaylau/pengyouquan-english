@@ -160,7 +160,7 @@ public class AdminController {
         Map<String, Object> result = new LinkedHashMap<>();
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
-        result.put("appName", "朋友圈英语");
+        result.put("appName", "英语剧场");
         result.put("appVersion", "0.0.1-SNAPSHOT");
         result.put("startTime", Instant.ofEpochMilli(runtime.getStartTime()).toString());
         result.put("uptime", Duration.ofMillis(runtime.getUptime()).toString());

@@ -4,6 +4,6 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/pengyouquan_english_sit?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
-    username: root
-    password: pengyouquan123
+    url: jdbc:mysql://${SPRING_DATASOURCE_HOST:mysql}:3306/${SPRING_DATASOURCE_DB:pengyouquan_english}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:pengyouquan123}

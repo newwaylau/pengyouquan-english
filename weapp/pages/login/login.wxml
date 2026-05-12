@@ -1,9 +1,9 @@
-<!-- 朋友圈英语 — 微信登录页 -->
+<!-- 英语剧场 — 微信登录页 -->
 <view class="login-container">
   <view class="login-box">
     <view class="logo-area">
       <text class="logo-icon">📖</text>
-      <text class="logo-title">朋友圈英语</text>
+      <text class="logo-title">英语剧场</text>
       <text class="logo-subtitle">看美剧，学英语</text>
     </view>
 

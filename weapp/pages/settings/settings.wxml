@@ -1,4 +1,4 @@
-<!-- 朋友圈英语 — 设置页 -->
+<!-- 英语剧场 — 设置页 -->
 <view class="page-container">
   <view class="page-title">设置</view>
 
@@ -38,7 +38,7 @@
   <view class="card">
     <text class="setting-label">关于</text>
     <view class="about-info">
-      <text class="about-item">朋友圈英语 v1.0.0</text>
+      <text class="about-item">英语剧场 v1.0.0</text>
       <text class="about-item">看美剧，学英语</text>
     </view>
   </view>

@@ -7,6 +7,15 @@ COPY backend/src ./src
 RUN mvn package -DskipTests
 
 FROM eclipse-temurin:17-jre
+
+# 安装 Python3 + pip + edge-tts（用于 TTS 语音生成）
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip python3-venv && \
+    python3 -m venv /app/venv-tts && \
+    /app/venv-tts/bin/pip install --no-cache-dir edge-tts==7.2.8 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080

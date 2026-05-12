@@ -7,7 +7,7 @@
     "pages/settings/settings"
   ],
   "window": {
-    "navigationBarTitleText": "朋友圈英语",
+    "navigationBarTitleText": "英语剧场",
     "navigationBarBackgroundColor": "#1a1a2e",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f5f5f5"

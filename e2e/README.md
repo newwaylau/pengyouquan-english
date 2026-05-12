@@ -1,4 +1,4 @@
-# 朋友圈英语 — E2E 测试
+# 英语剧场 — E2E 测试
 
 使用 [Playwright](https://playwright.dev/) 进行端到端浏览器测试。
 

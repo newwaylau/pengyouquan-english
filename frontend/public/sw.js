@@ -1,4 +1,4 @@
-// 朋友圈英语 — Service Worker
+// 英语剧场 — Service Worker
 // 缓存名称，版本更新时变更
 const CACHE_NAME = 'pengyouquan-english-v1'
 

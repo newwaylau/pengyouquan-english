@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — 微信登录页样式
+ * 英语剧场 — 微信登录页样式
  */
 .login-container {
   display: flex;

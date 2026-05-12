@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — 设置页逻辑
+ * 英语剧场 — 设置页逻辑
  */
 const { get, put } = require('../../utils/request')
 const { showSuccess, showError } = require('../../utils/toast')

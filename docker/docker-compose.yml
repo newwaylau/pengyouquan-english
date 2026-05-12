@@ -1,5 +1,5 @@
 # ====================================
-# 朋友圈英语 — 完整部署 Docker Compose
+# 英语剧场 — 完整部署 Docker Compose
 # 启动：docker compose -f docker/docker-compose.yml --env-file docker/.env up -d
 # 停止：docker compose -f docker/docker-compose.yml down
 # 日志：docker compose -f docker/docker-compose.yml logs -f

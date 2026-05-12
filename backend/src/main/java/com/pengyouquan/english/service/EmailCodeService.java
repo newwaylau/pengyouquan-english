@@ -41,7 +41,7 @@ public class EmailCodeService {
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
             helper.setFrom(FROM);
             helper.setTo(email);
-            helper.setSubject("朋友圈英语 - 验证码");
+            helper.setSubject("英语剧场 - 验证码");
             helper.setText("您的验证码为：<b>" + code + "</b><br>有效期5分钟，如非本人操作请忽略。", true);
             mailSender.send(msg);
         } catch (Exception e) {

@@ -54,7 +54,7 @@ export default function App() {
   return (
     <div className="app">
       <nav className="topnav">
-        <span className="logo">朋友圈英语</span>
+        <span className="logo" onClick={() => setPage('practice')} style={{ cursor: 'pointer' }}>英语剧场</span>
         <div className="nav-links">
           {user ? (
             <>

@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — 剧集选择页逻辑
+ * 英语剧场 — 剧集选择页逻辑
  */
 const { get } = require('../../utils/request')
 const { showError } = require('../../utils/toast')

@@ -108,6 +108,7 @@ export default function PracticePage({
   const preferOriginalRef = useRef(preferOriginal);
   const speedRef = useRef(speed);
   const voiceRef = useRef(voice);
+  const preloadedAudioUrls = useRef(new Set<string>());
   // 句子队列（API 一次返回 limit=15，逐个消费，预加载下一句 TTS）
   const [sentenceQueue, setSentenceQueue] = useState<any[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
@@ -195,6 +196,15 @@ export default function PracticePage({
     })();
   }, [showList, user]);
 
+  // 预加载音频到浏览器缓存 — 用 new Audio() 与播放代码同路径，确保缓存命中
+  const preloadAudioUrl = (url: string) => {
+    if (preloadedAudioUrls.current.has(url)) return;
+    preloadedAudioUrls.current.add(url);
+    const a = new Audio(url);
+    a.preload = 'auto';
+    a.load();
+  };
+
   // 加载句子
   const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
   const loadSentence = async (specificId?: number, skipAutoPlay?: boolean) => {
@@ -236,12 +246,18 @@ export default function PracticePage({
     setQueueIndex(0);
     setupSentence(r.data[0], skipAutoPlay);
 
-    // 预加载下一句 TTS（用户练当前句时触发后端生成，不影响用户体验）
-    if (r.data.length > 1) {
-      const next = r.data[1];
+    // 预加载当前句 + 后面多条句子的音频（TTS + 原音）
+    const preloadCount = Math.min(5, r.data.length - 1);
+    for (let i = 0; i <= preloadCount; i++) {
+      const next = r.data[i];
       const nextEn = extractEn(next.text);
-      if (nextEn && (!preferOriginal || !next.audioFile)) {
-        fetch(getTtsUrl(nextEn, voice)).catch(() => {});
+      // 预加载 TTS — 用 new Audio() 而非 fetch()，与播放代码同路径，确保缓存命中
+      if (nextEn) {
+        preloadAudioUrl(getTtsUrl(nextEn, voice));
+      }
+      // 预加载剧集原音
+      if (next.audioFile) {
+        preloadAudioUrl(getAudioUrl('/api/audio/' + encodeURIComponent(next.audioFile)));
       }
     }
   };
@@ -535,12 +551,18 @@ export default function PracticePage({
       setupSentence(sentenceQueue[nextIdx], false);
       setHistoryIds(h => [...h, sentenceQueue[nextIdx].id]);
 
-      // 预加载再下一句
-      if (nextIdx + 1 < sentenceQueue.length) {
-        const next2 = sentenceQueue[nextIdx + 1];
-        const nextEn = extractEn(next2.text);
-        if (nextEn && (!preferOriginal || !next2.audioFile)) {
-          fetch(getTtsUrl(nextEn, voice)).catch(() => {});
+      // 预加载后面多条句子的音频（TTS + 原音）
+      const preloadCount = Math.min(5, sentenceQueue.length - nextIdx - 1);
+      for (let i = 1; i <= preloadCount; i++) {
+        const next = sentenceQueue[nextIdx + i];
+        const nextEn = extractEn(next.text);
+        // 预加载 TTS — 与播放同路径
+        if (nextEn) {
+          preloadAudioUrl(getTtsUrl(nextEn, voice));
+        }
+        // 预加载剧集原音
+        if (next.audioFile) {
+          preloadAudioUrl(getAudioUrl('/api/audio/' + encodeURIComponent(next.audioFile)));
         }
       }
       return;
@@ -594,10 +616,13 @@ export default function PracticePage({
     const target = next < words.length ? inputRefs.current[next] : submitRef.current;
     if (target) {
       try { target.focus({ preventScroll: true }); } catch(e) {}
-      // iOS 双 focus 技巧：延时再调一次
+      // iOS 多层 focus 保险：requestAnimationFrame 等键盘动画完成后再试
       if (document.activeElement !== target) {
-        setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 0);
-        setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 50);
+        requestAnimationFrame(() => {
+          try { target.focus({ preventScroll: true }); } catch(e) {}
+          setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 0);
+          setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 150);
+        });
       }
     }
   };
@@ -606,10 +631,6 @@ export default function PracticePage({
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
-    const parts = splitWordParts(words[i] || '');
-    if (val.length >= parts.letters.length) {
-      focusNextInput(i, newInputs);
-    }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
@@ -622,15 +643,21 @@ export default function PracticePage({
       e.preventDefault();
       inputRefs.current[i + 1]?.focus();
     }
-    // iOS 聚焦方案：keydown 同步调 focus() 不会被拦
-    // 预测：当前已输入字符数 +1 >= 单词长度 → 提前聚焦下一格
+    // 预测：当前已输入字符数 +1 >= 单词长度 → 聚焦下一格
     if (!answered && !hints.has(i) && (e.key.length === 1 || e.key === 'Process') && e.key !== ' ') {
       const parts = splitWordParts(words[i] || '');
-      if ((inputs[i]?.length || 0) + 1 >= parts.letters.length) {
+      const val = (e.target as HTMLInputElement).value;
+      if ((val.length || 0) + 1 >= parts.letters.length) {
         let next = i + 1;
         while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
         const target = next < words.length ? inputRefs.current[next] : submitRef.current;
-        try { target?.focus({ preventScroll: true }); } catch(e) {}
+        // 等当前字符渲染后再跳转——用 requestAnimationFrame 让 React 先 render
+        requestAnimationFrame(() => {
+          try { target?.focus({ preventScroll: true }); } catch(e) {}
+          if (target && document.activeElement !== target) {
+            setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 50);
+          }
+        });
       }
     }
   };
@@ -799,13 +826,14 @@ export default function PracticePage({
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    size={Math.max(1, parts.letters.length)}
+                    size={Math.max(3, parts.letters.length * 2 - 1)}
                     maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
+                    autoFocus={i === 0}
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}
@@ -816,7 +844,7 @@ export default function PracticePage({
 
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
-            <button className="btn-phone-submit" onClick={handleSubmit}>⏎提交</button>
+            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}>⏎提交</button>
             <button className="btn-phone-next" onClick={goNext}>⏭下一句</button>
             <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬原音</button>
             <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
@@ -905,6 +933,7 @@ export default function PracticePage({
 
         {/* 逐词输入（未完成时显示） */}
         {/* 输入框始终显示，回答后变为只读 */}
+        {!phoneMode && (<>
           {/* 隐藏输入框（手机键盘触发用） */}
           <input ref={hiddenInputRef}
             style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
@@ -924,7 +953,7 @@ export default function PracticePage({
                   <input
                     ref={el => { inputRefs.current[i] = el; }}
                     className={`word-input ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    size={Math.max(1, parts.letters.length)}
+                    size={Math.max(3, parts.letters.length * 2 - 1)}
                     maxLength={parts.letters.length}
                     placeholder={Array(parts.letters.length).fill('_').join(' ')}
                     value={hints.has(i) ? parts.letters : inputs[i]}
@@ -939,6 +968,7 @@ export default function PracticePage({
               );
             })}
           </div>
+        </>)}
 
         {/* 反馈区域 */}
         {answered && (
@@ -970,6 +1000,8 @@ export default function PracticePage({
       </div>
 
       {/* 按钮区 */}
+      {!phoneMode && (
+      <>
       <div className="bottom-section">
       <div className="button-area">
         <hr className="action-divider" />
@@ -1043,9 +1075,11 @@ export default function PracticePage({
           <span className="bottom-nav-icon">🧘</span>
           <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
         </button>
-      </div>
+      </div> {/* end bottom-nav */}
 
-      </div>
+      </div> {/* end bottom-section */}
+      </>
+      )}
       {/* 设置面板 */}
       <SettingsPanel
         open={settingsOpen}

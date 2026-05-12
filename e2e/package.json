@@ -2,7 +2,7 @@
   "name": "pengyouquan-english-e2e",
   "private": true,
   "version": "1.0.0",
-  "description": "朋友圈英语 — Playwright E2E 测试",
+  "description": "英语剧场 — Playwright E2E 测试",
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",

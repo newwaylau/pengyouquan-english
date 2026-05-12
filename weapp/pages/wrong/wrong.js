@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — 错题本页逻辑
+ * 英语剧场 — 错题本页逻辑
  */
 const { get, del } = require('../../utils/request')
 const { showSuccess, showError } = require('../../utils/toast')

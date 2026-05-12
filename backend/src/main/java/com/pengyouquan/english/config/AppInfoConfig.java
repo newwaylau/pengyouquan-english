@@ -13,7 +13,7 @@ public class AppInfoConfig implements InfoContributor {
 
     @Override
     public void contribute(Info.Builder builder) {
-        builder.withDetail("app", "朋友圈英语")
+        builder.withDetail("app", "英语剧场")
                .withDetail("version", "1.0.0")
                .withDetail("java", System.getProperty("java.version"));
     }

@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — 微信登录页逻辑
+ * 英语剧场 — 微信登录页逻辑
  */
 const { post } = require('../../utils/request')
 const { showError, showLoading, hideLoading } = require('../../utils/toast')

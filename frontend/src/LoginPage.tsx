@@ -20,6 +20,9 @@ function pwdLevel(pwd: string): { label: string; color: string; percent: number 
   return { label: '弱', color: '#e17055', percent: 35 };
 }
 
+/** 阻止空格键输入 —— 避免按下空格时框内先显示空格再被过滤 */
+function preventSpace(e: React.KeyboardEvent) { if (e.key === ' ') e.preventDefault(); }
+
 export default function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -110,14 +113,14 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>朋友圈英语</h1>
-        <p className="subtitle">从美剧中学英语</p>
+        <h1>英语剧场</h1>
+        <p className="subtitle">听懂每一句台词</p>
         <form onSubmit={handleSubmit}>
 
           {/* ── 邮箱（必填） ── */}
           <input type={mode === 'login' ? 'text' : 'email'} placeholder={mode === 'login' ? '邮箱/手机号' : '邮箱'}
             value={email}
-            onChange={e => setEmail(e.target.value)} required
+            onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
             style={email && (mode === 'register' || email.includes('@')) && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
 
           {mode === 'register' && (
@@ -125,7 +128,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
               {/* ── 验证码（必填） ── */}
               <div className="code-row">
                 <input type="text" placeholder="邮箱验证码" value={code}
-                  onChange={e => setCode(e.target.value)} required maxLength={6}
+                  onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
                   className="code-input" />
                 <button type="button" className="send-code-btn"
                   onClick={handleSendCode}
@@ -137,7 +140,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
               {/* ── 密码（必填，至少8位含字母+数字） ── */}
               <div className="pwd-wrapper">
                 <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
-                  onChange={e => setPassword(e.target.value)} required />
+                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
                 <span className="eye-btn" onClick={() => setShowPwd(!showPwd)}>
                   {showPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
@@ -155,7 +158,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
               )}
               <div className="pwd-wrapper">
                 <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
-                  onChange={e => setPassword2(e.target.value)} required
+                  onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                   style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
                 <span className="eye-btn" onClick={() => setShowPwd2(!showPwd2)}>
                   {showPwd2 ? <EyeOpen /> : <EyeClosed />}
@@ -164,18 +167,18 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
 
               {/* ── 手机号（可选） ── */}
               <input type="tel" placeholder="手机号（可选）" value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
                 style={phone && !isValidPhone(phone) ? { borderColor: '#e17055' } : {}} />
 
               {/* ── 邀请码（可选） ── */}
               <input type="text" placeholder="邀请码（可选）" value={invitedBy}
-                onChange={e => setInvitedBy(e.target.value)} />
+                onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
             </>
           )}
 
           {mode === 'login' && (
             <input type="password" placeholder="密码" value={password}
-              onChange={e => setPassword(e.target.value)} required />
+              onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
           )}
 
           {error && <div className="error-msg">{error}</div>}

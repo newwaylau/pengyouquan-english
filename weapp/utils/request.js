@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — HTTP 请求封装
+ * 英语剧场 — HTTP 请求封装
  * 自动带 token 和 baseUrl，统一处理响应
  */
 const app = getApp()

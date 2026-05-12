@@ -1,5 +1,5 @@
 /**
- * 朋友圈英语 — k6 压力测试脚本
+ * 英语剧场 — k6 压力测试脚本
  *
  * 用法：
  *   1. 安装 k6: https://k6.io/docs/getting-started/installation/

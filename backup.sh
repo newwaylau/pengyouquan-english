@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ====================================
-# 朋友圈英语 — 数据库备份脚本
+# 英语剧场 — 数据库备份脚本
 # 功能：mysqldump → tar.gz → 时间戳命名 → 保留最近7天
 # 用法：chmod +x backup.sh && ./backup.sh
 # 支持 cron 定时执行:
@@ -25,7 +25,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${GREEN}📦 朋友圈英语 — 数据库备份开始${NC}"
+echo -e "${GREEN}📦 英语剧场 — 数据库备份开始${NC}"
 echo "  时间: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "  数据库: ${MYSQL_DATABASE}"
 echo "  保留天数: ${RETENTION_DAYS}"
