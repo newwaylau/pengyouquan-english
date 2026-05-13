@@ -99,9 +99,26 @@ export default function PracticePage({
   useEffect(() => {
     if (!phoneMode) return;
     requestAnimationFrame(() => {
-      hiddenInputRef.current?.focus();
+      hiddenInputRef.current?.focus({ preventScroll: true });
     });
   }, [phoneMode]);
+
+  // 句子切换后聚焦输入框（不滚动页面）
+  useEffect(() => {
+    if (phoneMode) {
+      requestAnimationFrame(() => hiddenInputRef.current?.focus({ preventScroll: true }));
+    } else {
+      let first = 0;
+      while (first < (sentence?.words?.length || 0) && hints.has(first)) first++;
+      const target = inputRefs.current[first];
+      if (target) {
+        requestAnimationFrame(() => {
+          try { target.focus({ preventScroll: true }); } catch(e) {}
+        });
+      }
+    }
+  }, [sentence?.id]);
+
   const [autoPlay, setAutoPlay] = useState(true);
   const [preferOriginal, setPreferOriginal] = useState(false);
   const jumpDoneRef = useRef(false);
@@ -381,9 +398,6 @@ export default function PracticePage({
     setRevealed(false);
     setCorrectWords(new Set());
     setWrongWords(new Set());
-    setShowEn(false);
-    // 中译英模式：中文始终可见；听写模式：中文默认模糊
-    setShowCn(mode === 'translation');
 
     const en = extractEn(s.text);
     const wds = en.split(/\s+/).filter(Boolean);
@@ -525,7 +539,6 @@ export default function PracticePage({
     setRevealed(false);
     setCorrectWords(new Set());
     setWrongWords(new Set());
-    setShowEn(false);
     setInputs(words.map(() => ''));
     // 重置提示（撇号词+随机提示保持不变，已在hints中）
     let first = 0;
@@ -569,7 +582,7 @@ export default function PracticePage({
     }
 
     // 队列用完，加载新一批
-    hiddenInputRef.current?.focus();
+    hiddenInputRef.current?.focus({ preventScroll: true });
     setHistoryIds(h => [...h, sentence.id]);
     loadSentence();
   };
@@ -812,7 +825,7 @@ export default function PracticePage({
             onBlur={() => {
               let first = 0;
               while (first < words.length && hints.has(first)) first++;
-              inputRefs.current[first]?.focus();
+              inputRefs.current[first]?.focus({ preventScroll: true });
             }}
           />
 
@@ -833,7 +846,6 @@ export default function PracticePage({
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
-                    autoFocus={i === 0}
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}
@@ -941,7 +953,7 @@ export default function PracticePage({
               // 隐藏输入框失焦时，聚焦到实际输入框
               let first = 0;
               while (first < words.length && hints.has(first)) first++;
-              inputRefs.current[first]?.focus();
+              inputRefs.current[first]?.focus({ preventScroll: true });
             }}
           />
           <div className="word-inputs">
@@ -960,7 +972,6 @@ export default function PracticePage({
                     onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
                     onKeyDown={e => handleKeyDown(i, e)}
                     disabled={hints.has(i) || answered}
-                    autoFocus={i === 0}
                   />
                   {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
                   {i < words.length - 1 && <span className="word-sep"> </span>}
