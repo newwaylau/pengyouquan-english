@@ -2386,8 +2386,7 @@ body {
   gap: 6px;
   padding: 10px 14px 12px;
   flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
 
 /* 按钮基类 — 统一基础属性 */
@@ -2398,15 +2397,15 @@ body {
   line-height: 1;
   transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
   touch-action: manipulation;
 }
 
 /* --- 层级1：主操作（提交）--- */
 .phone-mode-actions .btn-phone-submit {
-  padding: 10px 16px;
+  padding: 10px 12px;
   min-height: 40px;
-  min-width: 60px;
   border: none;
   border-radius: 8px;
   background: linear-gradient(135deg, #6c5ce7 0%, #5a4bd1 100%);
@@ -2427,9 +2426,8 @@ body {
 
 /* --- 层级2：次要操作（下一句）--- */
 .phone-mode-actions .btn-phone-next {
-  padding: 10px 14px;
+  padding: 10px 10px;
   min-height: 40px;
-  min-width: 48px;
   border: 1px solid var(--primary);
   border-radius: 8px;
   background: rgba(108,92,231,0.08);
@@ -2449,9 +2447,8 @@ body {
 
 /* --- 层级3：工具按钮（原音/TTS/中文/英文）--- */
 .phone-mode-actions .btn-phone-icon {
-  padding: 8px 8px;
+  padding: 8px 6px;
   min-height: 40px;
-  min-width: 36px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: transparent;

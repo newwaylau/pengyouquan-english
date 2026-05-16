@@ -890,7 +890,7 @@ export default function PracticePage({
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
             <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}>⏎提交</button>
-            <button className="btn-phone-next" onClick={goNext}>⏭下一句</button>
+            <button className="btn-phone-next" onClick={goNext}>⏭下句</button>
             <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬原音</button>
             <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
             {mode === 'dictation' && (
