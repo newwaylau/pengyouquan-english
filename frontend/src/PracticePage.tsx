@@ -730,21 +730,33 @@ export default function PracticePage({
           {toastMsg && <div className="toast-msg">{toastMsg}</div>}
           {user && (
             <div className="stats-bar">
-              <div className="stat-card">
-                <span className="stat-value">{stats.totalPractices}</span>
-                <span className="stat-label">总句子</span>
+              <div className="stat-item">
+                <div className="stat-icon teal">📝</div>
+                <div className="stat-info">
+                  <div className="stat-value">{stats.totalPractices}</div>
+                  <div className="stat-label">总句子</div>
+                </div>
               </div>
-              <div className="stat-card">
-                <span className="stat-value">{stats.totalPractices}</span>
-                <span className="stat-label">今日练习</span>
+              <div className="stat-item">
+                <div className="stat-icon amber">📖</div>
+                <div className="stat-info">
+                  <div className="stat-value">{stats.totalPractices}</div>
+                  <div className="stat-label">今日练习</div>
+                </div>
               </div>
-              <div className="stat-card">
-                <span className="stat-value">{accuracy}%</span>
-                <span className="stat-label">正确率</span>
+              <div className="stat-item">
+                <div className="stat-icon blue">🎯</div>
+                <div className="stat-info">
+                  <div className="stat-value">{accuracy}%</div>
+                  <div className="stat-label">正确率</div>
+                </div>
               </div>
-              <div className="stat-card clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-                <span className="stat-value">{wrongCount}</span>
-                <span className="stat-label">错题</span>
+              <div className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
+                <div className="stat-icon emerald">📕</div>
+                <div className="stat-info">
+                  <div className="stat-value">{wrongCount}</div>
+                  <div className="stat-label">错题</div>
+                </div>
               </div>
             </div>
           )}
@@ -754,10 +766,10 @@ export default function PracticePage({
             <div className="wrong-review-subtitle">复习摘要：正确 {wrongReviewStats.correct}/{wrongReviewStats.total} 句</div>
             <div className="wrong-review-subtitle">共 {wrongSentences.length} 句错题</div>
             <div className="wrong-review-actions">
-              <button className="btn-primary" onClick={() => onNavigate?.('wrong')}>
+              <button className="action-btn primary" onClick={() => onNavigate?.('wrong')}>
                 📕 返回错题本
               </button>
-              <button className="btn-action" onClick={() => setMode('translation')}>
+              <button className="action-btn secondary" onClick={() => setMode('translation')}>
                 📝 继续普通练习
               </button>
             </div>
@@ -794,10 +806,10 @@ export default function PracticePage({
       <div className="practice-page">
         {toastMsg && <div className="toast-msg">{toastMsg}</div>}
         <div className="stats-bar">
-          <div className="stat-card skeleton" style={{ height: 60 }} />
-          <div className="stat-card skeleton" style={{ height: 60 }} />
-          <div className="stat-card skeleton" style={{ height: 60 }} />
-          <div className="stat-card skeleton" style={{ height: 60 }} />
+          <div className="stat-item skeleton" style={{ height: 60 }} />
+          <div className="stat-item skeleton" style={{ height: 60 }} />
+          <div className="stat-item skeleton" style={{ height: 60 }} />
+          <div className="stat-item skeleton" style={{ height: 60 }} />
         </div>
         <div className="mode-badge skeleton" style={{ height: 24, width: 120, marginBottom: 16 }} />
         <div className="skeleton" style={{ height: 40, width: '100%', marginBottom: 12 }} />
@@ -906,22 +918,34 @@ export default function PracticePage({
       )}
       {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
       {user && (
-        <div className="stats-bar">
-          <div className="stat-card" onClick={() => {}}>
-            <span className="stat-value">{stats.totalPractices}</span>
-            <span className="stat-label">总句子</span>
+        <div className="stats-bar stats-bar-enter">
+          <div className="stat-item" onClick={() => {}}>
+            <div className="stat-icon teal">📝</div>
+            <div className="stat-info">
+              <div className="stat-value">{stats.totalPractices}</div>
+              <div className="stat-label">总句子</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <span className="stat-value">{stats.totalPractices}</span>
-            <span className="stat-label">今日练习</span>
+          <div className="stat-item">
+            <div className="stat-icon amber">📖</div>
+            <div className="stat-info">
+              <div className="stat-value">{stats.totalPractices}</div>
+              <div className="stat-label">今日练习</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <span className="stat-value">{accuracy}%</span>
-            <span className="stat-label">正确率</span>
+          <div className="stat-item">
+            <div className="stat-icon blue">🎯</div>
+            <div className="stat-info">
+              <div className="stat-value">{accuracy}%</div>
+              <div className="stat-label">正确率</div>
+            </div>
           </div>
-          <div className="stat-card clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-            <span className="stat-value">{wrongCount}</span>
-            <span className="stat-label">错题</span>
+          <div className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
+            <div className="stat-icon emerald">📕</div>
+            <div className="stat-info">
+              <div className="stat-value">{wrongCount}</div>
+              <div className="stat-label">错题</div>
+            </div>
           </div>
         </div>
       )}
@@ -954,8 +978,8 @@ export default function PracticePage({
       )}
 
       {/* 主卡片 */}
-      <div className="practice-card">
-        <div className="card-body">
+      <div className="practice-card card-enter">
+        <div className="card-body" key={sentence?.id || 'no-sentence'}>
         {/* 剧集名 + ID */}
         <div className="sentence-meta">
           {sentence.showName} · #{sentence.id}
@@ -1047,23 +1071,23 @@ export default function PracticePage({
       {!phoneMode && (
       <>
       <div className="bottom-section">
-      <div className="button-area">
+      <div className="button-area card-enter-delay-1">
         <hr className="action-divider" />
 
         {/* 操作行1：提交 */}
         <div className="action-row">
           {!answered ? (
-            <button className="btn-primary" ref={submitRef} onClick={handleSubmit}>⏎ 提交</button>
+            <button className="action-btn primary" ref={submitRef} onClick={handleSubmit}>⏎ 提交</button>
           ) : (
-            <button className="btn-primary" onClick={goNext}>⏭️ 下一句</button>
+            <button className="action-btn primary" onClick={goNext}>⏭️ 下一句</button>
           )}
         </div>
 
         {/* 操作行2：剧集原音 / 服务器音色 / 下一句 */}
         <div className="action-row">
-          <button className="btn-action" onClick={playOriginal}>🎬 剧集原音</button>
-          <button className="btn-action" onClick={() => playTts(en)}>🎙️ {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
-          <button className="btn-action" onClick={goNext}>⏭️ 下一句</button>
+          <button className="action-btn secondary" onClick={playOriginal}>🎬 剧集原音</button>
+          <button className="action-btn secondary" onClick={() => playTts(en)}>🎙️ {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
+          <button className="action-btn secondary" onClick={goNext}>⏭️ 下一句</button>
         </div>
 
         {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
@@ -1081,11 +1105,11 @@ export default function PracticePage({
           </div>
           <div className="action-row-half">
             {mode === 'dictation' && (
-              <button className="btn-action" onClick={() => setShowCn(s => !s)}>
+              <button className="action-btn secondary" onClick={() => setShowCn(s => !s)}>
                 {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
               </button>
             )}
-            <button className="btn-action" onClick={() => setShowEn(s => !s)}>
+            <button className="action-btn secondary" onClick={() => setShowEn(s => !s)}>
               {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
             </button>
           </div>
@@ -1182,10 +1206,10 @@ export default function PracticePage({
               <div className="wrong-retry-title">这句之前错过 {wrongBookPrompt.errorCount} 次</div>
               <div className="wrong-retry-subtitle">再练一遍，巩固记忆？</div>
               <div className="wrong-retry-actions">
-                <button className="btn-primary" onClick={retryWrongSentence}>
+                <button className="action-btn primary" onClick={retryWrongSentence}>
                   🔄 再练一遍
                 </button>
-                <button className="btn-action" onClick={skipRetry}>
+                <button className="action-btn secondary" onClick={skipRetry}>
                   ⏭️ 跳过
                 </button>
               </div>
