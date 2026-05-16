@@ -7,6 +7,7 @@ import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
 import SubtitlePage from './SubtitlePage';
+import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
 import './index.css';
 
@@ -70,54 +71,66 @@ export default function App() {
 
   return (
     <div className="app">
-      <nav className="topnav">
-        <span className="logo" onClick={() => setPage('practice')} style={{ cursor: 'pointer' }}>英语剧场</span>
-        <div className="nav-links">
-          {user ? (
-            <>
-              <span className="user-badge">{user.nickname}</span>
-              {user?.role === 'admin' && (
-                <>
-                  <span className="topnav-online">
-                    <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
-                    {onlineCount !== null ? onlineCount : '...'}
-                  </span>
-                  <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
-                </>
-              )}
-              <button onClick={handleLogout} className="logout-btn">退出</button>
-            </>
-          ) : (
-            <button onClick={() => setPage('login')}>登录</button>
-          )}
-        </div>
-      </nav>
-      {announcement && (
-        <div className="announcement-bar">
-          {announcement}
-        </div>
-      )}
-      {notifications.length > 0 && (
-        <div className="notification-list">
-          {notifications.map((n: any) => (
-            <div key={n.id} className="notification-item">
-              <div className="notification-title">{n.title}</div>
-              {n.content && <div className="notification-content">{n.content}</div>}
-              <div className="notification-time">
-                {n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ''}
+      {/* 桌面端侧边栏 */}
+      <Sidebar
+        page={page}
+        onNavigate={handleNavigate}
+        user={user}
+        onlineCount={onlineCount}
+        onLogout={handleLogout}
+      />
+
+      <div className="app-content">
+        {/* 手机端精简顶部导航 */}
+        <nav className="topnav-mobile">
+          <span className="topnav-mobile-logo" onClick={() => setPage('practice')}>
+            <span className="topnav-mobile-dot" />
+            英语剧场
+          </span>
+          <div className="topnav-mobile-right">
+            {user?.role === 'admin' && (
+              <span className="topnav-mobile-online">
+                <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
+                {onlineCount !== null ? onlineCount : '...'}
+              </span>
+            )}
+            {user ? (
+              <button onClick={handleLogout} className="topnav-mobile-logout">退出</button>
+            ) : (
+              <button onClick={() => setPage('login')} className="topnav-mobile-login">登录</button>
+            )}
+          </div>
+        </nav>
+
+        {/* 公告 & 通知区域 */}
+        {announcement && (
+          <div className="announcement-bar">
+            {announcement}
+          </div>
+        )}
+        {notifications.length > 0 && (
+          <div className="notification-list">
+            {notifications.map((n: any) => (
+              <div key={n.id} className="notification-item">
+                <div className="notification-title">{n.title}</div>
+                {n.content && <div className="notification-content">{n.content}</div>}
+                <div className="notification-time">
+                  {n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ''}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <main>
-        {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
-        {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-        {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-        {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-        {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
-        {page === 'subtitle' && <SubtitlePage />}
-      </main>
+            ))}
+          </div>
+        )}
+
+        <main>
+          {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
+          {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+          {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+          {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+          {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
+          {page === 'subtitle' && <SubtitlePage />}
+        </main>
+      </div>
     </div>
   );
 }
