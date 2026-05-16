@@ -6,6 +6,7 @@
 
 /* ---------- CSS 变量（Teal/Slate 主题默认） ---------- */
 :root {
+  color-scheme: light dark;
   --bg: #0f172a;
   --card: #1e293b;
   --card-border: #334155;
@@ -537,6 +538,32 @@ h3 {
 /* 弹性间距 */
 .sidebar-spacer {
   flex: 1;
+}
+
+/* 主题切换（在弹性间距和分割线之间） */
+.sidebar-theme-row {
+  padding: 4px 10px;
+}
+
+.sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--sidebar-text-secondary);
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+.sidebar-theme-btn:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text);
 }
 
 /* 分割线 */
