@@ -215,6 +215,16 @@ body {
   color: var(--danger);
 }
 
+/* ── 导航栏在线人数 ── */
+.topnav-online {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+}
+
 /* ---------- 登录页 ---------- */
 .login-page {
   display: flex;

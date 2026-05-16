@@ -19,6 +19,7 @@ export default function App() {
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (getToken()) {
@@ -34,12 +35,28 @@ export default function App() {
       .then(r => { if (r.code === 200) setNotifications(r.data || []); });
   }, []);
 
+  // 管理员实时在线人数 SSE
+  useEffect(() => {
+    if (user?.role !== 'admin') { setOnlineCount(null); return; }
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const es = new EventSource(`/api/admin/online/subscribe?token=${encodeURIComponent(token)}`);
+    es.addEventListener('online', (e) => {
+      try { setOnlineCount(JSON.parse(e.data).onlineCount); } catch {}
+    });
+    es.addEventListener('init', (e) => {
+      try { setOnlineCount(JSON.parse(e.data).onlineCount); } catch {}
+    });
+    es.onerror = () => {};
+    return () => es.close();
+  }, [user?.role]);
+
   const handleLogin = (token: string) => {
     setToken(token);
     api.me().then(r => { if (r.code === 200) setUser(r.data); setPage('practice'); });
   };
 
-  const handleLogout = () => { clearToken(); setUser(null); setPage('login'); };
+  const handleLogout = () => { clearToken(); setUser(null); setOnlineCount(null); setPage('login'); };
 
   // 处理从实践页底部导航来的跳转
   const handleNavigate = (target: string, data?: any) => {
@@ -59,10 +76,16 @@ export default function App() {
           {user ? (
             <>
               <span className="user-badge">{user.nickname}</span>
-              <button onClick={handleLogout} className="logout-btn">退出</button>
               {user?.role === 'admin' && (
-                <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
+                <>
+                  <span className="topnav-online">
+                    <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
+                    {onlineCount !== null ? onlineCount : '...'}
+                  </span>
+                  <button onClick={() => setPage('admin')} className={page === 'admin' ? 'active' : ''}>管理</button>
+                </>
               )}
+              <button onClick={handleLogout} className="logout-btn">退出</button>
             </>
           ) : (
             <button onClick={() => setPage('login')}>登录</button>
@@ -92,7 +115,7 @@ export default function App() {
         {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
         {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
         {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-        {page === 'admin' && <AdminPage />}
+        {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
         {page === 'subtitle' && <SubtitlePage />}
       </main>
     </div>

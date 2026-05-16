@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 
 const COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2'];
 
-export default function AdminPage() {
+export default function AdminPage({ onlineCount }: { onlineCount: number | null }) {
   const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications' | 'sentence-flags'>('stats');
 
   return (
@@ -18,7 +18,7 @@ export default function AdminPage() {
         <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}>🚩 句子报告</button>
       </aside>
       <main className="admin-content">
-        {tab === 'stats' && <AdminDashboard />}
+        {tab === 'stats' && <AdminDashboard onlineCount={onlineCount} />}
         {tab === 'users' && <UserManagement />}
         {tab === 'settings' && <SystemSettings />}
         {tab === 'notifications' && <NotificationManagement />}
@@ -28,10 +28,9 @@ export default function AdminPage() {
   );
 }
 
-function AdminDashboard() {
+function AdminDashboard({ onlineCount }: { onlineCount: number | null }) {
   const [stats, setStats] = useState<any>(null);
   const [retention, setRetention] = useState<any[]>([]);
-  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -44,17 +43,6 @@ function AdminDashboard() {
     fetch('/api/admin/retention', { headers })
       .then(r => r.json())
       .then(r => { if (r.code === 200) setRetention(r.data || []); });
-
-    // 实时在线人数 SSE
-    const es = new EventSource(`/api/admin/online/subscribe?token=${encodeURIComponent(token || '')}`);
-    es.addEventListener('online', (e) => {
-      try { setOnlineCount(JSON.parse(e.data).onlineCount); } catch {}
-    });
-    es.addEventListener('init', (e) => {
-      try { setOnlineCount(JSON.parse(e.data).onlineCount); } catch {}
-    });
-    es.onerror = () => { /* 断线重连由 EventSource 自动处理 */ };
-    return () => es.close();
   }, []);
 
   if (!stats) return <div className="loading">加载中...</div>;
@@ -66,15 +54,6 @@ function AdminDashboard() {
     <div className="admin-dashboard">
       <h2>📈 总览</h2>
       <div className="stats-cards">
-        <div className="stat-card stat-card-online">
-          <div className="stat-value" style={{ color: onlineCount !== null && onlineCount > 0 ? '#52c41a' : '#999' }}>
-            <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
-            {onlineCount !== null ? onlineCount : '...'}
-          </div>
-          <div className="stat-label">
-            {onlineCount !== null ? '实时在线' : '连接中...'}
-          </div>
-        </div>
         <div className="stat-card">
           <div className="stat-value">{totalUsers}</div>
           <div className="stat-label">总用户数</div>
