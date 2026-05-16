@@ -1514,6 +1514,44 @@ body {
   color: var(--text-secondary);
   margin-top: 4px;
 }
+/* ── 实时在线绿点 ── */
+.online-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #666;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.online-dot-active {
+  background: #52c41a;
+  box-shadow: 0 0 8px rgba(82, 196, 26, 0.6);
+  animation: online-pulse 2s ease-in-out infinite;
+}
+@keyframes online-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(82, 196, 26, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(82, 196, 26, 0.8); }
+}
+.stat-card-online {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-online::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #52c41a, #73d13d, #52c41a);
+  background-size: 200% 100%;
+  animation: online-bar 3s linear infinite;
+}
+@keyframes online-bar {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .chart-container {
   background: var(--card-bg);
   padding: 16px;
