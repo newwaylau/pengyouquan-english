@@ -285,15 +285,216 @@ body {
 }
 .forgot-link span:hover { opacity: 0.9; }
 
-.error-msg {
-  color: var(--danger);
-  font-size: 0.8125rem;
-  margin-bottom: 8px;
+/* 欢迎面板 / 密码表单过渡动画 */
+.post-login-content {
+  animation: fadeIn 0.3s ease;
 }
-.success-msg {
-  color: var(--success);
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 登录后欢迎面板 ---------- */
+.login-card-welcome {
+  width: 400px;
+  max-width: 92vw;
+  animation: fadeIn 0.3s ease;
+}
+.welcome-avatar-section {
+  margin-bottom: 20px;
+}
+.welcome-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+}
+.welcome-greeting {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.welcome-email {
   font-size: 0.8125rem;
-  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+/* 登录成功徽章 */
+.login-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,184,148,0.12);
+  border: 1px solid rgba(0,184,148,0.3);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.8125rem;
+  color: #00b894;
+  margin-bottom: 20px;
+}
+
+/* 修改密码入口卡 */
+.change-pwd-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  margin-bottom: 16px;
+}
+.change-pwd-btn:hover {
+  background: rgba(108,92,231,0.1);
+  border-color: #6c5ce7;
+}
+.change-pwd-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.change-pwd-label {
+  flex: 1;
+}
+.change-pwd-label-main {
+  font-weight: 500;
+}
+.change-pwd-label-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.change-pwd-arrow {
+  color: var(--text-tertiary);
+  font-size: 1.125rem;
+}
+
+/* 欢迎面板分隔线 */
+.welcome-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* 欢迎面板分类标题 */
+.welcome-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+/* 快速操作按钮行 */
+.welcome-action-row {
+  display: flex;
+  gap: 10px;
+}
+.welcome-primary-btn {
+  flex: 1;
+  padding: 12px;
+  background: #6c5ce7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.welcome-primary-btn:hover { opacity: 0.9; }
+.welcome-secondary-btn {
+  padding: 12px 20px;
+  background: none;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.welcome-secondary-btn:hover {
+  border-color: #6c5ce7;
+  color: var(--text);
+}
+
+/* 修改密码表单按钮行 */
+.pwd-btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.pwd-save-btn {
+  flex: 1;
+  padding: 12px;
+  background: #6c5ce7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.pwd-save-btn:hover { opacity: 0.9; }
+.pwd-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pwd-cancel-btn {
+  padding: 12px 20px;
+  background: none;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pwd-cancel-btn:hover { border-color: #e17055; color: #e17055; }
+
+/* 修改密码返回链接 */
+.pwd-back-link {
+  margin-top: 16px;
+  color: #6c5ce7;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+.pwd-back-link:hover { opacity: 0.9; }
+
+/* 修改密码成功提示 */
+.pwd-success-toast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(0,184,148,0.1);
+  border: 1px solid rgba(0,184,148,0.3);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: #00b894;
 }
 
 /* 验证码行 */
@@ -2069,6 +2270,16 @@ body {
   .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 3; }
   .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; flex: 1; }
   .login-card button { padding: 8px; font-size: 0.875rem; }
+
+  /* 欢迎面板手机适配 */
+  .welcome-avatar { width: 56px; height: 56px; font-size: 1.375rem; }
+  .welcome-greeting { font-size: 1rem; }
+  .change-pwd-btn { padding: 10px 12px; }
+  .change-pwd-icon { width: 32px; height: 32px; }
+  .welcome-primary-btn { padding: 10px; font-size: 0.875rem; }
+  .welcome-secondary-btn { padding: 10px 14px; font-size: 0.875rem; }
+  .pwd-save-btn { padding: 10px; font-size: 0.875rem; }
+  .pwd-cancel-btn { padding: 10px 14px; font-size: 0.875rem; }
 
   /* 浏览页 */
   .browse-controls select { min-width: 140px; font-size: 0.8125rem; }
