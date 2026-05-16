@@ -2376,61 +2376,83 @@ body {
   font-size: 16px;
   min-height: 22px;
 }
-/* 第3行: 按钮区（一行排满） */
+/* 第3行: 按钮区（一行排满） — 三阶统一样式 */
 .phone-mode-actions {
   flex-shrink: 0;
-  padding-top: 4px;
+  padding: 6px 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 6px;
   flex-wrap: nowrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-.phone-mode-actions .btn-phone-submit {
-  padding: 6px 8px;
-  border: none;
-  border-radius: 6px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 600;
+.phone-mode-actions::-webkit-scrollbar {
+  display: none;
+}
+/* 所有按钮共享的基础样式：统一高度/圆角/字号 */
+.phone-mode-actions button {
+  min-height: 36px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
-  line-height: 1;
-}
-.phone-mode-actions .btn-phone-next {
-  padding: 6px 8px;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text);
-  font-size: 0.72rem;
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: 1;
-}
-.phone-mode-actions .btn-phone-icon {
-  padding: 5px 5px;
-  border: none;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.65rem;
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: 1;
   display: flex;
   align-items: center;
-  gap: 1px;
+  justify-content: center;
+  gap: 3px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* ---- 1级：主要操作（提交）— 品牌色填充 ---- */
+.phone-mode-actions .btn-phone-submit {
+  padding: 8px 14px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.phone-mode-actions .btn-phone-submit:hover {
+  background: var(--primary-hover);
+}
+.phone-mode-actions .btn-phone-submit:active {
+  background: var(--primary-hover);
+  transform: scale(0.97);
+}
+/* ---- 2级：次要操作（下一句）— 品牌色描边 ---- */
+.phone-mode-actions .btn-phone-next {
+  padding: 7px 13px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+}
+.phone-mode-actions .btn-phone-next:hover {
+  background: var(--hover-bg);
+}
+.phone-mode-actions .btn-phone-next:active {
+  background: var(--hover-bg);
+  transform: scale(0.97);
+}
+/* ---- 3级：辅助工具按钮（原音/TTS/显示）— 弱描边 ---- */
+.phone-mode-actions .btn-phone-icon {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.phone-mode-actions .btn-phone-icon:hover {
+  background: var(--hover-bg-gray);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .phone-mode-actions .btn-phone-icon:active {
   background: var(--hover-bg);
-  background: var(--card-bg);
+  border-color: var(--primary);
   color: var(--text);
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.15s, border-color 0.15s;
 }
