@@ -531,10 +531,9 @@ export default function PracticePage({
       refreshStats();
     } else {
       setRetryCount(1);
-      // 清空错误输入 + 聚焦到第一个错误框
+      // 聚焦到第一个错误框
       const firstWrongIdx = Array.from(wrong).sort()[0];
       const clearedInputs = [...currentInputs];
-      wrong.forEach(idx => { clearedInputs[idx] = ''; });
       setInputs(clearedInputs);
       if (firstWrongIdx !== undefined) {
         // 等 React 渲染完空输入后再聚焦（iOS 上 setTimeout(0) 仍在用户手势上下文中）
@@ -876,6 +875,17 @@ export default function PracticePage({
               );
             })}
           </div>
+
+          {/* 反馈提示（手机模式内联显示） */}
+          {(wrongWords.size > 0 || answered) && (
+            <div className={`phone-mode-feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
+              {answered && wrongWords.size === 0
+                ? '✅ 完全正确！'
+                : answered
+                ? `❌ 正确 ${userCorrectCount}/${userTotal} 个词 (${userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)`
+                : `❌ 有 ${wrongWords.size} 个词不对，请重试 (${userTotal > 0 ? Math.round((userTotal - wrongWords.size)/userTotal*100) : 0}%)`}
+            </div>
+          )}
 
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">

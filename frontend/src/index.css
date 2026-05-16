@@ -677,6 +677,17 @@ body {
 .feedback.correct { background: var(--feedback-correct-bg); }
 .feedback.wrong { background: var(--feedback-wrong-bg); }
 .feedback.retry { background: var(--feedback-retry-bg); }
+.phone-mode-feedback {
+  text-align: center;
+  font-size: 0.875rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  animation: feedback-enter 0.3s ease-out;
+}
+.phone-mode-feedback.correct { background: var(--feedback-correct-bg); }
+.phone-mode-feedback.wrong { background: var(--feedback-wrong-bg); }
+
 .answer-reveal {
   margin-top: 8px;
   font-size: 0.875rem;
