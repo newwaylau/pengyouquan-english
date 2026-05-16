@@ -13,8 +13,10 @@ import com.pengyouquan.english.repository.ShowRepository;
 import com.pengyouquan.english.repository.SystemSettingRepository;
 import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.security.CurrentUserId;
+import com.pengyouquan.english.service.OnlineUserTracker;
 import com.pengyouquan.english.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -55,6 +57,7 @@ public class AdminController {
     private final SentenceFlagRepository sentenceFlagRepository;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
     private final NotificationRepository notificationRepository;
+    private final OnlineUserTracker onlineUserTracker;
 
     public AdminController(UserService userService,
                            PracticeLogRepository practiceLogRepository,
@@ -64,7 +67,8 @@ public class AdminController {
                            SentenceRepository sentenceRepository,
                            SystemSettingRepository systemSettingRepository,
                            RequestLoggingInterceptor requestLoggingInterceptor,
-                           NotificationRepository notificationRepository) {
+                           NotificationRepository notificationRepository,
+                           OnlineUserTracker onlineUserTracker) {
         this.userService = userService;
         this.practiceLogRepository = practiceLogRepository;
         this.userRepository = userRepository;
@@ -74,6 +78,7 @@ public class AdminController {
         this.systemSettingRepository = systemSettingRepository;
         this.requestLoggingInterceptor = requestLoggingInterceptor;
         this.notificationRepository = notificationRepository;
+        this.onlineUserTracker = onlineUserTracker;
     }
 
     /** 管理后台统计数据总览 */
@@ -510,4 +515,17 @@ public class AdminController {
         }
         return value;
     }
+
+    // ── ──
+
+    /**
+     * 实时在线人数 SSE 订阅
+     * 管理员在浏览器通过 EventSource 连接
+     * 由于 EventSource 不支持自定义请求头，token 通过查询参数传递
+     */
+    @GetMapping("/online/subscribe")
+    public SseEmitter subscribeOnline(@RequestParam String token) {
+        return onlineUserTracker.subscribe(token);
+    }
+
 }
