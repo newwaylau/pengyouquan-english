@@ -99,6 +99,39 @@ public class AuthService {
     }
 
     /**
+     * 忘记密码：发送验证码（检查邮箱是否已注册）
+     */
+    public void forgotPasswordSendCode(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new BusinessException("该邮箱未注册");
+        }
+        emailCodeService.sendCode(email);
+    }
+
+    /**
+     * 重置密码（验证码 + 新密码）
+     * 成功后返回新 JWT，用户自动登录
+     */
+    public LoginResponse resetPassword(ResetPasswordRequest request) {
+        // 校验验证码
+        emailCodeService.verifyCode(request.getEmail(), request.getCode());
+
+        // 查找用户
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("该邮箱未注册"));
+
+        // 更新密码（BCrypt 编码）
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        // 生成新 JWT
+        String token = jwtUtil.generateToken(user.getId());
+
+        return new LoginResponse(token, user.getEmail(), user.getNickname(),
+                user.getAvatar(), user.getRole());
+    }
+
+    /**
      * 获取用户信息
      */
     public UserInfoResponse getUserInfo(Long userId) {

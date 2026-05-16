@@ -35,6 +35,19 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
+    /** 忘记密码：发送验证码（检查邮箱已注册） */
+    @PostMapping("/forgot-password/send-code")
+    public ApiResponse<Void> forgotPasswordSendCode(@Valid @RequestBody SendCodeRequest request) {
+        authService.forgotPasswordSendCode(request.getEmail());
+        return ApiResponse.success(null);
+    }
+
+    /** 重置密码（验证码 + 新密码），成功后自动登录返回 JWT */
+    @PostMapping("/reset-password")
+    public ApiResponse<LoginResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ApiResponse.success(authService.resetPassword(request));
+    }
+
     /** 用户注册（邮箱 + 手机号 + 验证码 + 密码 + 可选邀请码） */
     @PostMapping("/register")
     public ApiResponse<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
