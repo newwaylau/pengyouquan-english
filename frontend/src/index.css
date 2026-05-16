@@ -857,16 +857,6 @@ body {
 }
 
 /* 注册手机号 */
-.login-card input[type="tel"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  background: var(--input-bg);
-  color: var(--text);
-}
 
 /* =====================================================
    练习页 — 布局
@@ -2522,14 +2512,10 @@ body {
   .stat-card { padding: 14px; }
   .stat-value { font-size: 1.375rem; }
 
-  /* 登录卡片宽度自适应 */
-  .login-card { width: calc(100% - 32px); padding: 16px; }
-  .login-card .subtitle { margin-bottom: 16px; }
-  .login-card input { padding: 8px; margin-bottom: 8px; font-size: 0.875rem; }
+  /* 登录表单手机适配 */
   .code-row { gap: 4px; }
   .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 3; }
   .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; flex: 1; }
-  .login-card button { padding: 8px; font-size: 0.875rem; }
 
   /* 欢迎面板手机适配 */
   .welcome-avatar { width: 56px; height: 56px; font-size: 1.375rem; }
