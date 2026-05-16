@@ -643,7 +643,8 @@ export default function PracticePage({
   const focusNextInput = (fromIdx: number, inputsCopy: string[]) => {
     let next = fromIdx + 1;
     while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputsCopy[next]?.length ?? 0) > 0))) next++;
-    const target = next < words.length ? inputRefs.current[next] : submitRef.current;
+    // phone mode 下输完最后一个词 → 聚焦隐藏输入框（保持键盘弹出），不聚焦提交按钮（会收起键盘）
+    const target = next < words.length ? inputRefs.current[next] : (phoneMode ? hiddenInputRef.current : submitRef.current);
     if (target) {
       try { target.focus({ preventScroll: true }); } catch(e) {}
       // iOS 多层 focus 保险：requestAnimationFrame 等键盘动画完成后再试
@@ -661,6 +662,21 @@ export default function PracticePage({
     const newInputs = [...inputs];
     newInputs[i] = val;
     setInputs(newInputs);
+    // 自动跳转下个输入框（在 onChange 中执行，字符已写入 DOM，iOS 不会丢字）
+    if (!answered && !hints.has(i) && val.length > 0) {
+      const parts = splitWordParts(words[i] || '');
+      if (val.length >= parts.letters.length) {
+        let next = i + 1;
+        while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
+        const target = next < words.length ? inputRefs.current[next] : (phoneMode ? hiddenInputRef.current : submitRef.current);
+        requestAnimationFrame(() => {
+          try { target?.focus({ preventScroll: true }); } catch(e) {}
+          if (target && document.activeElement !== target) {
+            setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 50);
+          }
+        });
+      }
+    }
   };
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !inputs[i] && i > 0) {
@@ -673,22 +689,12 @@ export default function PracticePage({
       e.preventDefault();
       inputRefs.current[i + 1]?.focus();
     }
-    // 预测：当前已输入字符数 +1 >= 单词长度 → 聚焦下一格
+    // 预测：当前已输入字符数 >= 单词长度 → 聚焦下一格
+    // （实际跳转逻辑已移至 handleInputChange onChange 中，
+    //  避免 iOS 上 keydown 跳转导致最后一个字符丢失）
     if (!answered && !hints.has(i) && (e.key.length === 1 || e.key === 'Process') && e.key !== ' ') {
       const parts = splitWordParts(words[i] || '');
       const val = (e.target as HTMLInputElement).value;
-      if ((val.length || 0) + 1 >= parts.letters.length) {
-        let next = i + 1;
-        while (next < words.length && (hints.has(next) || (retryCount === 1 && (inputs[next]?.length ?? 0) > 0))) next++;
-        const target = next < words.length ? inputRefs.current[next] : submitRef.current;
-        // 等当前字符渲染后再跳转——用 requestAnimationFrame 让 React 先 render
-        requestAnimationFrame(() => {
-          try { target?.focus({ preventScroll: true }); } catch(e) {}
-          if (target && document.activeElement !== target) {
-            setTimeout(() => { try { target.focus({ preventScroll: true }); } catch(e) {} }, 50);
-          }
-        });
-      }
     }
   };
 
