@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 — UI 重设计 Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Navigation ── */
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 32px;
+    border-bottom: 1px solid #1e293b;
+    background: #0f172a;
+  }
+  .logo {
+    font-size: 1.125rem; font-weight: 700;
+    color: #14b8a6;
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #14b8a6;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .topbar-btn {
+    background: none; border: none; color: #94a3b8;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 0.8125rem; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .topbar-btn:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; }
+  .topbar-btn.active { background: rgba(20,184,166,0.1); color: #14b8a6; }
+  .topbar-user {
+    font-size: 0.8125rem; color: #64748b;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .topbar-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #14b8a6, #5eead4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 600; color: #0f172a;
+  }
+
+  /* ── Page Tabs ── */
+  .page-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid #1e293b;
+    padding: 0 32px;
+  }
+  .page-tab {
+    padding: 12px 20px;
+    font-size: 0.8125rem; font-weight: 500;
+    color: #64748b;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+  .page-tab:hover { color: #94a3b8; }
+  .page-tab.active { color: #14b8a6; border-bottom-color: #14b8a6; }
+
+  /* ── Demo Content ── */
+  .demo-container {
+    max-width: 1200px; margin: 0 auto;
+    padding: 24px 32px;
+  }
+
+  /* ── Screen Toggle ── */
+  .screen-tabs {
+    display: flex; gap: 8px;
+    margin-bottom: 24px;
+  }
+  .screen-tab {
+    padding: 8px 18px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.8125rem; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .screen-tab:hover { border-color: #14b8a6; color: #f1f5f9; }
+  .screen-tab.active { background: #14b8a6; color: #fff; border-color: #14b8a6; }
+
+  .demo-screen { display: none; animation: fadeIn 0.3s ease; }
+  .demo-screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Login Page Mockup ── */
+  .login-mockup {
+    display: flex;
+    min-height: 500px;
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #334155;
+  }
+  .login-brand {
+    flex: 1;
+    background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-brand::before {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(20,184,166,0.08);
+    top: -80px; right: -80px;
+  }
+  .login-brand::after {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(20,184,166,0.05);
+    bottom: -40px; left: -40px;
+  }
+  .login-brand-icon {
+    font-size: 2.5rem; margin-bottom: 16px;
+  }
+  .login-brand h1 {
+    font-size: 1.75rem; font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+  }
+  .login-brand p {
+    font-size: 0.9375rem;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .login-brand-features {
+    margin-top: 32px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .login-brand-feature {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.8125rem; color: #cbd5e1;
+  }
+  .login-brand-feature .check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(20,184,166,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: #14b8a6; font-size: 0.75rem; flex-shrink: 0;
+  }
+  .login-form {
+    width: 400px;
+    padding: 48px 40px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .login-form h2 {
+    font-size: 1.25rem; font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .login-form .subtitle {
+    font-size: 0.8125rem; color: #64748b;
+    margin-bottom: 28px;
+  }
+  .login-form label {
+    font-size: 0.75rem; font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .login-form input {
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: rgba(255,255,255,0.04);
+    color: #f1f5f9;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .login-form input:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+  }
+  .login-form input::placeholder { color: #475569; }
+  .login-form .btn-login {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    background: #14b8a6;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .login-form .btn-login:hover { background: #0d9488; transform: translateY(-1px); }
+  .login-form .form-footer {
+    display: flex; justify-content: space-between;
+    margin-top: 14px;
+    font-size: 0.75rem;
+  }
+  .login-form .form-footer a {
+    color: #64748b; text-decoration: none;
+    cursor: pointer; transition: color 0.15s;
+  }
+  .login-form .form-footer a:hover { color: #14b8a6; }
+
+  /* ── Practice Page Mockup ── */
+  .practice-mockup {
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .stats-row {
+    display: flex; gap: 12px;
+  }
+  .stat-item {
+    flex: 1;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .stat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .stat-icon.teal { background: rgba(20,184,166,0.12); color: #14b8a6; }
+  .stat-icon.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .stat-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .stat-icon.emerald { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .stat-info { flex: 1; }
+  .stat-value { font-size: 1.25rem; font-weight: 700; color: #f1f5f9; line-height: 1.2; }
+  .stat-label { font-size: 0.6875rem; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* Practice Card */
+  .practice-card-new {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 32px;
+    display: flex; flex-direction: column;
+    gap: 20px;
+  }
+  .sentence-area {
+    text-align: center;
+    padding: 20px 0 12px;
+  }
+  .mode-tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(20,184,166,0.1);
+    color: #14b8a6;
+    margin-bottom: 16px;
+  }
+  .sentence-en-new {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    font-weight: 500;
+    color: #f1f5f9;
+    letter-spacing: -0.01em;
+  }
+  .sentence-cn-new {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin-top: 8px;
+  }
+  .sentence-meta-new {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 12px;
+  }
+
+  .input-area {
+    border-top: 1px solid #334155;
+    padding-top: 20px;
+  }
+  .word-inputs-new {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .word-input-new {
+    padding: 8px 10px;
+    border: none;
+    border-bottom: 2px solid #475569;
+    background: transparent;
+    color: #f1f5f9;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: inherit;
+    width: 80px;
+  }
+  .word-input-new:focus { border-bottom-color: #14b8a6; background: rgba(20,184,166,0.05); }
+  .word-input-new.correct { border-bottom-color: #22c55e; background: rgba(34,197,94,0.08); }
+  .word-input-new.wrong { border-bottom-color: #ef4444; background: rgba(239,68,68,0.08); }
+
+  .action-buttons {
+    display: flex; gap: 10px;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .action-btn.primary {
+    background: #14b8a6; color: #fff;
+  }
+  .action-btn.primary:hover { background: #0d9488; transform: translateY(-1px); }
+  .action-btn.secondary {
+    background: rgba(255,255,255,0.06); color: #94a3b8;
+    border: 1px solid #334155;
+  }
+  .action-btn.secondary:hover { border-color: #14b8a6; color: #14b8a6; }
+  .action-btn.danger {
+    background: rgba(239,68,68,0.08); color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+  .action-btn.danger:hover { background: rgba(239,68,68,0.15); }
+
+  /* Bottom nav */
+  .bottom-nav-new {
+    display: flex;
+    background: #1e293b;
+    border-top: 1px solid #334155;
+    border-radius: 12px 12px 0 0;
+    padding: 8px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    padding: 8px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+    color: #64748b; font-family: inherit;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: #94a3b8; }
+  .nav-item.active { color: #14b8a6; }
+  .nav-icon { font-size: 1.25rem; line-height: 1; }
+  .nav-label { font-size: 0.625rem; line-height: 1; }
+
+  /* ── Comparison Section ── */
+  .comparison {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .comparison-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .comparison-card h3 {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .comparison-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+    font-size: 0.8125rem;
+  }
+  .comparison-item:last-child { border-bottom: none; }
+  .tag {
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 0.6875rem; font-weight: 600;
+  }
+  .tag.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .tag.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .tag.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .tag.teal { background: rgba(20,184,166,0.12); color: #14b8a6; }
+
+  .footer-note {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(20,184,166,0.06);
+    border: 1px solid rgba(20,184,166,0.15);
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .footer-note strong { color: #14b8a6; }
+
+  @media (max-width: 768px) {
+    .topbar { padding: 10px 16px; }
+    .page-tabs { padding: 0 16px; overflow-x: auto; }
+    .demo-container { padding: 16px; }
+    .login-mockup { flex-direction: column; }
+    .login-brand { padding: 32px; min-height: auto; }
+    .login-form { width: 100%; padding: 32px 24px; }
+    .comparison { grid-template-columns: 1fr; }
+    .stats-row { flex-wrap: wrap; }
+    .stat-item { min-width: calc(50% - 6px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-dot"></span>
+    英语剧场
+  </div>
+  <div class="topbar-right">
+    <button class="topbar-btn active">练习</button>
+    <button class="topbar-btn">错题本</button>
+    <button class="topbar-btn">浏览</button>
+    <button class="topbar-btn">搜索</button>
+    <span class="topbar-user">
+      <span class="topbar-avatar">H</span>
+      Heaton
+    </span>
+  </div>
+</div>
+
+<div class="demo-container">
+
+  <div class="screen-tabs">
+    <button class="screen-tab active" onclick="switchScreen('login')">📱 登录页（重设计）</button>
+    <button class="screen-tab" onclick="switchScreen('practice')">🎯 练习页（重设计）</button>
+    <button class="screen-tab" onclick="switchScreen('comparison')">📊 对比与优先级</button>
+  </div>
+
+  <!-- Login Screen -->
+  <div class="demo-screen active" id="screen-login">
+    <div class="login-mockup">
+      <div class="login-brand">
+        <div class="login-brand-icon">🎬</div>
+        <h1>听懂每一句台词</h1>
+        <p>通过精选美剧台词，逐词精听、跟读模仿，<br>真正提升英语听力与口语能力。</p>
+        <div class="login-brand-features">
+          <div class="login-brand-feature">
+            <span class="check">✓</span>
+            精选《老友记》《生活大爆炸》等经典美剧台词
+          </div>
+          <div class="login-brand-feature">
+            <span class="check">✓</span>
+            逐词填空练习 + 智能纠错 + 发音跟读
+          </div>
+          <div class="login-brand-feature">
+            <span class="check">✓</span>
+            学习进度追踪，错题自动复习
+          </div>
+        </div>
+      </div>
+      <div class="login-form">
+        <h2>欢迎回来</h2>
+        <p class="subtitle">登录你的账号继续学习</p>
+        <label>邮箱 / 手机号</label>
+        <input type="text" placeholder="newwaylau@hotmail.com" value="newwaylau@hotmail.com">
+        <label>密码</label>
+        <input type="password" placeholder="请输入密码">
+        <button class="btn-login">登录</button>
+        <div class="form-footer">
+          <a>注册新账号</a>
+          <a>忘记密码？</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Practice Screen -->
+  <div class="demo-screen" id="screen-practice">
+    <div class="practice-mockup">
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-icon teal">★</div>
+          <div class="stat-info">
+            <div class="stat-value">42</div>
+            <div class="stat-label">今日练习</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon emerald">✓</div>
+          <div class="stat-info">
+            <div class="stat-value">87%</div>
+            <div class="stat-label">正确率</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon amber">⚡</div>
+          <div class="stat-info">
+            <div class="stat-value">7</div>
+            <div class="stat-label">连续天数</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon blue">📚</div>
+          <div class="stat-info">
+            <div class="stat-value">1,284</div>
+            <div class="stat-label">总句子数</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-card-new">
+        <div class="sentence-area">
+          <span class="mode-tag">🎧 听力模式</span>
+          <div class="sentence-en-new">
+            I can't believe you actually did that.
+          </div>
+          <div class="sentence-cn-new">
+            我真不敢相信你真的那么做了。
+          </div>
+          <div class="sentence-meta-new">
+            S6E12 · 老友记 · #3824
+          </div>
+        </div>
+
+        <div class="input-area">
+          <div class="word-inputs-new">
+            <input class="word-input-new correct" value="I" readonly>
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new" placeholder="___" style="width:70px;">
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new" placeholder="___" style="width:80px;">
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new wrong" value="believe" readonly>
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new" placeholder="___" style="width:90px;">
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new" placeholder="___" style="width:60px;">
+            <span style="color:#475569;display:flex;align-items:center;padding:0 2px;font-size:1.2rem;user-select:none;"> </span>
+            <input class="word-input-new" placeholder="___" style="width:60px;">
+          </div>
+
+          <div class="action-buttons">
+            <button class="action-btn primary">✓ 提交答案</button>
+            <button class="action-btn secondary">🔄 重听</button>
+            <button class="action-btn secondary">💡 提示</button>
+            <button class="action-btn secondary">⏩ 跳过</button>
+            <button class="action-btn danger">🚩 举报</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav-new">
+        <button class="nav-item active">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">练习</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">错题</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">📖</span>
+          <span class="nav-label">浏览</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">🔍</span>
+          <span class="nav-label">搜索</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">设置</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Screen -->
+  <div class="demo-screen" id="screen-comparison">
+    <div class="comparison">
+      <div class="comparison-card">
+        <h3>🔄 当前 → 新设计 变化</h3>
+        <div class="comparison-item">
+          <span>主色调</span>
+          <span><span class="tag" style="background:#6c5ce733;color:#a29bfe;">紫色</span> → <span class="tag teal">Teal 青色</span></span>
+        </div>
+        <div class="comparison-item">
+          <span>布局宽度</span>
+          <span><span class="tag" style="background:#64748b33;color:#94a3b8;">900px 居中</span> → <span class="tag green">1200px 自适应</span></span>
+        </div>
+        <div class="comparison-item">
+          <span>登录页</span>
+          <span><span class="tag" style="background:#64748b33;color:#94a3b8;">居中卡片</span> → <span class="tag green">左右分割</span></span>
+        </div>
+        <div class="comparison-item">
+          <span>字体</span>
+          <span><span class="tag" style="background:#64748b33;color:#94a3b8;">系统字体</span> → <span class="tag teal">Inter</span></span>
+        </div>
+        <div class="comparison-item">
+          <span>统计栏</span>
+          <span><span class="tag" style="background:#64748b33;color:#94a3b8;">数字卡片</span> → <span class="tag green">图标+数据</span></span>
+        </div>
+        <div class="comparison-item">
+          <span>动效</span>
+          <span><span class="tag" style="background:#64748b33;color:#94a3b8;">无</span> → <span class="tag blue">fade + hover</span></span>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <h3>📋 优先级排序</h3>
+        <div class="comparison-item">
+          <span><strong style="color:#22c55e;">P0</strong> 配色 + 布局</span>
+          <span class="tag green">1-2 天</span>
+        </div>
+        <div class="comparison-item">
+          <span><strong style="color:#14b8a6;">P1</strong> 排版 + 组件</span>
+          <span class="tag teal">2-3 天</span>
+        </div>
+        <div class="comparison-item">
+          <span><strong style="color:#3b82f6;">P2</strong> 动效 + 导航</span>
+          <span class="tag blue">3-5 天</span>
+        </div>
+        <div class="comparison-item">
+          <span><strong style="color:#f59e0b;">P3</strong> 图标 + 响应式</span>
+          <span class="tag amber">持续</span>
+        </div>
+        <div class="comparison-item" style="border-bottom:none;">
+          <span style="font-size:0.75rem;color:#64748b;">快速见效：P0 只需改 CSS 变量</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      <strong>💡 第一步最实惠：</strong>只需要修改 CSS 变量（将紫色 #6c5ce7 改为 Teal #14b8a6，背景色做相应调整），整个应用的色彩风格就会焕然一新。零代码风险、零功能影响、立竿见影。
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchScreen(name) {
+  document.querySelectorAll('.demo-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelector(`.screen-tab[onclick*="${name}"]`).classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -301,7 +301,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
     return (
       <div className="login-page">
-        <div className="login-card login-card-welcome">
+        <div className="login-card-welcome">
           <div className="post-login-content" key={welcomeView}>
             {welcomeView === 'welcome' && (
               <>
@@ -422,24 +422,50 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
     );
   }
 
-  // ── 未登录：登录/注册/忘记密码表单 ──
+  // ── 未登录：左右分栏布局 ──
   return (
     <div className="login-page">
-      <div className="login-card">
-        <h1 style={{ cursor: 'pointer' }} onClick={onHome}>英语剧场</h1>
-        <p className="subtitle">听懂每一句台词</p>
+      {/* 左侧品牌区 */}
+      <div className="login-brand">
+        <div className="login-brand-icon">🎬</div>
+        <h1>听懂每一句台词</h1>
+        <p className="brand-subtitle">
+          通过精选美剧台词，逐词精听、跟读模仿，<br />真正提升英语听力与口语能力。
+        </p>
+        <div className="login-brand-features">
+          <div className="login-brand-feature">
+            <span className="check">✓</span>
+            精选《老友记》《生活大爆炸》等经典美剧台词
+          </div>
+          <div className="login-brand-feature">
+            <span className="check">✓</span>
+            逐词填空练习 + 智能纠错 + 发音跟读
+          </div>
+          <div className="login-brand-feature">
+            <span className="check">✓</span>
+            学习进度追踪，错题自动复习
+          </div>
+        </div>
+      </div>
+
+      {/* 右侧表单区 */}
+      <div className="login-form-container">
+        <h2>欢迎回来</h2>
+        <p className="form-subtitle">登录你的账号继续学习</p>
         <form onSubmit={handleSubmit}>
 
           {/* ── 登录模式 ── */}
           {mode === 'login' && (
             <>
-              <input type="text" placeholder="邮箱/手机号"
+              <label className="field-label">邮箱 / 手机号</label>
+              <input type="text" placeholder="newwaylau@hotmail.com"
                 value={email}
                 onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
+                style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
 
+              <label className="field-label">密码</label>
               <div className="pwd-wrapper">
-                <input type={showLoginPwd ? 'text' : 'password'} placeholder="密码" value={password}
+                <input type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
                 <span className="eye-btn" onClick={() => setShowLoginPwd(!showLoginPwd)}>
                   {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
@@ -458,7 +484,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <input type="email" placeholder="邮箱"
                 value={email}
                 onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                style={email && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
+                style={email && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
 
               {/* 验证码 */}
               <div className="code-row">
@@ -494,7 +520,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="pwd-wrapper">
                 <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
                   onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                  style={password2 && !pwd2Match ? { borderColor: '#e17055' } : {}} />
+                  style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
                 <span className="eye-btn" onClick={() => setShowPwd2(!showPwd2)}>
                   {showPwd2 ? <EyeOpen /> : <EyeClosed />}
                 </span>
@@ -502,7 +528,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
               <input type="tel" placeholder="手机号（可选）" value={phone}
                 onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
-                style={phone && !isValidPhone(phone) ? { borderColor: '#e17055' } : {}} />
+                style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
 
               <input type="text" placeholder="邀请码（可选）" value={invitedBy}
                 onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
@@ -518,7 +544,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                     autoFocus
-                    style={forgotEmail && !isValidEmail(forgotEmail) ? { borderColor: '#e17055' } : {}} />
+                    style={forgotEmail && !isValidEmail(forgotEmail) ? { borderColor: '#ef4444' } : {}} />
 
                   <div className="code-row">
                     <button type="button" className="send-code-btn" style={{ width: '100%' }}
@@ -568,7 +594,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   <div className="pwd-wrapper">
                     <input type={forgotShowPwd2 ? 'text' : 'password'} placeholder="确认新密码" value={forgotPassword2}
                       onChange={e => setForgotPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                      style={forgotPassword2 && !forgotPwd2Match ? { borderColor: '#e17055' } : {}} />
+                      style={forgotPassword2 && !forgotPwd2Match ? { borderColor: '#ef4444' } : {}} />
                     <span className="eye-btn" onClick={() => setForgotShowPwd2(!forgotShowPwd2)}>
                       {forgotShowPwd2 ? <EyeOpen /> : <EyeClosed />}
                     </span>
@@ -581,7 +607,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {error && <div className="error-msg">{error}</div>}
           {successMsg && <div className="success-msg">{successMsg}</div>}
 
-          <button type="submit" className="submit">
+          <button type="submit" className="submit-btn">
             {mode === 'login' ? '登录' : mode === 'register' ? '注册' : '重置密码'}
           </button>
         </form>
