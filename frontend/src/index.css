@@ -483,7 +483,7 @@ h3 {
   background: none;
   cursor: pointer;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-family: inherit;
   color: var(--sidebar-text-secondary);
   transition: background 0.15s, color 0.15s, transform 0.1s;
@@ -591,7 +591,7 @@ h3 {
 }
 
 .sidebar-online {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--sidebar-text-tertiary);
   display: inline-flex;
   align-items: center;
@@ -723,7 +723,7 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text);
 }
 .login-brand-feature .check {
@@ -773,7 +773,7 @@ h3 {
   margin-bottom: 12px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   background: var(--input-bg);
   color: var(--text);
   font-family: inherit;
@@ -792,7 +792,7 @@ h3 {
   border-radius: 8px;
   background: var(--primary);
   color: #fff;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -924,7 +924,7 @@ h3 {
   position: absolute;
   right: 0;
   top: -16px;
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   font-weight: 600;
 }
 
@@ -1345,7 +1345,7 @@ h3 {
   line-height: 1.2;
 }
 .stats-bar .stat-label {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text-tertiary);
   margin-top: 2px;
   text-transform: uppercase;
@@ -1450,7 +1450,7 @@ h3 {
   filter: blur(6px);
 }
 .sentence-cn {
-  font-size: 1.05rem;
+  font-size: var(--text-h3);
   line-height: 1.5;
   text-align: center;
   color: var(--cn-text-color);
@@ -1502,13 +1502,13 @@ h3 {
 }
 .word-input::placeholder {
   color: rgba(71, 85, 105, 0.5);
-  font-size: 0.7rem;
+  font-size: var(--text-tag);
 }
 .word-sep {
   display: flex;
   align-items: center;
   color: var(--text-secondary);
-  font-size: 1.2rem;
+  font-size: var(--text-h2);
   padding: 0 2px;
   user-select: none;
 }
@@ -1674,7 +1674,7 @@ h3 {
 .feedback.retry { background: var(--feedback-retry-bg); }
 .phone-mode-feedback {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   padding: 10px 12px;
   border-radius: 8px;
   margin-bottom: 6px;
@@ -1685,7 +1685,7 @@ h3 {
 
 .answer-reveal {
   margin-top: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--warning);
   padding: calc(6/16*1rem) calc(12/16*1rem);
   background: var(--feedback-retry-bg);
@@ -1702,7 +1702,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   padding: 6px 14px;
-  font-size: 0.85rem;
+  font-size: var(--text-aux);
   cursor: pointer;
   color: var(--text-secondary);
   transition: all 0.2s, transform 0.1s;
@@ -1737,7 +1737,7 @@ h3 {
   border-radius: 4px;
   border: 1px solid var(--kbd-border);
   margin: 0 2px;
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text);
 }
 
@@ -1780,7 +1780,7 @@ h3 {
   line-height: 1;
 }
 .bottom-nav-label {
-  font-size: 0.625rem;
+  font-size: var(--text-tag);
   line-height: 1;
 }
 
@@ -1837,7 +1837,7 @@ h3 {
 }
 .search-result-item:hover { background: var(--hover-bg); transform: translateY(-1px); }
 .search-result-item .result-text {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text);
   margin-bottom: 2px;
 }
@@ -1856,7 +1856,7 @@ h3 {
   border-radius: 8px;
   color: var(--text-secondary);
   padding: 6px 14px;
-  font-size: 0.8rem;
+  font-size: var(--text-aux);
   cursor: pointer;
   transition: all 0.15s, transform 0.1s;
 }
@@ -1916,7 +1916,7 @@ h3 {
 }
 
 /* ---------- 错题页增强 ---------- */
-.wrong-count { color: var(--text-secondary); font-size: 0.875rem; }
+.wrong-count { color: var(--text-secondary); font-size: var(--text-aux); }
 .wrong-toolbar {
   display: flex;
   align-items: center;
@@ -1953,7 +1953,7 @@ h3 {
   border-radius: 10px;
   background: linear-gradient(135deg, var(--primary), #f59e0b);
   color: #fff;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -2030,7 +2030,7 @@ h3 {
   min-width: 0;
 }
 .wrong-text {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text);
   line-height: 1.5;
   margin-bottom: 6px;
@@ -2043,7 +2043,7 @@ h3 {
   flex-wrap: wrap;
 }
 .wrong-meta-tag {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   padding: calc(2/16*1rem) calc(8/16*1rem);
   border-radius: 4px;
   color: var(--text-secondary);
@@ -2071,7 +2071,7 @@ h3 {
   margin-bottom: 20px;
 }
 .wrong-section-title {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   padding: 8px 12px;
   margin-bottom: 8px;
@@ -2136,7 +2136,7 @@ h3 {
   margin-bottom: 8px;
 }
 .wrong-review-subtitle {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   margin-bottom: 24px;
 }
@@ -2149,7 +2149,7 @@ h3 {
 
 /* ---------- 练习页错题错误次数徽标 ---------- */
 .wrong-error-badge {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   padding: calc(1/16*1rem) calc(6/16*1rem);
   border-radius: 4px;
   background: var(--feedback-wrong-bg);
@@ -2277,7 +2277,7 @@ h3 {
   margin-bottom: 8px;
 }
 .empty-state-card .empty-state-subtitle {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   line-height: 1.6;
   max-width: 320px;
@@ -2351,7 +2351,7 @@ h3 {
   padding: 8px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   background: var(--card-bg);
   color: var(--text);
   cursor: pointer;
@@ -2386,7 +2386,7 @@ h3 {
   align-items: center;
   gap: 8px;
   font-weight: 400;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text);
   cursor: pointer;
 }
@@ -2398,7 +2398,7 @@ h3 {
   border-radius: 8px;
   background: var(--card-bg);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   transition: all 0.15s;
 }
@@ -2418,7 +2418,7 @@ h3 {
   padding: calc(2/16*1rem) calc(6/16*1rem);
   border-radius: 4px;
   border: 1px solid var(--kbd-border);
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text);
 }
 
@@ -2436,7 +2436,7 @@ h3 {
   padding: calc(8/16*1rem) calc(12/16*1rem);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   flex: 1;
   min-width: 200px;
   background: var(--card-bg);
@@ -2453,7 +2453,7 @@ h3 {
   padding: calc(8/16*1rem) calc(12/16*1rem);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   background: var(--input-bg);
   color: var(--text);
 }
@@ -2498,7 +2498,7 @@ h3 {
   padding-top: 2px;
 }
 .sentence-body { flex: 1; min-width: 0; }
-.browse-en { font-size: 0.875rem; line-height: 1.5; color: var(--text); }
+.browse-en { font-size: var(--text-aux); line-height: 1.5; color: var(--text); }
 .sentence-cn-browse { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px; }
 
 /* ---------- 搜索页面 ---------- */
@@ -2531,7 +2531,7 @@ h3 {
   box-shadow: var(--shadow-soft);
 }
 .search-result:hover { background: var(--hover-bg); }
-.result-text { font-size: 0.875rem; margin-bottom: 4px; color: var(--text); }
+.result-text { font-size: var(--text-aux); margin-bottom: 4px; color: var(--text); }
 .result-meta { font-size: 0.75rem; color: var(--text-secondary); }
 
 /* ---------- 管理后台 ---------- */
@@ -2582,7 +2582,7 @@ h3 {
   text-align: left;
   cursor: pointer;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   transition: background 0.15s, color 0.15s;
   font-family: inherit;
@@ -2723,7 +2723,7 @@ h3 {
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
 }
 .ranking-num {
   width: 24px;
@@ -2769,7 +2769,7 @@ h3 {
   padding: calc(12/16*1rem) calc(16/16*1rem);
   text-align: left;
   border-bottom: 1px solid var(--table-border);
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text);
 }
 .admin-table th {
@@ -2851,7 +2851,7 @@ h3 {
   color: #fff;
   border-radius: 10px;
   padding: 2px 8px;
-  font-size: 0.8rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   min-width: 20px;
   text-align: center;
@@ -2875,7 +2875,7 @@ h3 {
   padding: calc(8/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   background: var(--input-bg);
   color: var(--text);
   outline: none;
@@ -2950,7 +2950,7 @@ h3 {
 .system-settings .settings-section { margin-bottom: 24px; }
 .system-settings label {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   margin-bottom: 8px;
   font-weight: 600;
@@ -2960,7 +2960,7 @@ h3 {
   padding: 10px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   outline: none;
   transition: border-color 0.2s;
   resize: vertical;
@@ -3013,7 +3013,7 @@ h3 {
   border: 1px solid var(--format-badge-border);
   border-radius: 4px;
   margin: 0 4px;
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--format-badge-text);
   font-weight: 600;
 }
@@ -3024,7 +3024,7 @@ h3 {
   margin-bottom: 12px;
 }
 .subtitle-form-row label {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   color: var(--text-secondary);
   white-space: nowrap;
   font-weight: 600;
@@ -3034,7 +3034,7 @@ h3 {
   padding: calc(8/16*1rem) calc(12/16*1rem);
   border: 1px solid var(--subtitle-input-border);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   outline: none;
   transition: border-color 0.2s;
   background: var(--input-bg);
@@ -3058,7 +3058,7 @@ h3 {
   padding: calc(10/16*1rem) calc(16/16*1rem);
   border-radius: 8px;
   margin-top: 12px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   text-align: center;
 }
 .upload-feedback.success {
@@ -3101,7 +3101,7 @@ h3 {
 .history-item:hover { box-shadow: var(--shadow-card); }
 .history-info { flex: 1; min-width: 0; }
 .history-show {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   color: var(--text);
   margin-bottom: 2px;
@@ -3115,7 +3115,7 @@ h3 {
   color: var(--text-secondary);
 }
 .history-file {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text-tertiary);
   margin-top: 2px;
   overflow: hidden;
@@ -3126,7 +3126,7 @@ h3 {
   padding: calc(1/16*1rem) calc(6/16*1rem);
   background: var(--hover-bg-gray);
   border-radius: 4px;
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -3135,7 +3135,7 @@ h3 {
   color: var(--dup-badge-text);
   padding: calc(1/16*1rem) calc(6/16*1rem);
   border-radius: 4px;
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
 }
 .history-time { color: var(--text-tertiary); }
 .delete-btn {
@@ -3299,7 +3299,7 @@ h3 {
   .stats-bar { gap: 8px; }
   .stats-bar .stat-item { padding: 12px; }
   .stats-bar .stat-value { font-size: 1.125rem; }
-  .stats-bar .stat-label { font-size: 0.625rem; }
+  .stats-bar .stat-label { font-size: var(--text-tag); }
 }
 
 /* ---------- 桌面端 (>768px) ---------- */
@@ -3325,26 +3325,26 @@ h3 {
 /* ---------- 手机 (≤480px) ---------- */
 @media (max-width: 480px) {
   .topnav-mobile { gap: 4px; }
-  .topnav-mobile-logo { font-size: 0.875rem; }
+  .topnav-mobile-logo { font-size: var(--text-aux); }
   .topnav-mobile-right { gap: 2px; }
   .topnav-mobile-login,
   .topnav-mobile-logout { font-size: 0.75rem; padding: calc(4/16*1rem) calc(6/16*1rem); }
 
   .word-input { font-size: 1rem; min-height: 28px; }
   .sentence-en { font-size: 1.125rem; padding: 12px; }
-  .sentence-cn { font-size: 0.875rem; }
+  .sentence-cn { font-size: var(--text-aux); }
 
   .practice-card { padding: 14px; }
 
   .action-row { gap: 4px; }
-  .action-btn { padding: calc(8/16*1rem) calc(14/16*1rem); font-size: 0.875rem; }
+  .action-btn { padding: calc(8/16*1rem) calc(14/16*1rem); font-size: var(--text-aux); }
   .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); }
 
   /* Stats Bar 在手机上2x2排列 */
   .stats-bar { gap: 6px; flex-wrap: wrap; }
   .stats-bar .stat-item { flex: 1 1 calc(50% - 6px); min-width: calc(50% - 6px); padding: 10px 10px; }
   .stats-bar .stat-value { font-size: 1rem; }
-  .stats-bar .stat-label { font-size: 0.625rem; }
+  .stats-bar .stat-label { font-size: var(--text-tag); }
 
   .mode-badge { font-size: 0.75rem; padding: calc(3/16*1rem) calc(10/16*1rem); }
 
@@ -3363,7 +3363,7 @@ h3 {
   .bottom-nav { padding: calc(4/16*1rem) calc(4/16*1rem); padding-bottom: max(4px, env(safe-area-inset-bottom)); }
   .bottom-nav-btn { padding: 6px 4px; min-height: 44px; }
   .bottom-nav-icon { font-size: 1.125rem; }
-  .bottom-nav-label { font-size: 9px; }
+  .bottom-nav-label { font-size: var(--text-tag); }
 
   /* 搜索面板 */
   .search-panel {
@@ -3427,10 +3427,10 @@ h3 {
   .welcome-greeting { font-size: 1rem; }
   .change-pwd-btn { padding: 10px 12px; }
   .change-pwd-icon { width: 32px; height: 32px; }
-  .welcome-primary-btn { padding: 10px; font-size: 0.875rem; }
-  .welcome-secondary-btn { padding: 10px 14px; font-size: 0.875rem; }
-  .pwd-save-btn { padding: 10px; font-size: 0.875rem; }
-  .pwd-cancel-btn { padding: 10px 14px; font-size: 0.875rem; }
+  .welcome-primary-btn { padding: 10px; font-size: var(--text-aux); }
+  .welcome-secondary-btn { padding: 10px 14px; font-size: var(--text-aux); }
+  .pwd-save-btn { padding: 10px; font-size: var(--text-aux); }
+  .pwd-cancel-btn { padding: 10px 14px; font-size: var(--text-aux); }
 
   /* 浏览页 */
   .browse-controls select { min-width: 140px; font-size: 0.8125rem; }
@@ -3458,7 +3458,7 @@ h3 {
   padding: calc(10/16*1rem) calc(14/16*1rem);
 }
 .notification-title {
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   font-weight: 600;
   color: var(--text);
   margin-bottom: 4px;
@@ -3470,7 +3470,7 @@ h3 {
   margin-bottom: 4px;
 }
 .notification-time {
-  font-size: 0.6875rem;
+  font-size: var(--text-tag);
   color: var(--text-tertiary);
 }
 
@@ -3513,7 +3513,7 @@ h3 {
   color: var(--text);
   padding: 12px 24px;
   border-radius: 10px;
-  font-size: 0.875rem;
+  font-size: var(--text-aux);
   z-index: 200;
   box-shadow: var(--shadow-card);
   animation: toast-in 0.3s ease-out;
@@ -3546,7 +3546,7 @@ h3 {
 @media (max-width: 550px) {
   .action-row { gap: 3px; }
   .btn-action,
-  .btn-speed { font-size: 0.625rem; padding: calc(3/16*1rem) calc(4/16*1rem); }
+  .btn-speed { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); }
   .action-row-split { gap: 4px; }
   .action-row-half { gap: 3px; }
 }
@@ -3558,7 +3558,7 @@ h3 {
   border: 1px solid var(--card-border);
   border-radius: 8px;
   padding: 4px 8px;
-  font-size: 0.8rem;
+  font-size: var(--text-aux);
   font-family: var(--font-family);
   outline: none;
   width: 100%;
@@ -3572,7 +3572,7 @@ h3 {
   gap: 6px;
 }
 .voice-section-label {
-  font-size: 0.78rem;
+  font-size: var(--text-aux);
   color: var(--text-muted);
   font-weight: 500;
   padding: 2px 2px 0;
@@ -3603,7 +3603,7 @@ h3 {
   border: 1px solid var(--card-border);
   background: rgba(255,255,255,0.05);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: var(--text-aux);
   transition: all 0.15s;
   user-select: none;
 }
@@ -3629,7 +3629,7 @@ h3 {
   border: 1px solid var(--card-border);
   background: rgba(255,255,255,0.05);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: var(--text-aux);
   transition: all 0.15s;
   user-select: none;
 }
@@ -3707,7 +3707,7 @@ h3 {
 }
 /* 第1行: 英文句子（最多3行截断） */
 .phone-mode-overlay .sentence-en {
-  font-size: 0.95rem;
+  font-size: var(--text-body);
   line-height: 1.45;
   text-align: center;
   font-weight: 500;
@@ -3721,7 +3721,7 @@ h3 {
 }
 /* 第1行: 中文翻译（最多2行，灰色） */
 .phone-mode-overlay .sentence-cn {
-  font-size: 0.7rem;
+  font-size: var(--text-tag);
   line-height: 1.4;
   text-align: center;
   color: var(--text-secondary);
@@ -3750,7 +3750,7 @@ h3 {
 }
 .phone-mode-overlay .word-input {
   padding: 3px 2px;
-  font-size: 16px;
+  font-size: var(--text-body);
   min-height: 28px;
 }
 /* 第3行: 按钮区（一行排满） — 新设计：三层视觉层级 */
@@ -3787,7 +3787,7 @@ h3 {
   border-radius: 8px;
   background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   color: #fff;
-  font-size: 0.80rem;
+  font-size: var(--text-aux);
   font-weight: 700;
   letter-spacing: 0.01em;
   box-shadow: 0 2px 8px rgba(20,184,166,0.35);
@@ -3809,7 +3809,7 @@ h3 {
   border-radius: 8px;
   background: rgba(20,184,166,0.08);
   color: var(--text);
-  font-size: 0.78rem;
+  font-size: var(--text-aux);
   font-weight: 500;
 }
 .phone-mode-actions .btn-phone-next:hover {
@@ -3830,7 +3830,7 @@ h3 {
   border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: var(--text-tag);
   cursor: pointer;
   white-space: nowrap;
   line-height: 1;

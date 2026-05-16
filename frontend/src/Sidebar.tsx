@@ -6,6 +6,8 @@ interface SidebarProps {
   user: any;
   onlineCount: number | null;
   onLogout: () => void;
+  isDark: boolean;
+  onToggleTheme: () => void;
 }
 
 const NAV_ITEMS: { key: string; icon: string; label: string; requiresLogin?: boolean }[] = [
@@ -15,7 +17,7 @@ const NAV_ITEMS: { key: string; icon: string; label: string; requiresLogin?: boo
   { key: 'browse', icon: '📖', label: '浏览' },
 ];
 
-export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout }: SidebarProps) {
+export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout, isDark, onToggleTheme }: SidebarProps) {
   return (
     <aside className="sidebar">
       {/* Logo */}
@@ -61,6 +63,14 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout 
 
       {/* Spacer to push user to bottom */}
       <div className="sidebar-spacer" />
+
+      {/* Theme toggle */}
+      <div className="sidebar-theme-row">
+        <button className="sidebar-theme-btn" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+          <span className="sidebar-nav-icon">{isDark ? '☀️' : '🌙'}</span>
+          <span className="sidebar-nav-label">{isDark ? '浅色模式' : '深色模式'}</span>
+        </button>
+      </div>
 
       {/* Divider */}
       <div className="sidebar-divider" />

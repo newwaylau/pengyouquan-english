@@ -492,7 +492,7 @@ function NotificationManagement() {
                     {n.createdAt ? new Date(n.createdAt).toLocaleString() : '-'}
                   </td>
                   <td>
-                    <button onClick={() => handleDelete(n.id)} className="action-btn action-btn-danger">
+                    <button onClick={() => handleDelete(n.id)} className="action-btn danger">
                       删除
                     </button>
                   </td>
@@ -599,7 +599,7 @@ function SentenceFlagManagement() {
                 <td>
                   {s.isDisabled ? (
                     <button
-                      className="action-btn action-btn-success"
+                      className="action-btn primary"
                       onClick={() => handleEnable(s.sentenceId)}
                     >
                       恢复
@@ -607,13 +607,13 @@ function SentenceFlagManagement() {
                   ) : (
                     <>
                       <button
-                        className="action-btn action-btn-success"
+                        className="action-btn primary"
                         onClick={() => handleApprove(s.sentenceId)}
                       >
                         ✅ 审核通过
                       </button>
                       <button
-                        className="action-btn action-btn-danger"
+                        className="action-btn danger"
                         onClick={() => handleDisable(s.sentenceId)}
                       >
                         ⛔ 停用

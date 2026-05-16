@@ -9,6 +9,7 @@ import AdminPage from './AdminPage';
 import SubtitlePage from './SubtitlePage';
 import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
+import { useTheme } from './useTheme';
 import './index.css';
 
 // 应用启动时检测 IPv6 连通性
@@ -21,6 +22,13 @@ export default function App() {
   const [announcement, setAnnouncement] = useState('');
   const [notifications, setNotifications] = useState<any[]>([]);
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
+  const { theme, toggleTheme, isDark } = useTheme();
+
+  // Sync theme-color meta tag
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+  }, [isDark]);
 
   useEffect(() => {
     if (getToken()) {
@@ -78,6 +86,8 @@ export default function App() {
         user={user}
         onlineCount={onlineCount}
         onLogout={handleLogout}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
       />
 
       <div className="app-content">
