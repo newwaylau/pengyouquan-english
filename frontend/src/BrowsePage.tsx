@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
 
 interface Props {
@@ -72,12 +73,22 @@ export default function BrowsePage({ onJump, onBack }: Props) {
         </div>
       </div>
 
-      {!selectedShowId && <div className="empty-state">请先选择剧集</div>}
+      {!selectedShowId && (
+        <EmptyStateCard
+          icon="📖"
+          title="请选择剧集"
+          subtitle="从上方下拉列表选择一部美剧，开始浏览句子。"
+        />
+      )}
 
       {loading && <div className="loading">加载中...</div>}
 
       {selectedShowId && !loading && sentences.length === 0 && (
-        <div className="empty-state">该剧集暂无句子</div>
+        <EmptyStateCard
+          icon="📝"
+          title="该剧集暂无句子"
+          subtitle="可能是该剧集正在更新中，请稍后再来。"
+        />
       )}
 
       {sentences.length > 0 && (

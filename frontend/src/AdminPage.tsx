@@ -10,12 +10,32 @@ export default function AdminPage({ onlineCount }: { onlineCount: number | null 
   return (
     <div className="admin-page">
       <aside className="admin-sidebar">
-        <h3>📊 管理后台</h3>
-        <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}>仪表盘</button>
-        <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>用户管理</button>
-        <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>系统设置</button>
-        <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>通知管理</button>
-        <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}>🚩 句子报告</button>
+        <div className="admin-sidebar-header">
+          <span className="admin-sidebar-logo">📊</span>
+          <span className="admin-sidebar-title">管理后台</span>
+        </div>
+        <nav className="admin-sidebar-nav">
+          <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}>
+            <span className="admin-nav-icon">📈</span>
+            <span className="admin-nav-label">仪表盘</span>
+          </button>
+          <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>
+            <span className="admin-nav-icon">👤</span>
+            <span className="admin-nav-label">用户管理</span>
+          </button>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
+            <span className="admin-nav-icon">⚙️</span>
+            <span className="admin-nav-label">系统设置</span>
+          </button>
+          <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>
+            <span className="admin-nav-icon">📢</span>
+            <span className="admin-nav-label">通知管理</span>
+          </button>
+          <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}>
+            <span className="admin-nav-icon">🚩</span>
+            <span className="admin-nav-label">句子报告</span>
+          </button>
+        </nav>
       </aside>
       <main className="admin-content">
         {tab === 'stats' && <AdminDashboard onlineCount={onlineCount} />}
@@ -240,7 +260,7 @@ function UserManagement() {
                 </span>
               </td>
               <td>{u.enabled !== false ? '正常' : '禁用'}</td>
-              <td><button onClick={() => toggleUser(u.id)} className="small-btn">
+              <td><button onClick={() => toggleUser(u.id)} className="action-btn">
                 {u.enabled !== false ? '禁用' : '启用'}
               </button></td>
             </tr>
@@ -250,7 +270,7 @@ function UserManagement() {
 
       {/* 分页控件 */}
       {totalPages > 1 && (
-        <div className="pagination">
+        <div className="pagination admin-pagination">
           <button disabled={page <= 0} onClick={() => fetchUsers(page - 1)}>上一页</button>
           <span className="page-info">第 {page + 1} / {totalPages} 页</span>
           <button disabled={page >= totalPages - 1} onClick={() => fetchUsers(page + 1)}>下一页</button>
@@ -472,7 +492,7 @@ function NotificationManagement() {
                     {n.createdAt ? new Date(n.createdAt).toLocaleString() : '-'}
                   </td>
                   <td>
-                    <button onClick={() => handleDelete(n.id)} className="small-btn" style={{ color: 'var(--danger)' }}>
+                    <button onClick={() => handleDelete(n.id)} className="action-btn action-btn-danger">
                       删除
                     </button>
                   </td>
@@ -579,8 +599,7 @@ function SentenceFlagManagement() {
                 <td>
                   {s.isDisabled ? (
                     <button
-                      className="small-btn"
-                      style={{ color: 'var(--success)' }}
+                      className="action-btn action-btn-success"
                       onClick={() => handleEnable(s.sentenceId)}
                     >
                       恢复
@@ -588,15 +607,13 @@ function SentenceFlagManagement() {
                   ) : (
                     <>
                       <button
-                        className="small-btn"
-                        style={{ color: 'var(--success)', marginRight: 6 }}
+                        className="action-btn action-btn-success"
                         onClick={() => handleApprove(s.sentenceId)}
                       >
                         ✅ 审核通过
                       </button>
                       <button
-                        className="small-btn"
-                        style={{ color: 'var(--danger)' }}
+                        className="action-btn action-btn-danger"
                         onClick={() => handleDisable(s.sentenceId)}
                       >
                         ⛔ 停用

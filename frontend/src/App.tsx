@@ -122,7 +122,7 @@ export default function App() {
           </div>
         )}
 
-        <main>
+        <main className="page-enter" key={page}>
           {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
           {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}

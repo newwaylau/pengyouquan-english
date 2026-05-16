@@ -486,7 +486,7 @@ h3 {
   font-size: 0.875rem;
   font-family: inherit;
   color: var(--sidebar-text-secondary);
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
   text-align: left;
   width: 100%;
 }
@@ -542,7 +542,7 @@ h3 {
 /* 分割线 */
 .sidebar-divider {
   height: 1px;
-  background: #1e293b;
+  background: var(--sidebar-divider);
   margin: 0 14px;
 }
 
@@ -569,7 +569,7 @@ h3 {
   justify-content: center;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--sidebar-avatar-text);
   flex-shrink: 0;
 }
 
@@ -584,7 +584,7 @@ h3 {
 .sidebar-username {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--sidebar-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -592,7 +592,7 @@ h3 {
 
 .sidebar-online {
   font-size: 0.6875rem;
-  color: #64748b;
+  color: var(--sidebar-text-tertiary);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -612,15 +612,15 @@ h3 {
 
 .sidebar-logout-btn {
   margin-top: 10px;
-  border: 1px solid #334155;
+  border: 1px solid var(--sidebar-border);
   background: none;
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.75rem;
   font-family: inherit;
-  color: #64748b;
-  transition: border-color 0.15s, color 0.15s, transform 0.1s;
+  color: var(--sidebar-text-tertiary);
+  transition: border-color 0.15s, color 0.15s;
 }
 .sidebar-logout-btn:hover {
   border-color: #ef4444;
@@ -1532,37 +1532,74 @@ h3 {
 }
 .action-row:last-child { margin-bottom: 0; }
 
-.action-row .btn-primary {
+/* ---- 三态按钮系统 ---- */
+.action-btn {
   flex: 1;
-  width: 100%;
-  padding: calc(10/16*1rem) calc(20/16*1rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px;
   border: none;
   border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Primary - 主操作 */
+.action-btn.primary {
   background: var(--primary);
   color: #fff;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  text-align: center;
 }
-.action-row .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-.action-row .btn-primary:active { transform: scale(0.97); }
+.action-btn.primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+.action-btn.primary:active { transform: scale(0.97); }
 
-.btn-action,
+/* Secondary - 次要操作 */
+.action-btn.secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--card-border);
+}
+.action-btn.secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Danger - 危险操作 */
+.action-btn.danger {
+  background: rgba(239,68,68,0.08);
+  color: var(--danger);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.action-btn.danger:hover {
+  background: rgba(239,68,68,0.15);
+}
+
+/* 速度按钮 - 继承 secondary 视觉 */
 .btn-speed {
   flex: 1;
   min-width: 0;
   padding: calc(6/16*1rem) calc(10/16*1rem);
-  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: var(--card-bg);
-  cursor: pointer;
   font-size: 0.8125rem;
-  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
   text-align: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--card-border);
 }
-.btn-action:hover,
 .btn-speed:hover {
   border-color: var(--primary);
   color: var(--primary);
@@ -1586,10 +1623,42 @@ h3 {
   flex: 1;
   min-width: 0;
 }
-.action-row-half .btn-action,
 .action-row-half .btn-speed {
   flex: 1;
   min-width: 0;
+}
+
+/* 非按钮区旧 btn-primary / btn-action 兼容
+   (wrong-review-actions, wrong-retry-actions 等独立组件) */
+.btn-primary {
+  padding: calc(10/16*1rem) calc(20/16*1rem);
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  text-align: center;
+}
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-action {
+  padding: calc(6/16*1rem) calc(10/16*1rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text);
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-action:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 /* ---------- 反馈 ---------- */
@@ -1637,7 +1706,7 @@ h3 {
   font-size: 0.85rem;
   cursor: pointer;
   color: var(--text-secondary);
-  transition: all 0.2s;
+  transition: all 0.2s, transform 0.1s;
 }
 .flag-btn:hover {
   border-color: var(--warning);
@@ -1765,7 +1834,7 @@ h3 {
   padding: calc(10/16*1rem) calc(14/16*1rem);
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
 .search-result-item:hover { background: var(--hover-bg); transform: translateY(-1px); }
 .search-result-item .result-text {
@@ -1790,7 +1859,7 @@ h3 {
   padding: 6px 14px;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s, transform 0.1s;
 }
 .exit-focus-btn:hover {
   background: rgba(255,255,255,0.12);
@@ -2119,6 +2188,40 @@ h3 {
   font-size: 0.8125rem;
   color: var(--text-secondary);
 }
+/* 管理后台分页美化 */
+.admin-pagination {
+  margin-top: 16px;
+  padding: 12px 0;
+  gap: 8px;
+}
+.admin-pagination button {
+  padding: calc(7/16*1rem) calc(18/16*1rem);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text);
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.admin-pagination button:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--hover-bg);
+}
+.admin-pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.admin-pagination .page-info {
+  padding: calc(6/16*1rem) calc(14/16*1rem);
+  background: var(--input-bg);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
 
 /* ---------- 空状态 & 加载 ---------- */
 .empty-state {
@@ -2217,7 +2320,7 @@ h3 {
   cursor: pointer;
   color: var(--text-secondary);
   padding: 4px;
-  transition: color 0.15s;
+  transition: color 0.15s, transform 0.1s;
 }
 .close-btn:hover { color: var(--text); transform: translateY(-1px); }
 .settings-section { margin-bottom: 20px; }
@@ -2251,7 +2354,7 @@ h3 {
   cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text);
-  transition: all 0.15s;
+  transition: all 0.15s, transform 0.1s;
 }
 .pill:hover {
   border-color: var(--pill-hover-border);
@@ -2368,7 +2471,7 @@ h3 {
   background: var(--card-bg);
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
   box-shadow: var(--shadow-soft);
 }
 .sentence-item:hover { background: var(--hover-bg); transform: translateY(-1px); }
@@ -3177,9 +3280,9 @@ h3 {
   .chart-half { min-width: 100%; }
   .bottom-nav { max-width: 100%; border-radius: 0; }
 
-  /* Stats Bar 在平板上4列 */
-  .stats-bar { gap: 6px; }
-  .stats-bar .stat-card { padding: calc(8/16*1rem) calc(4/16*1rem); }
+  /* Stats Bar 在平板上保持4列但更紧凑 */
+  .stats-bar { gap: 8px; }
+  .stats-bar .stat-item { padding: 12px; }
   .stats-bar .stat-value { font-size: 1.125rem; }
   .stats-bar .stat-label { font-size: 0.625rem; }
 }
@@ -3219,14 +3322,13 @@ h3 {
   .practice-card { padding: 14px; }
 
   .action-row { gap: 4px; }
-  .action-row .btn-primary { padding: calc(8/16*1rem) calc(16/16*1rem); font-size: 0.875rem; }
-  .btn-action,
+  .action-btn { padding: calc(8/16*1rem) calc(14/16*1rem); font-size: 0.875rem; }
   .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); }
 
-  /* Stats Bar 在平板上保持4列但更紧凑 */
-  .stats-bar { gap: 8px; }
-  .stats-bar .stat-item { padding: 12px 12px; }
-  .stats-bar .stat-value { font-size: 1.125rem; }
+  /* Stats Bar 在手机上2x2排列 */
+  .stats-bar { gap: 6px; flex-wrap: wrap; }
+  .stats-bar .stat-item { flex: 1 1 calc(50% - 6px); min-width: calc(50% - 6px); padding: 10px 10px; }
+  .stats-bar .stat-value { font-size: 1rem; }
   .stats-bar .stat-label { font-size: 0.625rem; }
 
   .mode-badge { font-size: 0.75rem; padding: calc(3/16*1rem) calc(10/16*1rem); }
@@ -3262,18 +3364,33 @@ h3 {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    padding: calc(8/16*1rem) calc(16/16*1rem);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0;
+    padding: 0 12px;
   }
-  .admin-sidebar h3 { display: none; }
-  .admin-sidebar button {
-    display: inline-block;
+  .admin-sidebar-header {
+    display: none;
+  }
+  .admin-sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    padding: calc(8/16*1rem) 0;
+    flex: 1;
+  }
+  .admin-sidebar-nav button {
+    display: inline-flex;
     width: auto;
-    margin-bottom: 0;
+    padding: calc(7/16*1rem) calc(12/16*1rem);
+    white-space: nowrap;
     font-size: 0.8125rem;
-    padding: calc(6/16*1rem) calc(12/16*1rem);
+  }
+  .admin-nav-icon {
+    font-size: 1rem;
+    width: 20px;
   }
   .admin-content { padding: 16px; }
 

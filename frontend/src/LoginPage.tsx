@@ -11,13 +11,13 @@ function isStrongPassword(v: string) { return v.length >= 8 && /[a-zA-Z]/.test(v
 /** 密码强度等级 */
 function pwdLevel(pwd: string): { label: string; color: string; percent: number } {
   if (!pwd) return { label: '', color: 'transparent', percent: 0 };
-  if (pwd.length < 6) return { label: '太短', color: '#e17055', percent: 20 };
+  if (pwd.length < 6) return { label: '太短', color: '#ef4444', percent: 20 };
   const hasLetter = /[a-zA-Z]/.test(pwd);
   const hasNumber = /[0-9]/.test(pwd);
   const hasBoth = hasLetter && hasNumber;
-  if (pwd.length >= 8 && hasBoth) return { label: '强', color: '#00b894', percent: 100 };
-  if (pwd.length >= 6 && (hasLetter || hasNumber)) return { label: '中', color: '#fdcb6e', percent: 60 };
-  return { label: '弱', color: '#e17055', percent: 35 };
+  if (pwd.length >= 8 && hasBoth) return { label: '强', color: '#22c55e', percent: 100 };
+  if (pwd.length >= 6 && (hasLetter || hasNumber)) return { label: '中', color: '#f59e0b', percent: 60 };
+  return { label: '弱', color: '#ef4444', percent: 35 };
 }
 
 /** 阻止空格键输入 */
@@ -387,13 +387,13 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showConfirmPwd ? 'text' : 'password'} placeholder="确认新密码" value={confirmPwd}
                   onChange={e => { setConfirmPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required
-                  style={confirmPwd && !confirmMatch ? { borderColor: '#e17055' } : {}} />
+                  style={confirmPwd && !confirmMatch ? { borderColor: '#ef4444' } : {}} />
                 <span className="eye-btn" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
                   {showConfirmPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
               {confirmPwd && !confirmMatch && (
-                <div style={{ color: '#e17055', fontSize: 12, textAlign: 'left', marginTop: -8, marginBottom: 8 }}>两次密码不一致</div>
+                <div style={{ color: '#ef4444', fontSize: 12, textAlign: 'left', marginTop: -8, marginBottom: 8 }}>两次密码不一致</div>
               )}
 
               {/* 成功提示 */}

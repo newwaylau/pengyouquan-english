@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
 
 export default function SearchPage({ onJump, onBack }: { onJump: (id: number) => void; onBack?: () => void }) {
@@ -26,7 +27,11 @@ export default function SearchPage({ onJump, onBack }: { onJump: (id: number) =>
         value={query} onChange={e => handleSearch(e.target.value)} autoFocus />
       {loading && <div className="search-loading">搜索中...</div>}
       {!loading && results.length === 0 && query.length >= 2 && (
-        <div className="empty-state">无结果</div>
+        <EmptyStateCard
+          icon="🔍"
+          title="未找到结果"
+          subtitle="试试其他关键词，中英文都可以搜索。"
+        />
       )}
       {results.map(s => (
         <div key={s.id} className="search-result" onClick={() => onJump(s.id)}>

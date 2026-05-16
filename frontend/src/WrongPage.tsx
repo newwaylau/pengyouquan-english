@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
 
 interface Props {
@@ -79,21 +80,13 @@ export default function WrongPage({ onJump, onBack }: Props) {
     return (
       <div className="wrong-page">
         <button className="back-btn" onClick={onBack}>← 返回练习</button>
-        <div className="empty-state">
-          <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🎉</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: 8 }}>暂无错题</div>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-            继续保持！做错的句子会自动加入错题本<br />
-            在练习页遇到不会的句子？多练几遍就会了
-          </div>
-          <button
-            className="btn-primary"
-            style={{ marginTop: 20 }}
-            onClick={onBack}
-          >
-            ← 返回练习
-          </button>
-        </div>
+        <EmptyStateCard
+          icon="🎉"
+          title="暂无错题"
+          subtitle="继续保持！做错的句子会自动加入错题本。在练习页遇到不会的句子？多练几遍就会了。"
+          actionLabel="← 返回练习"
+          onAction={onBack}
+        />
       </div>
     );
   }
