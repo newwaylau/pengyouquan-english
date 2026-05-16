@@ -50,10 +50,15 @@ public class ShowController {
         limit = Math.min(limit, 50);
         List<Long> excludeIds = parseIdList(exclude);
         List<Sentence> results;
+        boolean hasExclude = excludeIds != null && !excludeIds.isEmpty();
+        boolean hasShowIds = showIds != null && !showIds.isEmpty();
 
-        if (excludeIds != null && !excludeIds.isEmpty()) {
+        if (hasExclude && hasShowIds) {
+            List<Long> ids = parseIdList(showIds);
+            results = sentenceRepository.findRandomExcludingByShowIds(ids, excludeIds, limit);
+        } else if (hasExclude) {
             results = sentenceRepository.findRandomExcluding(excludeIds, limit);
-        } else if (showIds != null && !showIds.isEmpty()) {
+        } else if (hasShowIds) {
             List<Long> ids = parseIdList(showIds);
             results = sentenceRepository.findRandomByShowIds(ids, limit);
         } else if (showId != null) {

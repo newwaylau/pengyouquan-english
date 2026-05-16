@@ -44,6 +44,10 @@ public interface SentenceRepository extends JpaRepository<Sentence, Long> {
     @Query(value = "SELECT * FROM sentences WHERE id NOT IN :excludeIds AND is_disabled = 0 ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Sentence> findRandomExcluding(@Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
 
+    /** 在指定剧集中排除已练过的，随机抽取 */
+    @Query(value = "SELECT * FROM sentences WHERE show_id IN :showIds AND id NOT IN :excludeIds AND is_disabled = 0 ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Sentence> findRandomExcludingByShowIds(@Param("showIds") List<Long> showIds, @Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
+
     /** 搜索句子（中英文模糊匹配） */
     @Query("SELECT s FROM Sentence s WHERE s.isDisabled = false AND s.text LIKE %:query%")
     List<Sentence> searchByText(@Param("query") String query);

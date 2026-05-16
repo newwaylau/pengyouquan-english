@@ -1,0 +1,55 @@
+# ====================================
+# 英语剧场 — PROD 部署（独立运行，使用宿主机 MySQL 和 Redis）
+# 启动：docker compose -f docker/docker-compose.prod.yml -p pengyouquan-prod up -d --build
+# 停止：docker compose -f docker/docker-compose.prod.yml -p pengyouquan-prod down
+# ====================================
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: pengyouquan-prod-backend
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/pengyouquan_english_prod?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: pengyouquan123
+      SPRING_DATA_REDIS_HOST: localhost
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-pengyouquan-english-jwt-secret-key-2024-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+    volumes:
+      - prod-backend-logs:/app/logs
+      - ../backend/data/audio:/app/data/audio
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: pengyouquan-prod-frontend
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx-prod.conf:/etc/nginx/conf.d/default.conf
+      - prod-nginx-cache:/var/cache/nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  prod-backend-logs:
+  prod-nginx-cache:

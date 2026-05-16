@@ -23,7 +23,7 @@ function pwdLevel(pwd: string): { label: string; color: string; percent: number 
 /** 阻止空格键输入 —— 避免按下空格时框内先显示空格再被过滤 */
 function preventSpace(e: React.KeyboardEvent) { if (e.key === ' ') e.preventDefault(); }
 
-export default function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
+export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string) => void; onHome?: () => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -113,7 +113,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>英语剧场</h1>
+        <h1 style={{ cursor: 'pointer' }} onClick={onHome}>英语剧场</h1>
         <p className="subtitle">听懂每一句台词</p>
         <form onSubmit={handleSubmit}>
 

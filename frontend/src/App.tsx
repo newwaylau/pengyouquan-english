@@ -48,7 +48,7 @@ export default function App() {
   };
 
   if (page === 'login' || (!getToken() && page !== 'practice')) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} onHome={() => setPage('practice')} />;
   }
 
   return (
