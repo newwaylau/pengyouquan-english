@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { api } from './api/client';
+import { api, setToken, clearToken } from './api/client';
 import { EyeOpen, EyeClosed } from './eye-icons';
 
 /** 校验邮箱格式 */
@@ -35,6 +35,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
   const [successMsg, setSuccessMsg] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [showPwd2, setShowPwd2] = useState(false);
+  const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [codeSending, setCodeSending] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -50,6 +51,23 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
   const [forgotCountdown, setForgotCountdown] = useState(0);
   const [forgotSending, setForgotSending] = useState(false);
   const forgotTimerRef = useRef<number | null>(null);
+
+  // ── 登录后欢迎面板状态 ──
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginToken, setLoginToken] = useState('');
+  const [userData, setUserData] = useState<any>(null);
+  const [welcomeView, setWelcomeView] = useState<'welcome' | 'password' | 'pwd-success'>('welcome');
+
+  // ── 修改密码表单状态 ──
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const [pwdUpdating, setPwdUpdating] = useState(false);
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
+  const [showOldPwd, setShowOldPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const startCountdown = useCallback(() => {
     setCodeCountdown(60);
@@ -140,8 +158,21 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
     if (mode === 'login') {
       if (!email || !password) { setError('请填写邮箱和密码'); return; }
       const r = await api.login(email, password);
-      if (r.code === 200) { onLogin(r.data.token); }
-      else { setError(r.message || '登录失败'); }
+      if (r.code === 200) {
+        // 先设置 token，然后获取用户信息，显示欢迎面板
+        setToken(r.data.token);
+        setLoginToken(r.data.token);
+        const user = await api.me();
+        if (user.code === 200) {
+          setUserData(user.data);
+          setLoggedIn(true);
+          setWelcomeView('welcome');
+        } else {
+          setError('获取用户信息失败');
+        }
+      } else {
+        setError(r.message || '登录失败');
+      }
     } else if (mode === 'register') {
       if (!email) { setError('请填写邮箱'); return; }
       if (!isValidEmail(email)) { setError('邮箱格式不正确'); return; }
@@ -152,8 +183,20 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
       if (phone && !isValidPhone(phone)) { setError('手机号格式不正确（11位数字）'); return; }
 
       const r = await api.register({ email, code, password, phone: phone || undefined, invitedBy: invitedBy || undefined });
-      if (r.code === 200) { onLogin(r.data.token); }
-      else { setError(r.message || '注册失败'); }
+      if (r.code === 200) {
+        setToken(r.data.token);
+        setLoginToken(r.data.token);
+        const user = await api.me();
+        if (user.code === 200) {
+          setUserData(user.data);
+          setLoggedIn(true);
+          setWelcomeView('welcome');
+        } else {
+          setError('获取用户信息失败');
+        }
+      } else {
+        setError(r.message || '注册失败');
+      }
     } else if (mode === 'forgot' && forgotStep === 2) {
       if (!forgotCode) { setError('请填写验证码'); return; }
       if (!forgotPassword) { setError('请设置新密码'); return; }
@@ -195,12 +238,191 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
     setSuccessMsg('');
   };
 
+  const handleGoToPractice = () => {
+    if (loginToken) onLogin(loginToken);
+  };
+
+  const handleLogoutFromWelcome = () => {
+    clearToken();
+    setLoggedIn(false);
+    setLoginToken('');
+    setUserData(null);
+    setWelcomeView('welcome');
+    setPassword('');
+  };
+
+  const resetPwdFields = () => {
+    setOldPassword('');
+    setNewPwd('');
+    setConfirmPwd('');
+    setPwdError('');
+    setPwdSuccess('');
+    setShowOldPwd(false);
+    setShowNewPwd(false);
+    setShowConfirmPwd(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (!oldPassword) { setPwdError('请输入当前密码'); return; }
+    if (!newPwd) { setPwdError('请输入新密码'); return; }
+    if (!isStrongPassword(newPwd)) { setPwdError('新密码至少8位，需包含字母和数字'); return; }
+    if (newPwd !== confirmPwd) { setPwdError('两次新密码不一致'); return; }
+    if (oldPassword === newPwd) { setPwdError('新密码不能与旧密码相同'); return; }
+    setPwdError('');
+    setPwdSuccess('');
+    setPwdUpdating(true);
+    const r = await api.updatePassword({ oldPassword, newPassword: newPwd });
+    if (r.code === 200) {
+      setPwdSuccess('密码修改成功！');
+      setOldPassword('');
+      setNewPwd('');
+      setConfirmPwd('');
+      setTimeout(() => { setPwdSuccess(''); setWelcomeView('welcome'); }, 3000);
+    } else {
+      setPwdError(r.message || '修改失败，旧密码可能不正确');
+    }
+    setPwdUpdating(false);
+  };
+
+  const newPwdStrength = pwdLevel(newPwd);
+  const confirmMatch = confirmPwd && newPwd === confirmPwd;
+
   const pwdStrength = pwdLevel(password);
   const pwd2Match = password2 && password === password2;
 
   const forgotPwdStrength = pwdLevel(forgotPassword);
   const forgotPwd2Match = forgotPassword2 && forgotPassword === forgotPassword2;
 
+  // ── 登录后欢迎面板 ──
+  if (loggedIn) {
+    const displayName = userData?.nickname || userData?.email || email;
+    const avatarLetter = (displayName || 'U').charAt(0).toUpperCase();
+    const userEmail = userData?.email || email;
+
+    return (
+      <div className="login-page">
+        <div className="login-card login-card-welcome">
+          <div className="post-login-content" key={welcomeView}>
+            {welcomeView === 'welcome' && (
+              <>
+                {/* 用户头像区 */}
+                <div className="welcome-avatar-section">
+                  <div className="welcome-avatar">{avatarLetter}</div>
+                  <div className="welcome-greeting">欢迎回来，{displayName}</div>
+                  <div className="welcome-email">{userEmail} · 已登录</div>
+                </div>
+
+              {/* 登录成功徽章 */}
+              <div className="login-success-badge">
+                <span>✓</span>
+                <span>登录成功</span>
+              </div>
+
+              {/* 修改密码入口卡 */}
+              <button className="change-pwd-btn" onClick={() => { resetPwdFields(); setWelcomeView('password'); }}>
+                <div className="change-pwd-icon">🔑</div>
+                <div className="change-pwd-label">
+                  <div className="change-pwd-label-main">修改密码</div>
+                  <div className="change-pwd-label-sub">定期更换密码可提高账户安全性</div>
+                </div>
+                <div className="change-pwd-arrow">›</div>
+              </button>
+
+              <div className="welcome-divider" />
+
+              <div className="welcome-section-title">快速操作</div>
+
+              <div className="welcome-action-row">
+                <button className="welcome-primary-btn" onClick={handleGoToPractice}>
+                  🚀 进入练习
+                </button>
+                <button className="welcome-secondary-btn" onClick={handleLogoutFromWelcome}>
+                  退出
+                </button>
+              </div>
+            </>
+          )}
+
+          {welcomeView === 'password' && (
+            <>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                🔑 修改密码
+              </h2>
+
+              {/* 当前密码 */}
+              <div className="pwd-wrapper">
+                <input type={showOldPwd ? 'text' : 'password'} placeholder="当前密码" value={oldPassword}
+                  onChange={e => { setOldPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
+                  onKeyDown={preventSpace} required />
+                <span className="eye-btn" onClick={() => setShowOldPwd(!showOldPwd)}>
+                  {showOldPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
+
+              {/* 新密码 */}
+              <div className="pwd-wrapper">
+                <input type={showNewPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={newPwd}
+                  onChange={e => { setNewPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
+                  onKeyDown={preventSpace} required />
+                <span className="eye-btn" onClick={() => setShowNewPwd(!showNewPwd)}>
+                  {showNewPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
+
+              {/* 密码强度条 */}
+              {newPwd && (
+                <div className="pwd-strength-bar" style={{ marginTop: -4, marginBottom: 12 }}>
+                  <div className="pwd-strength-fill" style={{
+                    width: `${newPwdStrength.percent}%`,
+                    background: newPwdStrength.color
+                  }} />
+                  <span className="pwd-strength-label" style={{ color: newPwdStrength.color }}>
+                    {newPwdStrength.label}
+                  </span>
+                </div>
+              )}
+
+              {/* 确认新密码 */}
+              <div className="pwd-wrapper">
+                <input type={showConfirmPwd ? 'text' : 'password'} placeholder="确认新密码" value={confirmPwd}
+                  onChange={e => { setConfirmPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
+                  onKeyDown={preventSpace} required
+                  style={confirmPwd && !confirmMatch ? { borderColor: '#e17055' } : {}} />
+                <span className="eye-btn" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
+                  {showConfirmPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
+              {confirmPwd && !confirmMatch && (
+                <div style={{ color: '#e17055', fontSize: 12, textAlign: 'left', marginTop: -8, marginBottom: 8 }}>两次密码不一致</div>
+              )}
+
+              {/* 成功提示 */}
+              {pwdSuccess && (
+                <div className="pwd-success-toast" style={{ marginBottom: 12 }}>
+                  <span>✓</span>
+                  <span>密码修改成功！</span>
+                </div>
+              )}
+
+              {pwdError && <div className="error-msg">{pwdError}</div>}
+
+              <div className="pwd-btn-row">
+                <button className="pwd-save-btn" onClick={handleChangePassword} disabled={pwdUpdating}>
+                  {pwdUpdating ? '保存中...' : '💾 保存密码'}
+                </button>
+                <button className="pwd-cancel-btn" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>取消</button>
+              </div>
+
+              <p className="pwd-back-link" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>← 返回</p>
+            </>
+          )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── 未登录：登录/注册/忘记密码表单 ──
   return (
     <div className="login-page">
       <div className="login-card">
@@ -216,8 +438,13 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                 style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#e17055' } : {}} />
 
-              <input type="password" placeholder="密码" value={password}
-                onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+              <div className="pwd-wrapper">
+                <input type={showLoginPwd ? 'text' : 'password'} placeholder="密码" value={password}
+                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+                <span className="eye-btn" onClick={() => setShowLoginPwd(!showLoginPwd)}>
+                  {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
 
               <div className="forgot-link">
                 <span onClick={goToForgot}>忘记密码？</span>

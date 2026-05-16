@@ -82,60 +82,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
 
   const [toastMsg, setToastMsg] = useState('');
 
-  // 修改密码
-  const [showPwdForm, setShowPwdForm] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [pwdUpdating, setPwdUpdating] = useState(false);
-  const [pwdError, setPwdError] = useState('');
-  const [pwdSuccess, setPwdSuccess] = useState('');
-
-  /** 密码强度：至少8位，含字母+数字 */
-  function isStrongPassword(v: string) { return v.length >= 8 && /[a-zA-Z]/.test(v) && /[0-9]/.test(v); }
-  /** 密码强度等级 */
-  function pwdLevel(pwd: string): { label: string; color: string; percent: number } {
-    if (!pwd) return { label: '', color: 'transparent', percent: 0 };
-    if (pwd.length < 6) return { label: '太短', color: '#e17055', percent: 20 };
-    const hasLetter = /[a-zA-Z]/.test(pwd);
-    const hasNumber = /[0-9]/.test(pwd);
-    const hasBoth = hasLetter && hasNumber;
-    if (pwd.length >= 8 && hasBoth) return { label: '强', color: '#00b894', percent: 100 };
-    if (pwd.length >= 6 && (hasLetter || hasNumber)) return { label: '中', color: '#fdcb6e', percent: 60 };
-    return { label: '弱', color: '#e17055', percent: 35 };
-  }
-
-  const handleUpdatePassword = async () => {
-    if (!oldPassword) { setPwdError('请输入当前密码'); return; }
-    if (!newPassword) { setPwdError('请输入新密码'); return; }
-    if (!isStrongPassword(newPassword)) { setPwdError('新密码至少8位，需包含字母和数字'); return; }
-    if (newPassword !== confirmPassword) { setPwdError('两次新密码不一致'); return; }
-    if (oldPassword === newPassword) { setPwdError('新密码不能与旧密码相同'); return; }
-    setPwdError('');
-    setPwdSuccess('');
-    setPwdUpdating(true);
-    const r = await api.updatePassword({ oldPassword, newPassword });
-    if (r.code === 200) {
-      setPwdSuccess('密码修改成功！');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => { setPwdSuccess(''); setShowPwdForm(false); }, 3000);
-    } else {
-      setPwdError(r.message || '修改失败，旧密码可能不正确');
-    }
-    setPwdUpdating(false);
-  };
-
-  const resetPwdForm = () => {
-    setShowPwdForm(false);
-    setOldPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setPwdError('');
-    setPwdSuccess('');
-  };
-
   const save = async (key: string, value: string) => {
     const r = await api.saveSettings({ [key]: value });
     if (r.code === 401) {
@@ -321,51 +267,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               </button>
             ))}
           </div>
-        </div>
-
-        {/* ── 账户安全 ── */}
-        <div className="settings-section">
-          <label>账户安全</label>
-          {!showPwdForm ? (
-            <button className="btn-sm" onClick={() => setShowPwdForm(true)}
-              style={{ marginTop: 4 }}>
-              🔑 修改密码
-            </button>
-          ) : (
-            <div className="password-change-form" style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <input type="password" placeholder="当前密码" value={oldPassword}
-                onChange={e => { setOldPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
-                onKeyDown={e => { if (e.key === ' ') e.preventDefault(); }} />
-              <input type="password" placeholder="新密码（至少8位，含字母和数字）" value={newPassword}
-                onChange={e => { setNewPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
-                onKeyDown={e => { if (e.key === ' ') e.preventDefault(); }} />
-              {newPassword && pwdLevel(newPassword).percent > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: '#eee' }}>
-                    <div style={{ width: `${pwdLevel(newPassword).percent}%`, height: '100%', borderRadius: 2,
-                      background: pwdLevel(newPassword).color, transition: 'width .2s' }} />
-                  </div>
-                  <span style={{ color: pwdLevel(newPassword).color, fontWeight: 500 }}>{pwdLevel(newPassword).label}</span>
-                </div>
-              )}
-              <input type="password" placeholder="确认新密码" value={confirmPassword}
-                onChange={e => { setConfirmPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
-                onKeyDown={e => { if (e.key === ' ') e.preventDefault(); }}
-                style={confirmPassword && newPassword !== confirmPassword ? { borderColor: '#e17055' } : {}} />
-              {confirmPassword && newPassword !== confirmPassword && (
-                <div style={{ color: '#e17055', fontSize: 12 }}>两次密码不一致</div>
-              )}
-              {pwdError && <div style={{ color: '#e17055', fontSize: 13 }}>{pwdError}</div>}
-              {pwdSuccess && <div style={{ color: '#00b894', fontSize: 13, fontWeight: 500 }}>{pwdSuccess}</div>}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn-sm btn-primary" onClick={handleUpdatePassword} disabled={pwdUpdating}
-                  style={{ flex: 1 }}>
-                  {pwdUpdating ? '保存中...' : '💾 保存密码'}
-                </button>
-                <button className="btn-sm" onClick={resetPwdForm}>取消</button>
-              </div>
-            </div>
-          )}
         </div>
 
       </div>
