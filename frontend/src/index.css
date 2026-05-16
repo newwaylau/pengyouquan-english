@@ -261,6 +261,20 @@ body {
   cursor: pointer;
   font-size: 0.8125rem;
 }
+/* 忘记密码链接 */
+.forgot-link {
+  text-align: right;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+.forgot-link span {
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: opacity 0.15s;
+}
+.forgot-link span:hover { opacity: 0.9; }
+
 .error-msg {
   color: var(--danger);
   font-size: 0.8125rem;

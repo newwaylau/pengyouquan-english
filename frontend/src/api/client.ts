@@ -86,6 +86,16 @@ export const api = {
   subtitleBatchImport: (directoryPath: string) =>
     request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
 
+  // 修改密码
+  updatePassword: (data: { oldPassword: string; newPassword: string }) =>
+    request('/api/auth/password', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // 忘记密码
+  forgotPasswordSendCode: (email: string) =>
+    request('/api/auth/forgot-password/send-code', { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPassword: (data: { email: string; code: string; password: string }) =>
+    request('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
+
   // 管理后台——句子报告
   adminFlaggedSentences: () =>
     request('/api/admin/sentence-flags'),
