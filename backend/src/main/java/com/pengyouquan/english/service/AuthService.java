@@ -132,6 +132,37 @@ public class AuthService {
     }
 
     /**
+     * 修改密码（登录用户通过旧密码 + 新密码修改）
+     */
+    public void updatePassword(Long userId, UpdatePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+
+        // 校验旧密码
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new BusinessException("旧密码错误");
+        }
+
+        // 校验新密码强度（至少8位，含字母和数字，同注册规则）
+        String newPassword = request.getNewPassword();
+        if (newPassword.length() < 8) {
+            throw new BusinessException("密码长度至少8位");
+        }
+        if (!newPassword.matches(".*[a-zA-Z].*") || !newPassword.matches(".*\\d.*")) {
+            throw new BusinessException("密码必须包含字母和数字");
+        }
+
+        // 新密码不能与旧密码相同
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new BusinessException("新密码不能与旧密码相同");
+        }
+
+        // 更新密码（BCrypt 编码）
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    /**
      * 获取用户信息
      */
     public UserInfoResponse getUserInfo(Long userId) {

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机模式底部按钮 — UI 设计稿</title>
+<style>
+/* =====================================================
+   pengyouquan-english — 手机模式底部按钮设计稿
+   深色主题 · 三层视觉层级 · 触控友好
+   ===================================================== */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: #0f0f23;
+  color: #e8e8f0;
+  padding: 24px;
+}
+
+/* --- 设计系统色板 (项目现有变量) --- */
+:root {
+  --bg: #14142a;
+  --card: #1e1e38;
+  --card-border: #2e2e50;
+  --text: #e8e8f0;
+  --text-secondary: #8888aa;
+  --text-tertiary: #6666aa;
+  --border: #2e2e50;
+  --border-strong: #3e3e60;
+  --primary: #6c5ce7;
+  --primary-hover: #7c6cf7;
+  --input-bg: rgba(255,255,255,0.06);
+  --hover-bg: rgba(108,92,231,0.1);
+  --correct-bg: rgba(0,184,148,0.12);
+  --wrong-bg: rgba(225,112,85,0.12);
+}
+
+/* ---------- 页面布局 ---------- */
+.container {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #c8c4f0;
+}
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .badge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.badge-current {
+  background: rgba(225,112,85,0.15);
+  color: #e17055;
+}
+.badge-new {
+  background: rgba(0,184,148,0.15);
+  color: #00b894;
+}
+
+/* ---------- 手机模拟容器 ---------- */
+.phone-frame {
+  background: var(--bg);
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* 内容前导 */
+.phone-preview {
+  padding: 16px 14px 0;
+}
+.phone-preview .en-line {
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.phone-preview .cn-line {
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.phone-preview .word-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+  justify-content: center;
+  margin-bottom: 6px;
+  min-height: 24px;
+}
+.phone-preview .word-row .wb {
+  display: inline-block;
+  padding: 2px 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+}
+.phone-preview .feedback-line {
+  text-align: center;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.phone-preview .feedback-line.correct {
+  background: var(--correct-bg);
+  color: #00b894;
+}
+.phone-preview .feedback-line.wrong {
+  background: var(--wrong-bg);
+  color: #e17055;
+}
+
+/* ============================================================
+   当前按钮样式 (现状)
+   ============================================================ */
+
+.phone-bar-old {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;            /* 当前 gap 3px — 太挤 */
+  padding: 4px 4px 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.phone-bar-old .btn-submit-old {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  height: auto;
+}
+.phone-bar-old .btn-next-old {
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+.phone-bar-old .btn-icon-old {
+  padding: 5px 5px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+/* ============================================================
+   新设计按钮样式 — 三层视觉层级
+   ============================================================ */
+
+.phone-bar-new {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;             /* 6px — 呼吸空间 */
+  padding: 10px 14px 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- 按钮基类 --- */
+.phone-bar-new button {
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+
+/* --- 层级 1：主操作（提交）--- */
+.btn-primary {
+  padding: 10px 16px;
+  min-height: 40px;
+  min-width: 60px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6c5ce7 0%, #5a4bd1 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(108,92,231,0.35);
+  flex-shrink: 0;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #7c6cf7 0%, #6c5ce7 100%);
+  box-shadow: 0 3px 12px rgba(108,92,231,0.5);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 4px rgba(108,92,231,0.3);
+}
+
+/* --- 层级 2：次要操作（下一句）--- */
+.btn-secondary {
+  padding: 10px 14px;
+  min-height: 40px;
+  min-width: 48px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background: rgba(108,92,231,0.08);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.btn-secondary:hover {
+  background: rgba(108,92,231,0.18);
+  border-color: #7c6cf7;
+  color: #c8c4f0;
+}
+.btn-secondary:active {
+  transform: scale(0.97);
+  background: rgba(108,92,231,0.25);
+}
+
+/* --- 层级 3：工具按钮（原音/TTS/中文/英文）--- */
+.btn-tertiary {
+  padding: 8px 8px;
+  min-height: 40px;
+  min-width: 36px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.btn-tertiary:hover {
+  border-color: var(--text-tertiary);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+.btn-tertiary:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   设计规范表
+   ============================================================ */
+
+.spec-table {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--card-border);
+}
+.spec-table h3 {
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  color: #c8c4f0;
+}
+.spec-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.spec-table th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.spec-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+}
+.spec-table tr:last-child td {
+  border-bottom: none;
+}
+.spec-table .prop-name {
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.spec-table .prop-val {
+  color: var(--text);
+  font-weight: 500;
+}
+.color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- 差异点卡片 ---------- */
+.diff-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--card-border);
+  margin-bottom: 24px;
+}
+.diff-card h3 {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  color: #c8c4f0;
+}
+.diff-list {
+  list-style: none;
+  padding: 0;
+}
+.diff-list li {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.diff-list li:last-child {
+  border-bottom: none;
+}
+.diff-list .diff-before {
+  color: #e17055;
+  min-width: 36%;
+}
+.diff-list .diff-arrow {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.diff-list .diff-after {
+  color: #00b894;
+}
+
+/* ---------- 标签 ---------- */
+.tag-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+.tag-tier1 { background: rgba(108,92,231,0.2); color: #a29bfe; }
+.tag-tier2 { background: rgba(108,92,231,0.12); color: #a29bfe; }
+.tag-tier3 { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+.tag-touch { background: rgba(0,184,148,0.12); color: #00b894; }
+.tag-brand { background: rgba(253,203,110,0.12); color: #fdcb6e; }
+
+/* 模式标签 */
+.mode-label {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  padding: 2px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mode-label .mode-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.mode-dot.t1 { background: #6c5ce7; }
+.mode-dot.t2 { background: rgba(108,92,231,0.6); }
+.mode-dot.t3 { background: var(--card-border); }
+
+.flex-row {
+  display: flex;
+  gap: 12px;
+}
+.flex-col {
+  flex: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <h1>📱 手机模式 · 底部操作按钮 redesign</h1>
+  <p class="subtitle">为 pengyouquan-english 手机模式底部 6 个操作按钮设计全新外观 · 三层视觉层级 · 深色主题 · 触控友好</p>
+
+  <!-- ======== Before / After ======== -->
+  <div class="flex-row" style="gap:24px;flex-wrap:wrap;">
+
+    <!-- BEFORE: 当前状态 -->
+    <div class="flex-col" style="min-width:200px">
+      <div class="section-title">
+        <span class="badge badge-current">当前</span>
+      </div>
+      <div class="phone-frame" style="border-color:#4a2a2a;">
+        <div class="phone-preview">
+          <div class="en-line">What have you been doing all this time?</div>
+          <div class="cn-line">你这段时间都在做什么？</div>
+          <div class="word-row">
+            <span class="wb">W h a t</span>
+            <span class="wb">h a v e</span>
+            <span class="wb">y o u</span>
+            <span class="wb">b e e n</span>
+            <span class="wb">d o i n g</span>
+            <span class="wb">a l l</span>
+            <span class="wb">t h i s</span>
+            <span class="wb">t i m e</span>
+            <span class="wb" style="color:var(--text)">?</span>
+          </div>
+        </div>
+        <!-- 中译英模式 5个按钮 -->
+        <div class="phone-bar-old">
+          <button class="btn-submit-old">⏎提交</button>
+          <button class="btn-next-old">⏭下一句</button>
+          <button class="btn-icon-old">🎬原音</button>
+          <button class="btn-icon-old">🎙Jenny</button>
+          <button class="btn-icon-old">👁️英文</button>
+        </div>
+        <div style="padding:0 14px 10px;">
+          <div class="mode-label"><span class="mode-dot t1"></span>中译英模式 · 5个按钮</div>
+        </div>
+      </div>
+
+      <!-- Dictation mode current -->
+      <div class="phone-frame" style="border-color:#4a2a2a;">
+        <div class="phone-preview">
+          <div class="en-line">The key is finding rhythm in daily life.</div>
+          <div class="cn-line">关键在于在日常生活中找到节奏。</div>
+          <div class="word-row">
+            <span class="wb">T h e</span>
+            <span class="wb">k e y</span>
+            <span class="wb">i s</span>
+            <span class="wb">f i n d i n g</span>
+            <span class="wb">r h y t h m</span>
+            <span class="wb">i n</span>
+            <span class="wb">d a i l y</span>
+            <span class="wb">l i f e</span>
+          </div>
+        </div>
+        <!-- 听写模式 6个按钮 -->
+        <div class="phone-bar-old">
+          <button class="btn-submit-old">⏎提交</button>
+          <button class="btn-next-old">⏭下一句</button>
+          <button class="btn-icon-old">🎬原音</button>
+          <button class="btn-icon-old">🎙Jenny</button>
+          <button class="btn-icon-old">👁️中文</button>
+          <button class="btn-icon-old">👁️英文</button>
+        </div>
+        <div style="padding:0 14px 10px;">
+          <div class="mode-label"><span class="mode-dot t1"></span>听写模式 · 6个按钮（中文+英文两个眼睛按钮）</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border-radius:12px;padding:14px 16px;border:1px solid #3a2a2a;margin-top:12px;">
+        <div style="font-size:0.78rem;color:#e17055;font-weight:600;margin-bottom:6px;">⚠ 当前问题</div>
+        <ul style="font-size:0.72rem;color:var(--text-secondary);list-style:disc;padding-left:16px;line-height:1.6;">
+          <li>gap 仅 3px — 太挤，手指易误触</li>
+          <li>圆角不统一：6px / 6px / 5px</li>
+          <li>高度不统一：padding 不同</li>
+          <li>图标按钮无边框，与标签按钮视觉割裂</li>
+          <li>文字偏小 (0.65-0.72rem)</li>
+          <li>无 hover 效果，交互反馈弱</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AFTER: 新设计 -->
+    <div class="flex-col" style="min-width:200px">
+      <div class="section-title">
+        <span class="badge badge-new">新设计</span>
+      </div>
+      <!-- 中译英 - 新设计 -->
+      <div class="phone-frame" style="border-color:#1a3a2a;">
+        <div class="phone-preview">
+          <div class="en-line">What have you been doing all this time?</div>
+          <div class="cn-line">你这段时间都在做什么？</div>
+          <div class="word-row">
+            <span class="wb">W h a t</span>
+            <span class="wb">h a v e</span>
+            <span class="wb">y o u</span>
+            <span class="wb">b e e n</span>
+            <span class="wb">d o i n g</span>
+            <span class="wb">a l l</span>
+            <span class="wb">t h i s</span>
+            <span class="wb">t i m e</span>
+            <span class="wb" style="color:var(--text)">?</span>
+          </div>
+        </div>
+        <!-- 新设计 5个按钮 -->
+        <div class="phone-bar-new">
+          <button class="btn-primary">⏎ 提交</button>
+          <button class="btn-secondary">⏭ 下一句</button>
+          <button class="btn-tertiary">🎬 原音</button>
+          <button class="btn-tertiary">🎙 Jenny</button>
+          <button class="btn-tertiary">👁 英文</button>
+        </div>
+        <div style="padding:0 14px 10px;">
+          <div class="tag-row">
+            <span class="tag tag-tier1">层级1 · 主操作</span>
+            <span class="tag tag-tier2">层级2 · 次要</span>
+            <span class="tag tag-tier3">层级3 · 工具</span>
+          </div>
+          <div class="mode-label"><span class="mode-dot t1"></span>中译英模式 · 5个按钮</div>
+        </div>
+      </div>
+
+      <!-- Dictation - 新设计 (6个按钮) -->
+      <div class="phone-frame" style="border-color:#1a3a2a;">
+        <div class="phone-preview">
+          <div class="en-line">The key is finding rhythm in daily life.</div>
+          <div class="cn-line">关键在于在日常生活中找到节奏。</div>
+          <div class="word-row">
+            <span class="wb">T h e</span>
+            <span class="wb">k e y</span>
+            <span class="wb">i s</span>
+            <span class="wb">f i n d i n g</span>
+            <span class="wb">r h y t h m</span>
+            <span class="wb">i n</span>
+            <span class="wb">d a i l y</span>
+            <span class="wb">l i f e</span>
+          </div>
+        </div>
+        <!-- 新设计 6个按钮 -->
+        <div class="phone-bar-new">
+          <button class="btn-primary">⏎ 提交</button>
+          <button class="btn-secondary">⏭ 下一句</button>
+          <button class="btn-tertiary">🎬 原音</button>
+          <button class="btn-tertiary">🎙 Jenny</button>
+          <button class="btn-tertiary">👁 中文</button>
+          <button class="btn-tertiary">👁 英文</button>
+        </div>
+        <div style="padding:0 14px 10px;">
+          <div class="tag-row">
+            <span class="tag tag-tier1">层级1 · 主操作</span>
+            <span class="tag tag-tier2">层级2 · 次要</span>
+            <span class="tag tag-tier3">层级3 · 工具</span>
+          </div>
+          <div class="mode-label"><span class="mode-dot t1"></span>听写模式 · 6个按钮（宽度自适应）</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border-radius:12px;padding:14px 16px;border:1px solid #1a3a2a;margin-top:12px;">
+        <div style="font-size:0.78rem;color:#00b894;font-weight:600;margin-bottom:6px;">✓ 改进要点</div>
+        <ul style="font-size:0.72rem;color:var(--text-secondary);list-style:disc;padding-left:16px;line-height:1.6;">
+          <li>gap 提升至 6px — 手指有呼吸空间</li>
+          <li>统一圆角 8px — 与项目全局一致</li>
+          <li>统一高度 40px — 触控友好</li>
+          <li>三层视觉层级清晰可辨</li>
+          <li>hover / active 动效反馈</li>
+          <li>6个按钮时自动压缩，仍是完整的一行</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 设计系统规范 ======== -->
+  <div style="margin-top:32px;">
+    <div class="section-title">
+      <span style="color:#a29bfe;font-size:1rem;">🎨 按钮设计系统规范</span>
+    </div>
+
+    <!-- 三层层级说明 -->
+    <div class="flex-row" style="gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:130px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--card-border);text-align:center;">
+        <div style="font-size:0.85rem;font-weight:700;color:#a29bfe;margin-bottom:4px;">层级1 · 主操作</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.5;">
+          <strong style="color:var(--text);">⏎ 提交</strong><br>
+          品牌渐变色填充 · 高对比度<br>
+          唯一主操作，视觉焦点
+        </div>
+      </div>
+      <div style="flex:1;min-width:130px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--card-border);text-align:center;">
+        <div style="font-size:0.85rem;font-weight:700;color:#a29bfe;margin-bottom:4px;">层级2 · 次要操作</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.5;">
+          <strong style="color:var(--text);">⏭ 下一句</strong><br>
+          品牌色描边 + 微弱填充<br>
+          清晰可辨但不过度抢夺
+        </div>
+      </div>
+      <div style="flex:1;min-width:130px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--card-border);text-align:center;">
+        <div style="font-size:0.85rem;font-weight:700;color:#a29bfe;margin-bottom:4px;">层级3 · 工具按钮</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.5;">
+          <strong style="color:var(--text);">🎬 🎙 👁</strong><br>
+          弱边框 + 透明底<br>
+          次重要度，视觉后退
+        </div>
+      </div>
+      <div style="flex:1;min-width:130px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--card-border);text-align:center;">
+        <div style="font-size:0.85rem;font-weight:700;color:#a29bfe;margin-bottom:4px;">📏 触控标准</div>
+        <div style="font-size:0.68rem;color:var(--text-secondary);line-height:1.5;">
+          最小触控目标 <strong style="color:#00b894;">≥44px</strong><br>
+          min-height: <strong style="color:#00b894;">40px</strong><br>
+          实际触控区 <strong style="color:#00b894;">44×44</strong> (含gap)
+        </div>
+      </div>
+    </div>
+
+    <!-- 详细参数表 -->
+    <div class="flex-row" style="gap:20px;flex-wrap:wrap;">
+      <div class="spec-table" style="flex:2;min-width:280px;">
+        <h3>按钮参数对比</h3>
+        <table>
+          <tr>
+            <th>属性</th>
+            <th>当前 (旧)</th>
+            <th>新设计</th>
+          </tr>
+          <tr>
+            <td class="prop-name">按钮间距</td>
+            <td style="color:#e17055;">3px</td>
+            <td style="color:#00b894;">6px</td>
+          </tr>
+          <tr>
+            <td class="prop-name">圆角 (全部)</td>
+            <td style="color:#e17055;">5–6px 不统一</td>
+            <td style="color:#00b894;">8px 统一</td>
+          </tr>
+          <tr>
+            <td class="prop-name">最小高度</td>
+            <td style="color:#e17055;">不统一 (≈28-32px)</td>
+            <td style="color:#00b894;">40px</td>
+          </tr>
+          <tr>
+            <td class="prop-name">字体大小</td>
+            <td style="color:#e17055;">0.65–0.72rem</td>
+            <td style="color:#00b894;">0.72–0.80rem</td>
+          </tr>
+          <tr>
+            <td class="prop-name">提交按钮样式</td>
+            <td><span class="color-swatch" style="background:#6c5ce7;"></span> 纯色</td>
+            <td><span class="color-swatch" style="background:linear-gradient(135deg,#6c5ce7,#5a4bd1);"></span> 渐变 + 阴影</td>
+          </tr>
+          <tr>
+            <td class="prop-name">交互反馈</td>
+            <td style="color:#e17055;">仅:active（部分）</td>
+            <td style="color:#00b894;">:hover + :active (scale)</td>
+          </tr>
+          <tr>
+            <td class="prop-name">图标按钮</td>
+            <td style="color:#e17055;">无边框</td>
+            <td style="color:#00b894;">弱边框 + 悬停高亮</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="spec-table" style="flex:1;min-width:200px;">
+        <h3>颜色 & 变量</h3>
+        <table>
+          <tr><td class="prop-name">提交底色</td><td class="prop-val"><span class="color-swatch" style="background:#6c5ce7;"></span>--primary: #6c5ce7</td></tr>
+          <tr><td class="prop-name">提交悬停</td><td class="prop-val"><span class="color-swatch" style="background:#7c6cf7;"></span>--primary-hover: #7c6cf7</td></tr>
+          <tr><td class="prop-name">提交阴影</td><td class="prop-val"><span class="color-swatch" style="background:rgba(108,92,231,0.35);"></span>rgba(108,92,231,0.35)</td></tr>
+          <tr><td class="prop-name">次要描边</td><td class="prop-val"><span class="color-swatch" style="background:#6c5ce7;"></span>--primary @ 1px</td></tr>
+          <tr><td class="prop-name">次要填充</td><td class="prop-val"><span class="color-swatch" style="background:rgba(108,92,231,0.08);"></span>rgba(108,92,231,0.08)</td></tr>
+          <tr><td class="prop-name">工具描边</td><td class="prop-val"><span class="color-swatch" style="background:#2e2e50;"></span>--card-border: #2e2e50</td></tr>
+          <tr><td class="prop-name">工具文字</td><td class="prop-val"><span class="color-swatch" style="background:#8888aa;"></span>--text-secondary: #8888aa</td></tr>
+          <tr><td class="prop-name">Bar 填充</td><td class="prop-val">transparent (无底色)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 状态展示 ======== -->
+  <div style="margin-top:28px;">
+    <div class="section-title">
+      <span style="color:#a29bfe;font-size:1rem;">🔄 交互状态</span>
+    </div>
+    <div class="flex-row" style="gap:16px;flex-wrap:wrap;">
+      <div class="phone-frame" style="flex:1;min-width:180px;">
+        <div style="padding:12px 14px;">
+          <div style="font-size:0.75rem;font-weight:600;margin-bottom:8px;">Default (默认)</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn-primary" style="position:static;">⏎ 提交</button>
+            <button class="btn-secondary" style="position:static;">⏭ 下一句</button>
+            <button class="btn-tertiary" style="position:static;">🎬 原音</button>
+            <button class="btn-tertiary" style="position:static;">👁 英文</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone-frame" style="flex:1;min-width:180px;">
+        <div style="padding:12px 14px;">
+          <div style="font-size:0.75rem;font-weight:600;margin-bottom:8px;">Hover / Pressed</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn-primary" style="position:static;background:linear-gradient(135deg,#7c6cf7,#6c5ce7);box-shadow:0 3px 12px rgba(108,92,231,0.5);">⏎ 提交</button>
+            <button class="btn-secondary" style="position:static;background:rgba(108,92,231,0.18);border-color:#7c6cf7;color:#c8c4f0;">⏭ 下一句</button>
+            <button class="btn-tertiary" style="position:static;border-color:#6666aa;background:rgba(255,255,255,0.04);color:#e8e8f0;">🎬 原音</button>
+            <button class="btn-tertiary" style="position:static;border-color:#6666aa;background:rgba(255,255,255,0.04);color:#e8e8f0;">👁 英文</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone-frame" style="flex:1;min-width:180px;">
+        <div style="padding:12px 14px;">
+          <div style="font-size:0.75rem;font-weight:600;margin-bottom:8px;">Disabled (已答对)</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn-primary" style="position:static;opacity:0.4;cursor:not-allowed;box-shadow:none;" disabled>⏎ 提交</button>
+            <button class="btn-secondary" style="position:static;opacity:0.4;cursor:not-allowed;" disabled>⏭ 下一句</button>
+            <button class="btn-tertiary" style="position:static;opacity:0.4;cursor:not-allowed;" disabled>🎬 原音</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 实现说明 ======== -->
+  <div style="margin-top:28px;margin-bottom:40px;">
+    <div class="section-title">
+      <span style="color:#a29bfe;font-size:1rem;">📝 实现说明</span>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--card-border);">
+      <div style="font-size:0.82rem;line-height:1.7;">
+      <p style="margin-bottom:10px;"><strong>新增 CSS 类名（仅修改 index.css，不触碰 .tsx）：</strong></p>
+      <ul style="list-style:disc;padding-left:20px;font-size:0.78rem;color:var(--text-secondary);line-height:1.8;">
+        <li><code style="color:#a29bfe;">.phone-mode-actions .btn-phone-submit</code> → 改为 <code style="color:#00b894;">.btn-phone-primary</code> (层级1)</li>
+        <li><code style="color:#a29bfe;">.phone-mode-actions .btn-phone-next</code> → 改为 <code style="color:#00b894;">.btn-phone-secondary</code> (层级2)</li>
+        <li><code style="color:#a29bfe;">.phone-mode-actions .btn-phone-icon</code> → 改为 <code style="color:#00b894;">.btn-phone-tertiary</code> (层级3)</li>
+        <li><code style="color:#00b894;">.phone-mode-actions</code> — gap: 3px → 6px; padding-top: 4px → 10px 14px 12px</li>
+      </ul>
+      <p style="margin-top:12px;margin-bottom:10px;"><strong>注意：</strong>以下是 CSS 设计建议，<em>不修改任何代码文件</em>。</p>
+      <p style="color:var(--text-tertiary);font-size:0.75rem;">若需提交到项目中，请由前端开发者将上述 CSS 规则写入 index.css 的 .phone-mode-actions 区块（约 L2392-L2436），并确保 PracticePage.tsx 中的 button className 同步更新。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

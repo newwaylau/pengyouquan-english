@@ -69,6 +69,17 @@ public class AuthController {
         return ApiResponse.success(authService.getUserInfo(userId));
     }
 
+    /** 修改密码（需要 JWT Token） */
+    @PutMapping("/password")
+    public ApiResponse<Void> updatePassword(@CurrentUserId Long userId,
+                                             @Valid @RequestBody UpdatePasswordRequest request) {
+        if (userId == null) {
+            return ApiResponse.unauthorized("未登录");
+        }
+        authService.updatePassword(userId, request);
+        return ApiResponse.success(null);
+    }
+
     /** 微信小程序登录 */
     @PostMapping("/wechat-login")
     public ApiResponse<LoginResponse> wechatLogin(@Valid @RequestBody WechatLoginRequest request) {
