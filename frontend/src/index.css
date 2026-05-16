@@ -373,7 +373,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family: var(--font-family);
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -630,7 +630,7 @@ h3 {
 
 .sidebar-login-btn {
   border: none;
-  background: #14b8a6;
+  background: var(--primary);
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
@@ -640,9 +640,8 @@ h3 {
   color: #fff;
   transition: background 0.15s;
 }
-
 .sidebar-login-btn:hover {
-  background: #0d9488;
+  background: var(--primary-hover);
 }
 
 /* ---------- 手机端精简顶部导航 ---------- */
@@ -658,13 +657,13 @@ h3 {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #0f172a;
+  background: var(--bg);
 }
 
 /* 左侧品牌区 */
 .login-brand {
   flex: 1;
-  background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
+  background: linear-gradient(135deg, var(--login-brand-gradient-start) 0%, var(--login-brand-gradient-end) 100%);
   padding: 48px;
   display: flex;
   flex-direction: column;
@@ -699,7 +698,7 @@ h3 {
 .login-brand h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text);
   margin-bottom: 8px;
   letter-spacing: -0.03em;
   position: relative;
@@ -707,7 +706,7 @@ h3 {
 }
 .login-brand .brand-subtitle {
   font-size: 0.9375rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.6;
   position: relative;
   z-index: 1;
@@ -725,7 +724,7 @@ h3 {
   align-items: center;
   gap: 10px;
   font-size: 0.875rem;
-  color: #cbd5e1;
+  color: var(--text);
 }
 .login-brand-feature .check {
   width: 22px; height: 22px;
@@ -746,23 +745,23 @@ h3 {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: #0f172a;
+  background: var(--card-bg);
 }
 .login-form-container h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text);
   margin-bottom: 4px;
 }
 .login-form-container .form-subtitle {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 28px;
 }
 .login-form-container .field-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-bottom: 6px;
   display: block;
   text-transform: uppercase;
@@ -772,26 +771,26 @@ h3 {
   width: 100%;
   padding: 10px 14px;
   margin-bottom: 12px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 0.875rem;
-  background: rgba(255,255,255,0.04);
-  color: #f1f5f9;
+  background: var(--input-bg);
+  color: var(--text);
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .login-form-container input:focus {
-  border-color: #14b8a6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
 }
-.login-form-container input::placeholder { color: #475569; }
+.login-form-container input::placeholder { color: var(--text-tertiary); }
 .login-form-container .submit-btn {
   width: 100%;
   padding: 11px;
   border: none;
   border-radius: 8px;
-  background: #14b8a6;
+  background: var(--primary);
   color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
@@ -801,7 +800,7 @@ h3 {
   margin-top: 4px;
 }
 .login-form-container .submit-btn:hover {
-  background: #0d9488;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 .login-form-container .form-footer {
@@ -811,11 +810,11 @@ h3 {
   font-size: 0.75rem;
 }
 .login-form-container .form-footer span {
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: color 0.15s;
 }
-.login-form-container .form-footer span:hover { color: #14b8a6; }
+.login-form-container .form-footer span:hover { color: var(--primary); }
 
 /* 密码输入包装器（带眼睛图标） */
 .login-form-container .pwd-wrapper {
@@ -832,11 +831,11 @@ h3 {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-tertiary);
   display: flex;
   align-items: center;
 }
-.login-form-container .eye-btn:hover { color: #94a3b8; }
+.login-form-container .eye-btn:hover { color: var(--text-secondary); }
 
 /* 忘记密码链接 */
 .forgot-link {
@@ -845,12 +844,12 @@ h3 {
   margin-bottom: 12px;
 }
 .forgot-link span {
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 0.75rem;
   transition: color 0.15s;
 }
-.forgot-link span:hover { color: #14b8a6; }
+.forgot-link span:hover { color: var(--primary); }
 
 /* 错误/成功消息 */
 .login-form-container .error-msg {
@@ -886,10 +885,10 @@ h3 {
 }
 .login-form-container .send-code-btn {
   padding: 10px 16px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: transparent;
-  color: #14b8a6;
+  color: var(--primary);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -898,13 +897,13 @@ h3 {
   white-space: nowrap;
 }
 .login-form-container .send-code-btn:hover {
-  border-color: #14b8a6;
+  border-color: var(--primary);
   background: rgba(20,184,166,0.08);
 }
 .login-form-container .send-code-btn:disabled {
-  color: #475569;
+  color: var(--text-tertiary);
   cursor: not-allowed;
-  border-color: #334155;
+  border-color: var(--border);
 }
 
 /* 密码强度条 */
@@ -932,7 +931,7 @@ h3 {
 /* 切换模式链接 */
 .login-form-container .toggle-mode {
   margin-top: 16px;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 0.8125rem;
   text-align: center;
@@ -985,7 +984,7 @@ h3 {
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   text-align: center;
-  border: 1px solid #334155;
+  border: 1px solid var(--card-border);
 }
 .welcome-avatar-section {
   margin-bottom: 20px;
@@ -1331,10 +1330,10 @@ h3 {
   font-size: 1rem;
   flex-shrink: 0;
 }
-.stats-bar .stat-icon.teal { background: rgba(20,184,166,0.12); }
-.stats-bar .stat-icon.amber { background: rgba(245,158,11,0.12); }
-.stats-bar .stat-icon.blue { background: rgba(59,130,246,0.12); }
-.stats-bar .stat-icon.emerald { background: rgba(34,197,94,0.12); }
+.stats-bar .stat-icon.teal { background: rgba(20,184,166,0.12); color: #14b8a6; }
+.stats-bar .stat-icon.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.stats-bar .stat-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.stats-bar .stat-icon.emerald { background: rgba(34,197,94,0.12); color: #22c55e; }
 .stats-bar .stat-info {
   flex: 1;
   min-width: 0;
@@ -1454,7 +1453,7 @@ h3 {
   font-size: 1.05rem;
   line-height: 1.5;
   text-align: center;
-  color: #a8a8c8;
+  color: var(--cn-text-color);
   margin-top: 14px;
   padding: 6px 12px;
   width: 100%;
@@ -1872,7 +1871,6 @@ h3 {
   color: #fff;
   border-color: var(--primary);
 }
-}
 
 /* =====================================================
    以下页面级样式（错题本、设置面板、浏览、搜索、管理、字幕等）
@@ -2238,6 +2236,15 @@ h3 {
 }
 
 /* ---------- 空状态卡片 (P2-11) ---------- */
+@keyframes empty-state-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes empty-state-scale-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 .empty-state-card {
   display: flex;
   flex-direction: column;
@@ -2249,11 +2256,19 @@ h3 {
   padding: 48px 32px;
   margin: 24px 0;
   text-align: center;
+  animation: empty-state-fade-in 0.4s ease-out both;
 }
 .empty-state-card .empty-state-icon {
   font-size: 3rem;
   line-height: 1;
   margin-bottom: 16px;
+}
+.empty-state-card .empty-state-illustration {
+  margin-bottom: 16px;
+  animation: empty-state-scale-in 0.5s ease-out both;
+}
+.empty-state-card .empty-state-illustration svg {
+  display: block;
 }
 .empty-state-card .empty-state-title {
   font-size: 1.25rem;
@@ -3179,13 +3194,13 @@ h3 {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.stats-bar-enter {
+.stats-bar-enter > * {
   animation: stats-bar-enter 0.25s ease-out both;
 }
-.stats-bar-enter:nth-child(1) { animation-delay: 0s; }
-.stats-bar-enter:nth-child(2) { animation-delay: 0.05s; }
-.stats-bar-enter:nth-child(3) { animation-delay: 0.1s; }
-.stats-bar-enter:nth-child(4) { animation-delay: 0.15s; }
+.stats-bar-enter > *:nth-child(1) { animation-delay: 0s; }
+.stats-bar-enter > *:nth-child(2) { animation-delay: 0.05s; }
+.stats-bar-enter > *:nth-child(3) { animation-delay: 0.1s; }
+.stats-bar-enter > *:nth-child(4) { animation-delay: 0.15s; }
 
 /* ---------- 卡片进入动画 ---------- */
 @keyframes card-enter {
