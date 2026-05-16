@@ -129,6 +129,7 @@ export default function PracticePage({
   // 句子队列（API 一次返回 limit=15，逐个消费，预加载下一句 TTS）
   const [sentenceQueue, setSentenceQueue] = useState<any[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
+  const [loadingNext, setLoadingNext] = useState(false);
 
   // 统计
   const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
@@ -225,57 +226,64 @@ export default function PracticePage({
   // 加载句子
   const loadSentenceRef = useRef<((specificId?: number) => Promise<void>) | null>(null);
   const loadSentence = async (specificId?: number, skipAutoPlay?: boolean) => {
-    // 错题练习模式
-    if (mode === 'wrong') {
-      const r = await api.wrongPractice(20);
-      if (r.code !== 200) return;
-      const sentences = r.data?.sentences || [];
-      if (sentences.length === 0) return;
-      setWrongSentences(sentences);
-      setWrongIndex(0);
+    // 防止快速连点时重复加载
+    if (loadingNext && !specificId && mode !== 'wrong') return;
+    setLoadingNext(true);
+    try {
+      // 错题练习模式
+      if (mode === 'wrong') {
+        const r = await api.wrongPractice(20);
+        if (r.code !== 200) return;
+        const sentences = r.data?.sentences || [];
+        if (sentences.length === 0) return;
+        setWrongSentences(sentences);
+        setWrongIndex(0);
+        if (specificId) {
+          // 如果传了 specificId，找到它在列表里的索引
+          const idx = sentences.findIndex((s: any) => s.sentenceId === specificId);
+          if (idx >= 0) {
+            setWrongIndex(idx);
+            setupSentence(sentences[idx], skipAutoPlay);
+            return;
+          }
+        }
+        setupSentence(sentences[0], skipAutoPlay);
+        return;
+      }
+
       if (specificId) {
-        // 如果传了 specificId，找到它在列表里的索引
-        const idx = sentences.findIndex((s: any) => s.sentenceId === specificId);
-        if (idx >= 0) {
-          setWrongIndex(idx);
-          setupSentence(sentences[idx], skipAutoPlay);
-          return;
+        const r = await api.sentence(specificId);
+        if (r.code !== 200 || !r.data) return;
+        setSentenceQueue([r.data]);
+        setQueueIndex(0);
+        setupSentence(r.data, skipAutoPlay);
+        return;
+      }
+      const exclude = historyIds.join(',');
+      let url = `limit=15&exclude=${encodeURIComponent(exclude)}`;
+      if (showIdsParam) url += `&showIds=${showIdsParam}`;
+      const r = await api.random(url);
+      if (r.code !== 200 || !r.data?.length) return;
+      setSentenceQueue(r.data);
+      setQueueIndex(0);
+      setupSentence(r.data[0], skipAutoPlay);
+
+      // 预加载当前句 + 后面多条句子的音频（TTS + 原音）
+      const preloadCount = Math.min(5, r.data.length - 1);
+      for (let i = 0; i <= preloadCount; i++) {
+        const next = r.data[i];
+        const nextEn = extractEn(next.text);
+        // 预加载 TTS — 用 new Audio() 而非 fetch()，与播放代码同路径，确保缓存命中
+        if (nextEn) {
+          preloadAudioUrl(getTtsUrl(nextEn, voice));
+        }
+        // 预加载剧集原音
+        if (next.audioFile) {
+          preloadAudioUrl(getAudioUrl('/api/audio/' + encodeURIComponent(next.audioFile)));
         }
       }
-      setupSentence(sentences[0], skipAutoPlay);
-      return;
-    }
-
-    if (specificId) {
-      const r = await api.sentence(specificId);
-      if (r.code !== 200 || !r.data) return;
-      setSentenceQueue([r.data]);
-      setQueueIndex(0);
-      setupSentence(r.data, skipAutoPlay);
-      return;
-    }
-    const exclude = historyIds.join(',');
-    let url = `limit=15&exclude=${encodeURIComponent(exclude)}`;
-    if (showIdsParam) url += `&showIds=${showIdsParam}`;
-    const r = await api.random(url);
-    if (r.code !== 200 || !r.data?.length) return;
-    setSentenceQueue(r.data);
-    setQueueIndex(0);
-    setupSentence(r.data[0], skipAutoPlay);
-
-    // 预加载当前句 + 后面多条句子的音频（TTS + 原音）
-    const preloadCount = Math.min(5, r.data.length - 1);
-    for (let i = 0; i <= preloadCount; i++) {
-      const next = r.data[i];
-      const nextEn = extractEn(next.text);
-      // 预加载 TTS — 用 new Audio() 而非 fetch()，与播放代码同路径，确保缓存命中
-      if (nextEn) {
-        preloadAudioUrl(getTtsUrl(nextEn, voice));
-      }
-      // 预加载剧集原音
-      if (next.audioFile) {
-        preloadAudioUrl(getAudioUrl('/api/audio/' + encodeURIComponent(next.audioFile)));
-      }
+    } finally {
+      setLoadingNext(false);
     }
   };
   loadSentenceRef.current = loadSentence;
@@ -343,13 +351,20 @@ export default function PracticePage({
     return () => cancelAnimationFrame(raf);
   }, [sentence]);
 
-  // 提交报错后把焦点从隐藏输入框移到第一个单词输入框
+  // 重试后聚焦到第一个错误输入框（光标在最左边）
   useEffect(() => {
     if (retryCount !== 1) return;
     const raf = requestAnimationFrame(() => {
-      let first = 0;
-      while (first < words.length && hints.has(first)) first++;
-      const el = inputRefs.current[first];
+      // 第一次重试：聚焦到第一个错误输入框
+      const wrongArr = Array.from(wrongWords).sort();
+      let idx = wrongArr.length > 0 ? wrongArr[0] : -1;
+      if (idx < 0) {
+        // 兜底：聚焦第一个非提示词输入框
+        let first = 0;
+        while (first < words.length && hints.has(first)) first++;
+        idx = first;
+      }
+      const el = inputRefs.current[idx];
       if (el && document.activeElement !== el) {
         el.focus();
       }
@@ -522,9 +537,11 @@ export default function PracticePage({
       wrong.forEach(idx => { clearedInputs[idx] = ''; });
       setInputs(clearedInputs);
       if (firstWrongIdx !== undefined) {
-        // 先聚焦隐藏输入框（在用户手势上下文中，确保手机键盘弹出）
-        // 下一句场景已证实此方式有效
-        hiddenInputRef.current?.focus();
+        // 等 React 渲染完空输入后再聚焦（iOS 上 setTimeout(0) 仍在用户手势上下文中）
+        setTimeout(() => {
+          const target = inputRefs.current[firstWrongIdx];
+          if (target) target.focus({ preventScroll: true });
+        }, 0);
       }
     }
   };
