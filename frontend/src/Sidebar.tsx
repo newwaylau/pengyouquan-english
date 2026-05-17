@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconSun, IconMoon } from './Icons';
+import { IconTarget, IconClose, IconSearch, IconBook, IconRocket, IconSettings, IconSun, IconMoon } from './Icons';
 
 interface SidebarProps {
   page: string;
@@ -16,6 +16,7 @@ const NAV_ITEMS: { key: string; icon: React.ReactNode; label: string; requiresLo
   { key: 'wrong', icon: <IconClose />, label: '错题本', requiresLogin: true },
   { key: 'search', icon: <IconSearch />, label: '搜索' },
   { key: 'browse', icon: <IconBook />, label: '浏览' },
+  { key: 'demo', icon: <IconRocket />, label: 'Demo' },
 ];
 
 export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout, isDark, onToggleTheme }: SidebarProps) {

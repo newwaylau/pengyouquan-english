@@ -7,6 +7,7 @@ import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
 import SubtitlePage from './SubtitlePage';
+import DemoPage from './DemoPage';
 import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
@@ -16,7 +17,7 @@ import './index.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -139,6 +140,7 @@ export default function App() {
           {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
           {page === 'subtitle' && <SubtitlePage />}
+          {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
         </main>
       </div>
     </div>

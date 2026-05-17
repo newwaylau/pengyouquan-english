@@ -106,4 +106,8 @@ export const api = {
 
   // 连接测试
   ping: () => request('/api/auth/ping'),
+
+  // Demo 问候接口
+  demoGreeting: (name?: string) =>
+    request(`/api/demo/greeting?name=${encodeURIComponent(name || '访客')}`),
 };
