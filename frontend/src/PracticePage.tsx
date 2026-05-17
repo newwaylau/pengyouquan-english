@@ -132,7 +132,7 @@ export default function PracticePage({
   const [loadingNext, setLoadingNext] = useState(false);
 
   // 统计
-  const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0 });
+  const [stats, setStats] = useState({ totalPractices: 0, totalCorrect: 0, todayPractices: 0 });
   const [wrongCount, setWrongCount] = useState(0);
   // 本次错题复习的正确统计
   const [wrongReviewStats, setWrongReviewStats] = useState({ correct: 0, total: 0 });
@@ -141,7 +141,7 @@ export default function PracticePage({
   const refreshStats = () => {
     if (!user) return;
     api.stats().then(r => {
-      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
+      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect, todayPractices: r.data.todayPractices });
     });
     api.wrongSentenceStats().then(r => { if (r.code === 200) setWrongCount(r.data.due + r.data.upcoming); });
   };
@@ -174,7 +174,7 @@ export default function PracticePage({
   useEffect(() => {
     if (!user) return;
     api.stats().then(r => {
-      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect });
+      if (r.code === 200) setStats({ totalPractices: r.data.totalPractices, totalCorrect: r.data.totalCorrect, todayPractices: r.data.todayPractices });
     });
     api.wrongSentenceStats().then(r => { if (r.code === 200) setWrongCount(r.data.due + r.data.upcoming); });
     api.getSettings().then(r => {
@@ -740,7 +740,7 @@ export default function PracticePage({
               <div className="stat-item">
                 <div className="stat-icon amber">📖</div>
                 <div className="stat-info">
-                  <div className="stat-value">{stats.totalPractices}</div>
+                  <div className="stat-value">{stats.todayPractices}</div>
                   <div className="stat-label">今日练习</div>
                 </div>
               </div>
@@ -929,7 +929,7 @@ export default function PracticePage({
           <div className="stat-item">
             <div className="stat-icon amber">📖</div>
             <div className="stat-info">
-              <div className="stat-value">{stats.totalPractices}</div>
+              <div className="stat-value">{stats.todayPractices}</div>
               <div className="stat-label">今日练习</div>
             </div>
           </div>
