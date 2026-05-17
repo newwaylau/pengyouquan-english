@@ -3370,6 +3370,23 @@ h3 {
   .stats-bar .stat-item { padding: 12px; }
   .stats-bar .stat-value { font-size: 1.125rem; }
   .stats-bar .stat-label { font-size: var(--text-tag); }
+
+  /* sentence-en 限制高度 + 缩小字号 (手机端) */
+  .card-body .sentence-en {
+    max-height: 30vh;
+    font-size: 1.125rem;
+    flex: 0 1 auto;
+  }
+
+  /* sentence-meta 溢出省略号 */
+  .sentence-meta {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 768px以下隐藏快捷键提示 */
+  .shortcuts-hint { display: none; }
 }
 
 /* ---------- 桌面端 (>768px) ---------- */
