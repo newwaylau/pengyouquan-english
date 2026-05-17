@@ -482,7 +482,7 @@ h3 {
   padding: 10px 14px;
   border: none;
   background: none;
-  cursor: default;
+  cursor: pointer;
   border-radius: 6px;
   font-size: var(--text-aux);
   font-family: inherit;
@@ -553,7 +553,7 @@ h3 {
   width: 100%;
   border: none;
   background: none;
-  cursor: default;
+  cursor: pointer;
   border-radius: 6px;
   font-size: 0.875rem;
   font-family: inherit;
@@ -643,7 +643,7 @@ h3 {
   background: none;
   padding: 6px 12px;
   border-radius: 6px;
-  cursor: default;
+  cursor: pointer;
   font-size: 0.75rem;
   font-family: inherit;
   color: var(--sidebar-text-tertiary);
@@ -660,7 +660,7 @@ h3 {
   background: var(--primary);
   padding: 8px 14px;
   border-radius: 6px;
-  cursor: default;
+  cursor: pointer;
   font-size: 0.8125rem;
   font-weight: 600;
   font-family: inherit;
@@ -816,12 +816,12 @@ h3 {
   width: 100%;
   padding: 11px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--primary);
   color: #fff;
   font-size: var(--text-aux);
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
   margin-top: 4px;
@@ -857,7 +857,7 @@ h3 {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  cursor: default;
+  cursor: pointer;
   color: var(--text-tertiary);
   display: flex;
   align-items: center;
@@ -913,7 +913,7 @@ h3 {
 .login-form-container .send-code-btn {
   padding: 10px 16px;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--primary);
   font-size: 0.75rem;
@@ -1098,11 +1098,11 @@ h3 {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: var(--text);
   font-size: 0.9375rem;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
   text-align: left;
   margin-bottom: 16px;
@@ -1167,10 +1167,10 @@ h3 {
   background: #14b8a6;
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.9375rem;
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
   transition: opacity 0.15s;
 }
 .welcome-primary-btn:hover { opacity: 0.9; }
@@ -1179,9 +1179,9 @@ h3 {
   background: none;
   color: var(--text-secondary);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.9375rem;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
 }
 .welcome-secondary-btn:hover {
@@ -1204,7 +1204,7 @@ h3 {
   border-radius: 8px;
   font-size: 0.9375rem;
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
   transition: opacity 0.15s;
 }
 .pwd-save-btn:hover { opacity: 0.9; }
@@ -1216,7 +1216,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 0.9375rem;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
 }
 .pwd-cancel-btn:hover { border-color: #ef4444; color: #ef4444; }
@@ -1278,7 +1278,7 @@ h3 {
   color: #fff;
   font-size: 0.9375rem;
   white-space: nowrap;
-  cursor: default;
+  cursor: pointer;
   line-height: 1.4;
   text-align: center;
   transition: all 0.15s;
@@ -1432,7 +1432,7 @@ h3 {
   border-radius: 12px 12px 0 0;
   padding: 20px;
   box-shadow: var(--shadow-card);
-  margin-bottom: 0;
+  margin-bottom: 12px;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -1616,7 +1616,7 @@ h3 {
   border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
   text-align: center;
@@ -1710,7 +1710,7 @@ h3 {
   background: var(--primary);
   color: #fff;
   font-size: 0.9375rem;
-  cursor: default;
+  cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   text-align: center;
 }
@@ -1722,7 +1722,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   background: var(--card-bg);
-  cursor: default;
+  cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text);
   text-align: center;
@@ -1777,7 +1777,7 @@ h3 {
   border-radius: 6px;
   padding: 6px 14px;
   font-size: var(--text-aux);
-  cursor: default;
+  cursor: pointer;
   color: var(--text-secondary);
   transition: all 0.2s, transform 0.1s;
 }
@@ -1931,7 +1931,7 @@ h3 {
   color: var(--text-secondary);
   padding: 6px 14px;
   font-size: var(--text-aux);
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s, transform 0.1s;
 }
 .exit-focus-btn:hover {
@@ -1958,7 +1958,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--card-bg);
-  cursor: default;
+  cursor: pointer;
   font-size: 0.75rem;
   color: var(--text);
   transition: background 0.15s, color 0.15s;
@@ -2029,7 +2029,7 @@ h3 {
   color: #fff;
   font-size: var(--text-aux);
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s, transform 0.1s;
   box-shadow: 0 2px 8px rgba(99,102,241,0.3);
@@ -2051,7 +2051,7 @@ h3 {
   background: var(--card-bg);
   color: var(--text);
   font-size: 0.8125rem;
-  cursor: default;
+  cursor: pointer;
   transition: border-color 0.15s;
   white-space: nowrap;
 }
@@ -2244,7 +2244,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   background: var(--card-bg);
-  cursor: default;
+  cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text);
   transition: background 0.15s;
@@ -2271,7 +2271,7 @@ h3 {
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--card-bg);
-  cursor: default;
+  cursor: pointer;
   font-size: 0.8125rem;
   color: var(--text);
   transition: all 0.15s;
@@ -2406,7 +2406,7 @@ h3 {
   background: none;
   border: none;
   font-size: 1rem;
-  cursor: default;
+  cursor: pointer;
   color: var(--text-secondary);
   padding: 4px;
   transition: color 0.15s, transform 0.1s;
@@ -2471,7 +2471,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--card-bg);
-  cursor: default;
+  cursor: pointer;
   font-size: var(--text-aux);
   color: var(--text-secondary);
   transition: all 0.15s;
@@ -2537,7 +2537,7 @@ h3 {
   border-radius: 6px;
   background: var(--primary);
   color: #fff;
-  cursor: default;
+  cursor: pointer;
   font-size: 0.8125rem;
   transition: opacity 0.15s;
 }
