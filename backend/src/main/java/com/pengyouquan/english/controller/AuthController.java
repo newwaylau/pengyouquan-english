@@ -8,6 +8,8 @@ import com.pengyouquan.english.service.WechatAuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * 认证接口
  * 注册 / 登录 / 发送验证码 / 获取当前用户信息
@@ -84,5 +86,11 @@ public class AuthController {
     @PostMapping("/wechat-login")
     public ApiResponse<LoginResponse> wechatLogin(@Valid @RequestBody WechatLoginRequest request) {
         return ApiResponse.success(wechatAuthService.login(request.getCode()));
+    }
+
+    /** Ping 健康检查 */
+    @GetMapping("/ping")
+    public ApiResponse<Map<String, String>> ping() {
+        return ApiResponse.success(Map.of("status", "ok"));
     }
 }
