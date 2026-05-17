@@ -95,6 +95,12 @@ export default function PracticePage({
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [phoneMode, setPhoneMode] = useState(false);
+  // ≤480px 设备默认启用 phone-mode
+  useEffect(() => {
+    if (window.innerWidth <= 480) {
+      setPhoneMode(true);
+    }
+  }, []);
   // 手机模式：用隐藏输入框触发键盘，不上自动聚焦
   useEffect(() => {
     if (!phoneMode) return;
