@@ -1547,6 +1547,13 @@ h3 {
   cursor: default;
 }
 
+/* ---------- 操作按钮容器 ---------- */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
 /* ---------- 操作行 ---------- */
 .action-row {
   display: flex;
@@ -1608,6 +1615,7 @@ h3 {
 }
 .action-btn.danger:hover {
   background: rgba(239,68,68,0.15);
+  transform: translateY(-1px);
 }
 
 /* 速度按钮 - 继承 secondary 视觉 */

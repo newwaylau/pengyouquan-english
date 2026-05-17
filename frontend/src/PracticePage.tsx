@@ -1074,8 +1074,8 @@ export default function PracticePage({
       <div className="button-area card-enter-delay-1">
         <hr className="action-divider" />
 
-        {/* 操作行1：提交 */}
-        <div className="action-row">
+        {/* 操作按钮组：提交/下一句 — Primary */}
+        <div className="action-buttons">
           {!answered ? (
             <button className="action-btn primary" ref={submitRef} onClick={handleSubmit}>⏎ 提交</button>
           ) : (
@@ -1083,8 +1083,8 @@ export default function PracticePage({
           )}
         </div>
 
-        {/* 操作行2：剧集原音 / 服务器音色 / 下一句 */}
-        <div className="action-row">
+        {/* 操作按钮组：音效 + 下一句 — Secondary */}
+        <div className="action-buttons">
           <button className="action-btn secondary" onClick={playOriginal}>🎬 剧集原音</button>
           <button className="action-btn secondary" onClick={() => playTts(en)}>🎙️ {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
           <button className="action-btn secondary" onClick={goNext}>⏭️ 下一句</button>
