@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api/client';
-import { IconSettings, IconClose, IconEdit, IconPen, IconFilm, IconTV, IconSpeaker, IconMic } from './Icons';
+import { IconSettings, IconClose, IconPen, IconFilm, IconTV, IconSpeaker, IconMic } from './Icons';
 
 interface Props {
   open: boolean;
@@ -29,7 +29,7 @@ const VOICES = [
 ];
 
 const DEFAULTS = {
-  mode: 'translation',
+  mode: 'dictation',
   voice: 'en-GB-RyanNeural',
   speed: 0.75,
   showId: '',
@@ -171,11 +171,11 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         <div className="settings-section">
           <label>练习模式</label>
           <div className="voice-pills">
-            {['translation', 'dictation'].map(m => (
+            {['dictation'].map(m => (
               <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
                 onClick={() => { onModeChange(m); save('mode', m); }}>
                 <input type="radio" name="mode" checked={mode === m} readOnly />
-                <span>{m === 'translation' ? <><IconEdit /> 中译英</> : <><IconPen /> 听写</>}</span>
+                <span><><IconPen /> 听写模式</></span>
               </label>
             ))}
           </div>

@@ -37,7 +37,6 @@ function normalizeCase(s: string) {
 }
 /** 模式中文名 */
 const MODE_LABELS: Record<string, React.ReactNode> = {
-  translation: <><IconEdit /> 中译英模式</>,
   dictation: <><IconPen /> 纯听写模式</>,
   wrong: <><IconClose /> 错题复习模式</>,
 };
@@ -64,7 +63,7 @@ export default function PracticePage({
 }) {
   // 句子
   const [sentence, setSentence] = useState<any>(null);
-  const [mode, setMode] = useState<'translation' | 'dictation' | 'wrong'>('translation');
+  const [mode, setMode] = useState<'dictation' | 'wrong'>('dictation');
   // 错题练习相关
   const [wrongSentences, setWrongSentences] = useState<any[]>([]);
   const [wrongIndex, setWrongIndex] = useState(0);
@@ -332,10 +331,7 @@ export default function PracticePage({
     })();
   }, [showList]);
 
-  // 切换模式时更新中文显示状态
-  useEffect(() => {
-    setShowCn(mode === 'translation');
-  }, [mode]);
+
 
   // 新句子加载后把焦点从隐藏输入框移到第一个单词输入框（手机键盘保持弹出）
   useEffect(() => {
@@ -770,8 +766,8 @@ export default function PracticePage({
               <button className="action-btn primary" onClick={() => onNavigate?.('wrong')}>
                 <><IconBookClosed /> 返回错题本</>
               </button>
-              <button className="action-btn secondary" onClick={() => setMode('translation')}>
-                <><IconEdit /> 继续普通练习</>
+              <button className="action-btn secondary" onClick={() => setMode('dictation')}>
+                <><IconPen /> 继续听写练习</>
               </button>
             </div>
           </div>
