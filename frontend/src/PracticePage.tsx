@@ -781,23 +781,23 @@ export default function PracticePage({
             <div className="bottom-nav">
               <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
                 <span className="bottom-nav-icon"><IconConstruction /></span>
-                <span className="bottom-nav-label">浏览(建设中)</span>
+                <span className="bottom-nav-label">浏览(Browse)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
                 <span className="bottom-nav-icon"><IconClose /></span>
-                <span className="bottom-nav-label">错题</span>
+                <span className="bottom-nav-label">错题(Wrong)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
                 <span className="bottom-nav-icon"><IconSettings /></span>
-                <span className="bottom-nav-label">设置</span>
+                <span className="bottom-nav-label">设置(Settings)</span>
               </button>
               <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
                 <span className="bottom-nav-icon"><IconConstruction /></span>
-                <span className="bottom-nav-label">搜索(建设中)</span>
+                <span className="bottom-nav-label">搜索(Search)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
                 <span className="bottom-nav-icon"><IconMeditation /></span>
-                <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
+                <span className="bottom-nav-label">{focusMode ? '退出(Exit)' : '专注(Focus)'}</span>
               </button>
             </div>
           </div>
@@ -1128,23 +1128,23 @@ export default function PracticePage({
       <div className="bottom-nav">
         <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
           <span className="bottom-nav-icon"><IconConstruction /></span>
-          <span className="bottom-nav-label">浏览(建设中)</span>
+          <span className="bottom-nav-label">浏览(Browse)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
           <span className="bottom-nav-icon"><IconClose /></span>
-          <span className="bottom-nav-label">错题</span>
+          <span className="bottom-nav-label">错题(Wrong)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
           <span className="bottom-nav-icon"><IconSettings /></span>
-          <span className="bottom-nav-label">设置</span>
+          <span className="bottom-nav-label">设置(Settings)</span>
         </button>
         <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
           <span className="bottom-nav-icon"><IconConstruction /></span>
-          <span className="bottom-nav-label">搜索(建设中)</span>
+          <span className="bottom-nav-label">搜索(Search)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
           <span className="bottom-nav-icon"><IconMeditation /></span>
-          <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
+          <span className="bottom-nav-label">{focusMode ? '退出(Exit)' : '专注(Focus)'}</span>
         </button>
       </div> {/* end bottom-nav */}
 

@@ -515,7 +515,7 @@ h3 {
 
 .sidebar-nav-icon {
   font-size: 1.125rem;
-  line-height: 1;
+  line-height: 1.1;
   width: 24px;
   text-align: center;
   flex-shrink: 0;
@@ -523,7 +523,7 @@ h3 {
 
 .sidebar-nav-label {
   font-size: clamp(0.625rem, 1.2vw, 0.8125rem);
-  line-height: 1;
+  line-height: 1.1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1328,7 +1328,7 @@ h3 {
   align-items: center;
   cursor: pointer;
   user-select: none;
-  line-height: 1;
+  line-height: 1.1;
 }
 .pwd-strength-bar {
   display: flex;
@@ -1362,6 +1362,8 @@ h3 {
   flex-direction: column;
   height: calc(100vh - 24px);
   max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ---------- Stats Bar — 更紧凑、更可读 ---------- */
@@ -1829,6 +1831,8 @@ h3 {
 .bottom-nav {
   width: 100%;
   max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
   display: flex;
   background: var(--bottom-nav-bg);
   border-top: 1px solid var(--bottom-nav-border);
@@ -1861,15 +1865,17 @@ h3 {
 }
 .bottom-nav-icon {
   font-size: 1.25rem;
-  line-height: 1;
+  line-height: 1.1;
 }
 .bottom-nav-label {
   font-size: clamp(0.5rem, 2.5vw, 0.75rem);
-  line-height: 1;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ---------- 错题再练提示 ---------- */
@@ -2348,7 +2354,7 @@ h3 {
 }
 .empty-state-card .empty-state-icon {
   font-size: 3rem;
-  line-height: 1;
+  line-height: 1.1;
   margin-bottom: 16px;
 }
 .empty-state-card .empty-state-illustration {
@@ -2645,7 +2651,7 @@ h3 {
 }
 .admin-sidebar-logo {
   font-size: 1.25rem;
-  line-height: 1;
+  line-height: 1.1;
 }
 .admin-sidebar-title {
   font-size: 1rem;
@@ -2677,13 +2683,13 @@ h3 {
 }
 .admin-nav-icon {
   font-size: 1.125rem;
-  line-height: 1;
+  line-height: 1.1;
   width: 24px;
   text-align: center;
   flex-shrink: 0;
 }
 .admin-nav-label {
-  line-height: 1;
+  line-height: 1.1;
 }
 .admin-sidebar-nav button.active {
   background: var(--hover-bg);
@@ -3876,7 +3882,7 @@ h3 {
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  line-height: 1;
+  line-height: 1.1;
   transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   flex: 1;
@@ -3938,7 +3944,7 @@ h3 {
   font-size: var(--text-tag);
   cursor: pointer;
   white-space: nowrap;
-  line-height: 1;
+  line-height: 1.1;
   display: flex;
   align-items: center;
   justify-content: center;
