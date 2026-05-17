@@ -1613,7 +1613,7 @@ h3 {
   gap: 6px;
   padding: 11px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: default;
@@ -1662,9 +1662,9 @@ h3 {
   flex: 1;
   min-width: 0;
   padding: calc(6/16*1rem) calc(10/16*1rem);
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.8125rem;
-  cursor: default;
+  cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
   text-align: center;
@@ -1706,7 +1706,7 @@ h3 {
 .btn-primary {
   padding: calc(10/16*1rem) calc(20/16*1rem);
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--primary);
   color: #fff;
   font-size: 0.9375rem;
@@ -1720,7 +1720,7 @@ h3 {
 .btn-action {
   padding: calc(6/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--card-bg);
   cursor: default;
   font-size: 0.8125rem;
@@ -1836,8 +1836,8 @@ h3 {
   padding: calc(6/16*1rem) calc(4/16*1rem);
   border: none;
   background: none;
-  cursor: default;
-  border-radius: 8px;
+  cursor: pointer;
+  border-radius: 6px;
   transition: background 0.15s, transform 0.1s;
   color: var(--text-secondary);
 }
@@ -1927,7 +1927,7 @@ h3 {
 .exit-focus-btn {
   background: rgba(255,255,255,0.08);
   border: 1px solid var(--card-border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-secondary);
   padding: 6px 14px;
   font-size: var(--text-aux);
@@ -1977,7 +1977,7 @@ h3 {
 .clear-btn {
   padding: calc(6/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--danger);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--card-bg);
   color: var(--danger);
   cursor: pointer;
@@ -2024,7 +2024,7 @@ h3 {
   margin-left: auto;
   padding: calc(8/16*1rem) calc(18/16*1rem);
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   background: linear-gradient(135deg, var(--primary), #f59e0b);
   color: #fff;
   font-size: var(--text-aux);
@@ -2047,7 +2047,7 @@ h3 {
 .sort-dir-btn {
   padding: calc(6/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--card-bg);
   color: var(--text);
   font-size: 0.8125rem;
@@ -2242,7 +2242,7 @@ h3 {
 .pagination button {
   padding: calc(6/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--card-bg);
   cursor: default;
   font-size: 0.8125rem;
@@ -2269,7 +2269,7 @@ h3 {
 .admin-pagination button {
   padding: calc(7/16*1rem) calc(18/16*1rem);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--card-bg);
   cursor: default;
   font-size: 0.8125rem;
@@ -2534,7 +2534,7 @@ h3 {
 .jump-input button {
   padding: calc(8/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--primary);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--primary);
   color: #fff;
   cursor: default;
@@ -2655,7 +2655,7 @@ h3 {
   background: none;
   text-align: left;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: var(--text-aux);
   color: var(--text-secondary);
   transition: background 0.15s, color 0.15s;
@@ -2964,7 +2964,7 @@ h3 {
   background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -3876,7 +3876,7 @@ h3 {
   padding: 10px 12px;
   min-height: 44px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   color: #fff;
   font-size: var(--text-aux);
@@ -3898,7 +3898,7 @@ h3 {
   padding: 10px 10px;
   min-height: 44px;
   border: 1px solid var(--primary);
-  border-radius: 8px;
+  border-radius: 6px;
   background: rgba(20,184,166,0.08);
   color: var(--text);
   font-size: var(--text-aux);
@@ -3919,7 +3919,7 @@ h3 {
   padding: 8px 6px;
   min-height: 44px;
   border: 1px solid var(--card-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-secondary);
   font-size: var(--text-tag);
