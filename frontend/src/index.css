@@ -523,6 +523,9 @@ h3 {
 
 .sidebar-nav-label {
   line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 管理后台导航（在导航区下方） */
@@ -825,6 +828,9 @@ h3 {
   transition: all 0.15s;
   font-family: inherit;
   margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .login-form-container .submit-btn:hover {
   background: var(--primary-hover);
@@ -1606,12 +1612,12 @@ h3 {
 
 /* ---- 三态按钮系统 ---- */
 .action-btn {
-  flex: 1;
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 11px;
+  padding: 12px 14px;
   border: none;
   border-radius: 6px;
   font-size: 0.8125rem;
@@ -1620,7 +1626,10 @@ h3 {
   transition: all 0.15s;
   font-family: inherit;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+  min-height: 44px;
 }
 
 /* Primary - 主操作 */
@@ -1660,7 +1669,7 @@ h3 {
 /* 速度按钮 - 继承 secondary 视觉 */
 .btn-speed {
   flex: 1;
-  min-width: 0;
+  min-width: 48px;  /* 触控目标 >= 48px 符合 HIG */
   padding: calc(6/16*1rem) calc(10/16*1rem);
   border-radius: 6px;
   font-size: 0.8125rem;
@@ -1854,8 +1863,12 @@ h3 {
   line-height: 1;
 }
 .bottom-nav-label {
-  font-size: var(--text-tag);
+  font-size: clamp(0.5rem, 2.5vw, 0.75rem);
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* ---------- 错题再练提示 ---------- */
@@ -3455,7 +3468,6 @@ h3 {
   .bottom-nav { padding: calc(4/16*1rem) calc(4/16*1rem); padding-bottom: max(4px, env(safe-area-inset-bottom)); }
   .bottom-nav-btn { padding: 6px 4px; min-height: 44px; }
   .bottom-nav-icon { font-size: 1.125rem; }
-  .bottom-nav-label { font-size: var(--text-tag); }
 
   /* 搜索面板 */
   .search-panel {
