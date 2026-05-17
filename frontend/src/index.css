@@ -522,6 +522,7 @@ h3 {
 }
 
 .sidebar-nav-label {
+  font-size: clamp(0.625rem, 1.2vw, 0.8125rem);
   line-height: 1;
   overflow: hidden;
   text-overflow: ellipsis;
