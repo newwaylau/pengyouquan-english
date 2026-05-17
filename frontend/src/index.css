@@ -1707,7 +1707,7 @@ h3 {
 }
 .action-row-half .btn-speed {
   flex: 1;
-  min-width: 0;
+  min-width: 48px;  /* 继承主规则的触控目标 */
 }
 
 /* 非按钮区旧 btn-primary / btn-action 兼容
