@@ -74,7 +74,7 @@ export default function App() {
     if (data?.jumpId) setJumpId(data.jumpId);
   };
 
-  if (page === 'login' || (!getToken() && page !== 'practice')) {
+  if (page === 'login' || (!getToken() && page !== 'practice' && page !== 'demo')) {
     return <LoginPage onLogin={handleLogin} onHome={() => setPage('practice')} />;
   }
 
