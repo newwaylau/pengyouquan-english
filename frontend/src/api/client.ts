@@ -103,4 +103,7 @@ export const api = {
     request(`/api/admin/sentences/${sentenceId}/disable`, { method: 'PUT', body: JSON.stringify({ reason: reason || '' }) }),
   adminEnableSentence: (sentenceId: number) =>
     request(`/api/admin/sentences/${sentenceId}/enable`, { method: 'PUT' }),
+
+  // 连接测试
+  ping: () => request('/api/auth/ping'),
 };

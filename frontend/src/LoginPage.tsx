@@ -70,6 +70,28 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
+  // ── Ping 测试连接 ──
+  const [pingStatus, setPingStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [pingResult, setPingResult] = useState<string>('');
+
+  const handlePing = async () => {
+    setPingStatus('loading');
+    setPingResult('');
+    try {
+      const r = await api.ping();
+      if (r.code === 200) {
+        setPingStatus('success');
+        setPingResult(JSON.stringify(r.data, null, 2));
+      } else {
+        setPingStatus('error');
+        setPingResult(r.message || '请求失败');
+      }
+    } catch (e: any) {
+      setPingStatus('error');
+      setPingResult(e?.message || '网络错误');
+    }
+  };
+
   const startCountdown = useCallback(() => {
     setCodeCountdown(60);
     if (timerRef.current) clearInterval(timerRef.current);
@@ -620,6 +642,19 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
             {mode === 'login' ? '没有账号？点击注册' : '已有账号？点击登录'}
           </p>
         )}
+
+        {/* 测试连接 */}
+        <div className="ping-section">
+          <button className="ping-btn" onClick={handlePing} disabled={pingStatus === 'loading'}>
+            {pingStatus === 'loading' ? '测试中...' : '🔗 测试连接'}
+          </button>
+          {pingStatus === 'success' && (
+            <div className="ping-result ping-success">✅ 连接成功：{pingResult}</div>
+          )}
+          {pingStatus === 'error' && (
+            <div className="ping-result ping-error">❌ 连接失败：{pingResult}</div>
+          )}
+        </div>
       </div>
     </div>
   );
