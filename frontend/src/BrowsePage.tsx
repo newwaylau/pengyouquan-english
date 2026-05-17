@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
+import { IconBook, IconEdit } from './Icons';
 
 interface Props {
   onJump: (id: number) => void;
@@ -54,7 +55,7 @@ export default function BrowsePage({ onJump, onBack }: Props) {
   return (
     <div className="browse-page">
       <div className="browse-header">
-        <h2>📖 句子浏览</h2>
+        <h2><IconBook /> 句子浏览</h2>
         {onBack && <button className="back-btn" onClick={onBack}>← 返回</button>}
         <div className="browse-controls">
           <select value={selectedShowId ?? ''} onChange={e =>
@@ -75,7 +76,7 @@ export default function BrowsePage({ onJump, onBack }: Props) {
 
       {!selectedShowId && (
         <EmptyStateCard
-          icon="📖"
+          variant="book"
           title="请选择剧集"
           subtitle="从上方下拉列表选择一部美剧，开始浏览句子。"
         />
@@ -85,7 +86,7 @@ export default function BrowsePage({ onJump, onBack }: Props) {
 
       {selectedShowId && !loading && sentences.length === 0 && (
         <EmptyStateCard
-          icon="📝"
+          variant="document"
           title="该剧集暂无句子"
           subtitle="可能是该剧集正在更新中，请稍后再来。"
         />

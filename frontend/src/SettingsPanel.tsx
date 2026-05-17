@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api/client';
+import { IconSettings, IconClose, IconEdit, IconPen, IconFilm, IconTV, IconSpeaker, IconMic } from './Icons';
 
 interface Props {
   open: boolean;
@@ -162,8 +163,8 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
       {toastMsg && <div className="toast-msg">{toastMsg}</div>}
       <div className="settings-panel" onClick={e => e.stopPropagation()}>
         <div className="settings-header">
-          <h3>⚙️ 设置</h3>
-          <button className="close-btn" onClick={onClose}>✕ 关闭</button>
+          <h3><><IconSettings /> 设置</></h3>
+          <button className="close-btn" onClick={onClose}><><IconClose /> 关闭</></button>
         </div>
 
         {/* 练习模式 */}
@@ -174,7 +175,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
                 onClick={() => { onModeChange(m); save('mode', m); }}>
                 <input type="radio" name="mode" checked={mode === m} readOnly />
-                <span>{m === 'translation' ? '📝 中译英' : '🖊️ 听写'}</span>
+                <span>{m === 'translation' ? <><IconEdit /> 中译英</> : <><IconPen /> 听写</>}</span>
               </label>
             ))}
           </div>
@@ -187,7 +188,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <select className="show-select" style={{width:'100%'}}
               value={selectedShowTitle}
               onChange={e => { handleShowSelect(e.target.value); }}>
-              <option value="">🎬 全部剧集</option>
+              <option value=""><><IconFilm /> 全部剧集</></option>
               {Object.keys(showGroups).sort().map(title => (
                 <option key={title} value={title}>{title}</option>
               ))}
@@ -195,7 +196,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <select className="show-select" style={{width:'100%'}}
               value={selectedSeason}
               onChange={e => { handleSeasonSelect(e.target.value); }}>
-              <option value="">📺 全部季</option>
+              <option value=""><><IconTV /> 全部季</></option>
               {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -203,7 +204,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <select className="show-select" style={{width:'100%'}}
               value={internalShowId}
               onChange={e => { handleEpisodeChange(e.target.value); }}>
-              <option value="">🎬 全部集</option>
+              <option value=""><><IconFilm /> 全部集</></option>
               {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
                 .sort((a: any, b: any) => parseInt(a.episode.replace('E','')) - parseInt(b.episode.replace('E','')))
                 .map((ep: any) => (
@@ -250,7 +251,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
                     if (val === 'browser') { onPreferOriginalChange(true); save('preferOriginal', 'true'); }
                     else { onPreferOriginalChange(false); save('preferOriginal', 'false'); }
                   }} />
-                <span>{val === 'browser' ? '🔊 剧集原音' : '🎙️ 导播'}</span>
+                <span>{val === 'browser' ? <><IconSpeaker /> 剧集原音</> : <><IconMic /> 导播</>}</span>
               </label>
             ))}
           </div>

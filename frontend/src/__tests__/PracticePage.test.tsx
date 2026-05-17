@@ -108,9 +108,9 @@ describe('PracticePage 逐词输入框测试 (#156)', () => {
     });
 
     // 检查基本元素
-    expect(screen.getByText('⏎ 提交')).toBeDefined();
-    expect(screen.getByText('⚙️ 设置')).toBeDefined();
-    expect(screen.getByText('🎬 原音')).toBeDefined();
+    expect(screen.getByText('提交')).toBeDefined();
+    expect(screen.getByText('设置')).toBeDefined();
+    expect(screen.getByText('剧集原音')).toBeDefined();
     expect(screen.getByText(/测试剧集/)).toBeDefined();
     expect(screen.getByText(/#42/)).toBeDefined();
   });
@@ -136,7 +136,7 @@ describe('PracticePage 逐词输入框测试 (#156)', () => {
     });
 
     // 点击设置按钮
-    const settingsBtn = screen.getByText('⚙️ 设置');
+    const settingsBtn = screen.getByText('设置');
     await userEvent.click(settingsBtn);
 
     // 设置面板应该显示
@@ -169,7 +169,7 @@ describe('PracticePage 逐词输入框测试 (#156)', () => {
     }
 
     // 点击提交
-    const submitBtn = screen.getByText('⏎ 提交');
+    const submitBtn = screen.getByText('提交');
     await userEvent.click(submitBtn);
 
     // 提交后应进入反馈状态或重试状态
@@ -322,7 +322,7 @@ describe('PracticePage 练习模式切换测试 (#157)', () => {
 
     // 应该仍然在加载下一句
     await waitFor(() => {
-      expect(screen.getByText(/⏎ 提交|下一句/)).toBeDefined();
+      expect(screen.getByText(/提交|下一句/)).toBeDefined();
     });
   });
 });

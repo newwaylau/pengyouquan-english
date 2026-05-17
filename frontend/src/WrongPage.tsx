@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
+import { IconCelebration, IconBookClosed, IconTarget, IconCalendar, IconCalendarUpcoming, IconClose, IconClock, IconForbidden } from './Icons';
 
 interface Props {
   onJump: (id: number) => void;
@@ -81,7 +82,7 @@ export default function WrongPage({ onJump, onBack }: Props) {
       <div className="wrong-page">
         <button className="back-btn" onClick={onBack}>← 返回练习</button>
         <EmptyStateCard
-          icon="🎉"
+          variant="celebration"
           title="暂无错题"
           subtitle="继续保持！做错的句子会自动加入错题本。在练习页遇到不会的句子？多练几遍就会了。"
           actionLabel="← 返回练习"
@@ -97,7 +98,7 @@ export default function WrongPage({ onJump, onBack }: Props) {
       <div className="wrong-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="back-btn" onClick={onBack}>← 返回</button>
-          <h2>📕 错题复习</h2>
+          <h2><IconBookClosed /> 错题复习</h2>
           <span className="wrong-count">（共{total}句）</span>
         </div>
       </div>
@@ -124,7 +125,7 @@ export default function WrongPage({ onJump, onBack }: Props) {
           onClick={handleBatchPractice}
           disabled={dueItems.length === 0}
         >
-          🎯 开始错题复习（{dueCount}句）
+          <><IconTarget /> 开始错题复习（{dueCount}句）</>
         </button>
       </div>
 
@@ -141,7 +142,7 @@ export default function WrongPage({ onJump, onBack }: Props) {
           {dueItems.length > 0 && (
             <div className="wrong-section">
               <h3 className="wrong-section-title due-section">
-                📅 今天要复习（{dueCount}句）
+                <IconCalendar /> 今天要复习（{dueCount}句）
               </h3>
               <div className="wrong-section-items">
                 {renderItems(dueItems)}
@@ -153,7 +154,7 @@ export default function WrongPage({ onJump, onBack }: Props) {
           {upcomingItems.length > 0 && (
             <div className="wrong-section">
               <h3 className="wrong-section-title upcoming-section">
-                🗓️ 以后复习（{upcomingCount}句）
+                <IconCalendarUpcoming /> 以后复习（{upcomingCount}句）
               </h3>
               <div className="wrong-section-items">
                 {renderItems(upcomingItems)}
@@ -194,15 +195,15 @@ export default function WrongPage({ onJump, onBack }: Props) {
                   <span className="wrong-meta-tag show-name">{item.showName}</span>
                 )}
                 <span className="wrong-meta-tag error-count">
-                  ❌ 错{item.errorCount}次
+                  <IconClose /> 错{item.errorCount}次
                 </span>
                 {/* 复习间隔标签 */}
                 <span className="wrong-meta-tag review-label">
-                  ⏰ {getReviewLabel(item.nextReviewAt)}
+                  <IconClock /> {getReviewLabel(item.nextReviewAt)}
                 </span>
                 {item.isDisabled && (
                   <span className="wrong-meta-tag disabled-label">
-                    ⛔ 该句子已停用
+                    <IconForbidden /> 该句子已停用
                   </span>
                 )}
               </div>

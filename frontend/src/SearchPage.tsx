@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import EmptyStateCard from './EmptyStateCard';
 import { api } from './api/client';
+import { IconSearch } from './Icons';
 
 export default function SearchPage({ onJump, onBack }: { onJump: (id: number) => void; onBack?: () => void }) {
   const [query, setQuery] = useState('');
@@ -28,7 +29,7 @@ export default function SearchPage({ onJump, onBack }: { onJump: (id: number) =>
       {loading && <div className="search-loading">搜索中...</div>}
       {!loading && results.length === 0 && query.length >= 2 && (
         <EmptyStateCard
-          icon="🔍"
+          variant="search"
           title="未找到结果"
           subtitle="试试其他关键词，中英文都可以搜索。"
         />

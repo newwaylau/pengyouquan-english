@@ -48,12 +48,12 @@ describe('SettingsPanel 设置面板', () => {
   it('open=true 时渲染设置面板', () => {
     render(<SettingsPanel {...defaultProps} />);
     expect(screen.getByText('设置')).toBeDefined();
-    expect(screen.getByText('✕')).toBeDefined();
+    expect(screen.getByText('关闭')).toBeDefined();
   });
 
   it('点击关闭按钮调用 onClose', async () => {
     render(<SettingsPanel {...defaultProps} />);
-    const closeBtn = screen.getByText('✕');
+    const closeBtn = screen.getByText('关闭');
     await userEvent.click(closeBtn);
     expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
@@ -75,8 +75,8 @@ describe('SettingsPanel 设置面板', () => {
   // --- 练习模式切换 ---
   it('模式选择按钮存在', () => {
     render(<SettingsPanel {...defaultProps} />);
-    expect(screen.getByText('📝 中译英')).toBeDefined();
-    expect(screen.getByText('🖊️ 听写')).toBeDefined();
+    expect(screen.getByText('中译英')).toBeDefined();
+    expect(screen.getByText('听写')).toBeDefined();
   });
 
   it('当前模式高亮', () => {
@@ -87,7 +87,7 @@ describe('SettingsPanel 设置面板', () => {
 
   it('点击模式按钮切换并保存', async () => {
     render(<SettingsPanel {...defaultProps} />);
-    const dictationBtn = screen.getByText('🖊️ 听写');
+    const dictationBtn = screen.getByText('听写');
     await userEvent.click(dictationBtn);
     expect(defaultProps.onModeChange).toHaveBeenCalledWith('dictation');
   });

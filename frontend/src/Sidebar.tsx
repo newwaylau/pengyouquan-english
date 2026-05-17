@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconSun, IconMoon } from './Icons';
 
 interface SidebarProps {
   page: string;
@@ -10,11 +11,11 @@ interface SidebarProps {
   onToggleTheme: () => void;
 }
 
-const NAV_ITEMS: { key: string; icon: string; label: string; requiresLogin?: boolean }[] = [
-  { key: 'practice', icon: '🎯', label: '练习' },
-  { key: 'wrong', icon: '❌', label: '错题本', requiresLogin: true },
-  { key: 'search', icon: '🔍', label: '搜索' },
-  { key: 'browse', icon: '📖', label: '浏览' },
+const NAV_ITEMS: { key: string; icon: React.ReactNode; label: string; requiresLogin?: boolean }[] = [
+  { key: 'practice', icon: <IconTarget />, label: '练习' },
+  { key: 'wrong', icon: <IconClose />, label: '错题本', requiresLogin: true },
+  { key: 'search', icon: <IconSearch />, label: '搜索' },
+  { key: 'browse', icon: <IconBook />, label: '浏览' },
 ];
 
 export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout, isDark, onToggleTheme }: SidebarProps) {
@@ -55,7 +56,7 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
             className={`sidebar-nav-item sidebar-nav-admin ${page === 'admin' ? 'active' : ''}`}
             onClick={() => onNavigate('admin')}
           >
-            <span className="sidebar-nav-icon">⚙️</span>
+            <span className="sidebar-nav-icon"><IconSettings /></span>
             <span className="sidebar-nav-label">管理后台</span>
           </button>
         </div>
@@ -67,7 +68,7 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
       {/* Theme toggle */}
       <div className="sidebar-theme-row">
         <button className="sidebar-theme-btn" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
-          <span className="sidebar-nav-icon">{isDark ? '☀️' : '🌙'}</span>
+          <span className="sidebar-nav-icon">{isDark ? <IconSun /> : <IconMoon />}</span>
           <span className="sidebar-nav-label">{isDark ? '浅色模式' : '深色模式'}</span>
         </button>
       </div>

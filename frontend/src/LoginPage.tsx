@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { IconKey, IconRocket, IconSave, IconCheckPlain } from './Icons';
 import { api, setToken, clearToken } from './api/client';
 import { EyeOpen, EyeClosed } from './eye-icons';
 
@@ -314,13 +315,13 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
               {/* 登录成功徽章 */}
               <div className="login-success-badge">
-                <span>✓</span>
+                <span><IconCheckPlain /></span>
                 <span>登录成功</span>
               </div>
 
               {/* 修改密码入口卡 */}
               <button className="change-pwd-btn" onClick={() => { resetPwdFields(); setWelcomeView('password'); }}>
-                <div className="change-pwd-icon">🔑</div>
+                <div className="change-pwd-icon"><IconKey /></div>
                 <div className="change-pwd-label">
                   <div className="change-pwd-label-main">修改密码</div>
                   <div className="change-pwd-label-sub">定期更换密码可提高账户安全性</div>
@@ -334,7 +335,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
               <div className="welcome-action-row">
                 <button className="welcome-primary-btn" onClick={handleGoToPractice}>
-                  🚀 进入练习
+                  <IconRocket /> 进入练习
                 </button>
                 <button className="welcome-secondary-btn" onClick={handleLogoutFromWelcome}>
                   退出
@@ -346,7 +347,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {welcomeView === 'password' && (
             <>
               <h2 style={{ fontSize: '1.25rem', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                🔑 修改密码
+                <IconKey /> 修改密码
               </h2>
 
               {/* 当前密码 */}
@@ -399,7 +400,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               {/* 成功提示 */}
               {pwdSuccess && (
                 <div className="pwd-success-toast" style={{ marginBottom: 12 }}>
-                  <span>✓</span>
+                  <span><IconCheckPlain /></span>
                   <span>密码修改成功！</span>
                 </div>
               )}
@@ -408,7 +409,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
               <div className="pwd-btn-row">
                 <button className="pwd-save-btn" onClick={handleChangePassword} disabled={pwdUpdating}>
-                  {pwdUpdating ? '保存中...' : '💾 保存密码'}
+                  {pwdUpdating ? '保存中...' : <><IconSave /> 保存密码</>}
                 </button>
                 <button className="pwd-cancel-btn" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>取消</button>
               </div>

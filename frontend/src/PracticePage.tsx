@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
 import { getAudioUrl, getTtsUrl } from './audioBase';
+import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconEdit, IconPen, IconFilm, IconMic, IconEye, IconEyeOff, IconFlag, IconCheck, IconCheckCircle, IconMeditation, IconNext, IconSkipNext, IconRefresh, IconConstruction, IconPhone, IconCheckPlain, IconCelebration, IconBookClosed, IconCalendar, IconSpeaker, IconRocket, IconKey } from './Icons';
 
 /** 从字幕文本中提取英文（含大小写校正） */
 function extractEn(text: string) {
@@ -35,10 +36,10 @@ function normalizeCase(s: string) {
   }).join(' ');
 }
 /** 模式中文名 */
-const MODE_LABELS: Record<string, string> = {
-  translation: '📝 中译英模式',
-  dictation: '🖊️ 纯听写模式',
-  wrong: '❌ 错题复习模式',
+const MODE_LABELS: Record<string, React.ReactNode> = {
+  translation: <><IconEdit /> 中译英模式</>,
+  dictation: <><IconPen /> 纯听写模式</>,
+  wrong: <><IconClose /> 错题复习模式</>,
 };
 
 const VOICES = [
@@ -731,28 +732,28 @@ export default function PracticePage({
           {user && (
             <div className="stats-bar">
               <div className="stat-item">
-                <div className="stat-icon teal">📝</div>
+                <div className="stat-icon teal"><IconEdit /></div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.totalPractices}</div>
                   <div className="stat-label">总句子</div>
                 </div>
               </div>
               <div className="stat-item">
-                <div className="stat-icon amber">📖</div>
+                <div className="stat-icon amber"><IconBook /></div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.todayPractices}</div>
                   <div className="stat-label">今日练习</div>
                 </div>
               </div>
               <div className="stat-item">
-                <div className="stat-icon blue">🎯</div>
+                <div className="stat-icon blue"><IconTarget /></div>
                 <div className="stat-info">
                   <div className="stat-value">{accuracy}%</div>
                   <div className="stat-label">正确率</div>
                 </div>
               </div>
               <div className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-                <div className="stat-icon emerald">📕</div>
+                <div className="stat-icon emerald"><IconBookClosed /></div>
                 <div className="stat-info">
                   <div className="stat-value">{wrongCount}</div>
                   <div className="stat-label">错题</div>
@@ -761,39 +762,39 @@ export default function PracticePage({
             </div>
           )}
           <div className="wrong-review-done">
-            <div className="wrong-review-icon">🎉</div>
+            <div className="wrong-review-icon"><IconCelebration size={48} /></div>
             <div className="wrong-review-title">错题复习完成！</div>
             <div className="wrong-review-subtitle">复习摘要：正确 {wrongReviewStats.correct}/{wrongReviewStats.total} 句</div>
             <div className="wrong-review-subtitle">共 {wrongSentences.length} 句错题</div>
             <div className="wrong-review-actions">
               <button className="action-btn primary" onClick={() => onNavigate?.('wrong')}>
-                📕 返回错题本
+                <><IconBookClosed /> 返回错题本</>
               </button>
               <button className="action-btn secondary" onClick={() => setMode('translation')}>
-                📝 继续普通练习
+                <><IconEdit /> 继续普通练习</>
               </button>
             </div>
           </div>
           <div className="bottom-section">
             <div className="bottom-nav">
               <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
-                <span className="bottom-nav-icon">🚧</span>
+                <span className="bottom-nav-icon"><IconConstruction /></span>
                 <span className="bottom-nav-label">浏览(建设中)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-                <span className="bottom-nav-icon">❌</span>
+                <span className="bottom-nav-icon"><IconClose /></span>
                 <span className="bottom-nav-label">错题</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
-                <span className="bottom-nav-icon">⚙️</span>
+                <span className="bottom-nav-icon"><IconSettings /></span>
                 <span className="bottom-nav-label">设置</span>
               </button>
               <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
-                <span className="bottom-nav-icon">🚧</span>
+                <span className="bottom-nav-icon"><IconConstruction /></span>
                 <span className="bottom-nav-label">搜索(建设中)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
-                <span className="bottom-nav-icon">🧘</span>
+                <span className="bottom-nav-icon"><IconMeditation /></span>
                 <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
               </button>
             </div>
@@ -838,9 +839,9 @@ export default function PracticePage({
         <div className="phone-mode-overlay">
           {/* 专注模式按钮 */}
           <div style={{textAlign:'center',marginBottom:4,display:'flex',justifyContent:'center',gap:6,flexShrink:0}}>
-            <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}>🧘 专注</button>
-            <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}>📱 手机</button>
-            <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>✕ 退出</button>
+            <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}><><IconMeditation /> 专注</></button>
+            <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}><><IconPhone /> 手机</></button>
+            <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}><><IconClose /> 退出</></button>
           </div>
 
           {/* 第1行: 英文(3行截断) + 中文(2行灰色) */}
@@ -892,26 +893,26 @@ export default function PracticePage({
           {(wrongWords.size > 0 || answered) && (
             <div className={`phone-mode-feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
               {answered && wrongWords.size === 0
-                ? '✅ 完全正确！'
+                ? <><IconCheck /> 完全正确！</>
                 : answered
-                ? `❌ 正确 ${userCorrectCount}/${userTotal} 个词 (${userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)`
-                : `❌ 有 ${wrongWords.size} 个词不对，请重试 (${userTotal > 0 ? Math.round((userTotal - wrongWords.size)/userTotal*100) : 0}%)`}
+                ? <><IconClose /> 正确 {userCorrectCount}/{userTotal} 个词 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</>
+                : <><IconClose /> 有 {wrongWords.size} 个词不对，请重试 ({userTotal > 0 ? Math.round((userTotal - wrongWords.size)/userTotal*100) : 0}%)</>}
             </div>
           )}
 
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
-            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}>⏎提交</button>
-            <button className="btn-phone-next" onClick={goNext}>⏭下句</button>
-            <button className="btn-phone-icon" onClick={playOriginal} title="原音">🎬原音</button>
-            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">🎙{VOICES.find(v => v.id === voice)?.label || ''}</button>
+            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}><><IconNext />提交</></button>
+            <button className="btn-phone-next" onClick={goNext}><><IconSkipNext />下句</></button>
+            <button className="btn-phone-icon" onClick={playOriginal} title="原音"><><IconFilm />原音</></button>
+            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS"><IconMic />{VOICES.find(v => v.id === voice)?.label || ''}</button>
             {mode === 'dictation' && (
               <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
-                👁️中文
+                <><IconEye />中文</>
               </button>
             )}
             <button className="btn-phone-icon" onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>
-              👁️英文
+              <><IconEye />英文</>
             </button>
           </div>
         </div>
@@ -920,28 +921,28 @@ export default function PracticePage({
       {user && (
         <div className="stats-bar stats-bar-enter">
           <div className="stat-item" onClick={() => {}}>
-            <div className="stat-icon teal">📝</div>
+            <div className="stat-icon teal"><IconEdit /></div>
             <div className="stat-info">
               <div className="stat-value">{stats.totalPractices}</div>
               <div className="stat-label">总句子</div>
             </div>
           </div>
           <div className="stat-item">
-            <div className="stat-icon amber">📖</div>
+            <div className="stat-icon amber"><IconBook /></div>
             <div className="stat-info">
               <div className="stat-value">{stats.todayPractices}</div>
               <div className="stat-label">今日练习</div>
             </div>
           </div>
           <div className="stat-item">
-            <div className="stat-icon blue">🎯</div>
+            <div className="stat-icon blue"><IconTarget /></div>
             <div className="stat-info">
               <div className="stat-value">{accuracy}%</div>
               <div className="stat-label">正确率</div>
             </div>
           </div>
           <div className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-            <div className="stat-icon emerald">📕</div>
+            <div className="stat-icon emerald"><IconBookClosed /></div>
             <div className="stat-info">
               <div className="stat-value">{wrongCount}</div>
               <div className="stat-label">错题</div>
@@ -951,7 +952,7 @@ export default function PracticePage({
       )}
 
       {/* Mode Badge */}
-      <div className="mode-badge">{MODE_LABELS[mode] || '📝 练习模式'}</div>
+      <div className="mode-badge">{MODE_LABELS[mode] || <><IconEdit /> 练习模式</>}</div>
 
       {/* 错题练习进度 */}
       {mode === 'wrong' && wrongSentences.length > 0 && (
@@ -971,9 +972,9 @@ export default function PracticePage({
       {/* 专注模式：专注 | 手机 | 退出（非手机模式时显示） */}
       {focusMode && !phoneMode && (
         <div style={{textAlign:'center',marginBottom:8,display:'flex',justifyContent:'center',gap:6}}>
-          <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}>🧘 专注</button>
-          <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}>📱 手机</button>
-          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}>✕ 退出</button>
+          <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}><><IconMeditation /> 专注</></button>
+          <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}><><IconPhone /> 手机</></button>
+          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}><><IconClose /> 退出</></button>
         </div>
       )}
 
@@ -984,7 +985,7 @@ export default function PracticePage({
         <div className="sentence-meta">
           {sentence.showName} · #{sentence.id}
           {mode === 'wrong' && sentence.errorCount !== undefined && (
-            <span className="wrong-error-badge">❌ 错{sentence.errorCount}次</span>
+            <span className="wrong-error-badge"><><IconClose /> 错{sentence.errorCount}次</></span>
           )}
         </div>
 
@@ -1042,12 +1043,12 @@ export default function PracticePage({
         {answered && (
           <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
             {wrongWords.size === 0
-              ? '✅ 完全正确！'
-              : `❌ 正确 ${userCorrectCount}/${userTotal} 个词`}
+              ? <><IconCheck /> 完全正确！</>
+              : <><IconClose /> 正确 {userCorrectCount}/{userTotal} 个词</>}
           </div>
         )}
         {retryCount === 1 && !answered && (
-          <div className="feedback retry">❌ 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</div>
+          <div className="feedback retry"><><IconClose /> 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</></div>
         )}
 
         {/* 举报按钮（仅答完题后显示） */}
@@ -1059,7 +1060,7 @@ export default function PracticePage({
               disabled={flagLoading}
               title={flaggedSentenceIds.has(sentence.id) ? '取消举报' : '标记：这句台词跟原音对不上'}
             >
-              🚩 {flaggedSentenceIds.has(sentence.id) ? '已标记' : '报告问题'}
+              <IconFlag /> {flaggedSentenceIds.has(sentence.id) ? '已标记' : '报告问题'}
             </button>
           </div>
         )}
@@ -1077,17 +1078,17 @@ export default function PracticePage({
         {/* 操作按钮组：提交/下一句 — Primary */}
         <div className="action-buttons">
           {!answered ? (
-            <button className="action-btn primary" ref={submitRef} onClick={handleSubmit}>⏎ 提交</button>
+            <button className="action-btn primary" ref={submitRef} onClick={handleSubmit}><><IconNext /> 提交</></button>
           ) : (
-            <button className="action-btn primary" onClick={goNext}>⏭️ 下一句</button>
+            <button className="action-btn primary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
           )}
         </div>
 
         {/* 操作按钮组：音效 + 下一句 — Secondary */}
         <div className="action-buttons">
-          <button className="action-btn secondary" onClick={playOriginal}>🎬 剧集原音</button>
-          <button className="action-btn secondary" onClick={() => playTts(en)}>🎙️ {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
-          <button className="action-btn secondary" onClick={goNext}>⏭️ 下一句</button>
+          <button className="action-btn secondary" onClick={playOriginal}><><IconFilm /> 剧集原音</></button>
+          <button className="action-btn secondary" onClick={() => playTts(en)}><IconMic /> {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
+          <button className="action-btn secondary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
         </div>
 
         {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
@@ -1106,11 +1107,11 @@ export default function PracticePage({
           <div className="action-row-half">
             {mode === 'dictation' && (
               <button className="action-btn secondary" onClick={() => setShowCn(s => !s)}>
-                {showCn ? '🙈 隐藏中文' : '👁️ 显示中文'}
+                {showCn ? <><IconEyeOff /> 隐藏中文</> : <><IconEye /> 显示中文</>}
               </button>
             )}
             <button className="action-btn secondary" onClick={() => setShowEn(s => !s)}>
-              {showEn ? '🙈 隐藏英文' : '👁️ 显示英文'}
+              {showEn ? <><IconEyeOff /> 隐藏英文</> : <><IconEye /> 显示英文</>}
             </button>
           </div>
         </div>
@@ -1124,23 +1125,23 @@ export default function PracticePage({
       {/* 底部导航 */}
       <div className="bottom-nav">
         <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
-          <span className="bottom-nav-icon">🚧</span>
+          <span className="bottom-nav-icon"><IconConstruction /></span>
           <span className="bottom-nav-label">浏览(建设中)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-          <span className="bottom-nav-icon">❌</span>
+          <span className="bottom-nav-icon"><IconClose /></span>
           <span className="bottom-nav-label">错题</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
-          <span className="bottom-nav-icon">⚙️</span>
+          <span className="bottom-nav-icon"><IconSettings /></span>
           <span className="bottom-nav-label">设置</span>
         </button>
         <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
-          <span className="bottom-nav-icon">🚧</span>
+          <span className="bottom-nav-icon"><IconConstruction /></span>
           <span className="bottom-nav-label">搜索(建设中)</span>
         </button>
         <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
-          <span className="bottom-nav-icon">🧘</span>
+          <span className="bottom-nav-icon"><IconMeditation /></span>
           <span className="bottom-nav-label">{focusMode ? '退出' : '专注'}</span>
         </button>
       </div> {/* end bottom-nav */}
@@ -1171,8 +1172,8 @@ export default function PracticePage({
         <div className="settings-overlay" onClick={() => setSearchOpen(false)}>
           <div className="search-panel" onClick={e => e.stopPropagation()}>
             <div className="settings-header">
-              <h3>🔍 搜索句子</h3>
-              <button className="close-btn" onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}>✕</button>
+              <h3><><IconSearch /> 搜索句子</></h3>
+              <button className="close-btn" onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}><IconClose /></button>
             </div>
             <input
               className="search-input"
@@ -1202,15 +1203,15 @@ export default function PracticePage({
         <div className="settings-overlay">
           <div className="search-panel wrong-retry-panel">
             <div className="wrong-retry-content">
-              <div className="wrong-retry-icon">📝</div>
+              <div className="wrong-retry-icon"><IconEdit size={40} /></div>
               <div className="wrong-retry-title">这句之前错过 {wrongBookPrompt.errorCount} 次</div>
               <div className="wrong-retry-subtitle">再练一遍，巩固记忆？</div>
               <div className="wrong-retry-actions">
                 <button className="action-btn primary" onClick={retryWrongSentence}>
-                  🔄 再练一遍
+                  <><IconRefresh /> 再练一遍</>
                 </button>
                 <button className="action-btn secondary" onClick={skipRetry}>
-                  ⏭️ 跳过
+                  <><IconSkipNext /> 跳过</>
                 </button>
               </div>
             </div>

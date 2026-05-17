@@ -1,7 +1,6 @@
 import React from 'react';
 
 interface Props {
-  icon?: string;
   title: string;
   subtitle: string;
   actionLabel?: string;
@@ -84,15 +83,8 @@ const illustrations: Record<string, React.ReactNode> = {
   ),
 };
 
-const variantFromIcon: Record<string, string> = {
-  '🎉': 'celebration',
-  '🔍': 'search',
-  '📖': 'book',
-  '📝': 'document',
-};
-
-export default function EmptyStateCard({ icon, title, subtitle, actionLabel, onAction, variant }: Props) {
-  const resolvedVariant = variant || (icon ? variantFromIcon[icon] : undefined) || 'celebration';
+export default function EmptyStateCard({ title, subtitle, actionLabel, onAction, variant }: Props) {
+  const resolvedVariant = variant || 'celebration';
   const illustration = illustrations[resolvedVariant];
 
   return (
