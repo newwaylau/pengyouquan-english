@@ -527,6 +527,8 @@ h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* 管理后台导航（在导航区下方） */
