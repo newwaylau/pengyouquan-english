@@ -11,6 +11,7 @@
   --card: #1e293b;
   --card-border: #334155;
   --text: #f1f5f9;
+  --text-primary: var(--text);
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
   --border: #334155;
@@ -101,6 +102,9 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 999px;
+
+  /* 按钮系统专用变量 */
+  --text-primary: var(--text);
 }
 /* ---------- 浅色模式（系统偏好） ---------- */
 @media (prefers-color-scheme: light) {
@@ -476,42 +480,9 @@ h3 {
   padding: 8px 10px;
 }
 
-.sidebar-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: var(--text-aux);
-  font-family: inherit;
-  color: var(--sidebar-text-secondary);
-  transition: background 0.15s, color 0.15s, transform 0.1s;
-  text-align: left;
+.sidebar .btn-nav {
   width: 100%;
-}
-
-.sidebar-nav-item:hover {
-  background: var(--sidebar-hover-bg);
-  color: var(--sidebar-text);
-  transform: translateY(-1px);
-}
-
-.sidebar-nav-item.active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text);
-}
-
-.sidebar-nav-item:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.sidebar-nav-item:disabled:hover {
-  background: none;
-  color: var(--sidebar-text-secondary);
+  justify-content: flex-start;
 }
 
 .sidebar-nav-icon {
@@ -537,11 +508,6 @@ h3 {
   padding: 4px 10px;
 }
 
-.sidebar-nav-admin.active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text);
-}
-
 /* 弹性间距 */
 .sidebar-spacer {
   flex: 1;
@@ -550,27 +516,6 @@ h3 {
 /* 主题切换（在弹性间距和分割线之间） */
 .sidebar-theme-row {
   padding: 4px 10px;
-}
-
-.sidebar-theme-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  width: 100%;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: inherit;
-  color: var(--sidebar-text-secondary);
-  transition: background 0.15s, color 0.15s;
-  text-align: left;
-}
-.sidebar-theme-btn:hover {
-  background: var(--sidebar-hover-bg);
-  color: var(--sidebar-text);
 }
 
 /* 分割线 */
@@ -644,39 +589,9 @@ h3 {
   background: #22c55e;
 }
 
-.sidebar-logout-btn {
-  margin-top: 10px;
-  border: 1px solid var(--sidebar-border);
-  background: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-family: inherit;
-  color: var(--sidebar-text-tertiary);
-  transition: border-color 0.15s, color 0.15s;
-}
-.sidebar-logout-btn:hover {
-  border-color: #ef4444;
-  color: #ef4444;
-  transform: translateY(-1px);
-}
 
-.sidebar-login-btn {
-  border: none;
-  background: var(--primary);
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: #fff;
-  transition: background 0.15s;
-}
-.sidebar-login-btn:hover {
-  background: var(--primary-hover);
-}
+
+
 
 /* ---------- 手机端精简顶部导航 ---------- */
 .topnav-mobile {
@@ -4217,6 +4132,26 @@ h3 {
   outline-offset: 2px;
 }
 
+/* .btn-outline.danger — 退出/危险操作 hover 变红 */
+.btn-outline.danger {
+  margin-top: 10px;
+  width: 100%;
+}
+.btn-outline.danger:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239,68,68,0.08);
+  transform: translateY(-1px);
+}
+.btn-outline.danger:active {
+  color: #dc2626;
+  border-color: #dc2626;
+  background: rgba(239,68,68,0.15);
+}
+.btn-outline.danger:focus-visible {
+  outline-color: #ef4444;
+}
+
 /* ---------- .btn-chip（药丸形速度选择按钮） ---------- */
 .btn-chip {
   display: inline-flex; align-items: center; justify-content: center;
@@ -4314,12 +4249,4 @@ h3 {
     padding: 0 14px;
     font-size: 13px;
   }
-}
-
-/* ---------- .btn-outline.danger 变体 ---------- */
-.btn-outline.danger:hover,
-.btn-outline.danger.hover {
-  border-color: #ef4444;
-  color: #ef4444;
-  background: rgba(239,68,68,0.08);
 }
