@@ -15,8 +15,8 @@
   --text-tertiary: #64748b;
   --border: #334155;
   --border-strong: #475569;
-  --primary: #14b8a6;
-  --primary-hover: #0d9488;
+  --primary: var(--teal);
+  --primary-hover: var(--teal-dark);
   --success: #22c55e;
   --danger: #ef4444;
   --warning: #f59e0b;
@@ -91,6 +91,19 @@
   /* 登录页颜色 */
   --login-brand-gradient-start: #0f172a;
   --login-brand-gradient-end: #134e4a;
+
+  /* Teal Modern 设计系统变量 */
+  --teal: #14b8a6;
+  --teal-light: #2dd4bf;
+  --teal-dark: #0d9488;
+  --teal-glow: rgba(20,184,166,0.30);
+  --bg-hover: var(--hover-bg);
+
+  /* 圆角系统 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
 }
 /* ---------- 浅色模式（系统偏好） ---------- */
 @media (prefers-color-scheme: light) {
@@ -186,8 +199,8 @@
   --text-tertiary: #94a3b8;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --primary: #14b8a6;
-  --primary-hover: #0d9488;
+  --primary: var(--teal);
+  --primary-hover: var(--teal-dark);
   --success: #16a34a;
   --danger: #dc2626;
   --warning: #d97706;
@@ -268,8 +281,8 @@
   --text-tertiary: #64748b;
   --border: #334155;
   --border-strong: #475569;
-  --primary: #14b8a6;
-  --primary-hover: #0d9488;
+  --primary: var(--teal);
+  --primary-hover: var(--teal-dark);
   --success: #22c55e;
   --danger: #ef4444;
   --warning: #f59e0b;
@@ -4125,4 +4138,250 @@ h3 {
 
 .demo-status-dot.online {
   background: #52c41a;
+}
+
+/* =====================================================
+   Teal Modern 按钮系统
+   5 种变体: .btn-nav / .btn-primary / .btn-outline / .btn-chip / .btn-icon
+   ===================================================== */
+
+/* ---------- .btn-nav（导航按钮） ---------- */
+.btn-nav {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-nav:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.btn-nav.active {
+  color: var(--teal-light);
+  background: rgba(20,184,166,0.12);
+  font-weight: 600;
+}
+.btn-nav.active::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 3px;
+  background: var(--teal);
+  border-radius: var(--radius-full);
+}
+.btn-nav.active:hover {
+  background: rgba(20,184,166,0.18);
+}
+.btn-nav:disabled,
+.btn-nav.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-nav:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* ---------- .btn-primary（主要填充按钮 — 登录/提交） ---------- */
+.btn-primary {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 28px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 2px 8px rgba(20,184,166,0.25);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(20,184,166,0.35);
+  background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal) 100%);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(20,184,166,0.20);
+  background: linear-gradient(135deg, var(--teal-dark) 0%, #0f766e 100%);
+}
+.btn-primary:disabled,
+.btn-primary.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.btn-primary:focus-visible {
+  outline: 2px solid var(--teal-light);
+  outline-offset: 2px;
+}
+
+/* ---------- .btn-outline（次要轮廓按钮 — 剧集/语言/音频） ---------- */
+.btn-outline {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 18px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(148,163,184,0.15);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-outline:hover {
+  color: var(--teal-light);
+  border-color: rgba(20,184,166,0.35);
+  background: rgba(20,184,166,0.08);
+}
+.btn-outline.active {
+  color: var(--teal-light);
+  border-color: var(--teal);
+  background: rgba(20,184,166,0.12);
+  font-weight: 600;
+}
+.btn-outline.active:hover {
+  background: rgba(20,184,166,0.18);
+}
+.btn-outline:disabled,
+.btn-outline.disabled {
+  opacity: 0.30;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-outline:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* ---------- .btn-chip（药丸形速度选择按钮） ---------- */
+.btn-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 52px;
+  height: 36px;
+  padding: 0 16px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(148,163,184,0.12);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.btn-chip:hover {
+  color: var(--text-primary);
+  border-color: rgba(148,163,184,0.30);
+  background: rgba(255,255,255,0.07);
+}
+.btn-chip.active {
+  color: #fff;
+  background: var(--teal);
+  border-color: var(--teal);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(20,184,166,0.30);
+}
+.btn-chip.active:hover {
+  background: var(--teal-light);
+  border-color: var(--teal-light);
+  box-shadow: 0 3px 12px rgba(20,184,166,0.40);
+}
+.btn-chip:disabled,
+.btn-chip.disabled {
+  opacity: 0.30;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-chip:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* ---------- .btn-icon（方形图标按钮 — 如深浅切换） ---------- */
+.btn-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  font-family: var(--font-family);
+  font-size: 20px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.btn-icon:hover {
+  color: var(--teal-light);
+  background: var(--bg-hover);
+}
+.btn-icon.active {
+  color: var(--teal-light);
+  background: rgba(20,184,166,0.12);
+}
+.btn-icon:disabled,
+.btn-icon.disabled {
+  opacity: 0.30;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-icon:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* ---------- 移动端适配 ---------- */
+@media (max-width: 600px) {
+  .btn-nav {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .btn-primary {
+    height: 44px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+  .btn-outline {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
 }
