@@ -78,9 +78,6 @@
   --sidebar-text: #f1f5f9;
   --sidebar-text-secondary: #94a3b8;
   --sidebar-text-tertiary: #64748b;
-  --sidebar-hover-bg: rgba(255,255,255,0.05);
-  --sidebar-active-bg: rgba(20,184,166,0.1);
-  --sidebar-active-text: #14b8a6;
   --sidebar-divider: #1e293b;
   --sidebar-border: #334155;
   --sidebar-avatar-text: #0f172a;
@@ -177,9 +174,6 @@
     --sidebar-text: #0f172a;
     --sidebar-text-secondary: #64748b;
     --sidebar-text-tertiary: #94a3b8;
-    --sidebar-hover-bg: rgba(0,0,0,0.04);
-    --sidebar-active-bg: rgba(20,184,166,0.08);
-    --sidebar-active-text: #0d9488;
     --sidebar-divider: #e2e8f0;
     --sidebar-border: #cbd5e1;
     --sidebar-avatar-text: #fff;
@@ -260,9 +254,6 @@
   --sidebar-text: #0f172a;
   --sidebar-text-secondary: #64748b;
   --sidebar-text-tertiary: #94a3b8;
-  --sidebar-hover-bg: rgba(0,0,0,0.04);
-  --sidebar-active-bg: rgba(20,184,166,0.08);
-  --sidebar-active-text: #0d9488;
   --sidebar-divider: #e2e8f0;
   --sidebar-border: #cbd5e1;
   --sidebar-avatar-text: #fff;
@@ -342,9 +333,6 @@
   --sidebar-text: #f1f5f9;
   --sidebar-text-secondary: #94a3b8;
   --sidebar-text-tertiary: #64748b;
-  --sidebar-hover-bg: rgba(255,255,255,0.05);
-  --sidebar-active-bg: rgba(20,184,166,0.1);
-  --sidebar-active-text: #14b8a6;
   --sidebar-divider: #1e293b;
   --sidebar-border: #334155;
   --sidebar-avatar-text: #0f172a;
@@ -832,25 +820,7 @@ h3 {
 }
 .login-form-container input::placeholder { color: var(--text-tertiary); }
 .login-form-container .submit-btn {
-  width: 100%;
-  padding: 11px;
-  border: none;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  font-size: var(--text-aux);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
   margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.login-form-container .submit-btn:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
 }
 .login-form-container .form-footer {
   display: flex;
@@ -879,12 +849,7 @@ h3 {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  cursor: pointer;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
 }
-.login-form-container .eye-btn:hover { color: var(--text-secondary); }
 
 /* 忘记密码链接 */
 .forgot-link {
@@ -933,27 +898,9 @@ h3 {
   margin-bottom: 0;
 }
 .login-form-container .send-code-btn {
-  padding: 10px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--primary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
   white-space: nowrap;
 }
-.login-form-container .send-code-btn:hover {
-  border-color: var(--primary);
-  background: rgba(20,184,166,0.08);
-}
-.login-form-container .send-code-btn:disabled {
-  color: var(--text-tertiary);
-  cursor: not-allowed;
-  border-color: var(--border);
-}
+
 
 /* 密码强度条 */
 .login-form-container .pwd-strength-bar {
@@ -997,22 +944,8 @@ h3 {
   gap: 6px;
 }
 .login-form-container .ping-btn {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  background: none;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 6px;
   padding: 4px 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.login-form-container .ping-btn:hover:not(:disabled) {
-  color: #14b8a6;
-  border-color: #14b8a6;
-}
-.login-form-container .ping-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  font-size: 0.75rem;
 }
 .login-form-container .ping-result {
   font-size: 0.72rem;
@@ -1119,13 +1052,6 @@ h3 {
   gap: 10px;
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.15s;
   text-align: left;
   margin-bottom: 16px;
 }
@@ -1185,30 +1111,10 @@ h3 {
 }
 .welcome-primary-btn {
   flex: 1;
-  padding: 12px;
-  background: #14b8a6;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
-.welcome-primary-btn:hover { opacity: 0.9; }
+
 .welcome-secondary-btn {
   padding: 12px 20px;
-  background: none;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.welcome-secondary-btn:hover {
-  border-color: #14b8a6;
-  color: var(--text);
 }
 
 /* 修改密码表单按钮行 */
@@ -1219,29 +1125,16 @@ h3 {
 }
 .pwd-save-btn {
   flex: 1;
-  padding: 12px;
-  background: #14b8a6;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
-.pwd-save-btn:hover { opacity: 0.9; }
-.pwd-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .pwd-cancel-btn {
   padding: 12px 20px;
-  background: none;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.15s;
 }
-.pwd-cancel-btn:hover { border-color: #ef4444; color: #ef4444; }
+.pwd-cancel-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.08);
+}
 
 /* 修改密码返回链接 */
 .pwd-back-link {
@@ -1629,6 +1522,7 @@ h3 {
 .action-row:last-child { margin-bottom: 0; }
 
 /* ---- 三态按钮系统 ---- */
+/* ---- 三态按钮系统（布局基类，视觉由 Teal Modern 按钮类提供） ---- */
 .action-btn {
   flex: 1 1 auto;
   display: inline-flex;
@@ -1636,12 +1530,9 @@ h3 {
   justify-content: center;
   gap: 6px;
   padding: 12px 14px;
-  border: none;
-  border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
   font-family: inherit;
   text-align: center;
   white-space: normal;
@@ -1649,66 +1540,65 @@ h3 {
   hyphens: auto;
   min-height: 44px;
 }
-
-/* Primary - 主操作 */
-.action-btn.primary {
-  background: var(--primary);
-  color: #fff;
-}
-.action-btn.primary:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-}
-.action-btn.primary:active { transform: scale(0.97); }
-
-/* Secondary - 次要操作 */
-.action-btn.secondary {
-  background: rgba(255,255,255,0.06);
-  color: var(--text-secondary);
-  border: 1px solid var(--card-border);
-}
-.action-btn.secondary:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  transform: translateY(-1px);
+/* 与 Teal Modern 按钮类组合使用时覆盖固定高度 */
+.action-btn.btn-primary,
+.action-btn.btn-outline {
+  height: auto;
+  white-space: normal;
 }
 
-/* Danger - 危险操作 */
+/* Primary/Secondary 视觉已由 Teal Modern .btn-primary / .btn-outline 接管 */
+
+/* Danger - 危险操作（独立保留，非 Teal Modern 定义类型） */
 .action-btn.danger {
   background: rgba(239,68,68,0.08);
   color: var(--danger);
   border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.1s;
 }
 .action-btn.danger:hover {
   background: rgba(239,68,68,0.15);
   transform: translateY(-1px);
 }
+.action-btn.danger:active { transform: scale(0.97); }
 
-/* 速度按钮 - 继承 secondary 视觉 */
+/* 速度按钮 - Teal Modern btn-chip 风格（pill 形状） */
 .btn-speed {
   flex: 1;
-  min-width: 48px;  /* 触控目标 >= 48px 符合 HIG */
-  padding: calc(6/16*1rem) calc(10/16*1rem);
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-  text-align: center;
-
-  background: rgba(255,255,255,0.06);
+  min-width: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-secondary);
-  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(148,163,184,0.12);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .btn-speed:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-primary);
+  border-color: rgba(148,163,184,0.30);
+  background: rgba(255,255,255,0.07);
   transform: translateY(-1px);
 }
 .btn-speed.active {
-  background: var(--primary);
   color: #fff;
-  border-color: var(--primary);
+  background: var(--teal);
+  border-color: var(--teal);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(20,184,166,0.30);
+}
+.btn-speed.active:hover {
+  background: var(--teal-light);
+  border-color: var(--teal-light);
+  box-shadow: 0 3px 12px rgba(20,184,166,0.40);
 }
 
 .action-row-split {
@@ -1801,23 +1691,23 @@ h3 {
 .flag-btn {
   background: none;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 14px;
   font-size: var(--text-aux);
   cursor: pointer;
   color: var(--text-secondary);
-  transition: all 0.2s, transform 0.1s;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.1s;
 }
 .flag-btn:hover {
-  border-color: var(--warning);
-  color: var(--warning);
-  background: rgba(250, 173, 20, 0.08);
+  color: var(--teal-light);
+  border-color: rgba(20,184,166,0.35);
+  background: rgba(20,184,166,0.08);
   transform: translateY(-1px);
 }
 .flag-btn.flagged {
-  border-color: var(--warning);
-  color: var(--warning);
-  background: rgba(250, 173, 20, 0.1);
+  border-color: var(--teal);
+  color: var(--teal-light);
+  background: rgba(20,184,166,0.12);
 }
 .flag-btn:disabled {
   opacity: 0.5;
@@ -1866,9 +1756,10 @@ h3 {
   border: none;
   background: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: background 0.15s, transform 0.1s;
   color: var(--text-secondary);
+  position: relative;
 }
 .bottom-nav-btn:hover {
   background: var(--hover-bg-gray);
@@ -1877,6 +1768,21 @@ h3 {
 }
 .bottom-nav-btn:active {
   background: var(--hover-bg);
+}
+/* active 态：teal 圆点指示器 */
+.bottom-nav-btn.active {
+  color: var(--teal-light);
+}
+.bottom-nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
 }
 .bottom-nav-icon {
   font-size: 1.25rem;
@@ -3386,16 +3292,42 @@ h3 {
     background: none;
     padding: calc(5/16*1rem) calc(10/16*1rem);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 0.8125rem;
     font-family: inherit;
-    color: var(--text);
-    transition: background 0.15s;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
   }
-  .topnav-mobile-login { background: var(--primary); color: #fff; font-weight: 600; }
-  .topnav-mobile-login:hover { background: var(--primary-hover); }
-  .topnav-mobile-logout { border: 1px solid var(--border-strong); color: var(--text-secondary); }
-  .topnav-mobile-logout:hover { border-color: var(--danger); color: var(--danger); }
+  /* 登录按钮 — 结合 btn-primary 视觉 */
+  .topnav-mobile-login.btn-primary {
+    height: auto;
+    min-height: 0;
+    padding: calc(5/16*1rem) calc(12/16*1rem);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    box-shadow: 0 2px 6px rgba(20,184,166,0.25);
+  }
+  .topnav-mobile-login.btn-primary:hover {
+    background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal) 100%);
+    box-shadow: 0 3px 10px rgba(20,184,166,0.35);
+  }
+  /* 退出按钮 — 结合 btn-outline 视觉 + danger hover */
+  .topnav-mobile-logout.btn-outline {
+    height: auto;
+    min-height: 0;
+    padding: calc(5/16*1rem) calc(12/16*1rem);
+    color: var(--text-secondary);
+    border: 1px solid rgba(148,163,184,0.15);
+    background: rgba(255,255,255,0.04);
+    font-size: 0.8125rem;
+  }
+  .topnav-mobile-logout.btn-outline:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239,68,68,0.08);
+  }
   main { padding: 0 16px; }
   .practice-page { height: calc(100vh - 80px); }
 
@@ -3546,17 +3478,12 @@ h3 {
   /* 登录表单手机适配 */
   .code-row { gap: 4px; }
   .code-row .code-input { font-size: 0.8125rem; padding: 8px; letter-spacing: 2px; min-width: 0; flex: 3; }
-  .send-code-btn { font-size: 0.75rem; padding: 8px 10px; white-space: nowrap; flex: 1; }
 
   /* 欢迎面板手机适配 */
   .welcome-avatar { width: 56px; height: 56px; font-size: 1.375rem; }
   .welcome-greeting { font-size: 1rem; }
   .change-pwd-btn { padding: 10px 12px; }
   .change-pwd-icon { width: 32px; height: 32px; }
-  .welcome-primary-btn { padding: 10px; font-size: var(--text-aux); }
-  .welcome-secondary-btn { padding: 10px 14px; font-size: var(--text-aux); }
-  .pwd-save-btn { padding: 10px; font-size: var(--text-aux); }
-  .pwd-cancel-btn { padding: 10px 14px; font-size: var(--text-aux); }
 
   /* 浏览页 */
   .browse-controls select { min-width: 140px; font-size: 0.8125rem; }
@@ -4241,6 +4168,9 @@ h3 {
   outline: 2px solid var(--teal-light);
   outline-offset: 2px;
 }
+.btn-primary.full {
+  width: 100%;
+}
 
 /* ---------- .btn-outline（次要轮廓按钮 — 剧集/语言/音频） ---------- */
 .btn-outline {
@@ -4384,4 +4314,12 @@ h3 {
     padding: 0 14px;
     font-size: 13px;
   }
+}
+
+/* ---------- .btn-outline.danger 变体 ---------- */
+.btn-outline.danger:hover,
+.btn-outline.danger.hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.08);
 }

@@ -342,7 +342,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               </div>
 
               {/* 修改密码入口卡 */}
-              <button className="change-pwd-btn" onClick={() => { resetPwdFields(); setWelcomeView('password'); }}>
+              <button className="btn-outline change-pwd-btn" onClick={() => { resetPwdFields(); setWelcomeView('password'); }}>
                 <div className="change-pwd-icon"><IconKey /></div>
                 <div className="change-pwd-label">
                   <div className="change-pwd-label-main">修改密码</div>
@@ -356,10 +356,10 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="welcome-section-title">快速操作</div>
 
               <div className="welcome-action-row">
-                <button className="welcome-primary-btn" onClick={handleGoToPractice}>
+                <button className="btn-primary welcome-primary-btn" onClick={handleGoToPractice}>
                   <IconRocket /> 进入练习
                 </button>
-                <button className="welcome-secondary-btn" onClick={handleLogoutFromWelcome}>
+                <button className="btn-outline welcome-secondary-btn" onClick={handleLogoutFromWelcome}>
                   退出
                 </button>
               </div>
@@ -377,7 +377,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showOldPwd ? 'text' : 'password'} placeholder="当前密码" value={oldPassword}
                   onChange={e => { setOldPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required />
-                <span className="eye-btn" onClick={() => setShowOldPwd(!showOldPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
                   {showOldPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -387,7 +387,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showNewPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={newPwd}
                   onChange={e => { setNewPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required />
-                <span className="eye-btn" onClick={() => setShowNewPwd(!showNewPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
                   {showNewPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -411,7 +411,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   onChange={e => { setConfirmPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required
                   style={confirmPwd && !confirmMatch ? { borderColor: '#ef4444' } : {}} />
-                <span className="eye-btn" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
                   {showConfirmPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -430,10 +430,10 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               {pwdError && <div className="error-msg">{pwdError}</div>}
 
               <div className="pwd-btn-row">
-                <button className="pwd-save-btn" onClick={handleChangePassword} disabled={pwdUpdating}>
+                <button className="btn-primary pwd-save-btn" onClick={handleChangePassword} disabled={pwdUpdating}>
                   {pwdUpdating ? '保存中...' : <><IconSave /> 保存密码</>}
                 </button>
-                <button className="pwd-cancel-btn" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>取消</button>
+                <button className="btn-outline pwd-cancel-btn" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>取消</button>
               </div>
 
               <p className="pwd-back-link" onClick={() => { resetPwdFields(); setWelcomeView('welcome'); }}>← 返回</p>
@@ -490,7 +490,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="pwd-wrapper">
                 <input type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn" onClick={() => setShowLoginPwd(!showLoginPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)}>
                   {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -514,7 +514,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type="text" placeholder="邮箱验证码" value={code}
                   onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
                   className="code-input" />
-                <button type="button" className="send-code-btn"
+                <button type="button" className="btn-outline send-code-btn"
                   onClick={handleSendCode}
                   disabled={codeSending || codeCountdown > 0}>
                   {codeSending ? '发送中...' : codeCountdown > 0 ? `${codeCountdown}s` : '发送验证码'}
@@ -525,7 +525,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="pwd-wrapper">
                 <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn" onClick={() => setShowPwd(!showPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)}>
                   {showPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -544,7 +544,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
                   onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                   style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
-                <span className="eye-btn" onClick={() => setShowPwd2(!showPwd2)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)}>
                   {showPwd2 ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -570,7 +570,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     style={forgotEmail && !isValidEmail(forgotEmail) ? { borderColor: '#ef4444' } : {}} />
 
                   <div className="code-row">
-                    <button type="button" className="send-code-btn" style={{ width: '100%' }}
+                    <button type="button" className="btn-outline send-code-btn" style={{ width: '100%' }}
                       onClick={handleForgotSendCode}
                       disabled={forgotSending || forgotCountdown > 0}>
                       {forgotSending ? '发送中...' : forgotCountdown > 0 ? `${forgotCountdown}s` : '发送验证码'}
@@ -586,7 +586,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     <input type="text" placeholder="邮箱验证码" value={forgotCode}
                       onChange={e => setForgotCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
                       className="code-input" />
-                    <button type="button" className="send-code-btn"
+                    <button type="button" className="btn-outline send-code-btn"
                       onClick={handleForgotSendCode}
                       disabled={forgotSending || forgotCountdown > 0}>
                       {forgotSending ? '发送中...' : forgotCountdown > 0 ? `${forgotCountdown}s` : '重新发送'}
@@ -597,7 +597,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   <div className="pwd-wrapper">
                     <input type={forgotShowPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={forgotPassword}
                       onChange={e => setForgotPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                    <span className="eye-btn" onClick={() => setForgotShowPwd(!forgotShowPwd)}>
+                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd(!forgotShowPwd)}>
                       {forgotShowPwd ? <EyeOpen /> : <EyeClosed />}
                     </span>
                   </div>
@@ -618,7 +618,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     <input type={forgotShowPwd2 ? 'text' : 'password'} placeholder="确认新密码" value={forgotPassword2}
                       onChange={e => setForgotPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                       style={forgotPassword2 && !forgotPwd2Match ? { borderColor: '#ef4444' } : {}} />
-                    <span className="eye-btn" onClick={() => setForgotShowPwd2(!forgotShowPwd2)}>
+                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd2(!forgotShowPwd2)}>
                       {forgotShowPwd2 ? <EyeOpen /> : <EyeClosed />}
                     </span>
                   </div>
@@ -630,7 +630,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {error && <div className="error-msg">{error}</div>}
           {successMsg && <div className="success-msg">{successMsg}</div>}
 
-          <button type="submit" className="submit-btn">
+          <button type="submit" className="btn-primary full submit-btn">
             {mode === 'login' ? '登录' : mode === 'register' ? '注册' : '重置密码'}
           </button>
         </form>
@@ -645,7 +645,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
         {/* 测试连接 */}
         <div className="ping-section">
-          <button className="ping-btn" onClick={handlePing} disabled={pingStatus === 'loading'}>
+          <button className="btn-outline ping-btn" onClick={handlePing} disabled={pingStatus === 'loading'}>
             {pingStatus === 'loading' ? '测试中...' : '🔗 测试连接'}
           </button>
           {pingStatus === 'success' && (
