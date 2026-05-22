@@ -1080,17 +1080,17 @@ export default function PracticePage({
         {/* 操作按钮组：提交/下一句 — Primary */}
         <div className="action-buttons">
           {!answered ? (
-            <button className="action-btn btn-primary" ref={submitRef} onClick={handleSubmit}><><IconNext /> 提交</></button>
+            <button className="action-btn btn-primary" ref={submitRef} onClick={handleSubmit}>提交</button>
           ) : (
-            <button className="action-btn btn-primary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
+            <button className="action-btn btn-primary" onClick={goNext}>下一句</button>
           )}
         </div>
 
         {/* 操作按钮组：音效 + 下一句 — Secondary */}
         <div className="action-buttons">
-          <button className="action-btn btn-outline" onClick={playOriginal}><><IconFilm /> 剧集原音</></button>
-          <button className="action-btn btn-outline" onClick={() => playTts(en)}><IconMic /> {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
-          <button className="action-btn btn-outline" onClick={goNext}><><IconSkipNext /> 下一句</></button>
+          <button className="action-btn btn-outline" onClick={playOriginal}>剧集原音</button>
+          <button className="action-btn btn-outline" onClick={() => playTts(en)}>{VOICES.find(v => v.id === voice)?.label || '导播'}</button>
+          <button className="action-btn btn-outline" onClick={goNext}>下一句</button>
         </div>
 
         {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
@@ -1109,11 +1109,11 @@ export default function PracticePage({
           <div className="action-row-half">
             {mode === 'dictation' && (
               <button className="action-btn btn-outline" onClick={() => setShowCn(s => !s)}>
-                {showCn ? <><IconEyeOff /> 隐藏中文</> : <><IconEye /> 显示中文</>}
+                {showCn ? '隐藏中文' : '显示中文'}
               </button>
             )}
             <button className="action-btn btn-outline" onClick={() => setShowEn(s => !s)}>
-              {showEn ? <><IconEyeOff /> 隐藏英文</> : <><IconEye /> 显示英文</>}
+              {showEn ? '隐藏英文' : '显示英文'}
             </button>
           </div>
         </div>

@@ -3721,101 +3721,86 @@ h3 {
   font-size: var(--text-body);
   min-height: 28px;
 }
-/* 第3行: 按钮区（一行排满） — 新设计：三层视觉层级 */
+/* 第3行: 按钮区（一行排满） — 芯片式设计 */
 .phone-mode-actions {
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 14px 12px;
+  gap: 5px;
+  padding: 8px 8px 10px;
   flex-wrap: nowrap;
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* 按钮基类 — 统一基础属性 */
+/* 按钮基类 */
 .phone-mode-actions button {
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  line-height: 1.1;
+  line-height: 1.2;
   transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   flex: 1;
   min-width: 0;
   touch-action: manipulation;
+  border: none;
+  font-weight: 500;
 }
 
-/* --- 层级1：主操作（提交）--- */
+/* --- 主操作：提交 --- */
 .phone-mode-actions .btn-phone-submit {
-  padding: 10px 12px;
-  min-height: 44px;
-  border: none;
-  border-radius: 6px;
+  flex: 1.4;
+  padding: 10px 8px;
+  min-height: 40px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   color: #fff;
   font-size: var(--text-aux);
   font-weight: 700;
-  letter-spacing: 0.01em;
-  box-shadow: 0 2px 8px rgba(20,184,166,0.35);
-}
-.phone-mode-actions .btn-phone-submit:hover {
-  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-  box-shadow: 0 3px 12px rgba(20,184,166,0.5);
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 6px rgba(20,184,166,0.3);
 }
 .phone-mode-actions .btn-phone-submit:active {
-  transform: scale(0.97);
-  box-shadow: 0 1px 4px rgba(20,184,166,0.3);
+  transform: scale(0.96);
+  box-shadow: 0 1px 3px rgba(20,184,166,0.2);
 }
 
-/* --- 层级2：次要操作（下一句）--- */
+/* --- 次要操作：下句 --- */
 .phone-mode-actions .btn-phone-next {
-  padding: 10px 10px;
-  min-height: 44px;
-  border: 1px solid var(--primary);
-  border-radius: 6px;
-  background: rgba(20,184,166,0.08);
-  color: var(--text);
+  padding: 10px 6px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: rgba(20,184,166,0.1);
+  color: var(--primary);
   font-size: var(--text-aux);
-  font-weight: 500;
-}
-.phone-mode-actions .btn-phone-next:hover {
-  background: rgba(20,184,166,0.18);
-  border-color: #0d9488;
-  color: #5eead4;
+  font-weight: 600;
 }
 .phone-mode-actions .btn-phone-next:active {
-  transform: scale(0.97);
-  background: rgba(20,184,166,0.25);
+  transform: scale(0.96);
+  background: rgba(20,184,166,0.2);
 }
 
-/* --- 层级3：工具按钮（原音/TTS/中文/英文）--- */
+/* --- 工具按钮：原音/TTS/中文/英文 --- */
 .phone-mode-actions .btn-phone-icon {
-  padding: 8px 6px;
-  min-height: 44px;
+  padding: 8px 4px;
+  min-height: 40px;
+  border-radius: 8px;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 6px;
-  background: transparent;
   color: var(--text-secondary);
   font-size: var(--text-tag);
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: 1.1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-}
-.phone-mode-actions .btn-phone-icon:hover {
-  border-color: var(--text-tertiary);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
 }
 .phone-mode-actions .btn-phone-icon:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
   border-color: var(--primary);
-  background: rgba(255,255,255,0.08);
+  color: var(--primary);
+  background: rgba(20,184,166,0.06);
 }
 
 /* =====================================================
