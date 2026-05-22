@@ -3312,7 +3312,9 @@ h3 {
   .action-buttons { gap: 6px; }
   .action-row { gap: 4px; }
   .action-btn { padding: calc(8/16*1rem) calc(14/16*1rem); font-size: var(--text-aux); }
-  .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); }
+  .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); min-width: 40px; }
+  .action-row-split { flex-wrap: wrap; gap: 4px; }
+  .action-row-half { gap: 4px; min-width: 0; }
 
   /* Stats Bar 在手机上2x2排列 */
   .stats-bar { gap: 6px; flex-wrap: wrap; }
