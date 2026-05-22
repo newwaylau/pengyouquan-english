@@ -35,7 +35,7 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
           return (
             <button
               key={item.key}
-              className={`sidebar-nav-item ${page === item.key ? 'active' : ''}`}
+              className={`btn-nav ${page === item.key ? 'active' : ''}`}
               onClick={() => {
                 if (disabled) return;
                 onNavigate(item.key);
@@ -54,7 +54,7 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
       {user?.role === 'admin' && (
         <div className="sidebar-admin-row">
           <button
-            className={`sidebar-nav-item sidebar-nav-admin ${page === 'admin' ? 'active' : ''}`}
+            className={`btn-nav ${page === 'admin' ? 'active' : ''}`}
             onClick={() => onNavigate('admin')}
           >
             <span className="sidebar-nav-icon"><IconSettings /></span>
@@ -68,7 +68,7 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
 
       {/* Theme toggle */}
       <div className="sidebar-theme-row">
-        <button className="sidebar-theme-btn" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+        <button className="btn-nav" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
           <span className="sidebar-nav-icon">{isDark ? <IconSun /> : <IconMoon />}</span>
           <span className="sidebar-nav-label">{isDark ? '浅色模式' : '深色模式'}</span>
         </button>
@@ -94,13 +94,13 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
               )}
             </div>
           </div>
-          <button className="sidebar-logout-btn" onClick={onLogout}>
+          <button className="btn-outline danger" onClick={onLogout}>
             退出
           </button>
         </div>
       ) : (
         <div className="sidebar-user-section">
-          <button className="sidebar-login-btn" onClick={() => onNavigate('login')}>
+          <button className="btn-primary" onClick={() => onNavigate('login')}>
             登录
           </button>
         </div>

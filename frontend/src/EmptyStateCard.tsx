@@ -93,7 +93,7 @@ export default function EmptyStateCard({ title, subtitle, actionLabel, onAction,
       <div className="empty-state-title">{title}</div>
       <div className="empty-state-subtitle">{subtitle}</div>
       {actionLabel && onAction && (
-        <button className="action-btn primary" style={{ marginTop: 20 }} onClick={onAction}>
+        <button className="action-btn btn-primary" style={{ marginTop: 20 }} onClick={onAction}>
           {actionLabel}
         </button>
       )}

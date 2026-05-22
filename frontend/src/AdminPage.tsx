@@ -600,7 +600,7 @@ function SentenceFlagManagement() {
                 <td>
                   {s.isDisabled ? (
                     <button
-                      className="action-btn primary"
+                      className="action-btn btn-primary"
                       onClick={() => handleEnable(s.sentenceId)}
                     >
                       恢复
@@ -608,7 +608,7 @@ function SentenceFlagManagement() {
                   ) : (
                     <>
                       <button
-                        className="action-btn primary"
+                        className="action-btn btn-primary"
                         onClick={() => handleApprove(s.sentenceId)}
                       >
                         <><IconCheck /> 审核通过</>

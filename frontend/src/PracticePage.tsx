@@ -769,10 +769,10 @@ export default function PracticePage({
             <div className="wrong-review-subtitle">复习摘要：正确 {wrongReviewStats.correct}/{wrongReviewStats.total} 句</div>
             <div className="wrong-review-subtitle">共 {wrongSentences.length} 句错题</div>
             <div className="wrong-review-actions">
-              <button className="action-btn primary" onClick={() => onNavigate?.('wrong')}>
+              <button className="action-btn btn-primary" onClick={() => onNavigate?.('wrong')}>
                 <><IconBookClosed /> 返回错题本</>
               </button>
-              <button className="action-btn secondary" onClick={() => setMode('dictation')}>
+              <button className="action-btn btn-outline" onClick={() => setMode('dictation')}>
                 <><IconPen /> 继续听写练习</>
               </button>
             </div>
@@ -904,17 +904,17 @@ export default function PracticePage({
 
           {/* 第3行: 按钮区（一行排满） */}
           <div className="phone-mode-actions">
-            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}><><IconNext />提交</></button>
-            <button className="btn-phone-next" onClick={goNext}><><IconSkipNext />下句</></button>
-            <button className="btn-phone-icon" onClick={playOriginal} title="原音"><><IconFilm />原音</></button>
-            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS"><IconMic />{VOICES.find(v => v.id === voice)?.label || ''}</button>
+            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}>提交</button>
+            <button className="btn-phone-next" onClick={goNext}>下句</button>
+            <button className="btn-phone-icon" onClick={playOriginal} title="原音">原音</button>
+            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">{VOICES.find(v => v.id === voice)?.label || ''}</button>
             {mode === 'dictation' && (
               <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
-                <><IconEye />中文</>
+                中文
               </button>
             )}
             <button className="btn-phone-icon" onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>
-              <><IconEye />英文</>
+              英文
             </button>
           </div>
         </div>
@@ -1080,17 +1080,17 @@ export default function PracticePage({
         {/* 操作按钮组：提交/下一句 — Primary */}
         <div className="action-buttons">
           {!answered ? (
-            <button className="action-btn primary" ref={submitRef} onClick={handleSubmit}><><IconNext /> 提交</></button>
+            <button className="action-btn btn-primary" ref={submitRef} onClick={handleSubmit}><><IconNext /> 提交</></button>
           ) : (
-            <button className="action-btn primary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
+            <button className="action-btn btn-primary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
           )}
         </div>
 
         {/* 操作按钮组：音效 + 下一句 — Secondary */}
         <div className="action-buttons">
-          <button className="action-btn secondary" onClick={playOriginal}><><IconFilm /> 剧集原音</></button>
-          <button className="action-btn secondary" onClick={() => playTts(en)}><IconMic /> {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
-          <button className="action-btn secondary" onClick={goNext}><><IconSkipNext /> 下一句</></button>
+          <button className="action-btn btn-outline" onClick={playOriginal}><><IconFilm /> 剧集原音</></button>
+          <button className="action-btn btn-outline" onClick={() => playTts(en)}><IconMic /> {VOICES.find(v => v.id === voice)?.label || '导播'}</button>
+          <button className="action-btn btn-outline" onClick={goNext}><><IconSkipNext /> 下一句</></button>
         </div>
 
         {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
@@ -1108,11 +1108,11 @@ export default function PracticePage({
           </div>
           <div className="action-row-half">
             {mode === 'dictation' && (
-              <button className="action-btn secondary" onClick={() => setShowCn(s => !s)}>
+              <button className="action-btn btn-outline" onClick={() => setShowCn(s => !s)}>
                 {showCn ? <><IconEyeOff /> 隐藏中文</> : <><IconEye /> 显示中文</>}
               </button>
             )}
-            <button className="action-btn secondary" onClick={() => setShowEn(s => !s)}>
+            <button className="action-btn btn-outline" onClick={() => setShowEn(s => !s)}>
               {showEn ? <><IconEyeOff /> 隐藏英文</> : <><IconEye /> 显示英文</>}
             </button>
           </div>
@@ -1209,10 +1209,10 @@ export default function PracticePage({
               <div className="wrong-retry-title">这句之前错过 {wrongBookPrompt.errorCount} 次</div>
               <div className="wrong-retry-subtitle">再练一遍，巩固记忆？</div>
               <div className="wrong-retry-actions">
-                <button className="action-btn primary" onClick={retryWrongSentence}>
+                <button className="action-btn btn-primary" onClick={retryWrongSentence}>
                   <><IconRefresh /> 再练一遍</>
                 </button>
-                <button className="action-btn secondary" onClick={skipRetry}>
+                <button className="action-btn btn-outline" onClick={skipRetry}>
                   <><IconSkipNext /> 跳过</>
                 </button>
               </div>

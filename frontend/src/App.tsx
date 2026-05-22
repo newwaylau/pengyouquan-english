@@ -106,9 +106,9 @@ export default function App() {
               </span>
             )}
             {user ? (
-              <button onClick={handleLogout} className="topnav-mobile-logout">退出</button>
+              <button onClick={handleLogout} className="topnav-mobile-logout btn-outline">退出</button>
             ) : (
-              <button onClick={() => setPage('login')} className="topnav-mobile-login">登录</button>
+              <button onClick={() => setPage('login')} className="topnav-mobile-login btn-primary">登录</button>
             )}
           </div>
         </nav>

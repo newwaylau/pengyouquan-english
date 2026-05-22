@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile UI Design Review — pengyouquan-english SIT</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #253249;
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-dim: #64748b;
+    --primary: #14b8a6;
+    --primary-dark: #0d9488;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --border: #334155;
+    --border-strong: #475569;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 40px 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2 .badge {
+    font-size: 0.6875rem;
+    background: var(--primary);
+    color: #0f172a;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  h2 .badge.urgent { background: var(--danger); color: #fff; }
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .issue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .issue-card:hover {
+    border-color: var(--border-strong);
+  }
+  .issue-card.urgent {
+    border-left: 3px solid var(--danger);
+  }
+  .issue-card.high {
+    border-left: 3px solid var(--warning);
+  }
+  .issue-card.medium {
+    border-left: 3px solid var(--primary);
+  }
+  .issue-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .issue-header .severity {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .severity.urgent { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .severity.high   { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .severity.medium { background: rgba(20,184,166,0.15); color: #14b8a6; }
+  .issue-title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .issue-detail {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+  }
+  .code-snippet {
+    background: #0c1929;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin: 8px 0;
+    color: #e2e8f0;
+  }
+  .code-snippet .highlight {
+    background: rgba(239,68,68,0.2);
+    color: #fca5a5;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .code-snippet .fix {
+    background: rgba(20,184,166,0.15);
+    color: #5eead4;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin: 12px 0;
+  }
+  th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td {
+    color: var(--text-secondary);
+  }
+  td.name { color: var(--text); font-weight: 500; }
+  .recommendation {
+    background: rgba(20,184,166,0.08);
+    border: 1px solid rgba(20,184,166,0.2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 12px;
+  }
+  .recommendation strong {
+    color: var(--primary);
+  }
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .stat-box .label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .section-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 20px 0 8px;
+  }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 4px; }
+  .screenshot-info {
+    font-size: 0.8125rem;
+    color: var(--text-dim);
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>📱 Mobile UI Design Review</h1>
+<div class="subtitle">
+  pengyouquan-english · SIT Environment · Viewport: 375px (iPhone SE/12 Mini baseline)<br>
+  Audit Date: 2026-05-18 · Focus: English text button overflow
+</div>
+
+<div class="summary-stats">
+  <div class="stat-box">
+    <div class="num">5</div>
+    <div class="label">Issues Found</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">3</div>
+    <div class="label">Urgent / High</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">2</div>
+    <div class="label">Medium</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">2</div>
+    <div class="label">Pages Audited</div>
+  </div>
+</div>
+
+<!-- ==================== SCREENSHOTS ==================== -->
+<h2>📸 Screenshots Captured</h2>
+<div class="screenshot-info">
+  Screenshots saved to workspace for reference:<br>
+  <code>browser_screenshot_4c5d9cac3adc4c3bb11341de63f07c1f.png</code> — Login/Landing page<br>
+  <code>browser_screenshot_6ec14de70d734c07ac8bd49591876e83.png</code> — Practice page (desktop view)<br>
+  <code>browser_screenshot_f71b3fbdaee5470dbb8b15b3461937f1.png</code> — Practice page with content<br>
+  <code>browser_screenshot_9f8688ea46ef4c4f8dab27ae85f21fc4.png</code> — Practice page (mobile CSS override)
+</div>
+
+<!-- ==================== ISSUE 1 ==================== -->
+<div class="section-label">Critical Layout Defect</div>
+
+<div class="issue-card urgent">
+  <div class="issue-header">
+    <span class="severity urgent">urgent</span>
+    <span class="issue-title">#1 Action Buttons: <code>white-space: nowrap</code> Causes English Text Overflow</span>
+  </div>
+  <div class="issue-detail">
+    <strong>Location:</strong> Practice page — action button row (提交 / 剧集原音 / 下一句 / 显示中文 / 显示英文)
+  </div>
+  <div class="issue-detail">
+    <strong>Root Cause:</strong> The <code>.action-btn</code> and <code>.btn-speed</code> classes set <code>white-space: nowrap</code>, preventing text from wrapping when container width shrinks. Combined with <code>flex: 1 1 0%</code>, buttons share available width equally, but English text (typically 2-3× longer than Chinese equivalent) exceeds the allocated width.
+  </div>
+  <div class="code-snippet">
+    /* Current CSS — root font-size: 28px (desktop), ~22.75px button text */<br>
+    <span class="highlight">.action-btn {<br>
+    &nbsp;&nbsp;flex: 1 1 0%;<br>
+    &nbsp;&nbsp;padding: 11px;<br>
+    &nbsp;&nbsp;font-size: 0.8125rem; /* ~22.75px @ 28px root */<br>
+    &nbsp;&nbsp;white-space: nowrap;  /* ← OVERFLOWS on long English */<br>
+    }</span>
+  </div>
+  <table>
+    <tr><th>Chinese Label</th><th>English Translation</th><th>Char Ratio</th><th>At 125px width (3-btn row)</th></tr>
+    <tr><td class="name">提交</td><td>Submit</td><td>1:3</td><td>✅ Fits</td></tr>
+    <tr><td class="name">剧集原音</td><td>Original Audio</td><td>1:3.5</td><td>⚠️ Tight (≈110px)</td></tr>
+    <tr><td class="name">下一句</td><td>Next Sentence</td><td>1:4.7</td><td>⚠️ Tight (≈120px)</td></tr>
+    <tr><td class="name">显示中文</td><td>Show Chinese</td><td>1:3</td><td>✅ Fits (2-btn row ~187px)</td></tr>
+    <tr><td class="name">显示英文</td><td>Show English</td><td>1:3</td><td>✅ Fits</td></tr>
+    <tr><td class="name">纯听写模式</td><td>Dictation Mode</td><td>1:4</td><td>⚠️ May overflow single row</td></tr>
+  </table>
+  <div class="recommendation">
+    <strong>Recommendation:</strong>
+    <ol style="margin-top: 8px; padding-left: 20px; color: var(--text-secondary); font-size: 0.875rem;">
+      <li>Remove <code>white-space: nowrap</code> from <code>.action-btn</code> — let text naturally wrap. Add <code>word-break: break-word; hyphens: auto</code> for graceful truncation.</li>
+      <li>Add <code>min-width: 0; overflow: hidden; text-overflow: ellipsis</code> as a safety net.</li>
+      <li>For icon+text buttons (<code>.action-btn</code> with <code>gap: 6px</code>): increase horizontal padding or set <code>flex-shrink: 0</code> on the icon to prevent icon compression.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ==================== ISSUE 2 ==================== -->
+<div class="issue-card urgent">
+  <div class="issue-header">
+    <span class="severity urgent">urgent</span>
+    <span class="issue-title">#2 Bottom Nav Labels: Fixed Height + Short Width = Overflow Risk</span>
+  </div>
+  <div class="issue-detail">
+    <strong>Location:</strong> Bottom navigation bar — 浏览(建设中), 错题, 设置, 搜索(建设中), 专注
+  </div>
+  <div class="issue-detail">
+    <strong>Root Cause:</strong> <code>.bottom-nav-btn</code> uses <code>flex: 1 1 0%</code> with very tight horizontal padding (<code>0.375rem 0.25rem</code> ≈ 6px 4px). The <code>.bottom-nav-label</code> has <code>font-size: var(--text-tag) = 0.75rem</code> (~21px at 28px root). Chinese labels are 2 characters, but English equivalents would be 5-10 characters.
+  </div>
+  <table>
+    <tr><th>Chinese</th><th>English</th><th>Char Count</th><th>At 75px / btn (375px ÷ 5)</th></tr>
+    <tr><td class="name">浏览</td><td>Browse</td><td>2→6</td><td>✅ Fits</td></tr>
+    <tr><td class="name">错题</td><td>Mistakes</td><td>2→8</td><td>⚠️ Tight</td></tr>
+    <tr><td class="name">设置</td><td>Settings</td><td>2→8</td><td>⚠️ Tight</td></tr>
+    <tr><td class="name">搜索</td><td>Search</td><td>2→6</td><td>✅ Fits</td></tr>
+    <tr><td class="name">专注</td><td>Focus</td><td>2→5</td><td>✅ Fits</td></tr>
+  </table>
+  <div class="recommendation">
+    <strong>Recommendation:</strong>
+    <ol style="margin-top: 8px; padding-left: 20px; color: var(--text-secondary); font-size: 0.875rem;">
+      <li>Add <code>font-size: clamp(0.5rem, 2.5vw, 0.75rem)</code> to <code>.bottom-nav-label</code> so text scales down responsively on small viewports.</li>
+      <li>Set <code>white-space: nowrap; overflow: hidden; text-overflow: ellipsis</code> on the label as a safety net.</li>
+      <li>Increase horizontal padding to <code>0.375rem 0.5rem</code> for a bit more breathing room.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ==================== ISSUE 3 ==================== -->
+<div class="issue-card high">
+  <div class="issue-header">
+    <span class="severity high">high</span>
+    <span class="issue-title">#3 Sidebar Nav Icons + Text: Stacking in Narrow Sidebar</span>
+  </div>
+  <div class="issue-detail">
+    <strong>Location:</strong> Desktop sidebar navigation — 练习, 错题本, 搜索, 浏览
+  </div>
+  <div class="issue-detail">
+    <strong>Root Cause:</strong> Sidebar is 220px wide (desktop). Buttons have <code>flex-direction: row</code> with icon + label. At 220px, the Chinese text fits comfortably. However, when the sidebar width shrinks (tablet / narrow desktop), English labels like "Wrong Book" or "Practice" will compete for space with icons.
+  </div>
+  <div class="code-snippet">
+    .sidebar-nav-item {<br>
+    &nbsp;&nbsp;width: 220px;<br>
+    &nbsp;&nbsp;padding: 12px 16px;<br>
+    &nbsp;&nbsp;font-size: 0.8125rem; /* ~22.75px @ 28px root */<br>
+    }<br>
+    .sidebar-nav-label {<br>
+    &nbsp;&nbsp;white-space: nowrap; /* ← same overflow risk */<br>
+    }
+  </div>
+  <div class="recommendation">
+    <strong>Recommendation:</strong> For the sidebar, English labels like "Practice" (8 chars) and "Wrong Book" (10 chars) will fit at 220px. The main risk is at tablet breakpoints (768px) where the sidebar may collapse. Consider using <code>overflow: hidden; text-overflow: ellipsis</code> or switching to icon-only mode below 768px.
+  </div>
+</div>
+
+<!-- ==================== ISSUE 4 ==================== -->
+<div class="issue-card medium">
+  <div class="issue-header">
+    <span class="severity medium">medium</span>
+    <span class="issue-title">#4 Speed Button Row: Tight Horizontal Padding</span>
+  </div>
+  <div class="issue-detail">
+    <strong>Location:</strong> Playback speed buttons — 0.5x, 0.75x, 1x, 1.5x
+  </div>
+  <div class="issue-detail">
+    <strong>Root Cause:</strong> <code>.btn-speed</code> has <code>padding: 0.375rem 0.625rem</code> (~6px 10px). While speed values (0.5x, 1x) are short and unaffected, if these buttons ever carry longer labels in English mode (e.g., "Slow", "Normal", "Fast"), they will overflow. Current labels are safe.
+  </div>
+  <div class="code-snippet">
+    .btn-speed {<br>
+    &nbsp;&nbsp;flex: 1 1 0%;<br>
+    &nbsp;&nbsp;min-width: 0;<br>
+    &nbsp;&nbsp;padding: 0.375rem 0.625rem;<br>
+    &nbsp;&nbsp;font-size: 0.8125rem;<br>
+    }
+  </div>
+  <div class="recommendation">
+    <strong>Recommendation:</strong> Add <code>white-space: nowrap; overflow: hidden</code>. Currently low risk but good practice for future-proofing. Also consider <code>min-width: 48px</code> for touch target compliance.
+  </div>
+</div>
+
+<!-- ==================== ISSUE 5 ==================== -->
+<div class="issue-card medium">
+  <div class="issue-header">
+    <span class="severity medium">medium</span>
+    <span class="issue-title">#5 Login/Register Button: Full Width Safe, But Long Translation Risk</span>
+  </div>
+  <div class="issue-detail">
+    <strong>Location:</strong> Login page — submit button ("登录")
+  </div>
+  <div class="issue-detail">
+    <strong>Root Cause:</strong> The login submit button uses <code>width: 100%; padding: 11px</code>. With full container width available, "Login" / "Submit" / "Sign In" would all fit. However, if a longer phrase like "SIGN IN TO CONTINUE" or "VERIFY EMAIL" is used, it could overflow. Currently lower risk.
+  </div>
+  <div class="code-snippet">
+    .login-form-container .submit-btn {<br>
+    &nbsp;&nbsp;width: 100%;<br>
+    &nbsp;&nbsp;padding: 11px;<br>
+    &nbsp;&nbsp;font-size: var(--text-aux); /* 0.8125rem */<br>
+    &nbsp;&nbsp;font-family: inherit;<br>
+    }
+  </div>
+  <div class="recommendation">
+    <strong>Recommendation:</strong> Add <code>white-space: nowrap; overflow: hidden; text-overflow: ellipsis</code> as a safety net. Consider a maximum text length validation or responsive font sizing for the button text.
+  </div>
+</div>
+
+<!-- ==================== SYSTEM-LEVEL ==================== -->
+<h2>🔧 System-Wide Recommendations</h2>
+
+<div class="issue-card">
+  <h3>1. Root Font Size Considerations</h3>
+  <div class="issue-detail">
+    Root <code>font-size: 28px</code> is set on the <code>&lt;html&gt;</code> element. This means <code>0.8125rem</code> = 22.75px button text, which is quite large. For mobile 375px viewport, this creates very limited character real estate.
+  </div>
+  <div class="recommendation">
+    <strong>Recommendation:</strong> Consider setting root font-size proportional to viewport width using <code>clamp()</code>:<br>
+    <code>html { font-size: clamp(16px, 4.375vw, 28px); }</code><br>
+    This would give 16px on a 375px phone, ~22px on tablet, and 28px on desktop, ensuring buttons have enough room on mobile.
+  </div>
+</div>
+
+<div class="issue-card">
+  <h3>2. Touch Target Sizing</h3>
+  <div class="issue-detail">
+    Multiple buttons have padding that produces touch targets smaller than the recommended 44×44pt (Apple HIG) / 48×48px (Material Design). Specifically:
+  </div>
+  <ul>
+    <li><code>.btn-speed</code> — padding: 6px 10px → total height ~34px at 22.75px font</li>
+    <li><code>.bottom-nav-btn</code> — padding: 6px 4px → very tight</li>
+  </ul>
+</div>
+
+<div class="issue-card">
+  <h3>3. No Internationalization (i18n) System Detected</h3>
+  <div class="issue-detail">
+    All UI labels in the JS bundle are hardcoded as Chinese strings. There is no i18n / translations dictionary in the bundle. To properly support English mode, the app would need:
+  </div>
+  <ul>
+    <li>A translation dictionary mapping Chinese → English for every UI string</li>
+    <li>A language toggle (URL param, localStorage, or settings page)</li>
+    <li>Responsive button widths that accommodate 2-3× text expansion</li>
+  </ul>
+</div>
+
+<!-- ==================== PER-PAGE BREAKDOWN ==================== -->
+<h2>📄 Per-Page Audit Summary</h2>
+
+<div class="issue-card">
+  <h3>🖥️ Practice Page (练习)</h3>
+  <table>
+    <tr><th>Section</th><th>Issue</th><th>Severity</th></tr>
+    <tr><td class="name">Action buttons row</td><td>white-space:nowrap causes overflow</td><td><span class="severity urgent">urgent</span></td></tr>
+    <tr><td class="name">Speed buttons row</td><td>Tight touch targets, text overflow</td><td><span class="severity medium">medium</span></td></tr>
+    <tr><td class="name">Bottom nav bar</td><td>Labels overflow at mobile width</td><td><span class="severity urgent">urgent</span></td></tr>
+    <tr><td class="name">Dictation mode badge</td><td>"Dictation Mode" may overflow</td><td><span class="severity high">high</span></td></tr>
+    <tr><td class="name">Stats bar (dashboard)</td><td>Stats like "总句子", "今日练习", "正确率" — 1-3 Chinese chars, English 2-4× longer</td><td><span class="severity high">high</span></td></tr>
+  </table>
+</div>
+
+<div class="issue-card">
+  <h3>🔑 Login Page (登录)</h3>
+  <table>
+    <tr><th>Section</th><th>Issue</th><th>Severity</th></tr>
+    <tr><td class="name">Email/Password fields</td><td>Labels "邮箱 / 手机号" "密码" short enough</td><td><span class="severity medium">medium</span></td></tr>
+    <tr><td class="name">Submit button</td><td>Full width, safe for English</td><td>✅ OK</td></tr>
+    <tr><td class="name">"忘记密码" link</td><td>"Forgot Password?" fits</td><td>✅ OK</td></tr>
+  </table>
+</div>
+
+<div class="issue-card">
+  <h3>⚙️ Settings Page (设置)</h3>
+  <div class="issue-detail">Could not be fully inspected — SPA routing triggered snapshot timeouts. CSS analysis complete, exact page content requires further testing. Bottom nav for settings is the same as others.</div>
+</div>
+
+<div class="issue-card">
+  <h3>📝 Wrong Book Page (错题本)</h3>
+  <div class="issue-detail">Could not be fully inspected. The "错题本" nav item was disabled on the landing page requiring login first. Same bottom nav overflow risks apply.</div>
+</div>
+
+<!-- ==================== BEFORE/AFTER ==================== -->
+<h2>📐 Before / After — CSS Fix Snippets</h2>
+
+<div class="issue-card">
+  <h3>Fix: <code>.action-btn</code> (Primary Action Buttons)</h3>
+  <div class="code-snippet">
+    /* BEFORE — text overflows container */<br>
+    .action-btn {<br>
+    &nbsp;&nbsp;flex: <span class="highlight">1 1 0%</span>;<br>
+    &nbsp;&nbsp;padding: 11px;<br>
+    &nbsp;&nbsp;white-space: <span class="highlight">nowrap</span>;<br>
+    }
+  </div>
+  <div class="code-snippet">
+    /* AFTER — text wraps gracefully */<br>
+    .action-btn {<br>
+    &nbsp;&nbsp;flex: <span class="fix">1 1 auto</span>;  /* ← let content determine base width */<br>
+    &nbsp;&nbsp;padding: <span class="fix">12px 14px</span>;  /* ← slightly more horizontal padding */<br>
+    &nbsp;&nbsp;white-space: <span class="fix">normal</span>;  /* ← allow wrapping */<br>
+    &nbsp;&nbsp;<span class="fix">word-break: break-word;</span><br>
+    &nbsp;&nbsp;<span class="fix">hyphens: auto;</span><br>
+    &nbsp;&nbsp;<span class="fix">min-height: 44px;</span>  /* ← touch target compliance */<br>
+    }
+  </div>
+</div>
+
+<div class="issue-card">
+  <h3>Fix: <code>.bottom-nav-label</code> + <code>.bottom-nav-btn</code></h3>
+  <div class="code-snippet">
+    /* Add to .bottom-nav-label */<br>
+    .bottom-nav-label {<br>
+    &nbsp;&nbsp;font-size: <span class="fix">clamp(0.5rem, 2.5vw, 0.75rem)</span>;<br>
+    &nbsp;&nbsp;white-space: <span class="fix">nowrap</span>;<br>
+    &nbsp;&nbsp;overflow: <span class="fix">hidden</span>;<br>
+    &nbsp;&nbsp;text-overflow: <span class="fix">ellipsis</span>;<br>
+    &nbsp;&nbsp;max-width: <span class="fix">100%</span>;<br>
+    }
+  </div>
+</div>
+
+<div class="issue-card">
+  <h3>Fix: Responsive Root Font Size</h3>
+  <div class="code-snippet">
+    /* Current: fixed 28px root font */<br>
+    html { font-size: <span class="highlight">28px</span>; }<br><br>
+    /* Proposed: viewport-responsive */<br>
+    html { font-size: <span class="fix">clamp(16px, 5vw, 28px)</span>; }<br>
+    /* 375px → 18.75px | 768px → 25.6px | 1280px → 28px */
+  </div>
+</div>
+
+<hr style="border-color: var(--border); margin: 40px 0;">
+
+<div class="footer" style="color: var(--text-dim); font-size: 0.8125rem; text-align: center;">
+  Design Review · pengyouquan-english · Mobile UI Audit · Generated 2026-05-18
+</div>
+
+</body>
+</html>

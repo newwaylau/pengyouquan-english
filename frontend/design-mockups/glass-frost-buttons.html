@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glass Frost 按钮风格 · 设计稿</title>
+<style>
+/* ===== 全局 ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg-page:radial-gradient(ellipse at 50% 0%, #162032 0%, #0a0f1a 100%);
+  --bg-surface:rgba(30,41,59,0.50);
+  --bg-glass:rgba(255,255,255,0.05);
+  --bg-glass-hover:rgba(255,255,255,0.10);
+  --teal:#14b8a6;
+  --teal-light:#5eead4;
+  --teal-glow:rgba(20,184,166,0.25);
+  --text-primary:#f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-disabled:#475569;
+  --border-glass:rgba(255,255,255,0.08);
+  --border-glass-strong:rgba(255,255,255,0.14);
+  --radius-sm:10px;
+  --radius-md:14px;
+  --radius-lg:20px;
+  --radius-full:999px;
+  --font:Inter,"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{transparent}
+::-webkit-scrollbar-thumb{background:var(--teal);border-radius:3px}
+
+body{
+  font-family:var(--font);
+  background:var(--bg-page);
+  color:var(--text-primary);
+  line-height:1.5;
+  padding:40px 24px;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+/* 毛玻璃效果 — 全局 backdrop */
+.glass-panel{
+  backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass);
+}
+
+/* ===== 设计稿布局 ===== */
+.spec-header{
+  margin-bottom:48px;
+  text-align:center;
+}
+.spec-header h1{
+  font-size:28px;
+  font-weight:700;
+  background:linear-gradient(135deg,var(--teal-light),var(--teal));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.spec-header .tag{
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 16px;
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass-strong);
+  border-radius:var(--radius-full);
+  font-size:13px;
+  color:var(--text-secondary);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+/* ===== Section ===== */
+.section{
+  margin-bottom:48px;
+}
+.section-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:16px;
+  font-weight:600;
+  color:var(--text-secondary);
+  margin-bottom:20px;
+}
+.section-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border-glass);
+}
+.section-sub{
+  font-size:13px;
+  color:var(--text-disabled);
+  margin-top:12px;
+}
+
+/* ===== 按钮容器 ===== */
+.button-grid{
+  display:flex;flex-wrap:wrap;gap:12px;
+  padding:24px;
+  backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass);
+  border-radius:var(--radius-lg);
+  margin-bottom:8px;
+}
+
+/* ===== NAV BUTTONS (Glass Frost) ===== */
+.btn-nav{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:6px;
+  height:46px;
+  padding:0 22px;
+  font-family:var(--font);
+  font-size:15px;
+  font-weight:500;
+  color:var(--text-secondary);
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-nav:hover{
+  color:var(--text-primary);
+  background:var(--bg-glass-hover);
+  border-color:var(--border-glass);
+}
+.btn-nav.active{
+  color:var(--teal-light);
+  background:rgba(20,184,166,0.10);
+  border-color:rgba(20,184,166,0.20);
+  font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.btn-nav.active::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:var(--radius-sm);
+  box-shadow:0 0 20px -4px rgba(20,184,166,0.15);
+  pointer-events:none;
+}
+.btn-nav.active:hover{
+  background:rgba(20,184,166,0.16);
+  border-color:rgba(20,184,166,0.30);
+}
+.btn-nav:disabled,
+.btn-nav.disabled{
+  opacity:0.30;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-nav:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:2px;
+}
+
+/* ===== FILLED PRIMARY ===== */
+.btn-primary{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;
+  height:50px;
+  padding:0 30px;
+  font-family:var(--font);
+  font-size:15px;
+  font-weight:600;
+  color:#fff;
+  background:rgba(20,184,166,0.85);
+  border:1px solid rgba(20,184,166,0.30);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 4px 12px rgba(20,184,166,0.20), inset 0 1px 0 rgba(255,255,255,0.10);
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-primary:hover{
+  background:rgba(20,184,166,1);
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(20,184,166,0.30), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-primary:active{
+  transform:translateY(0);
+  background:rgba(13,148,136,0.85);
+  box-shadow:0 2px 6px rgba(20,184,166,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.btn-primary:disabled,
+.btn-primary.disabled{
+  opacity:0.30;
+  cursor:not-allowed;
+  pointer-events:none;
+  transform:none !important;
+  box-shadow:none !important;
+}
+.btn-primary:focus-visible{
+  outline:2px solid var(--teal-light);
+  outline-offset:2px;
+}
+
+/* ===== GLASS OUTLINE (content buttons) ===== */
+.btn-glass{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:6px;
+  height:46px;
+  padding:0 20px;
+  font-family:var(--font);
+  font-size:14px;
+  font-weight:500;
+  color:var(--text-secondary);
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border-glass);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-glass:hover{
+  color:var(--text-primary);
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.18);
+}
+.btn-glass.active{
+  color:var(--teal-light);
+  background:rgba(20,184,166,0.10);
+  border-color:rgba(20,184,166,0.25);
+  font-weight:600;
+  box-shadow:0 0 20px -6px rgba(20,184,166,0.20);
+}
+.btn-glass.active:hover{
+  background:rgba(20,184,166,0.16);
+  border-color:rgba(20,184,166,0.35);
+}
+.btn-glass:disabled,
+.btn-glass.disabled{
+  opacity:0.28;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-glass:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:2px;
+}
+
+/* ===== GLASS CHIP (speed pills) ===== */
+.btn-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:54px;
+  height:38px;
+  padding:0 18px;
+  font-family:var(--font);
+  font-size:13px;
+  font-weight:500;
+  color:var(--text-secondary);
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border-glass);
+  border-radius:var(--radius-full);
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.btn-chip:hover{
+  color:var(--text-primary);
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.18);
+}
+.btn-chip.active{
+  color:#fff;
+  background:rgba(20,184,166,0.30);
+  border-color:rgba(20,184,166,0.40);
+  font-weight:600;
+  box-shadow:0 0 20px -4px rgba(20,184,166,0.25), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.btn-chip.active:hover{
+  background:rgba(20,184,166,0.40);
+  border-color:rgba(20,184,166,0.55);
+  box-shadow:0 0 28px -4px rgba(20,184,166,0.35);
+}
+.btn-chip:disabled,
+.btn-chip.disabled{
+  opacity:0.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-chip:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:2px;
+}
+
+/* ===== ICON BUTTON ===== */
+.btn-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:46px;height:46px;
+  font-family:var(--font);
+  font-size:20px;
+  color:var(--text-secondary);
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border-glass);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-icon:hover{
+  color:var(--teal-light);
+  background:var(--bg-glass-hover);
+  border-color:var(--border-glass-strong);
+}
+.btn-icon.active{
+  color:var(--teal-light);
+  background:rgba(20,184,166,0.12);
+  border-color:rgba(20,184,166,0.25);
+}
+.btn-icon:disabled,
+.btn-icon.disabled{
+  opacity:0.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-icon:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:2px;
+}
+
+/* ===== 状态标注 ===== */
+.state-label{
+  display:block;
+  font-size:11px;
+  color:var(--text-disabled);
+  text-align:center;
+  margin-top:4px;
+}
+.btn-wrapper{
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* ===== 手机端预览 ===== */
+.phone-frame{
+  width:100%;max-width:390px;margin:0 auto;
+  backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass);
+  border-radius:24px;
+  padding:16px 16px 0;
+  overflow:hidden;
+}
+.phone-frame .status-bar{
+  display:flex;justify-content:space-between;
+  padding:0 4px 12px;
+  font-size:12px;color:var(--text-secondary);
+}
+.phone-bottom-nav{
+  display:flex;gap:0;
+  margin:0 -16px;
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(30px) saturate(1.5);
+  -webkit-backdrop-filter:blur(30px) saturate(1.5);
+  border-top:1px solid var(--border-glass);
+  padding:6px 12px;
+}
+.phone-bottom-nav .btn-nav{
+  flex:1;height:48px;font-size:12px;flex-direction:column;gap:2px;
+  padding:0;background:transparent;border:none;
+}
+.phone-bottom-nav .btn-nav.active{
+  background:transparent;color:var(--teal-light);border:none;
+}
+.phone-bottom-nav .btn-nav.active::after{display:none}
+
+/* ===== Design Notes ===== */
+.design-notes{
+  margin-top:48px;
+  padding:24px;
+  backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  background:var(--bg-glass);
+  border:1px solid var(--border-glass);
+  border-radius:var(--radius-lg);
+  font-size:14px;
+  line-height:1.7;
+}
+.design-notes h3{
+  color:var(--teal-light);
+  font-size:16px;
+  margin-bottom:12px;
+}
+.design-notes ul{
+  list-style:none;padding:0;
+}
+.design-notes li{
+  padding:6px 0;
+  color:var(--text-secondary);
+  position:relative;padding-left:20px;
+}
+.design-notes li::before{
+  content:'→';
+  position:absolute;left:0;
+  color:var(--teal);
+}
+
+/* ===== 响应式 ===== */
+@media(max-width:600px){
+  body{padding:20px 12px}
+  .button-grid{flex-wrap:nowrap;overflow-x:auto;padding:16px;gap:8px}
+  .btn-nav{height:40px;padding:0 16px;font-size:14px;flex-shrink:0}
+  .btn-primary{height:44px;padding:0 20px;font-size:14px}
+  .btn-glass{height:40px;padding:0 16px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="spec-header">
+  <h1>Glass Frost · 按钮视觉方案</h1>
+  <span class="tag">变体 B · 玻璃拟态风格</span>
+  <p style="margin-top:12px;color:var(--text-secondary);font-size:14px;">
+    灵感：macOS Big Sur / Glassmorphism · 通透层次 · 柔和光晕
+  </p>
+</div>
+
+<!-- 导航按钮 -->
+<div class="section">
+  <div class="section-title">Navigation · 导航按钮（全状态）</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-nav active">练习</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">错题本</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav disabled">错题本</button>
+      <span class="state-label">Disabled</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">搜索</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">浏览</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">Demo</button>
+      <span class="state-label">Normal</span>
+    </div>
+  </div>
+  <div class="section-sub">透明玻璃底 + 极细边框 · Hover 时边框显现 · Active 态 Teal 玻璃发光</div>
+</div>
+
+<!-- 图标按钮 -->
+<div class="section">
+  <div class="section-title">Icon · 图标按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-icon active">🌙</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-icon">☀️</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-icon disabled">🌙</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+</div>
+
+<!-- Primary -->
+<div class="section">
+  <div class="section-title">Primary · 主要按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-primary">登录</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-primary" style="background:rgba(20,184,166,1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(20,184,166,0.30)">登录</button>
+      <span class="state-label">Hover</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-primary disabled">提 交</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+</div>
+
+<!-- Glass / Content -->
+<div class="section">
+  <div class="section-title">Glass · 内容区按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-glass">剧集原音</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-glass active">Ryan</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-glass">下一句</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-glass disabled">下一句</button>
+      <span class="state-label">Disabled</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-glass">显示中文</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-glass">显示英文</button>
+      <span class="state-label">Normal</span>
+    </div>
+  </div>
+</div>
+
+<!-- Speed Chips -->
+<div class="section">
+  <div class="section-title">Chip · 速度选择</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-chip">0.5x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip">0.75x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip active">1x</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip">1.5x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip disabled">2x</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile -->
+<div class="section">
+  <div class="section-title">Mobile · 手机端预览</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>🔋 100%</span>
+    </div>
+
+    <div style="display:flex;gap:4px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch">
+      <button class="btn-nav active" style="flex-shrink:0;height:38px;font-size:13px">练习</button>
+      <button class="btn-nav" style="flex-shrink:0;height:38px;font-size:13px">错题本</button>
+      <button class="btn-nav" style="flex-shrink:0;height:38px;font-size:13px">搜索</button>
+      <button class="btn-nav" style="flex-shrink:0;height:38px;font-size:13px">浏览</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 0 12px">
+      <button class="btn-glass" style="font-size:13px;height:38px">剧集原音</button>
+      <button class="btn-glass active" style="font-size:13px;height:38px">Ryan</button>
+      <button class="btn-glass disabled" style="font-size:13px;height:38px">下一句</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 0 12px">
+      <button class="btn-chip" style="height:32px;min-width:44px;font-size:12px">0.5x</button>
+      <button class="btn-chip active" style="height:32px;min-width:44px;font-size:12px">0.75x</button>
+      <button class="btn-chip" style="height:32px;min-width:44px;font-size:12px">1x</button>
+      <button class="btn-chip" style="height:32px;min-width:44px;font-size:12px">1.5x</button>
+    </div>
+
+    <div style="display:flex;gap:8px;padding:0 0 8px">
+      <button class="btn-primary" style="flex:1;height:44px;font-size:14px">提 交</button>
+    </div>
+
+    <div class="phone-bottom-nav">
+      <button class="btn-nav active">
+        <span>🏠</span><span>练习</span>
+      </button>
+      <button class="btn-nav">
+        <span>📖</span><span>错题本</span>
+      </button>
+      <button class="btn-nav">
+        <span>🔍</span><span>搜索</span>
+      </button>
+      <button class="btn-nav">
+        <span>🌐</span><span>浏览</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Design Notes -->
+<div class="design-notes">
+  <h3>🎨 设计要点</h3>
+  <ul>
+    <li><strong>玻璃拟态核心理念</strong>：所有按钮使用 <code>backdrop-filter: blur(6-20px)</code> 产生通透玻璃质感</li>
+    <li><strong>背景增强</strong>：页面使用径向渐变 <code>radial-gradient(ellipse at 50% 0%, #162032, #0a0f1a)</code> — 玻璃效果需要深色渐变背景才能体现通透感</li>
+    <li><strong>导航按钮</strong>：Active 态 Teal 边框 + 内部发光阴影，像一块发光玻璃</li>
+    <li><strong>Primary</strong>：半透明 Teal 填充 + 玻璃效果，Hover 时不透明度升至 100% 更有"充能"感</li>
+    <li><strong>Glass 按钮</strong>：内容区按钮使用纯玻璃底 — 悬浮通透，Active 态 Teal 光晕</li>
+    <li><strong>Chip</strong>：选中态 Teal 半透明填充 + 顶部高光 → 模拟玻璃内发光</li>
+    <li><strong>禁用态</strong>：opacity 0.25~0.30，仍保留玻璃质感但更淡</li>
+    <li><strong>触摸目标</strong>：导航 46px → 44px (mobile)，Primary 50px → 44px (mobile)</li>
+  </ul>
+</div>
+
+</body>
+</html>

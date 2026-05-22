@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimal Outline 按钮风格 · 设计稿</title>
+<style>
+/* ===== 全局 ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg-page:#0b1121;
+  --bg-surface:#131c31;
+  --bg-elevated:#18233d;
+  --teal:#14b8a6;
+  --teal-dim:rgba(20,184,166,0.45);
+  --teal-subtle:rgba(20,184,166,0.08);
+  --text-primary:#e2e8f0;
+  --text-secondary:#8896a6;
+  --text-muted:#5a6a7e;
+  --text-disabled:#3a4a5e;
+  --border-default:rgba(148,163,184,0.10);
+  --border-hover:rgba(148,163,184,0.25);
+  --border-active:rgba(20,184,166,0.45);
+  --radius-sm:6px;
+  --radius-md:10px;
+  --radius-lg:16px;
+  --radius-full:999px;
+  --font:Inter,"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:2px}
+
+body{
+  font-family:var(--font);
+  background:var(--bg-page);
+  color:var(--text-primary);
+  line-height:1.5;
+  padding:40px 24px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== 设计稿布局 ===== */
+.spec-header{
+  margin-bottom:48px;
+}
+.spec-header h1{
+  font-size:28px;
+  font-weight:700;
+  background:linear-gradient(135deg,#e2e8f0,#94a3b8);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-0.3px;
+}
+.spec-header .tag{
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 14px;
+  background:transparent;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-full);
+  font-size:13px;
+  color:var(--text-muted);
+}
+
+/* ===== Section ===== */
+.section{
+  margin-bottom:48px;
+}
+.section-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:15px;
+  font-weight:600;
+  color:var(--text-muted);
+  margin-bottom:20px;
+  letter-spacing:0.2px;
+  text-transform:uppercase;
+}
+.section-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border-default);
+}
+.section-sub{
+  font-size:13px;
+  color:var(--text-disabled);
+  margin-top:12px;
+}
+
+/* ===== 按钮容器 ===== */
+.button-grid{
+  display:flex;flex-wrap:wrap;gap:12px;
+  padding:24px;
+  background:var(--bg-surface);
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-md);
+  margin-bottom:8px;
+}
+
+/* ===== NAV BUTTONS (Minimal Outline) ===== */
+.btn-nav{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:6px;
+  height:42px;
+  padding:0 18px;
+  font-family:var(--font);
+  font-size:14px;
+  font-weight:400;
+  color:var(--text-secondary);
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-nav:hover{
+  color:var(--text-primary);
+  border-color:var(--border-hover);
+}
+.btn-nav.active{
+  color:var(--teal);
+  border-color:var(--border-active);
+  font-weight:500;
+}
+.btn-nav:disabled,
+.btn-nav.disabled{
+  opacity:0.28;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-nav:focus-visible{
+  outline:1px solid var(--teal-dim);
+  outline-offset:2px;
+}
+
+/* ===== FILLED PRIMARY (subtle) ===== */
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;
+  height:44px;
+  padding:0 24px;
+  font-family:var(--font);
+  font-size:14px;
+  font-weight:500;
+  color:var(--teal);
+  background:var(--bg-elevated);
+  border:1px solid var(--border-active);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-primary:hover{
+  color:#fff;
+  background:rgba(20,184,166,0.08);
+  border-color:var(--teal);
+}
+.btn-primary:active{
+  color:#fff;
+  background:rgba(20,184,166,0.15);
+}
+.btn-primary:disabled,
+.btn-primary.disabled{
+  opacity:0.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-primary:focus-visible{
+  outline:1px solid var(--teal);
+  outline-offset:2px;
+}
+
+/* ===== OUTLINE (content buttons) ===== */
+.btn-outline{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:6px;
+  height:42px;
+  padding:0 16px;
+  font-family:var(--font);
+  font-size:14px;
+  font-weight:400;
+  color:var(--text-secondary);
+  background:transparent;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn-outline:hover{
+  color:var(--text-primary);
+  border-color:var(--border-hover);
+}
+.btn-outline.active{
+  color:var(--teal);
+  border-color:var(--border-active);
+  background:var(--teal-subtle);
+  font-weight:500;
+}
+.btn-outline:disabled,
+.btn-outline.disabled{
+  opacity:0.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-outline:focus-visible{
+  outline:1px solid var(--teal-dim);
+  outline-offset:2px;
+}
+
+/* ===== CHIP (speed) ===== */
+.btn-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:48px;
+  height:34px;
+  padding:0 14px;
+  font-family:var(--font);
+  font-size:12px;
+  font-weight:400;
+  color:var(--text-muted);
+  background:transparent;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-full);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.btn-chip:hover{
+  color:var(--text-primary);
+  border-color:var(--border-hover);
+}
+.btn-chip.active{
+  color:var(--teal);
+  border-color:var(--border-active);
+  background:var(--teal-subtle);
+  font-weight:500;
+}
+.btn-chip:disabled,
+.btn-chip.disabled{
+  opacity:0.20;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-chip:focus-visible{
+  outline:1px solid var(--teal-dim);
+  outline-offset:2px;
+}
+
+/* ===== ICON BUTTON ===== */
+.btn-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:42px;height:42px;
+  font-family:var(--font);
+  font-size:18px;
+  color:var(--text-muted);
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-icon:hover{
+  color:var(--text-primary);
+  border-color:var(--border-hover);
+}
+.btn-icon.active{
+  color:var(--teal);
+  border-color:var(--border-active);
+  background:var(--teal-subtle);
+}
+.btn-icon:disabled,
+.btn-icon.disabled{
+  opacity:0.20;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+.btn-icon:focus-visible{
+  outline:1px solid var(--teal-dim);
+  outline-offset:2px;
+}
+
+/* ===== 状态标注 ===== */
+.state-label{
+  display:block;
+  font-size:11px;
+  color:var(--text-disabled);
+  text-align:center;
+  margin-top:4px;
+}
+.btn-wrapper{
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* ===== 手机端预览 ===== */
+.phone-frame{
+  width:100%;max-width:390px;margin:0 auto;
+  background:var(--bg-surface);
+  border:1px solid var(--border-default);
+  border-radius:20px;
+  padding:16px 16px 0;
+  overflow:hidden;
+}
+.phone-frame .status-bar{
+  display:flex;justify-content:space-between;
+  padding:0 4px 12px;
+  font-size:12px;color:var(--text-muted);
+}
+.phone-bottom-nav{
+  display:flex;gap:0;
+  margin:0 -16px;
+  background:var(--bg-surface);
+  border-top:1px solid var(--border-default);
+  padding:4px 8px;
+}
+.phone-bottom-nav .btn-nav{
+  flex:1;height:44px;font-size:11px;flex-direction:column;gap:2px;
+  padding:0;border:none;border-radius:0;font-weight:400;
+}
+.phone-bottom-nav .btn-nav.active{
+  color:var(--teal);border:none;
+}
+
+/* ===== Design Notes ===== */
+.design-notes{
+  margin-top:48px;
+  padding:24px;
+  background:var(--bg-surface);
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-md);
+  font-size:14px;
+  line-height:1.7;
+}
+.design-notes h3{
+  color:var(--text-primary);
+  font-size:16px;
+  margin-bottom:12px;
+  font-weight:500;
+}
+.design-notes ul{
+  list-style:none;padding:0;
+}
+.design-notes li{
+  padding:6px 0;
+  color:var(--text-secondary);
+  position:relative;padding-left:20px;
+}
+.design-notes li::before{
+  content:'·';
+  position:absolute;left:6px;
+  color:var(--teal);
+  font-weight:700;
+}
+
+/* ===== 响应式 ===== */
+@media(max-width:600px){
+  body{padding:20px 12px}
+  .button-grid{flex-wrap:nowrap;overflow-x:auto;padding:16px;gap:8px}
+  .btn-nav{height:36px;padding:0 14px;font-size:13px;flex-shrink:0}
+  .btn-primary{height:40px;padding:0 18px;font-size:13px}
+  .btn-outline{height:36px;padding:0 14px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="spec-header">
+  <h1>Minimal Outline · 按钮视觉方案</h1>
+  <span class="tag">变体 C · 简约描边风格</span>
+  <p style="margin-top:12px;color:var(--text-muted);font-size:14px;">
+    灵感：Linear / Code 风格 · 极简边框 · 克制配色
+  </p>
+</div>
+
+<!-- 导航按钮 -->
+<div class="section">
+  <div class="section-title">Navigation · 导航按钮（全状态）</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-nav active">练习</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">错题本</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav disabled">错题本</button>
+      <span class="state-label">Disabled</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">搜索</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">浏览</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-nav">Demo</button>
+      <span class="state-label">Normal</span>
+    </div>
+  </div>
+  <div class="section-sub">Normal 态完全无额外着色 · Hover 显现边框 · Active 态 Teal 描边</div>
+</div>
+
+<!-- 图标按钮 -->
+<div class="section">
+  <div class="section-title">Icon · 图标按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-icon active">🌙</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-icon">☀️</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-icon disabled">🌙</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+</div>
+
+<!-- Primary -->
+<div class="section">
+  <div class="section-title">Primary · 主要按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-primary">登录</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-primary" style="color:#fff;background:rgba(20,184,166,0.08)">登录</button>
+      <span class="state-label">Hover</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-primary disabled">提 交</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+  <div class="section-sub">Primary 用 Teal 描边 + 深色填充，区别于 Outline 的灰边 — 视觉层级分明但不过重</div>
+</div>
+
+<!-- Outline / Content -->
+<div class="section">
+  <div class="section-title">Outline · 内容区按钮</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-outline">剧集原音</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-outline active">Ryan</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-outline disabled">下一句</button>
+      <span class="state-label">Disabled</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-outline">显示中文</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-outline">显示英文</button>
+      <span class="state-label">Normal</span>
+    </div>
+  </div>
+</div>
+
+<!-- Speed Chips -->
+<div class="section">
+  <div class="section-title">Chip · 速度选择</div>
+  <div class="button-grid">
+    <div class="btn-wrapper">
+      <button class="btn-chip">0.5x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip">0.75x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip active">1x</button>
+      <span class="state-label">Active</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip">1.5x</button>
+      <span class="state-label">Normal</span>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-chip disabled">2x</button>
+      <span class="state-label">Disabled</span>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile -->
+<div class="section">
+  <div class="section-title">Mobile · 手机端预览</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>🔋 100%</span>
+    </div>
+
+    <div style="display:flex;gap:4px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch">
+      <button class="btn-nav active" style="flex-shrink:0;height:36px;font-size:13px">练习</button>
+      <button class="btn-nav" style="flex-shrink:0;height:36px;font-size:13px">错题本</button>
+      <button class="btn-nav" style="flex-shrink:0;height:36px;font-size:13px">搜索</button>
+      <button class="btn-nav" style="flex-shrink:0;height:36px;font-size:13px">浏览</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 0 12px">
+      <button class="btn-outline" style="font-size:13px;height:36px">剧集原音</button>
+      <button class="btn-outline active" style="font-size:13px;height:36px">Ryan</button>
+      <button class="btn-outline disabled" style="font-size:13px;height:36px">下一句</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 0 12px">
+      <button class="btn-chip" style="height:30px;min-width:40px;font-size:12px">0.5x</button>
+      <button class="btn-chip active" style="height:30px;min-width:40px;font-size:12px">0.75x</button>
+      <button class="btn-chip" style="height:30px;min-width:40px;font-size:12px">1x</button>
+      <button class="btn-chip" style="height:30px;min-width:40px;font-size:12px">1.5x</button>
+    </div>
+
+    <div style="display:flex;gap:8px;padding:0 0 8px">
+      <button class="btn-primary" style="flex:1;height:40px;font-size:13px">提 交</button>
+    </div>
+
+    <div class="phone-bottom-nav">
+      <button class="btn-nav active">
+        <span>🏠</span><span>练习</span>
+      </button>
+      <button class="btn-nav">
+        <span>📖</span><span>错题本</span>
+      </button>
+      <button class="btn-nav">
+        <span>🔍</span><span>搜索</span>
+      </button>
+      <button class="btn-nav">
+        <span>🌐</span><span>浏览</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Design Notes -->
+<div class="design-notes">
+  <h3>🎨 设计要点</h3>
+  <ul>
+    <li><strong>极简哲学</strong>：Normal 态几乎「隐形」— 取消所有背景和边框装饰，仅保留文字</li>
+    <li><strong>导航按钮</strong>：Normal 态无任何边框/背景；Hover 显示灰色细边框；Active 态 Teal 描边</li>
+    <li><strong>Primary</strong>：用深色底 + Teal 描边区别于普通 Outline，而非填充 Teal — 保持整体轻量感</li>
+    <li><strong>Outline（内容区）</strong>：默认灰色细边框，Hover 边框变亮，Active 变为 Teal 边框 + 极淡 Teal 背景</li>
+    <li><strong>Chip</strong>：最小的视觉存在感，只有选中态才有 Teal 着色</li>
+    <li><strong>禁用态</strong>：opacity 0.20~0.28 — 比前两个方案更克制，符合极简风格</li>
+    <li><strong>配色缩减</strong>：仅使用 3 种边框色（灰/灰亮/Teal）+ 3 种文字色（灰/白/Teal）</li>
+    <li><strong>触摸目标</strong>：导航 42px → 36px (mobile)，Primary 44px → 40px (mobile) — 比其他方案紧凑但满足最小触控要求</li>
+  </ul>
+</div>
+
+</body>
+</html>
