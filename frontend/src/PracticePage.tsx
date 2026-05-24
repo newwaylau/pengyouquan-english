@@ -1077,9 +1077,17 @@ export default function PracticePage({
           <button className="action-btn-new" onClick={playOriginal}>剧集原音</button>
           <button className="action-btn-new" onClick={() => playTts(en)}>{VOICES.find(v => v.id === voice)?.label || '导播'}</button>
           <button className="action-btn-new" onClick={goNext}>下一句</button>
+          {mode === 'dictation' && (
+            <button className="action-btn-new" onClick={() => setShowCn(s => !s)}>
+              {showCn ? '隐藏中文' : '显示中文'}
+            </button>
+          )}
+          <button className="action-btn-new" onClick={() => setShowEn(s => !s)}>
+            {showEn ? '隐藏英文' : '显示英文'}
+          </button>
         </div>
 
-        {/* 操作行3：速度(50%) + 显示中文/英文(50%) */}
+        {/* 操作行3：速度 */}
         <div className="action-row-split">
           <div className="action-row-half">
             {SPEEDS.map(s => (
@@ -1091,16 +1099,6 @@ export default function PracticePage({
                 {s}x
               </button>
             ))}
-          </div>
-          <div className="action-row-half">
-            {mode === 'dictation' && (
-              <button className="action-btn-new" onClick={() => setShowCn(s => !s)}>
-                {showCn ? '隐藏中文' : '显示中文'}
-              </button>
-            )}
-            <button className="action-btn-new" onClick={() => setShowEn(s => !s)}>
-              {showEn ? '隐藏英文' : '显示英文'}
-            </button>
           </div>
         </div>
 
