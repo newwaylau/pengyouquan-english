@@ -480,15 +480,15 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {/* ── 登录模式 ── */}
           {mode === 'login' && (
             <>
-              <label className="field-label">邮箱 / 手机号</label>
-              <input type="text" placeholder="newwaylau@hotmail.com"
+              <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
+              <input id="login-email" type="text" placeholder="newwaylau@hotmail.com"
                 value={email}
                 onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                 style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
 
-              <label className="field-label">密码</label>
+              <label className="field-label" htmlFor="login-password">密码</label>
               <div className="pwd-wrapper">
-                <input type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
+                <input id="login-password" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
                 <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
                   {showLoginPwd ? <EyeOpen /> : <EyeClosed />}

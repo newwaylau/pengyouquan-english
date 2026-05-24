@@ -754,13 +754,13 @@ export default function PracticePage({
                   <div className="stat-label">正确率</div>
                 </div>
               </div>
-              <div className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
+              <button className="stat-item clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
                 <div className="stat-icon emerald"><IconBookClosed /></div>
                 <div className="stat-info">
                   <div className="stat-value">{wrongCount}</div>
                   <div className="stat-label">错题</div>
                 </div>
-              </div>
+              </button>
             </div>
           )}
           <div className="wrong-review-done">
@@ -779,7 +779,7 @@ export default function PracticePage({
           </div>
           <div className="bottom-section">
             <div className="bottom-nav">
-              <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+              <button className="bottom-nav-btn" aria-disabled="true" aria-label="浏览功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
                 <span className="bottom-nav-icon"><IconConstruction /></span>
                 <span className="bottom-nav-label">浏览(Browse)</span>
               </button>
@@ -791,7 +791,7 @@ export default function PracticePage({
                 <span className="bottom-nav-icon"><IconSettings /></span>
                 <span className="bottom-nav-label">设置(Settings)</span>
               </button>
-              <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+              <button className="bottom-nav-btn" aria-disabled="true" aria-label="搜索功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
                 <span className="bottom-nav-icon"><IconConstruction /></span>
                 <span className="bottom-nav-label">搜索(Search)</span>
               </button>
@@ -1126,7 +1126,7 @@ export default function PracticePage({
 
       {/* 底部导航 */}
       <div className="bottom-nav">
-        <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+        <button className="bottom-nav-btn" aria-disabled="true" aria-label="浏览功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
           <span className="bottom-nav-icon"><IconConstruction /></span>
           <span className="bottom-nav-label">浏览(Browse)</span>
         </button>
@@ -1138,7 +1138,7 @@ export default function PracticePage({
           <span className="bottom-nav-icon"><IconSettings /></span>
           <span className="bottom-nav-label">设置(Settings)</span>
         </button>
-        <button className="bottom-nav-btn" disabled style={{opacity:0.5,cursor:'not-allowed'}}>
+        <button className="bottom-nav-btn" aria-disabled="true" aria-label="搜索功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
           <span className="bottom-nav-icon"><IconConstruction /></span>
           <span className="bottom-nav-label">搜索(Search)</span>
         </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api, setToken, getToken, clearToken } from './api/client';
 import PracticePage from './PracticePage';
 import LoginPage from './LoginPage';
@@ -24,6 +24,12 @@ export default function App() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
   const { theme, toggleTheme, isDark } = useTheme();
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Focus management: move focus to main on page change
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, [page]);
 
   // Sync theme-color meta tag
   useEffect(() => {
@@ -134,7 +140,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="page-enter" key={page} id="main-content">
+        <main className="page-enter" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
           {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
           {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
