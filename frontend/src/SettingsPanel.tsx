@@ -65,18 +65,21 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         setShows(r.data);
         const groups = parseShowGroups(r.data);
         setShowGroups(groups);
-        // 从已保存的selectedShow/selectedSeason回显
-        api.getSettings().then(sr => {
-          if (sr.code === 200) {
-            const savedTitle = sr.data.selectedShow;
-            const savedSeason = sr.data.selectedSeason;
-            if (savedTitle && groups[savedTitle]) {
-              setSelectedShowTitle(savedTitle);
-              if (savedSeason) setSelectedSeason(savedSeason);
-              if (sr.data.showId) setInternalShowId(sr.data.showId);
+        // 从已保存的selectedShow/selectedSeason回显（仅登录用户）
+        const token = localStorage.getItem('token');
+        if (token) {
+          api.getSettings().then(sr => {
+            if (sr.code === 200) {
+              const savedTitle = sr.data.selectedShow;
+              const savedSeason = sr.data.selectedSeason;
+              if (savedTitle && groups[savedTitle]) {
+                setSelectedShowTitle(savedTitle);
+                if (savedSeason) setSelectedSeason(savedSeason);
+                if (sr.data.showId) setInternalShowId(sr.data.showId);
+              }
             }
-          }
-        });
+          });
+        }
       }
     });
   }, [open]);
@@ -84,6 +87,12 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   const [toastMsg, setToastMsg] = useState('');
 
   const save = async (key: string, value: string) => {
+    // 未登录时直接弹 toast，不调 API（避免 request() 的 401 自动跳转）
+    if (!localStorage.getItem('token')) {
+      setToastMsg('请先登录才能保存设置');
+      setTimeout(() => setToastMsg(''), 3000);
+      return;
+    }
     const r = await api.saveSettings({ [key]: value });
     if (r.code === 401) {
       setToastMsg('请先登录才能保存设置');
