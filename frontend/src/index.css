@@ -1322,7 +1322,7 @@ h3 {
 .action-divider {
   border: none;
   border-top: 1px solid var(--border-strong);
-  margin: 16px 0 8px;
+  margin: 12px 0 8px;
   opacity: 0.5;
 }
 
@@ -1531,7 +1531,7 @@ h3 {
 }
 .action-row-half {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
@@ -1648,17 +1648,18 @@ h3 {
   background: var(--bottom-nav-bg);
   border-top: 1px solid var(--bottom-nav-border);
   border-radius: 12px 12px 0 0;
-  padding: calc(6/16*1rem) calc(8/16*1rem);
+  padding: 6px 12px;
   padding-bottom: max(6px, env(safe-area-inset-bottom));
   box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
+  justify-content: space-around;
 }
 .bottom-nav-btn {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: calc(6/16*1rem) calc(4/16*1rem);
+  gap: 3px;
+  padding: 8px 4px;
   border: none;
   background: none;
   cursor: pointer;
@@ -3307,8 +3308,8 @@ h3 {
   .action-btn-new { padding: 8px 12px; height: 36px; font-size: 13px; }
   .btn-speed { font-size: 12px; padding: 0 10px; height: 36px; min-width: 40px; }
   .btn-action { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); }
-  .action-row-split { flex-wrap: wrap; gap: 4px; }
-  .action-row-half { gap: 4px; min-width: 0; }
+  .action-row-split { flex-wrap: wrap; gap: 8px; }
+  .action-row-half { gap: 6px; min-width: 0; }
 
   /* 手机版：底部按钮区不再强制33%高度 */
   .bottom-section { flex: none; }
@@ -3335,8 +3336,8 @@ h3 {
   }
 
   /* 底部导航紧凑 */
-  .bottom-nav { padding: calc(4/16*1rem) calc(4/16*1rem); padding-bottom: max(4px, env(safe-area-inset-bottom)); }
-  .bottom-nav-btn { padding: 6px 4px; min-height: 44px; }
+  .bottom-nav { padding: 6px 8px; padding-bottom: max(6px, env(safe-area-inset-bottom)); justify-content: space-around; }
+  .bottom-nav-btn { padding: 8px 2px; min-height: 44px; gap: 2px; }
   .bottom-nav-icon { font-size: 1.125rem; }
 
   /* 搜索面板 */
