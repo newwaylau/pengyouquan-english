@@ -1421,6 +1421,7 @@ h3 {
 /* ---------- 操作按钮容器 ---------- */
 .action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   width: 100%;
 }
@@ -1518,6 +1519,7 @@ h3 {
 
 .action-row-split {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
   width: 100%;
@@ -4533,6 +4535,8 @@ h3 {
 
 /* Action buttons — Teal Modern style */
 .action-btn-new {
+  flex: 1 1 auto;
+  min-width: 80px;
   padding: 8px 16px;
   border-radius: 8px;
   border: 1px solid var(--border);
