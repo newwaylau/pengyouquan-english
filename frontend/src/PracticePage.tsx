@@ -921,7 +921,7 @@ export default function PracticePage({
         </div>
       )}
       {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
-      {user && (
+      {user && !phoneMode && (
         <div className="stats-bar-new">
           <div className="stat-item-new">
             <div className="stat-value-new">{stats.totalPractices}</div>
@@ -967,6 +967,7 @@ export default function PracticePage({
       )}
 
       {/* 主卡片 */}
+      {!phoneMode && (
       <div className="practice-card-new card-enter">
         <div className="card-body" key={sentence?.id || 'no-sentence'}>
         {/* 卡片头部：模式徽章 + 剧集信息 */}
@@ -1053,6 +1054,7 @@ export default function PracticePage({
 
         </div>
       </div>
+      )}
 
       {/* 按钮区 */}
       {!phoneMode && (
