@@ -4669,7 +4669,8 @@ h3 {
   color: #64748b;
   margin-top: 4px;
 }
-.login-form-panel {
+.login-form-panel,
+.login-form-panel-new {
   width: 460px;
   min-width: 460px;
   background: #1e293b;
@@ -4679,7 +4680,8 @@ h3 {
   justify-content: center;
   padding: 40px;
 }
-.login-form-inner {
+.login-form-inner,
+.login-form-new {
   max-width: 360px;
   width: 100%;
 }

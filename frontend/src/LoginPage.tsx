@@ -470,16 +470,16 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
       </div>
 
       {/* 右侧表单区 */}
-      <div className="login-form-panel-new">
-        <div className="login-form-new">
-        <h2 className="login-form-title">欢迎回来</h2>
-        <p className="login-form-subtitle">登录你的账号继续学习</p>
+      <div className="login-form-panel">
+        <div className="login-form-inner">
+        <h2>欢迎回来</h2>
+        <p className="form-subtitle">登录你的账号继续学习</p>
         <form onSubmit={handleSubmit}>
 
           {/* ── 登录模式 ── */}
           {mode === 'login' && (
             <>
-              <div className="login-form-group">
+              <div>
                 <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
                 <input id="login-email" type="text" placeholder="newwaylau@hotmail.com" className="login-form-input"
                   value={email}
@@ -487,7 +487,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
               </div>
 
-              <div className="login-form-group">
+              <div>
                 <label className="field-label" htmlFor="login-password">密码</label>
                 <div className="pwd-wrapper">
                   <input id="login-password" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
@@ -507,7 +507,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {/* ── 注册模式 ── */}
           {mode === 'register' && (
             <>
-              <div className="login-form-group">
+              <div>
                 <input type="email" placeholder="邮箱" className="login-form-input"
                   value={email}
                   onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
@@ -515,11 +515,11 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               </div>
 
               {/* 验证码 */}
-              <div className="login-form-group">
+              <div>
                 <div className="code-row">
                   <input type="text" placeholder="邮箱验证码" value={code}
                     onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
-                    className="code-input login-form-input" />
+                    className="code-input" />
                   <button type="button" className="btn-outline send-code-btn"
                     onClick={handleSendCode}
                     disabled={codeSending || codeCountdown > 0}>
@@ -529,7 +529,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               </div>
 
               {/* 密码 */}
-              <div className="login-form-group">
+              <div>
                 <div className="pwd-wrapper">
                   <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
                     onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
@@ -549,7 +549,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   </div>
                 )}
               </div>
-              <div className="login-form-group">
+              <div>
                 <div className="pwd-wrapper">
                   <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
                     onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
@@ -560,14 +560,14 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 </div>
               </div>
 
-              <div className="login-form-group">
+              <div>
                 <input type="tel" placeholder="手机号（可选）" className="login-form-input"
                   value={phone}
                   onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
                   style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
               </div>
 
-              <div className="login-form-group">
+              <div>
                 <input type="text" placeholder="邀请码（可选）" className="login-form-input"
                   value={invitedBy}
                   onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
