@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>英语剧场 - 手机布局优化方案</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .phone-frame {
+    width: 375px;
+    background: #1e293b;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .phone-frame-header {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+    background: #0f172a;
+  }
+
+  .phone-content {
+    min-height: 650px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  /* Label on top */
+  .mock-label {
+    text-align: center;
+    padding: 12px 16px 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    letter-spacing: 0.5px;
+  }
+  .mock-label .badge {
+    font-size: 0.65rem;
+    color: #14b8a6;
+    background: rgba(20,184,166,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 6px;
+  }
+  .mock-label .badge-problem {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+  }
+
+  /* Sentence display */
+  .sentence-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 8px;
+  }
+  .sentence-en {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    text-align: center;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  .sentence-cn {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: center;
+  }
+  .word-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .word-input {
+    padding: 6px 10px;
+    border: 1px dashed #475569;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #e2e8f0;
+    background: transparent;
+    min-width: 60px;
+    text-align: center;
+  }
+  .word-input.filled {
+    border-color: #14b8a6;
+    background: rgba(20,184,166,0.1);
+    border-style: solid;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    flex: 1;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    min-width: calc(50% - 6px);
+  }
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #14b8a6;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: #64748b;
+  }
+
+  /* --- CURRENT (Desktop on Mobile) --- */
+  .current-layout .action-buttons {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px;
+    width: 100%;
+  }
+  .current-layout .action-btn {
+    flex: 1;
+    padding: 10px 8px;
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+  }
+  .current-layout .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(20,184,166,0.3);
+  }
+  .current-layout .btn-outline {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
+  .current-layout .action-row-split {
+    display: flex;
+    gap: 4px;
+    padding: 0 14px;
+    width: 100%;
+  }
+  .current-layout .action-row-half {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+    min-width: 0;
+  }
+  .current-layout .btn-speed {
+    flex: 1;
+    min-width: 38px;
+    padding: 5px 4px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+  }
+  .current-layout .btn-speed.active {
+    background: rgba(20,184,166,0.15);
+    border-color: #14b8a6;
+    color: #14b8a6;
+  }
+  .current-layout .button-area {
+    padding: 0 0 8px;
+  }
+
+  .current-layout .bottom-nav {
+    display: flex;
+    gap: 0;
+    padding: 6px 4px;
+    border-top: 1px solid #334155;
+    background: #0f172a;
+  }
+  .current-layout .bottom-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 2px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 0.6rem;
+    font-family: inherit;
+  }
+  .current-layout .bottom-nav-btn .nav-icon {
+    font-size: 1.1rem;
+  }
+  .current-layout .shortcuts-hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 6px;
+    padding: 6px 14px;
+    font-size: 0.6rem;
+    color: #475569;
+    justify-content: center;
+  }
+  .current-layout .shortcuts-hint kbd {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 0.6rem;
+  }
+
+  /* --- NEW DESIGN (Phone Mode Fixed) --- */
+  .new-layout .top-mode-bar {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+  }
+  .new-layout .mode-chip {
+    padding: 5px 14px;
+    border-radius: 16px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .new-layout .mode-chip.active {
+    background: rgba(20,184,166,0.12);
+    border-color: #14b8a6;
+    color: #14b8a6;
+  }
+
+  .new-layout .phone-actions {
+    display: flex;
+    gap: 5px;
+    padding: 8px 10px 10px;
+  }
+  .new-layout .phone-btn {
+    flex: 1;
+    min-height: 38px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 2px;
+    transition: all 0.15s;
+  }
+  .new-layout .phone-btn.submit {
+    flex: 1.3;
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(20,184,166,0.3);
+    font-weight: 700;
+  }
+  .new-layout .phone-btn.next {
+    background: rgba(20,184,166,0.1);
+    color: #14b8a6;
+    font-weight: 600;
+    border: none;
+  }
+  .new-layout .phone-btn.tool {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    font-size: 0.65rem;
+  }
+  .new-layout .phone-btn.tool.active {
+    border-color: #14b8a6;
+    color: #14b8a6;
+    background: rgba(20,184,166,0.08);
+  }
+
+  /* Comparison tags */
+  .version-tag {
+    position: absolute;
+    top: 38px;
+    right: 10px;
+    font-size: 0.6rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    z-index: 10;
+  }
+  .version-tag.current {
+    background: rgba(239,68,68,0.2);
+    color: #f87171;
+  }
+  .version-tag.new {
+    background: rgba(34,197,94,0.2);
+    color: #34d399;
+  }
+
+  .section-title {
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #e2e8f0;
+  }
+
+  .section-title .sub {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #64748b;
+    display: block;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT: CURRENT STATE -->
+<div style="position:relative">
+  <div class="section-title">
+    ❌ 当前
+    <span class="sub">桌面版布局挤在手机屏幕上</span>
+  </div>
+  <div class="phone-frame current-layout">
+    <div class="version-tag current">当前</div>
+    <div class="status-bar">
+      <span>05:59</span>
+      <span>🔋 76%</span>
+    </div>
+    <div class="phone-content">
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value">42</div><div class="stat-label">总句子</div></div>
+        <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">今日练习</div></div>
+        <div class="stat-item"><div class="stat-value">85%</div><div class="stat-label">正确率</div></div>
+        <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">错题</div></div>
+      </div>
+
+      <div class="sentence-area">
+        <div class="sentence-cn">我的孩子是无辜的</div>
+        <div class="sentence-en">My child is ___</div>
+        <div class="word-inputs">
+          <div class="word-input filled">Innocent</div>
+        </div>
+      </div>
+
+      <div class="button-area">
+        <div class="action-buttons" style="margin-bottom:6px">
+          <button class="action-btn btn-primary" style="width:100%">提交</button>
+        </div>
+        <div class="action-buttons" style="margin-bottom:6px">
+          <button class="action-btn btn-outline">剧集原音</button>
+          <button class="action-btn btn-outline">Ryan</button>
+          <button class="action-btn btn-outline">下一句</button>
+        </div>
+        <div class="action-row-split">
+          <div class="action-row-half">
+            <button class="btn-speed active">0.5x</button>
+            <button class="btn-speed">0.75x</button>
+            <button class="btn-speed">1x</button>
+            <button class="btn-speed">1.5x</button>
+          </div>
+          <div class="action-row-half">
+            <button class="action-btn btn-outline" style="border-radius:6px;padding:5px 4px;font-size:0.7rem">隐藏中文</button>
+            <button class="action-btn btn-outline" style="border-radius:6px;padding:5px 4px;font-size:0.7rem">显示英文</button>
+          </div>
+        </div>
+        <div class="shortcuts-hint">
+          <kbd>-</kbd>原音 <kbd>=</kbd>音色 <kbd>\</kbd>下一句 <kbd>[</kbd>中文 <kbd>]</kbd>英文 <kbd>Enter</kbd>提交
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <button class="bottom-nav-btn"><span class="nav-icon">⚙️</span>浏览</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">✕</span>错题</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">⚙️</span>设置</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">🔍</span>搜索</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">🧘</span>专注</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT: PROPOSED FIX -->
+<div style="position:relative">
+  <div class="section-title">
+    ✅ 方案
+    <span class="sub">手机模式 + 速度/切换按钮重新布局</span>
+  </div>
+  <div class="phone-frame new-layout">
+    <div class="version-tag new">新方案</div>
+    <div class="status-bar">
+      <span>05:59</span>
+      <span>🔋 76%</span>
+    </div>
+
+    <!-- 模式切换条：始终可见 -->
+    <div class="top-mode-bar">
+      <button class="mode-chip">🧘 专注</button>
+      <button class="mode-chip active">📱 手机</button>
+    </div>
+
+    <div class="phone-content">
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value">42</div><div class="stat-label">总句子</div></div>
+        <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">今日练习</div></div>
+        <div class="stat-item"><div class="stat-value">85%</div><div class="stat-label">正确率</div></div>
+        <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">错题</div></div>
+      </div>
+
+      <div class="sentence-area">
+        <div class="sentence-cn">我的孩子是无辜的</div>
+        <div class="sentence-en">My child is ___</div>
+        <div class="word-inputs">
+          <div class="word-input filled">Innocent</div>
+        </div>
+      </div>
+
+      <!-- 速度 + 中文/英文 另起一行，不再挤在action-row-split -->
+      <div style="display:flex;flex-direction:column;gap:6px;padding:0 14px 6px">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <button class="btn-speed active">0.5x</button>
+          <button class="btn-speed">0.75x</button>
+          <button class="btn-speed">1x</button>
+          <button class="btn-speed">1.5x</button>
+          <button class="btn-speed" style="min-width:auto;padding:5px 10px;color:#94a3b8;border-color:#334155">隐藏中文</button>
+          <button class="btn-speed" style="min-width:auto;padding:5px 10px;color:#94a3b8;border-color:#334155">显示英文</button>
+        </div>
+      </div>
+
+      <!-- 手机模式：6个紧凑按钮一行 -->
+      <div class="phone-actions">
+        <button class="phone-btn submit">提交</button>
+        <button class="phone-btn next">下句</button>
+        <button class="phone-btn tool">原音</button>
+        <button class="phone-btn tool">Ryan</button>
+        <button class="phone-btn tool">中文</button>
+        <button class="phone-btn tool">英文</button>
+      </div>
+
+      <div class="bottom-nav">
+        <button class="bottom-nav-btn"><span class="nav-icon">⚙️</span>浏览</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">✕</span>错题</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">⚙️</span>设置</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">🔍</span>搜索</button>
+        <button class="bottom-nav-btn"><span class="nav-icon">🧘</span>专注</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom comparison -->
+<div style="width:100%;max-width:800px;margin:20px auto 0;background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
+  <h3 style="margin-bottom:12px;font-size:0.9rem">🔧 核心改动</h3>
+  <table style="width:100%;font-size:0.8rem;border-collapse:collapse">
+    <tr style="border-bottom:1px solid #334155">
+      <th style="padding:8px 12px;text-align:left;color:#94a3b8">问题</th>
+      <th style="padding:8px 12px;text-align:left;color:#94a3b8">当前</th>
+      <th style="padding:8px 12px;text-align:left;color:#94a3b8">方案</th>
+    </tr>
+    <tr style="border-bottom:1px solid #1e293b">
+      <td style="padding:8px 12px;font-weight:600">模式切换入口</td>
+      <td style="padding:8px 12px;color:#f87171">只在 focusMode 下才显示，普通模式看不到</td>
+      <td style="padding:8px 12px;color:#34d399">始终在顶部显示「专注 / 手机」切换条</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e293b">
+      <td style="padding:8px 12px;font-weight:600">速度+切换按钮</td>
+      <td style="padding:8px 12px;color:#f87171">action-row-split 分两半，手机上挤一起</td>
+      <td style="padding:8px 12px;color:#34d399">全部横排一行，用更小的 chip 样式，flex-wrap 自动换行</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e293b">
+      <td style="padding:8px 12px;font-weight:600">6个操作按钮</td>
+      <td style="padding:8px 12px;color:#f87171">桌面版3行按钮（提交/剧集原音行/速度行）太长</td>
+      <td style="padding:8px 12px;color:#34d399">手机模式6个compact按钮一行，视觉层次清晰</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">快捷键提示</td>
+      <td style="padding:8px 12px;color:#f87171">手机上占空间，已隐藏（@media 480px）</td>
+      <td style="padding:8px 12px;color:#34d399">保持隐藏（已实现 ✅）</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
