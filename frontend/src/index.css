@@ -4710,6 +4710,21 @@ h3 {
   color: #64748b;
   margin-bottom: 28px;
 }
+.login-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 6px 0;
+  margin-bottom: 16px;
+  text-align: left;
+  transition: color 0.15s;
+}
+.login-back-btn:hover {
+  color: var(--teal);
+}
 .login-form-inner input {
   width: 100%;
   padding: 10px 14px;

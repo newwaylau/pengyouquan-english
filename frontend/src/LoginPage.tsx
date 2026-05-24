@@ -472,6 +472,11 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
       {/* 右侧表单区 */}
       <div className="login-form-panel">
         <div className="login-form-inner">
+        {onHome && (
+          <button className="login-back-btn" onClick={onHome} type="button">
+            ← 返回首页
+          </button>
+        )}
         <h2>欢迎回来</h2>
         <p className="form-subtitle">登录你的账号继续学习</p>
         <form onSubmit={handleSubmit}>
