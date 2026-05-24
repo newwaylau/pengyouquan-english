@@ -13,6 +13,7 @@
   --text: #f1f5f9;
   --text-primary: var(--text);
   --text-secondary: #94a3b8;
+  --text-muted: #94a3b8;
   --text-tertiary: #64748b;
   --border: #334155;
   --border-strong: #475569;
@@ -104,7 +105,6 @@
   --radius-full: 999px;
 
   /* 按钮系统专用变量 */
-  --text-primary: var(--text);
 }
 /* ---------- 浅色模式（系统偏好） ---------- */
 @media (prefers-color-scheme: light) {
@@ -1533,22 +1533,6 @@ h3 {
   min-width: 48px;  /* 继承主规则的触控目标 */
 }
 
-/* 非按钮区旧 btn-primary / btn-action 兼容
-   (wrong-review-actions, wrong-retry-actions 等独立组件) */
-.btn-primary {
-  padding: calc(10/16*1rem) calc(20/16*1rem);
-  border: none;
-  border-radius: 6px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  text-align: center;
-}
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-.btn-primary:active { transform: scale(0.97); }
-
 .btn-action {
   padding: calc(6/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
@@ -1812,7 +1796,7 @@ h3 {
 .small-btn {
   padding: calc(4/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--card-bg);
   cursor: pointer;
   font-size: 0.75rem;
@@ -1833,7 +1817,7 @@ h3 {
 .clear-btn {
   padding: calc(6/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--danger);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--card-bg);
   color: var(--danger);
   cursor: pointer;
@@ -2098,7 +2082,7 @@ h3 {
 .pagination button {
   padding: calc(6/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--card-bg);
   cursor: pointer;
   font-size: 0.8125rem;
@@ -2390,7 +2374,7 @@ h3 {
 .jump-input button {
   padding: calc(8/16*1rem) calc(14/16*1rem);
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--primary);
   color: #fff;
   cursor: pointer;
@@ -2905,7 +2889,7 @@ h3 {
   background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.9375rem;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -2977,7 +2961,7 @@ h3 {
   background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.9375rem;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -3462,7 +3446,7 @@ h3 {
 
 /* PC 大屏缩放（与5000老版一致） */
 @media (min-width: 1200px) {
-  html { font-size: 28px; }
+  html { font-size: 16px; }
 }
 
 /* ---------- 大屏 (≥1400px) 宽屏间距优化 ---------- */
@@ -3500,7 +3484,7 @@ h3 {
   gap: 4px;
   padding: 6px 14px;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--card-bg);
   color: var(--text);
   cursor: pointer;
