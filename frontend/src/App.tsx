@@ -136,7 +136,7 @@ export default function App() {
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
-          <div className="topbar-right">
+          <div className="topbar-right topbar-actions">
             <button className="topbar-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
               {isDark ? '☀️' : '🌙'}
             </button>

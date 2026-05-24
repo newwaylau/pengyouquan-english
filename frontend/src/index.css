@@ -3282,6 +3282,7 @@ h3 {
     padding: 0 24px 24px;
   }
   .bottom-nav { display: none !important; }
+  .topbar-actions { display: none; }
 
   /* 桌面端隐藏 phone-mode 专用的底部导航 */
   .phone-mode .bottom-nav,
