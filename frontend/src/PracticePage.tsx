@@ -730,7 +730,7 @@ export default function PracticePage({
     if (mode === 'wrong' && wrongSentences.length > 0) {
       return (
         <div className="practice-page">
-          {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+          {toastMsg && <div className="toast-msg" role="alert">{toastMsg}</div>}
           {user && (
             <div className="stats-bar">
               <div className="stat-item">
@@ -807,7 +807,7 @@ export default function PracticePage({
 
     return (
       <div className="practice-page">
-        {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+        {toastMsg && <div className="toast-msg" role="alert">{toastMsg}</div>}
         <div className="stats-bar">
           <div className="stat-item skeleton" style={{ height: 60 }} />
           <div className="stat-item skeleton" style={{ height: 60 }} />
@@ -835,7 +835,7 @@ export default function PracticePage({
 
   return (
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''} ${phoneMode ? 'phone-mode' : ''}`}>
-      {toastMsg && <div className="toast-msg">{toastMsg}</div>}
+      {toastMsg && <div className="toast-msg" role="alert">{toastMsg}</div>}
       {/* 手机模式：三行占满上半屏，下半屏是键盘 */}
       {phoneMode && (
         <div className="phone-mode-overlay">
@@ -847,7 +847,7 @@ export default function PracticePage({
           </div>
 
           {/* 第1行: 英文(3行截断) + 中文(2行灰色) */}
-          <div className={`sentence-en ${!showEn ? 'blurred' : ''}`}>
+          <div className={`sentence-en ${!showEn ? 'blurred' : ''}`} aria-hidden={!showEn}>
             {en}
           </div>
           {cn && (
@@ -992,7 +992,7 @@ export default function PracticePage({
         </div>
 
         {/* 英文显示区 */}
-        <div className={`sentence-en sentence-fade-in ${!showEn ? 'blurred' : ''}`}>
+        <div className={`sentence-en sentence-fade-in ${!showEn ? 'blurred' : ''}`} aria-hidden={!showEn}>
           {en}
         </div>
 

@@ -80,6 +80,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-to-content">跳转到主要内容</a>
       {/* 桌面端侧边栏 */}
       <Sidebar
         page={page}
@@ -133,7 +134,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="page-enter" key={page}>
+        <main className="page-enter" key={page} id="main-content">
           {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
           {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}

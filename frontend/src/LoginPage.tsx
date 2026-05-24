@@ -377,7 +377,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showOldPwd ? 'text' : 'password'} placeholder="当前密码" value={oldPassword}
                   onChange={e => { setOldPassword(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowOldPwd(!showOldPwd)} aria-label={showOldPwd ? '隐藏密码' : '显示密码'}>
                   {showOldPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -387,7 +387,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showNewPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={newPwd}
                   onChange={e => { setNewPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowNewPwd(!showNewPwd)} aria-label={showNewPwd ? '隐藏密码' : '显示密码'}>
                   {showNewPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -411,7 +411,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   onChange={e => { setConfirmPwd(e.target.value); setPwdError(''); setPwdSuccess(''); }}
                   onKeyDown={preventSpace} required
                   style={confirmPwd && !confirmMatch ? { borderColor: '#ef4444' } : {}} />
-                <span className="eye-btn btn-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)} aria-label={showConfirmPwd ? '隐藏密码' : '显示密码'}>
                   {showConfirmPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -490,7 +490,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="pwd-wrapper">
                 <input type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
                   {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -525,7 +525,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
               <div className="pwd-wrapper">
                 <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
                   onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? '隐藏密码' : '显示密码'}>
                   {showPwd ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -544,7 +544,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                 <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
                   onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                   style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
-                <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)}>
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)} aria-label={showPwd2 ? '隐藏密码' : '显示密码'}>
                   {showPwd2 ? <EyeOpen /> : <EyeClosed />}
                 </span>
               </div>
@@ -597,7 +597,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                   <div className="pwd-wrapper">
                     <input type={forgotShowPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={forgotPassword}
                       onChange={e => setForgotPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd(!forgotShowPwd)}>
+                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd(!forgotShowPwd)} aria-label={forgotShowPwd ? '隐藏密码' : '显示密码'}>
                       {forgotShowPwd ? <EyeOpen /> : <EyeClosed />}
                     </span>
                   </div>
@@ -618,7 +618,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     <input type={forgotShowPwd2 ? 'text' : 'password'} placeholder="确认新密码" value={forgotPassword2}
                       onChange={e => setForgotPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                       style={forgotPassword2 && !forgotPwd2Match ? { borderColor: '#ef4444' } : {}} />
-                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd2(!forgotShowPwd2)}>
+                    <span className="eye-btn btn-icon" onClick={() => setForgotShowPwd2(!forgotShowPwd2)} aria-label={forgotShowPwd2 ? '隐藏密码' : '显示密码'}>
                       {forgotShowPwd2 ? <EyeOpen /> : <EyeClosed />}
                     </span>
                   </div>
