@@ -1300,8 +1300,8 @@ h3 {
 }
 
 .bottom-section {
-  flex: 0 0 33%;
   display: flex;
+  flex: 0 0 33%;
   flex-direction: column;
   min-height: 0;
 }
@@ -3302,6 +3302,10 @@ h3 {
   .btn-action { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); }
   .action-row-split { flex-wrap: wrap; gap: 4px; }
   .action-row-half { gap: 3px; min-width: 0; }
+
+  /* 手机版：底部按钮区不再强制33%高度 */
+  .bottom-section { flex: none; }
+  .practice-page { height: auto; min-height: calc(100vh - 48px); }
 
   /* Stats Bar 在手机上2x2排列 */
   .stats-bar { gap: 6px; flex-wrap: wrap; }
