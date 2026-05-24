@@ -464,16 +464,20 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
             <>
               <div>
                 <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
-                <input id="login-email" type="text" placeholder="邮箱或手机号" className="login-form-input"
-                  value={email}
-                  onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                  style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+                <div className="login-input-icon-wrap">
+                  <span className="login-input-icon">@</span>
+                  <input id="login-email" type="text" placeholder="邮箱或手机号" className="login-form-input with-icon"
+                    value={email}
+                    onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                    style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+                </div>
               </div>
 
               <div>
                 <label className="field-label" htmlFor="login-password">密码</label>
-                <div className="pwd-wrapper">
-                  <input id="login-password" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
+                <div className="pwd-wrapper login-input-icon-wrap">
+                  <span className="login-input-icon"><IconKey /></span>
+                  <input id="login-password" className="with-icon" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
                     onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
                   <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
                     {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
