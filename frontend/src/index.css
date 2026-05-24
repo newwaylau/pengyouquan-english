@@ -1197,6 +1197,8 @@ h3 {
 }
 .stats-bar .stat-item {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: 10px;
@@ -2710,6 +2712,7 @@ h3 {
 }
 /* 行内操作按钮 */
 .admin-table .action-btn {
+  flex: 0 0 auto;
   padding: calc(4/16*1rem) calc(10/16*1rem);
   border: 1px solid var(--border-strong);
   border-radius: 6px;
@@ -4170,10 +4173,6 @@ h3 {
 }
 
 /* .btn-outline.danger — 退出/危险操作 hover 变红 */
-.btn-outline.danger {
-  margin-top: 10px;
-  width: 100%;
-}
 .btn-outline.danger:hover {
   color: #ef4444;
   border-color: #ef4444;
