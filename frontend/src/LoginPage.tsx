@@ -70,28 +70,6 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
-  // ── Ping 测试连接 ──
-  const [pingStatus, setPingStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [pingResult, setPingResult] = useState<string>('');
-
-  const handlePing = async () => {
-    setPingStatus('loading');
-    setPingResult('');
-    try {
-      const r = await api.ping();
-      if (r.code === 200) {
-        setPingStatus('success');
-        setPingResult(JSON.stringify(r.data, null, 2));
-      } else {
-        setPingStatus('error');
-        setPingResult(r.message || '请求失败');
-      }
-    } catch (e: any) {
-      setPingStatus('error');
-      setPingResult(e?.message || '网络错误');
-    }
-  };
-
   const startCountdown = useCallback(() => {
     setCodeCountdown(60);
     if (timerRef.current) clearInterval(timerRef.current);
@@ -486,7 +464,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
             <>
               <div>
                 <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
-                <input id="login-email" type="text" placeholder="newwaylau@hotmail.com" className="login-form-input"
+                <input id="login-email" type="text" placeholder="邮箱或手机号" className="login-form-input"
                   value={email}
                   onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                   style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
@@ -665,18 +643,6 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           </p>
         )}
 
-        {/* 测试连接 */}
-        <div className="ping-section">
-          <button className="btn-outline ping-btn" onClick={handlePing} disabled={pingStatus === 'loading'}>
-            {pingStatus === 'loading' ? '测试中...' : '🔗 测试连接'}
-          </button>
-          {pingStatus === 'success' && (
-            <div className="ping-result ping-success">✅ 连接成功：{pingResult}</div>
-          )}
-          {pingStatus === 'error' && (
-            <div className="ping-result ping-error">❌ 连接失败：{pingResult}</div>
-          )}
-        </div>
       </div>
     </div>
     </div>
