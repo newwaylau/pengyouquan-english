@@ -17,7 +17,12 @@ import './index.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo'>('practice');
+  const parseHash = (): 'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo' => {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    const valid: Record<string, any> = { login: 'login', wrong: 'wrong', search: 'search', browse: 'browse', admin: 'admin', subtitle: 'subtitle', demo: 'demo' };
+    return valid[hash] || 'practice';
+  };
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo'>(parseHash);
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -50,6 +55,22 @@ export default function App() {
     fetch('/api/notifications')
       .then(r => r.json())
       .then(r => { if (r.code === 200) setNotifications(r.data || []); });
+  }, []);
+
+  // 同步 page 到 URL hash
+  useEffect(() => {
+    const target = page === 'practice' ? '' : page;
+    const current = window.location.hash.replace(/^#\/?/, '');
+    if (current !== target) {
+      window.location.hash = target ? `#/${target}` : '';
+    }
+  }, [page]);
+
+  // 监听 hash 变化（浏览器前进/后退/直接输入）
+  useEffect(() => {
+    const onHashChange = () => setPage(parseHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
   // 管理员实时在线人数 SSE
