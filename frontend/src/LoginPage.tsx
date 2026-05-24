@@ -323,8 +323,8 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
     const userEmail = userData?.email || email;
 
     return (
-      <div className="login-page">
-        <div className="login-card-welcome">
+      <div className="login-page-new">
+        <div className="login-card-welcome-new">
           <div className="post-login-content" key={welcomeView}>
             {welcomeView === 'welcome' && (
               <>
@@ -447,52 +447,55 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
   // ── 未登录：左右分栏布局 ──
   return (
-    <div className="login-page">
+    <div className="login-page-new">
       {/* 左侧品牌区 */}
-      <div className="login-brand">
-        <div className="login-brand-icon">🎬</div>
-        <h1>听懂每一句台词</h1>
-        <p className="brand-subtitle">
-          通过精选美剧台词，逐词精听、跟读模仿，<br />真正提升英语听力与口语能力。
-        </p>
-        <div className="login-brand-features">
-          <div className="login-brand-feature">
-            <span className="check">✓</span>
-            精选《老友记》《生活大爆炸》等经典美剧台词
+      <div className="login-brand-new">
+        <div className="login-brand-icon-new">🎬</div>
+        <h1>英语<span className="accent">剧场</span></h1>
+        <p className="login-brand-tagline">跟读经典美剧片段，在台词中掌握地道英语</p>
+        <div className="login-brand-stats">
+          <div className="login-brand-stat-card">
+            <div className="login-brand-stat-value">3000+</div>
+            <div className="login-brand-stat-label">影视句子</div>
           </div>
-          <div className="login-brand-feature">
-            <span className="check">✓</span>
-            逐词填空练习 + 智能纠错 + 发音跟读
+          <div className="login-brand-stat-card">
+            <div className="login-brand-stat-value">20+</div>
+            <div className="login-brand-stat-label">经典剧集</div>
           </div>
-          <div className="login-brand-feature">
-            <span className="check">✓</span>
-            学习进度追踪，错题自动复习
+          <div className="login-brand-stat-card">
+            <div className="login-brand-stat-value">1M+</div>
+            <div className="login-brand-stat-label">练习次数</div>
           </div>
         </div>
       </div>
 
       {/* 右侧表单区 */}
-      <div className="login-form-container">
-        <h2>欢迎回来</h2>
-        <p className="form-subtitle">登录你的账号继续学习</p>
+      <div className="login-form-panel-new">
+        <div className="login-form-new">
+        <h2 className="login-form-title">欢迎回来</h2>
+        <p className="login-form-subtitle">登录你的账号继续学习</p>
         <form onSubmit={handleSubmit}>
 
           {/* ── 登录模式 ── */}
           {mode === 'login' && (
             <>
-              <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
-              <input id="login-email" type="text" placeholder="newwaylau@hotmail.com"
-                value={email}
-                onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+              <div className="login-form-group">
+                <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
+                <input id="login-email" type="text" placeholder="newwaylau@hotmail.com" className="login-form-input"
+                  value={email}
+                  onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                  style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+              </div>
 
-              <label className="field-label" htmlFor="login-password">密码</label>
-              <div className="pwd-wrapper">
-                <input id="login-password" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
-                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
-                  {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
-                </span>
+              <div className="login-form-group">
+                <label className="field-label" htmlFor="login-password">密码</label>
+                <div className="pwd-wrapper">
+                  <input id="login-password" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
+                    onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+                  <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
+                    {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
+                  </span>
+                </div>
               </div>
 
               <div className="forgot-link">
@@ -504,57 +507,71 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           {/* ── 注册模式 ── */}
           {mode === 'register' && (
             <>
-              <input type="email" placeholder="邮箱"
-                value={email}
-                onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                style={email && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+              <div className="login-form-group">
+                <input type="email" placeholder="邮箱" className="login-form-input"
+                  value={email}
+                  onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                  style={email && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+              </div>
 
               {/* 验证码 */}
-              <div className="code-row">
-                <input type="text" placeholder="邮箱验证码" value={code}
-                  onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
-                  className="code-input" />
-                <button type="button" className="btn-outline send-code-btn"
-                  onClick={handleSendCode}
-                  disabled={codeSending || codeCountdown > 0}>
-                  {codeSending ? '发送中...' : codeCountdown > 0 ? `${codeCountdown}s` : '发送验证码'}
-                </button>
+              <div className="login-form-group">
+                <div className="code-row">
+                  <input type="text" placeholder="邮箱验证码" value={code}
+                    onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
+                    className="code-input login-form-input" />
+                  <button type="button" className="btn-outline send-code-btn"
+                    onClick={handleSendCode}
+                    disabled={codeSending || codeCountdown > 0}>
+                    {codeSending ? '发送中...' : codeCountdown > 0 ? `${codeCountdown}s` : '发送验证码'}
+                  </button>
+                </div>
               </div>
 
               {/* 密码 */}
-              <div className="pwd-wrapper">
-                <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
-                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? '隐藏密码' : '显示密码'}>
-                  {showPwd ? <EyeOpen /> : <EyeClosed />}
-                </span>
-              </div>
-              {password && (
-                <div className="pwd-strength-bar">
-                  <div className="pwd-strength-fill" style={{
-                    width: `${pwdStrength.percent}%`,
-                    background: pwdStrength.color
-                  }} />
-                  <span className="pwd-strength-label" style={{ color: pwdStrength.color }}>
-                    {pwdStrength.label}
+              <div className="login-form-group">
+                <div className="pwd-wrapper">
+                  <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
+                    onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+                  <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? '隐藏密码' : '显示密码'}>
+                    {showPwd ? <EyeOpen /> : <EyeClosed />}
                   </span>
                 </div>
-              )}
-              <div className="pwd-wrapper">
-                <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
-                  onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                  style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
-                <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)} aria-label={showPwd2 ? '隐藏密码' : '显示密码'}>
-                  {showPwd2 ? <EyeOpen /> : <EyeClosed />}
-                </span>
+                {password && (
+                  <div className="pwd-strength-bar">
+                    <div className="pwd-strength-fill" style={{
+                      width: `${pwdStrength.percent}%`,
+                      background: pwdStrength.color
+                    }} />
+                    <span className="pwd-strength-label" style={{ color: pwdStrength.color }}>
+                      {pwdStrength.label}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="login-form-group">
+                <div className="pwd-wrapper">
+                  <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
+                    onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                    style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
+                  <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)} aria-label={showPwd2 ? '隐藏密码' : '显示密码'}>
+                    {showPwd2 ? <EyeOpen /> : <EyeClosed />}
+                  </span>
+                </div>
               </div>
 
-              <input type="tel" placeholder="手机号（可选）" value={phone}
-                onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
-                style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
+              <div className="login-form-group">
+                <input type="tel" placeholder="手机号（可选）" className="login-form-input"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
+                  style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
+              </div>
 
-              <input type="text" placeholder="邀请码（可选）" value={invitedBy}
-                onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
+              <div className="login-form-group">
+                <input type="text" placeholder="邀请码（可选）" className="login-form-input"
+                  value={invitedBy}
+                  onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
+              </div>
             </>
           )}
 
@@ -656,6 +673,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

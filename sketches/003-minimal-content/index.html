@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 设计提案</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #090d14;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; background: #0d111c;
+  border-right: 1px solid #1c2333;
+  display: flex; flex-direction: column; padding: 20px 12px; flex-shrink: 0;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 12px 20px; border-bottom: 1px solid #1c2333; margin-bottom: 16px;
+}
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: #14b8a6; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+}
+.logo-text { font-size: 16px; font-weight: 700; color: #f1f5f9; letter-spacing: -0.01em; }
+.nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; color: #6b7280;
+  cursor: pointer; transition: all 0.12s; text-decoration: none;
+  border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+}
+.nav-item:hover { background: #1c2333; color: #d1d5db; }
+.nav-item.active { background: rgba(20,184,166,0.1); color: #14b8a6; font-weight: 600; }
+.nav-icon { width: 18px; text-align: center; font-size: 14px; }
+.nav-badge {
+  margin-left: auto; background: #1c2333;
+  font-size: 11px; padding: 1px 7px; border-radius: 8px; color: #6b7280;
+}
+.nav-item.active .nav-badge { background: rgba(20,184,166,0.15); color: #14b8a6; }
+.sidebar-footer { border-top: 1px solid #1c2333; padding-top: 12px; margin-top: 8px; }
+.user-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 6px; cursor: pointer;
+}
+.user-row:hover { background: #1c2333; }
+.avatar {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #14b8a6; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+.user-name { font-size: 12px; font-weight: 500; color: #d1d5db; }
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; max-width: 100%; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 32px; border-bottom: 1px solid #1c2333;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-nav { display: flex; gap: 4px; }
+.topbar-nav-item {
+  padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  color: #6b7280; cursor: pointer; border: none; background: none; font-family: inherit;
+  transition: all 0.12s;
+}
+.topbar-nav-item:hover { color: #d1d5db; background: #1c2333; }
+.topbar-nav-item.active { color: #14b8a6; background: rgba(20,184,166,0.1); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: none;
+  background: transparent; color: #6b7280; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.12s;
+}
+.icon-btn:hover { background: #1c2333; color: #d1d5db; }
+.btn-login {
+  padding: 6px 16px; border-radius: 6px; border: 1px solid #1c2333;
+  background: transparent; color: #d1d5db; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all 0.12s;
+}
+.btn-login:hover { background: #1c2333; border-color: #374151; }
+/* Content */
+.content { padding: 24px 32px; flex: 1; }
+/* Stats badges */
+.stats-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.stat-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px; font-size: 13px;
+  background: #0d111c; border: 1px solid #1c2333; color: #6b7280;
+}
+.stat-badge strong { color: #d1d5db; font-weight: 600; }
+/* Sentence card */
+.sentence-card {
+  background: #0d111c; border: 1px solid #1c2333;
+  border-radius: 8px; padding: 28px;
+}
+.sentence-meta {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+}
+.sentence-meta-item {
+  font-size: 12px; color: #6b7280;
+}
+.sentence-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: #374151; }
+.mode-tag {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  color: #14b8a6; padding: 2px 8px; border-radius: 4px;
+  background: rgba(20,184,166,0.08);
+}
+.sentence-en {
+  font-size: 20px; font-weight: 500; color: #e2e8f0;
+  line-height: 1.5; margin-bottom: 6px; letter-spacing: -0.01em;
+}
+.sentence-cn {
+  font-size: 14px; color: #6b7280; margin-bottom: 24px;
+}
+/* Input area */
+.input-area { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.input-slot {
+  padding: 8px 10px; border-radius: 6px; font-size: 15px; text-align: center;
+  border: 1px solid #1c2333; background: #090d14; color: #e2e8f0;
+  min-width: 36px; font-family: inherit; outline: none; transition: border-color 0.12s;
+}
+.input-slot:focus { border-color: #14b8a6; }
+.input-slot.filled { border-color: #22c55e; background: rgba(34,197,94,0.05); color: #22c55e; }
+.input-slot.prefill { border-color: transparent; color: #6b7280; font-style: italic; }
+/* Action bar */
+.action-bar {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  padding: 12px 0 0; border-top: 1px solid #1c2333;
+}
+.action-group { display: flex; gap: 2px; align-items: center; }
+.action-divider { width: 1px; height: 20px; background: #1c2333; margin: 0 8px; }
+.action-btn {
+  padding: 6px 12px; border-radius: 6px; border: none;
+  background: transparent; color: #6b7280; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all 0.12s;
+  display: flex; align-items: center; gap: 4px;
+}
+.action-btn:hover { background: #1c2333; color: #d1d5db; }
+.action-btn.primary {
+  background: #14b8a6; color: #fff; font-weight: 600;
+}
+.action-btn.primary:hover { background: #0d9488; }
+.action-btn.active-speed {
+  background: #1c2333; color: #d1d5db; font-weight: 600;
+}
+/* Shortcuts footer */
+.shortcuts-bar {
+  display: flex; gap: 16px; margin-top: 16px;
+  font-size: 11px; color: #4b5563;
+}
+.shortcuts-bar kbd {
+  font-family: inherit; color: #6b7280;
+  background: #0d111c; border: 1px solid #1c2333;
+  padding: 1px 5px; border-radius: 3px; font-size: 10px;
+}
+/* Login page */
+.login-layout {
+  min-height: 100vh; display: flex; background: #090d14;
+}
+.login-side {
+  width: 440px; padding: 48px; display: flex; flex-direction: column;
+  justify-content: center; background: #0d111c;
+  border-right: 1px solid #1c2333;
+}
+.login-side h1 { font-size: 24px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+.login-side p { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+.login-field { margin-bottom: 16px; }
+.login-field label { display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+.login-field input {
+  width: 100%; padding: 10px 14px; border-radius: 6px;
+  border: 1px solid #1c2333; background: #090d14; color: #e2e8f0;
+  font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.12s;
+}
+.login-field input:focus { border-color: #14b8a6; }
+.login-btn {
+  width: 100%; padding: 10px; border-radius: 6px; border: none;
+  background: #14b8a6; color: #fff; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; margin-top: 4px;
+}
+.login-btn:hover { background: #0d9488; }
+.login-links { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 13px; }
+.login-links a { color: #6b7280; text-decoration: none; cursor: pointer; }
+.login-links a:hover { color: #14b8a6; }
+.login-hero {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 48px;
+}
+.login-hero-content { text-align: center; }
+.login-hero-content .big-icon { font-size: 72px; margin-bottom: 16px; }
+.login-hero-content h2 { font-size: 28px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+.login-hero-content h2 span { color: #14b8a6; }
+.login-hero-content p { font-size: 15px; color: #6b7280; max-width: 400px; line-height: 1.6; }
+.login-hero-stats { display: flex; gap: 24px; margin-top: 32px; justify-content: center; }
+.login-hero-stat { text-align: center; }
+.login-hero-stat .num { font-size: 32px; font-weight: 700; color: #14b8a6; }
+.login-hero-stat .label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .content { padding: 16px; }
+  .topbar { padding: 10px 16px; }
+  .topbar-nav { display: none; }
+  .stats-row { flex-wrap: wrap; }
+  .login-side { width: 100%; border-right: none; }
+  .login-hero { display: none; }
+  .action-group { flex-wrap: wrap; }
+  .action-divider { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div style="padding:20px;background:#090d14;border-bottom:1px solid #1c2333;">
+  <span style="color:#14b8a6;font-size:13px;font-weight:600;">变体 3 · Minimal Content-First</span>
+  <span style="color:#6b7280;font-size:12px;margin-left:12px;">灵感：Linear / GitHub 极简主义，内容为王</span>
+</div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🎬</div>
+      <span class="logo-text">英语剧场</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active"><span class="nav-icon">📝</span> 练习 <span class="nav-badge">当前</span></button>
+      <button class="nav-item"><span class="nav-icon">❌</span> 错题本 <span class="nav-badge">12</span></button>
+      <button class="nav-item"><span class="nav-icon">🔍</span> 搜索</button>
+      <button class="nav-item"><span class="nav-icon">📂</span> 浏览</button>
+      <button class="nav-item"><span class="nav-icon">🧪</span> Demo</button>
+      <button class="nav-item"><span class="nav-icon">⚙️</span> 设置</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar">H</div>
+        <span class="user-name">Heaton</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-nav">
+          <button class="topbar-nav-item active">练习</button>
+          <button class="topbar-nav-item">错题本</button>
+          <button class="topbar-nav-item">搜索</button>
+          <button class="topbar-nav-item">浏览</button>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn">🔔</button>
+        <button class="icon-btn">🌙</button>
+        <button class="btn-login">登录</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-badge"><strong>87%</strong> 正确率</div>
+        <div class="stat-badge"><strong>12</strong> 待复习错题</div>
+        <div class="stat-badge"><strong>47</strong> 今日练习</div>
+        <div class="stat-badge"><strong>1,284</strong> 总计</div>
+      </div>
+
+      <!-- Sentence Card -->
+      <div class="sentence-card">
+        <div class="sentence-meta">
+          <span class="mode-tag">听写</span>
+          <span class="sentence-meta-dot"></span>
+          <span class="sentence-meta-item">Game of Thrones S01E02 · #1955</span>
+          <span class="sentence-meta-dot"></span>
+          <span class="sentence-meta-item">3 / 42</span>
+        </div>
+
+        <div class="sentence-en">Stay here. I'll go back to the inn and bring help.</div>
+        <div class="sentence-cn">躺着别动，我这就回旅店找人来帮忙。</div>
+
+        <!-- Progress dots -->
+        <div style="display:flex;gap:3px;margin-bottom:16px;">
+          <div style="flex:1;height:3px;border-radius:2px;background:#22c55e;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#22c55e;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#22c55e;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#14b8a6;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#1c2333;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#1c2333;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#1c2333;"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:#1c2333;"></div>
+        </div>
+
+        <div class="input-area">
+          <span class="input-slot filled">Stay</span>
+          <span class="input-slot" contenteditable>here</span>
+          <span class="input-slot prefill">I'll</span>
+          <span class="input-slot" contenteditable></span>
+          <span class="input-slot prefill">back</span>
+          <span class="input-slot" contenteditable></span>
+          <span class="input-slot" contenteditable></span>
+          <span class="input-slot" contenteditable></span>
+          <span class="input-slot" contenteditable></span>
+          <span class="input-slot" contenteditable></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+          <button class="action-btn primary">⏎ 提交</button>
+          <div class="action-divider"></div>
+          <div class="action-group">
+            <button class="action-btn">🎬 原音</button>
+            <button class="action-btn">🎙️ 导播</button>
+            <button class="action-btn">⏭️ 下一句</button>
+          </div>
+          <div class="action-divider"></div>
+          <div class="action-group">
+            <button class="action-btn">0.5×</button>
+            <button class="action-btn active-speed">1×</button>
+            <button class="action-btn">1.5×</button>
+          </div>
+          <div class="action-divider"></div>
+          <button class="action-btn">👁️ 中文</button>
+        </div>
+
+        <div class="shortcuts-bar">
+          <span><kbd>Enter</kbd> 提交</span>
+          <span><kbd>Space</kbd> 播放</span>
+          <span><kbd>Tab</kbd> 下一格</span>
+          <span><kbd>Shift+Tab</kbd> 上一格</span>
+          <span><kbd>→</kbd> 下一句</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login -->
+<div style="padding:20px;background:#090d14;border-top:1px solid #1c2333;border-bottom:1px solid #1c2333;">
+  <span style="color:#14b8a6;font-size:13px;font-weight:600;">登录页预览</span>
+</div>
+
+<div class="login-layout">
+  <div class="login-side">
+    <h1>登录</h1>
+    <p>欢迎回来，继续你的英语学习之旅</p>
+    <div class="login-field">
+      <label>邮箱 / 手机号</label>
+      <input type="email" placeholder="newwaylau@hotmail.com" value="newwaylau@hotmail.com">
+    </div>
+    <div class="login-field">
+      <label>密码</label>
+      <input type="password" placeholder="输入密码">
+    </div>
+    <button class="login-btn">登录</button>
+    <div class="login-links">
+      <a>忘记密码？</a>
+      <a>注册账号</a>
+    </div>
+  </div>
+  <div class="login-hero">
+    <div class="login-hero-content">
+      <div class="big-icon">🎬</div>
+      <h2>英语<span>剧场</span></h2>
+      <p>跟读经典美剧片段，在真实的台词语境中掌握地道英语表达。</p>
+      <div class="login-hero-stats">
+        <div class="login-hero-stat"><div class="num">3,000+</div><div class="label">影视句子</div></div>
+        <div class="login-hero-stat"><div class="num">20+</div><div class="label">经典剧集</div></div>
+        <div class="login-hero-stat"><div class="num">1M+</div><div class="label">练习次数</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

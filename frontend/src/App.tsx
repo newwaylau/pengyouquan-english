@@ -23,6 +23,7 @@ export default function App() {
   const [announcement, setAnnouncement] = useState('');
   const [notifications, setNotifications] = useState<any[]>([]);
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
+  const [wrongCount, setWrongCount] = useState(0);
   const { theme, toggleTheme, isDark } = useTheme();
   const mainRef = useRef<HTMLElement>(null);
 
@@ -96,9 +97,10 @@ export default function App() {
         onLogout={handleLogout}
         isDark={isDark}
         onToggleTheme={toggleTheme}
+        wrongCount={wrongCount}
       />
 
-      <div className="app-content">
+      <div className="app-content app-content-new">
         {/* 手机端精简顶部导航 */}
         <nav className="topnav-mobile">
           <span className="topnav-mobile-logo" onClick={() => setPage('practice')}>
@@ -120,6 +122,32 @@ export default function App() {
           </div>
         </nav>
 
+        {/* 桌面端 Topbar */}
+        <header className="topbar">
+          <div className="topbar-left">
+            <div className="topbar-title">
+              {page === 'practice' && '练习'}
+              {page === 'wrong' && '错题本'}
+              {page === 'search' && '搜索'}
+              {page === 'browse' && '浏览'}
+              {page === 'admin' && '管理后台'}
+              {page === 'subtitle' && '字幕导入'}
+              {page === 'demo' && 'Demo'}
+            </div>
+            <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
+          </div>
+          <div className="topbar-right">
+            <button className="topbar-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+              {isDark ? '☀️' : '🌙'}
+            </button>
+            {user ? (
+              <button className="topbar-login-btn btn-outline-style" onClick={handleLogout}>退出</button>
+            ) : (
+              <button className="topbar-login-btn" onClick={() => setPage('login')}>登录</button>
+            )}
+          </div>
+        </header>
+
         {/* 公告 & 通知区域 */}
         {announcement && (
           <div className="announcement-bar">
@@ -140,8 +168,8 @@ export default function App() {
           </div>
         )}
 
-        <main className="page-enter" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
-          {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} />}
+        <main className="page-enter main-content-new" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
+          {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} onWrongCountChange={setWrongCount} />}
           {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
