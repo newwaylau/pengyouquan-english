@@ -76,11 +76,11 @@
   --mode-badge-bg: rgba(255,255,255,0.08);
 
   /* 侧边栏深色模式 */
-  --sidebar-bg: #0c1a2b;
+  --sidebar-bg: #1e293b;
   --sidebar-text: #f1f5f9;
   --sidebar-text-secondary: #94a3b8;
   --sidebar-text-tertiary: #64748b;
-  --sidebar-divider: #1e293b;
+  --sidebar-divider: #334155;
   --sidebar-border: #334155;
   --sidebar-avatar-text: #0f172a;
 
@@ -333,11 +333,11 @@
   --stat-card-bg: rgba(255,255,255,0.06);
   --stat-card-hover-bg: rgba(255,255,255,0.1);
   --mode-badge-bg: rgba(255,255,255,0.08);
-  --sidebar-bg: #0c1a2b;
+  --sidebar-bg: #1e293b;
   --sidebar-text: #f1f5f9;
   --sidebar-text-secondary: #94a3b8;
   --sidebar-text-tertiary: #64748b;
-  --sidebar-divider: #1e293b;
+  --sidebar-divider: #334155;
   --sidebar-border: #334155;
   --sidebar-avatar-text: #0f172a;
   --cn-text-color: #a8a8c8;
@@ -4895,7 +4895,7 @@ h3 {
   left: 0;
   width: 260px;
   height: 100vh;
-  background: #1e293b;
+  background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -4908,7 +4908,7 @@ h3 {
   padding: 20px 16px 16px;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--sidebar-divider);
 }
 .sidebar-logo-circle {
   width: 36px;
@@ -4929,16 +4929,16 @@ h3 {
 .sidebar-logo-title {
   font-size: 18px;
   font-weight: bold;
-  color: #f1f5f9;
+  color: var(--sidebar-text);
 }
 .sidebar-logo-subtitle {
   font-size: 11px;
-  color: #64748b;
+  color: var(--sidebar-text-secondary);
 }
 .sidebar-section-header {
   font-size: 11px;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--sidebar-text-tertiary);
   letter-spacing: 0.05em;
   padding: 16px 12px 6px;
 }
@@ -4955,7 +4955,7 @@ h3 {
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--sidebar-text-secondary);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -4965,8 +4965,8 @@ h3 {
   text-align: left;
 }
 .sidebar-nav-item:hover {
-  background: #334155;
-  color: #f1f5f9;
+  background: var(--sidebar-divider);
+  color: var(--sidebar-text);
 }
 .sidebar-nav-item.active {
   background: #14b8a6;
@@ -4998,7 +4998,7 @@ h3 {
   text-align: center;
 }
 .sidebar-footer-divider {
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--sidebar-divider);
   margin: auto 14px 0;
 }
 .sidebar-user-new {
@@ -5011,7 +5011,7 @@ h3 {
   border-radius: 0;
 }
 .sidebar-user-new:hover {
-  background: rgba(255,255,255,0.03);
+  background: var(--hover-bg);
 }
 .sidebar-avatar-new {
   width: 32px;
@@ -5035,14 +5035,14 @@ h3 {
 .sidebar-username-new {
   font-size: 13px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--sidebar-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .sidebar-email-new {
   font-size: 11px;
-  color: #64748b;
+  color: var(--sidebar-text-secondary);
 }
 
 /* =====================================================
