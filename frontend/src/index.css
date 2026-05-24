@@ -1183,7 +1183,7 @@ h3 {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 24px);
+  height: calc(100vh - 48px);
   max-width: 100%;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -3294,11 +3294,12 @@ h3 {
   .practice-card { padding: 14px; }
 
   .action-buttons { gap: 6px; }
-  .action-row { gap: 4px; }
+  .action-row { gap: 3px; }
   .action-btn { padding: calc(8/16*1rem) calc(14/16*1rem); font-size: var(--text-aux); }
-  .btn-speed { font-size: 0.75rem; padding: calc(5/16*1rem) calc(8/16*1rem); min-width: 40px; }
+  .btn-speed { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); min-width: 40px; }
+  .btn-action { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); }
   .action-row-split { flex-wrap: wrap; gap: 4px; }
-  .action-row-half { gap: 4px; min-width: 0; }
+  .action-row-half { gap: 3px; min-width: 0; }
 
   /* Stats Bar 在手机上2x2排列 */
   .stats-bar { gap: 6px; flex-wrap: wrap; }
@@ -3396,6 +3397,10 @@ h3 {
 
   /* 跳转按钮窄一点 */
   .jump-input button { font-size: 0.75rem; padding: calc(6/16*1rem) calc(10/16*1rem); }
+
+  /* 手机模式句子行数放宽 */
+  .phone-mode-overlay .sentence-en { -webkit-line-clamp: 4; }
+  .phone-mode-overlay .sentence-cn { -webkit-line-clamp: 3; }
 }
 
 /* ---------- 通知列表（公开区域） ---------- */
@@ -3494,15 +3499,6 @@ h3 {
 }
 .back-btn:hover {
   background: var(--hover-bg);
-}
-
-/* 超小屏手机 (≤400px) 适配 */
-@media (max-width: 550px) {
-  .action-row { gap: 3px; }
-  .btn-action,
-  .btn-speed { font-size: var(--text-tag); padding: calc(3/16*1rem) calc(4/16*1rem); }
-  .action-row-split { gap: 4px; }
-  .action-row-half { gap: 3px; }
 }
 
 /* ── 设置面板 (匹配5000老版) ─── */
@@ -3618,6 +3614,70 @@ h3 {
 .btn-sm {
   padding: 6px 14px;
   font-size: 0.75rem;
+}
+
+/* ---------- PracticePage 内联样式提取 ---------- */
+.practice-hidden-input {
+  position: fixed;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.focus-mode-btn-row {
+  text-align: center;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.focus-mode-btn-row-desktop {
+  text-align: center;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.bottom-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.skeleton-stat-item {
+  height: 60px;
+}
+.skeleton-mode-badge {
+  height: 24px;
+  width: 120px;
+  margin-bottom: 16px;
+}
+.skeleton-bar {
+  height: 40px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.skeleton-block {
+  height: 60px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.skeleton-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.skeleton-btn-sm {
+  height: 36px;
+  width: 80px;
+}
+.skeleton-btn-md {
+  height: 36px;
+  width: 100px;
+}
+.word-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* ========== 手机模式 ========== */
