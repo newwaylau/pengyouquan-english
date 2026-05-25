@@ -865,6 +865,9 @@ export default function PracticePage({
             }}
           />
 
+          {/* 可滚动内容区（英文句子始终可见） */}
+          <div className="phone-mode-scroll">
+
           {/* 第2行: 逐词输入框(自动换行) */}
           <div className="word-inputs">
             {words.map((w, i) => {
@@ -922,6 +925,7 @@ export default function PracticePage({
               ))}
             </div>
             <button className="phone-ka-btn phone-ka-settings" onClick={() => setSettingsOpen(true)}>⚙ 设置</button>
+          </div>
           </div>
         </div>
       )}

@@ -24,8 +24,8 @@ function pwdLevel(pwd: string): { label: string; color: string; percent: number 
 /** 阻止空格键输入 */
 function preventSpace(e: React.KeyboardEvent) { if (e.key === ' ') e.preventDefault(); }
 
-export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string) => void; onHome?: () => void }) {
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+export default function LoginPage({ onLogin, onHome, initialMode }: { onLogin: (token: string) => void; onHome?: () => void; initialMode?: 'login' | 'register' | 'forgot' }) {
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(initialMode || 'login');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -160,17 +160,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
       if (!email || !password) { setError('请填写邮箱和密码'); return; }
       const r = await api.login(email, password);
       if (r.code === 200) {
-        // 先设置 token，然后获取用户信息，显示欢迎面板
-        setToken(r.data.token);
-        setLoginToken(r.data.token);
-        const user = await api.me();
-        if (user.code === 200) {
-          setUserData(user.data);
-          setLoggedIn(true);
-          setWelcomeView('welcome');
-        } else {
-          setError('获取用户信息失败');
-        }
+        onLogin(r.data.token);
       } else {
         setError(r.message || '登录失败');
       }
@@ -185,16 +175,7 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
       const r = await api.register({ email, code, password, phone: phone || undefined, invitedBy: invitedBy || undefined });
       if (r.code === 200) {
-        setToken(r.data.token);
-        setLoginToken(r.data.token);
-        const user = await api.me();
-        if (user.code === 200) {
-          setUserData(user.data);
-          setLoggedIn(true);
-          setWelcomeView('welcome');
-        } else {
-          setError('获取用户信息失败');
-        }
+        onLogin(r.data.token);
       } else {
         setError(r.message || '注册失败');
       }

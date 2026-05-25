@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏰 维斯特洛学习赛道 · 权游主题</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070b15;
+    color: #d4c9b8;
+    font-family: 'Inter', -apple-system, serif;
+    padding: 40px 24px 80px;
+  }
+  .header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 48px;
+  }
+  .header::before {
+    content: '❄️ ⚔️ 🐉';
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 12px;
+    letter-spacing: 12px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #c4a35a, #8b6914, #c4a35a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.05em;
+  }
+  .header .tagline {
+    color: #6b5b4e;
+    font-size: 0.875rem;
+    font-style: italic;
+    font-family: 'Georgia', serif;
+  }
+
+  .section { max-width: 1100px; margin: 0 auto 56px; }
+  .sec-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #c4a35a;
+    margin-bottom: 6px;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.03em;
+  }
+  .sec-sub {
+    color: #5a4a3a;
+    font-size: 0.875rem;
+    margin-bottom: 24px;
+    border-left: 2px solid #c4a35a33;
+    padding-left: 14px;
+  }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card {
+    background: #0f1322;
+    border: 1px solid rgba(196,163,90,0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border-color: rgba(196,163,90,0.12);
+  }
+  .card-header {
+    padding: 18px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(196,163,90,0.04);
+  }
+  .card-header .icon { font-size: 1.5rem; }
+  .card-header h3 { font-size: 1rem; font-weight: 600; color: #c4a35a; font-family: 'Georgia', serif; }
+  .card-body { padding: 16px 20px 20px; }
+
+  .mock-block {
+    background: rgba(196,163,90,0.02);
+    border: 1px solid rgba(196,163,90,0.04);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .mock-block:last-child { margin-bottom: 0; }
+
+  /* Rank cards */
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(196,163,90,0.03);
+  }
+  .rank-item:last-child { border-bottom: none; }
+  .rank-icon { font-size: 1.3rem; width: 34px; text-align: center; }
+  .rank-name { flex: 1; font-size: 0.8125rem; font-weight: 500; color: #c4b998; }
+  .rank-motto { font-size: 0.625rem; color: #5a4a3a; font-style: italic; }
+  .rank-xp { font-size: 0.6875rem; color: #6b5b4e; white-space: nowrap; }
+
+  .divider { height: 1px; background: rgba(196,163,90,0.04); margin: 32px 0; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+  }
+  .badge.gold { background: rgba(196,163,90,0.12); color: #c4a35a; }
+  .badge.ice { background: rgba(136,192,208,0.12); color: #88c0d0; }
+  .badge.fire { background: rgba(208,96,64,0.12); color: #d06040; }
+  .badge.night { background: rgba(80,80,120,0.12); color: #7070a0; }
+  .badge.green { background: rgba(100,160,100,0.12); color: #64a064; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .ftag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    margin: 3px;
+  }
+  .ftag.gold { background: rgba(196,163,90,0.06); color: #c4a35a; border: 1px solid rgba(196,163,90,0.08); }
+  .ftag.ice { background: rgba(136,192,208,0.06); color: #88c0d0; border: 1px solid rgba(136,192,208,0.08); }
+  .ftag.fire { background: rgba(208,96,64,0.06); color: #d06040; border: 1px solid rgba(208,96,64,0.08); }
+  .ftag.night { background: rgba(80,80,120,0.06); color: #8080b0; border: 1px solid rgba(80,80,120,0.08); }
+
+  .summary-box {
+    background: linear-gradient(135deg, rgba(196,163,90,0.04), rgba(196,163,90,0.01));
+    border: 1px solid rgba(196,163,90,0.06);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .summary-box h3 { font-size: 1rem; font-weight: 600; color: #c4a35a; margin-bottom: 12px; font-family: 'Georgia', serif; }
+  .summary-box ul { list-style: none; }
+  .summary-box li {
+    padding: 8px 0;
+    font-size: 0.875rem;
+    color: #a09080;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(196,163,90,0.03);
+  }
+  .summary-box li:last-child { border-bottom: none; }
+  .summary-box li .num { color: #c4a35a; font-weight: 700; min-width: 32px; font-family: 'Georgia', serif; }
+
+  .divider-ornate {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #4a3a2a;
+    margin: 40px 0;
+    letter-spacing: 8px;
+  }
+
+  .prowess-bar { height: 4px; border-radius: 2px; background: rgba(196,163,90,0.04); margin: 6px 0; overflow: hidden; }
+  .prowess-fill { height: 100%; border-radius: 2px; }
+  .prowess-fill.gold { background: linear-gradient(90deg, #8b6914, #c4a35a); }
+  .prowess-fill.ice { background: linear-gradient(90deg, #5a8090, #88c0d0); }
+
+  .bottom-nav-mock {
+    display: flex; justify-content: space-around;
+    padding: 14px; margin-top: 12px;
+    border-top: 1px solid rgba(196,163,90,0.04);
+  }
+  .bn-item { text-align: center; }
+  .bn-item .ico { font-size: 1.25rem; }
+  .bn-item .lab { font-size: 0.625rem; color: #4a3a2a; margin-top: 3px; }
+  .bn-item.active .lab { color: #c4a35a; }
+
+  .inset {
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(196,163,90,0.04);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+  }
+  .goth-text { font-size: 0.75rem; color: #5a4a3a; font-style: italic; line-height: 1.6; }
+  .invite-code {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: #c4a35a;
+    font-family: 'Georgia', serif;
+    padding: 12px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(196,163,90,0.08);
+    border-radius: 8px;
+    margin: 8px 0;
+  }
+
+  .page-mock {
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(196,163,90,0.04);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .page-mock-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(196,163,90,0.04);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .page-mock-body { padding: 18px 20px; }
+
+  .lb-tabs {
+    display: flex; gap: 4px; margin-bottom: 10px;
+    background: rgba(0,0,0,0.1); border-radius: 8px; padding: 3px;
+  }
+  .lb-tab {
+    flex: 1; text-align: center; padding: 6px 0;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 500;
+    color: #4a3a2a; cursor: default;
+  }
+  .lb-tab.active { background: rgba(196,163,90,0.08); color: #c4a35a; }
+
+  .lb-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(196,163,90,0.02);
+  }
+  .lb-row:last-child { border-bottom: none; }
+
+  @media (max-width: 800px) {
+    .cards { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  .quest-progress {
+    display: flex; gap: 6px; margin: 10px 0;
+  }
+  .qstep {
+    flex: 1; height: 6px; border-radius: 3px;
+    background: rgba(196,163,90,0.04);
+  }
+  .qstep.done { background: #c4a35a; }
+  .qstep.cur { background: #88c0d0; }
+
+  .quote-block {
+    border-left: 2px solid rgba(196,163,90,0.1);
+    padding: 12px 16px;
+    margin: 8px 0;
+    font-size: 0.8rem;
+    color: #6b5b4e;
+    font-style: italic;
+    font-family: 'Georgia', serif;
+    line-height: 1.6;
+  }
+  .quote-block .who {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.6875rem;
+    color: #4a3a2a;
+    font-style: normal;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏰 维斯特洛学习赛道</h1>
+  <div class="tagline">"当你练习之时，群狼共舞" — 旧神与新版</div>
+</div>
+
+<!-- Bottom nav -->
+<div class="section" style="max-width:500px;">
+  <div style="background:#0f1322;border:1px solid rgba(196,163,90,0.06);border-radius:14px;padding:16px 20px;">
+    <div class="bottom-nav-mock">
+      <div class="bn-item active"><div class="ico">🎯</div><div class="lab">Practice</div></div>
+      <div class="bn-item"><div class="ico">❌</div><div class="lab">错题本</div></div>
+      <div class="bn-item active"><div class="ico">⚔️</div><div class="lab">🏰 维斯特洛</div></div>
+      <div class="bn-item"><div class="ico">🐉</div><div class="lab">发现</div></div>
+    </div>
+    <div style="text-align:center;font-size:0.6875rem;color:#3a2a1a;">
+      Library → 🐉 发现 · Search 合并进发现<br>
+      Review 保留 · 新增 ⚔️ 维斯特洛（赛道）
+    </div>
+  </div>
+</div>
+
+<!-- 1. 封号体系 -->
+<div class="section">
+  <div class="sec-title">👑 封号体系 · 七大王国爵位</div>
+  <div class="sec-sub">从长城之外的野人，一路打到铁王座。每个封号对应家族箴言和爵位纹章。</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">❄️</span><h3>长城之外 · 起于微末</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-item">
+            <span class="rank-icon">🌲</span>
+            <span class="rank-name">自由民<br><span class="rank-motto">"凛冬将至"</span></span>
+            <span class="rank-xp">0 → 500 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">⚔️</span>
+            <span class="rank-name">守夜人<br><span class="rank-motto">"长夜至此，我即守望"</span></span>
+            <span class="rank-xp">500 → 1,200 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">📜</span>
+            <span class="rank-name">学士<br><span class="rank-motto">"吾之职责即服务"</span></span>
+            <span class="rank-xp">1,200 → 2,500 威望</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🛡️</span><h3>七国贵族 · 权力的游戏</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-item">
+            <span class="rank-icon">🗡️</span>
+            <span class="rank-name">骑士<br><span class="rank-motto">"吾盾为誓，吾剑为法"</span></span>
+            <span class="rank-xp">2,500 → 4,500 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">🏰</span>
+            <span class="rank-name">领主<br><span class="rank-motto">"听我怒吼"</span></span>
+            <span class="rank-xp">4,500 → 7,500 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">👑</span>
+            <span class="rank-name">公爵（河湾地守护）<br><span class="rank-motto">"生生不息"</span></span>
+            <span class="rank-xp">7,500 → 12,000 威望</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🐉</span><h3>铁王座 · 终局之战</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-item">
+            <span class="rank-icon">🤝</span>
+            <span class="rank-name">国王之手<br><span class="rank-motto">"权力存于人心"</span></span>
+            <span class="rank-xp">12,000 → 18,000 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">🐉</span>
+            <span class="rank-name">龙之母 / 北境之王<br><span class="rank-motto">"龙焰不熄"</span></span>
+            <span class="rank-xp">18,000 → 30,000 威望</span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon" style="filter:drop-shadow(0 0 6px #c4a35a88);">⚔️</span>
+            <span class="rank-name" style="color:#c4a35a;font-weight:700;">铁王座<br><span class="rank-motto" style="color:#8b6914;">"凛冬已至，但长夏终将来临"</span></span>
+            <span class="rank-xp">30,000+ 威望</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. 威望获取 -->
+<div class="section">
+  <div class="sec-title">💰 威望（XP）获取 · 七国律法</div>
+  <div class="sec-sub">每个练习句子都在为你的家族积累威望，终有一天坐上铁王座。</div>
+  <div class="summary-box">
+    <ul>
+      <li><span class="num">+10 威望</span> 完成一句练习（无论对错，史塔克家族从不后悔）</li>
+      <li><span class="num">+5 威望</span> 正确 bonus — "正确的人，正确的选择"</li>
+      <li><span class="num">+3 威望</span> 连击 bonus（第3句起每句+3）— "群狼不死，愈战愈强"</li>
+      <li><span class="num">+15 威望</span> 每日首练 — "每一位领主的第一道命令"</li>
+      <li><span class="num">+30 威望</span> 完成御前挑战（每日10句通关）— "为铁王座而战"</li>
+      <li><span class="num">+50 威望</span> 招揽封臣（邀请好友注册并完成首练）— "团结各部族"</li>
+      <li><span class="num">+20 威望</span> 家族盟约（和好友一起练习≥5句）— "誓言永存"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 3. 成就勋章 = 丰功伟绩 -->
+<div class="section">
+  <div class="sec-title">🎖️ 丰功伟绩 · 30+ 可载入史册</div>
+  <div class="sec-sub">每解锁一个伟绩，都会在维斯特洛的历史书中留下一页。</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">❄️</span><h3>坚守誓言 · 坚持成就</h3></div>
+      <div class="card-body">
+        <div class="mock-block" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="ftag ice">❄️ 守夜人誓言 · 练3天</span>
+          <span class="ftag ice">🗡️ 长城守望 · 练7天</span>
+          <span class="ftag gold">👑 铁王座觊觎者 · 练30天</span>
+          <span class="ftag fire">🐉 龙之征服 · 练100天</span>
+          <span class="ftag night">🌙 永夜之主 · 练365天</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🗡️</span><h3>比武大会 · 练习成就</h3></div>
+      <div class="card-body">
+        <div class="mock-block" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="ftag ice">🐺 幼狼初啼 · 首句练习</span>
+          <span class="ftag ice">⚔️ 百战勇士 · 练100句</span>
+          <span class="ftag gold">🏰 千军之主 · 练1000句</span>
+          <span class="ftag fire">🔥 龙母军团 · 练10000句</span>
+          <span class="ftag gold">🎯 御前全胜 · 每日挑战全对</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🐉</span><h3>权力的游戏 · 社交成就</h3></div>
+      <div class="card-body">
+        <div class="mock-block" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="ftag ice">🤝 结盟 · 首次邀请</span>
+          <span class="ftag ice">🗡️ 联军 · 组队初体验</span>
+          <span class="ftag gold">⭐ 五王联盟 · 邀请5人</span>
+          <span class="ftag fire">👑 铁金库支持 · 邀请20人</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. 御前挑战 + Streak -->
+<div class="section">
+  <div class="sec-title">⚔️ 御前挑战 · 每日任务</div>
+  <div class="sec-sub">国王御前会议发布每日任务：完成 10 句练习，守护你的统治天数。</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="icon">🐉</span><h3>今日御前令</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:0.8125rem;font-weight:600;color:#c4a35a;">🔥 统治 12 天</span>
+            <span style="font-size:0.8125rem;color:#6b5b4e;">今日 6/10 句</span>
+          </div>
+          <div class="quest-progress">
+            <div class="qstep done"></div><div class="qstep done"></div><div class="qstep done"></div><div class="qstep done"></div><div class="qstep done"></div><div class="qstep done"></div><div class="qstep cur"></div><div class="qstep"></div><div class="qstep"></div><div class="qstep"></div>
+          </div>
+          <div style="font-size:0.75rem;color:#5a4a3a;">今日准确率: 83%</div>
+        </div>
+        <div class="inset">
+          <div class="goth-text">"每天完成御前挑战，才能守住你的王座。若一日懈怠，铁王座便将摇摇欲坠。"</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📜</span><h3>统治日历 · Streak</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:4px;margin-bottom:8px;">
+            <span class="badge gold">M</span><span class="badge gold">T</span><span class="badge gold">W</span><span class="badge gold">T</span><span class="badge ice">F</span><span class="badge night">S</span><span class="badge gold">S</span>
+          </div>
+          <div style="font-size:0.75rem;color:#5a4a3a;">
+            💊 中断一次可用 <strong style="color:#c4a35a;">无面者的馈赠</strong>（复活卡）续命
+          </div>
+          <div style="margin-top:8px;">
+            <span class="ftag gold">💊 无面者的馈赠 · 邀请好友获得</span>
+          </div>
+        </div>
+        <div class="quote-block">
+          "凡需服役者，终获自由。凡需学习之人，终得智慧。"
+          <span class="who">— 旧镇学士，学城箴言</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. 社交裂变 -->
+<div class="section">
+  <div class="sec-title">🐺 狼群 · 社交体系</div>
+  <div class="sec-sub">"孤狼死，群狼生" — 史塔克家族。</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">🕊️</span><h3>招揽封臣 · 邀请</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="font-size:0.75rem;color:#6b5b4e;text-align:center;">你的家族纹章</div>
+          <div class="invite-code">⚔️ WINTER-2026</div>
+          <div style="font-size:0.75rem;color:#5a4a3a;text-align:center;">分享此纹章邀请封臣 · 双方各得 +50 威望</div>
+          <div style="margin-top:10px;text-align:center;">
+            <span style="display:inline-block;padding:8px 24px;border-radius:8px;background:linear-gradient(135deg,#5a3a1a,#8b6914);color:#d4c9b8;font-size:0.8125rem;font-weight:600;">📤 派乌鸦送信</span>
+          </div>
+          <div class="inset" style="margin-top:10px;">
+            <div style="font-size:0.6875rem;color:#5a4a3a;">
+              ✅ 被邀封臣完成首练后，领主威望到账<br>
+              ✅ 新封臣获 <strong style="color:#88c0d0;">长城馈赠</strong> +100 威望
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🛡️</span><h3>家族盟约 · 组队</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="font-size:0.8125rem;font-weight:600;color:#c4a35a;margin-bottom:8px;">⚔️ 北境联军</div>
+          <div class="rank-item">
+            <span class="rank-icon">🐺</span>
+            <span class="rank-name">你 · 骑士<span style="display:block;font-size:0.625rem;color:#5a4a3a;">🔥 今日 23 句</span></span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">🌊</span>
+            <span class="rank-name">小明 · 学士<span style="display:block;font-size:0.625rem;color:#5a4a3a;">🔥 今日 15 句</span></span>
+          </div>
+          <div class="rank-item">
+            <span class="rank-icon">🌲</span>
+            <span class="rank-name">Lucy · 自由民<span style="display:block;font-size:0.625rem;color:#5a4a3a;">昨日 8 句</span></span>
+          </div>
+          <div style="margin-top:8px;font-size:0.75rem;color:#88c0d0;">
+            🎯 盟约目标：今日合计 50 句 · 已完成 38/50
+          </div>
+          <div class="prowess-bar"><div class="prowess-fill gold" style="width:76%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">👑</span><h3>七国铁王座 · 排行榜</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="lb-tabs">
+            <div class="lb-tab active">今日御前</div>
+            <div class="lb-tab">本周朝会</div>
+            <div class="lb-tab">本月征战</div>
+            <div class="lb-tab">狼群</div>
+          </div>
+          <div class="lb-row">
+            <span style="color:#c4a35a;width:24px;text-align:center;font-weight:700;">1</span>
+            <span style="font-size:0.75rem;">你</span>
+            <span style="margin-left:auto;font-size:0.6875rem;color:#6b5b4e;">47 句 · 🏰 领主</span>
+          </div>
+          <div class="lb-row">
+            <span style="color:#6b5b4e;width:24px;text-align:center;">2</span>
+            <span style="font-size:0.75rem;">小明</span>
+            <span style="margin-left:auto;font-size:0.6875rem;color:#6b5b4e;">35 句 · ⚔️ 守夜人</span>
+          </div>
+          <div class="lb-row">
+            <span style="color:#6b5b4e;width:24px;text-align:center;">3</span>
+            <span style="font-size:0.75rem;">Lucy</span>
+            <span style="margin-left:auto;font-size:0.6875rem;color:#6b5b4e;">28 句 · 📜 学士</span>
+          </div>
+          <div class="lb-row">
+            <span style="color:#4a3a2a;width:24px;text-align:center;">4</span>
+            <span style="font-size:0.75rem;">Mike</span>
+            <span style="margin-left:auto;font-size:0.6875rem;color:#6b5b4e;">22 句 · 🌲 自由民</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 赛道首页 -->
+<div class="section">
+  <div class="sec-title">⚔️ 进入维斯特洛 · 赛道首页</div>
+  <div class="sec-sub">点下方导航栏的 🏰 维斯特洛，看到的就是这个页面</div>
+  <div class="page-mock">
+    <div class="page-mock-header">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8b6914,#c4a35a);display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:700;color:#0f1322;flex-shrink:0;">H</div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:0.9375rem;color:#c4b998;">Heaton</div>
+        <div style="font-size:0.75rem;color:#c4a35a;">🛡️ 骑士 · "吾盾为誓"</div>
+        <div style="display:flex;gap:8px;font-size:0.6875rem;color:#5a4a3a;margin-top:2px;">
+          <span>2,500 / 4,500 威望 → 领主</span>
+        </div>
+        <div class="prowess-bar"><div class="prowess-fill gold" style="width:45%"></div></div>
+      </div>
+    </div>
+    <div class="page-mock-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <div style="flex:1;text-align:center;padding:10px;background:rgba(196,163,90,0.03);border-radius:8px;">
+          <div style="font-size:1.25rem;font-weight:700;color:#c4a35a;">12🔥</div>
+          <div style="font-size:0.625rem;color:#5a4a3a;">统治天数</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:rgba(196,163,90,0.03);border-radius:8px;">
+          <div style="font-size:1.25rem;font-weight:700;color:#88c0d0;">6/10</div>
+          <div style="font-size:0.625rem;color:#5a4a3a;">御前挑战</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:rgba(196,163,90,0.03);border-radius:8px;">
+          <div style="font-size:1.25rem;font-weight:700;color:#d06040;">#1</div>
+          <div style="font-size:0.625rem;color:#5a4a3a;">七国排行</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;padding:12px;background:rgba(196,163,90,0.04);border-radius:10px;text-align:center;border:1px solid rgba(196,163,90,0.06);">
+          <div style="font-size:1.25rem;">⚔️</div>
+          <div style="font-size:0.6875rem;color:#c4a35a;">御前挑战</div>
+        </div>
+        <div style="flex:1;padding:12px;background:rgba(136,192,208,0.04);border-radius:10px;text-align:center;border:1px solid rgba(136,192,208,0.06);">
+          <div style="font-size:1.25rem;">👑</div>
+          <div style="font-size:0.6875rem;color:#88c0d0;">铁王座排名</div>
+        </div>
+        <div style="flex:1;padding:12px;background:rgba(208,96,64,0.04);border-radius:10px;text-align:center;border:1px solid rgba(208,96,64,0.06);">
+          <div style="font-size:1.25rem;">🎖️</div>
+          <div style="font-size:0.6875rem;color:#d06040;">丰功伟绩</div>
+        </div>
+        <div style="flex:1;padding:12px;background:rgba(196,163,90,0.02);border-radius:10px;text-align:center;border:1px solid rgba(196,163,90,0.03);">
+          <div style="font-size:1.25rem;">🐺</div>
+          <div style="font-size:0.6875rem;color:#5a4a3a;">狼群</div>
+        </div>
+      </div>
+      <div class="quote-block" style="margin-top:16px;">
+        "凛冬将至。但每一句练习，都让长城更加坚固。"
+        <span class="who">— 守夜人誓言，改写于学城</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. 发现页 -->
+<div class="section">
+  <div class="sec-title">🐉 发现 · 学城藏经阁</div>
+  <div class="sec-sub">替代 Library + Search。学城的学士们为你推荐最适合的卷宗。</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="icon">📜</span><h3>学城推荐</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="font-size:0.75rem;font-weight:600;color:#88c0d0;margin-bottom:8px;">📜 学士推荐</div>
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;background:rgba(196,163,90,0.03);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(196,163,90,0.04);">
+              <div style="font-size:0.8125rem;font-weight:600;color:#c4b998;">🐉 权力的游戏</div>
+              <div style="font-size:0.625rem;color:#5a4a3a;">进度 67%</div>
+              <div class="prowess-bar"><div class="prowess-fill gold" style="width:67%"></div></div>
+              <div style="font-size:0.625rem;color:#c4a35a;">继续征战 →</div>
+            </div>
+            <div style="flex:1;background:rgba(136,192,208,0.03);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(136,192,208,0.04);">
+              <div style="font-size:0.8125rem;font-weight:600;color:#c4b998;">🏰 唐顿庄园</div>
+              <div style="font-size:0.625rem;color:#5a4a3a;">未被征服之地</div>
+              <div style="font-size:0.625rem;color:#88c0d0;margin-top:4px;">开始你的征服 →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📚</span><h3>七国卷宗 · 剧集浏览</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <span class="ftag gold">全部</span>
+            <span class="ftag ice">征战</span>
+            <span class="ftag night">未开</span>
+            <span class="ftag fire">已征服</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#c4b998;padding:6px 0;border-bottom:1px solid rgba(196,163,90,0.02);">
+            🐉 权力的游戏 · 67% <span style="color:#5a4a3a;float:right;">1,230句</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#c4b998;padding:6px 0;border-bottom:1px solid rgba(196,163,90,0.02);">
+            🏰 唐顿庄园 · 🆕 <span style="color:#88c0d0;float:right;">630句</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#5a4a3a;padding:6px 0;">
+            💬 老友记 · 远航中 <span style="float:right;">即将到达</span>
+          </div>
+          <div style="margin-top:8px;">
+            <input type="text" placeholder="🔍 搜索台词、剧集..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(196,163,90,0.04);background:rgba(0,0,0,0.15);color:#c4b998;font-size:0.8125rem;font-family:inherit;outline:none;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider-ornate"> ⚔️ ❄️ 🐉 👑 🏰 🔥
+
+<!-- 总结 -->
+<div style="max-width:700px;margin:0 auto;text-align:center;">
+  <div style="font-size:2rem;margin-bottom:12px;">🐺</div>
+  <div style="font-size:1.125rem;font-weight:600;color:#c4a35a;margin-bottom:8px;font-family:'Georgia', serif;">"孤狼死，群狼生"</div>
+  <div style="color:#5a4a3a;font-size:0.875rem;line-height:1.7;font-family:'Georgia', serif;font-style:italic;">
+    <strong style="color:#c4a35a;font-style:normal;">每一句练习，都是迈向铁王座的一步。</strong><br>
+    <strong style="color:#88c0d0;font-style:normal;">每一天坚持，都是对凛冬的宣战。</strong><br>
+    <strong style="color:#d06040;font-style:normal;">每一个战友，都是家族的力量。</strong>
+  </div>
+
+  <div class="divider-ornate">═══ ✦ ═══</div>
+
+  <div style="background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.06);border-radius:14px;padding:24px;text-align:left;">
+    <h3 style="color:#c4a35a;font-family:'Georgia',serif;margin-bottom:12px;">📋 分期规划</h3>
+    <div style="font-size:0.8125rem;color:#6b5b4e;line-height:1.8;">
+      <strong style="color:#c4a35a;">P0 · 加冕 (~2天)</strong><br>
+      改底部导航选项卡、后台加威望字段和等级表、前端赛道首页展示封号+进度条<br><br>
+      <strong style="color:#88c0d0;">P1 · 御前 (~3天)</strong><br>
+      御前挑战（每日任务）+ Streak + 无面者复活卡 + 发现页重构<br><br>
+      <strong style="color:#d06040;">P2 · 权力的游戏 (~4天)</strong><br>
+      招揽封臣（邀请）+ 七国铁王座（排行榜）+ 家族盟约（组队）+ 丰功伟绩（成就勋章）
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

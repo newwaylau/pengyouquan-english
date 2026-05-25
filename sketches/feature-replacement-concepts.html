@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>功能概念方案 · 英语剧场</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 24px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+  .header p {
+    color: #64748b;
+    font-size: 0.9375rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .card-banner {
+    height: 8px;
+  }
+  .card-banner.a { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+  .card-banner.b { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .card-banner.c { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+
+  .card-body { padding: 24px; }
+  .card-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .card-tag.a { background: rgba(20,184,166,0.12); color: #2dd4bf; }
+  .card-tag.b { background: rgba(245,158,11,0.12); color: #fbbf24; }
+  .card-tag.c { background: rgba(139,92,246,0.12); color: #a78bfa; }
+
+  .card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+  }
+  .card .sub {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Mockup content */
+  .mockup {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  /* Stats mockup */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .stat-item {
+    text-align: center;
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+  }
+  .stat-item .num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #14b8a6;
+  }
+  .stat-item .label {
+    font-size: 0.6875rem;
+    color: #64748b;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cal-heatmap {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-top: 8px;
+  }
+  .cal-dot {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+  }
+  .cal-dot.l1 { background: rgba(20,184,166,0.2); }
+  .cal-dot.l2 { background: rgba(20,184,166,0.4); }
+  .cal-dot.l3 { background: rgba(20,184,166,0.6); }
+  .cal-dot.l4 { background: #14b8a6; }
+
+  .cal-label {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px 0;
+    font-size: 0.625rem;
+    color: #475569;
+  }
+
+  /* Vocab mockup */
+  .vocab-list {
+    padding: 0;
+  }
+  .vocab-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-word {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    min-width: 60px;
+  }
+  .vocab-context {
+    flex: 1;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+  .vocab-info {
+    font-size: 0.6875rem;
+    color: #475569;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .vocab-play {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(20,184,166,0.12);
+    display: flex;
+    align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    color: #14b8a6;
+    flex-shrink: 0;
+  }
+
+  /* Leaderboard mockup */
+  .leaderboard {
+    padding: 0;
+  }
+  .lb-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .lb-item:last-child { border-bottom: none; }
+  .lb-rank {
+    width: 24px;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #475569;
+  }
+  .lb-rank.gold { color: #f59e0b; }
+  .lb-rank.silver { color: #94a3b8; }
+  .lb-rank.bronze { color: #d97706; }
+  .lb-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14b8a6, #2dd4bf);
+    display: flex;
+    align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0f172a;
+    flex-shrink: 0;
+  }
+  .lb-name {
+    flex: 1;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #e2e8f0;
+  }
+  .lb-score {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-align: right;
+  }
+  .lb-badge {
+    font-size: 0.625rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(245,158,11,0.12);
+    color: #f59e0b;
+    margin-left: auto;
+  }
+
+  /* Feature list */
+  .feature-list {
+    list-style: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .feature-list li {
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feature-list li::before {
+    content: '→';
+    color: #14b8a6;
+    font-weight: 600;
+  }
+
+  /* Bottom nav simulation */
+  .bottom-nav-mock {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px 0;
+    margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .bn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.625rem;
+    color: #475569;
+  }
+  .bn-item .icon { font-size: 1.25rem; }
+  .bn-item.active { color: #14b8a6; }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+    font-size: 0.75rem;
+  }
+  .pc-pro, .pc-con { padding: 10px; border-radius: 8px; }
+  .pc-pro { background: rgba(20,184,166,0.06); }
+  .pc-con { background: rgba(239,68,68,0.06); }
+  .pc-pro h4, .pc-con h4 {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .pc-pro h4 { color: #2dd4bf; }
+  .pc-con h4 { color: #f87171; }
+  .pc-pro ul, .pc-con ul { list-style: none; }
+  .pc-pro li, .pc-con li { padding: 3px 0; line-height: 1.5; color: #94a3b8; }
+  .pc-pro li::before { content: '+ '; color: #2dd4bf; }
+  .pc-con li::before { content: '- '; color: #f87171; }
+
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+    body { padding: 20px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>用啥功能替换 Library + Search？</h1>
+  <p>目前底部导航：Practice · Review · <s style="color:#475569">Library</s> · <s style="color:#475569">Search</s> → 换成两个更有用的</p>
+</div>
+
+<div class="grid">
+
+<!-- 方案 A -->
+<div class="card">
+  <div class="card-banner a"></div>
+  <div class="card-body">
+    <span class="card-tag a">保守型 · 低风险</span>
+    <h2>📊 学习看板 + 收藏</h2>
+    <div class="sub">把占用 nav 的两个页签变成一个「看板」，腾出位置给收藏夹</div>
+
+    <div class="mockup">
+      <div class="stats-grid">
+        <div class="stat-item"><div class="num">47</div><div class="label">今日练习</div></div>
+        <div class="stat-item"><div class="num">89%</div><div class="label">今日正确率</div></div>
+        <div class="stat-item"><div class="num">12🔥</div><div class="label">连续天数</div></div>
+        <div class="stat-item"><div class="num">3,240</div><div class="label">累计句子</div></div>
+      </div>
+      <div class="cal-label"><span>四月学习日历</span><span>🔥 12天连续</span></div>
+      <div class="cal-heatmap">
+        <div class="cal-dot l4"></div><div class="cal-dot l3"></div><div class="cal-dot"></div><div class="cal-dot l1"></div><div class="cal-dot l2"></div><div class="cal-dot l4"></div><div class="cal-dot l3"></div>
+        <div class="cal-dot l2"></div><div class="cal-dot l4"></div><div class="cal-dot l4"></div><div class="cal-dot l1"></div><div class="cal-dot"></div><div class="cal-dot l3"></div><div class="cal-dot l4"></div>
+        <div class="cal-dot"></div><div class="cal-dot l1"></div><div class="cal-dot l2"></div><div class="cal-dot l4"></div><div class="cal-dot l3"></div><div class="cal-dot l4"></div><div class="cal-dot l4"></div>
+        <div class="cal-dot l2"></div><div class="cal-dot"></div><div class="cal-dot l3"></div><div class="cal-dot l4"></div><div class="cal-dot l4"></div><div class="cal-dot l2"></div><div class="cal-dot l1"></div>
+        <div class="cal-dot l3"></div><div class="cal-dot l4"></div><div class="cal-dot l4"></div><div class="cal-dot"></div><div class="cal-dot"></div><div class="cal-dot l1"></div><div class="cal-dot l2"></div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-mock">
+      <div class="bn-item active"><span class="icon">🎯</span><span>Practice</span></div>
+      <div class="bn-item active"><span class="icon">❌</span><span>Review</span></div>
+      <div class="bn-item active"><span class="icon">📊</span><span>看板</span></div>
+      <div class="bn-item"><span class="icon">⭐</span><span>收藏</span></div>
+    </div>
+
+    <ul class="feature-list">
+      <li>个人学习看板：今日/周/月统计 + 学习日历 + 正确率趋势图</li>
+      <li>收藏夹：标记喜欢的句子、剧集，快速回看原音</li>
+      <li>Library 和 Search 合并到下拉/弹窗中作为辅助入口</li>
+    </ul>
+
+    <div class="pros-cons">
+      <div class="pc-pro">
+        <h4>Pro</h4>
+        <ul>
+          <li>实现简单，改动少</li>
+          <li>学习日历养成习惯</li>
+          <li>收藏功能需求明确</li>
+        </ul>
+      </div>
+      <div class="pc-con">
+        <h4>Con</h4>
+        <ul>
+          <li>看板信息量有限</li>
+          <li>收藏跟练习页部分功能重叠</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 方案 B -->
+<div class="card">
+  <div class="card-banner b"></div>
+  <div class="card-body">
+    <span class="card-tag b">强契合 · 最推荐</span>
+    <h2>📝 生词本 + 学习日报</h2>
+    <div class="sub">练听力学英语最核心的「积累」需求——生词自动收录 + 每日学习报告</div>
+
+    <div class="mockup">
+      <div style="padding:12px 16px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.04);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+          <span style="font-size:0.75rem;font-weight:600;color:#f59e0b;">📖 今日积累 5 个生词</span>
+          <span style="font-size:0.6875rem;color:#475569;">查看全部 →</span>
+        </div>
+        <div class="vocab-list">
+          <div class="vocab-item">
+            <div class="vocab-play">▶</div>
+            <div class="vocab-word" style="color:#f59e0b;">magnificent</div>
+            <div class="vocab-context">"That was a magnificent performance."</div>
+            <div class="vocab-info">GOT S01E03</div>
+          </div>
+          <div class="vocab-item">
+            <div class="vocab-play">▶</div>
+            <div class="vocab-word" style="color:#f59e0b;">inevitable</div>
+            <div class="vocab-context">"Death is inevitable, but..."</div>
+            <div class="vocab-info">GOT S01E05</div>
+          </div>
+          <div class="vocab-item">
+            <div class="vocab-play">▶</div>
+            <div class="vocab-word" style="color:#f59e0b;">hesitate</div>
+            <div class="vocab-context">"Don't hesitate. Just do it."</div>
+            <div class="vocab-info">DA S01E02</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:12px 16px;border-radius:10px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.08);">
+        <div style="font-size:0.8125rem;font-weight:600;color:#fbbf24;margin-bottom:8px;">📋 昨日学习报告</div>
+        <div style="font-size:0.75rem;color:#94a3b8;line-height:1.6;">
+          练习 35 句 · 正确率 83% · 生词 5 个<br>
+          薄弱环节：单词拼写 待加强（GOT 剧集）
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-mock">
+      <div class="bn-item active"><span class="icon">🎯</span><span>Practice</span></div>
+      <div class="bn-item active"><span class="icon">❌</span><span>Review</span></div>
+      <div class="bn-item active"><span class="icon">📖</span><span>生词本</span></div>
+      <div class="bn-item active"><span class="icon">📋</span><span>学习日报</span></div>
+    </div>
+
+    <ul class="feature-list">
+      <li>练习过程中标记生词（错词自动收录），支持原音回放</li>
+      <li>生词按剧集/难度/时间分组，支持按剧集筛选</li>
+      <li>每日学习报告：正确率趋势、薄弱环节、推荐复习</li>
+      <li>生词可导出 Anki / 打印</li>
+    </ul>
+
+    <div class="pros-cons">
+      <div class="pc-pro">
+        <h4>Pro</h4>
+        <ul>
+          <li>学习语言最核心的需求</li>
+          <li>跟练习场景强关联</li>
+          <li>对比竞品有差异化</li>
+        </ul>
+      </div>
+      <div class="pc-con">
+        <h4>Con</h4>
+        <ul>
+          <li>需要后端存生词数据</li>
+          <li>自动标记需要判断逻辑</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 方案 C -->
+<div class="card">
+  <div class="card-banner c"></div>
+  <div class="card-body">
+    <span class="card-tag c">突破型 · 高回报</span>
+    <h2>🏆 学习赛道 + 内容发现</h2>
+    <div class="sub">把练习变成有目标的学习旅程——关卡体系 + 个性化内容推荐</div>
+
+    <div class="mockup">
+      <div style="padding:16px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.04);">
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:1.25rem;">🏅</div>
+            <div style="font-size:0.8125rem;font-weight:600;color:#a78bfa;margin:4px 0;">听力青铜</div>
+            <div style="font-size:0.6875rem;color:#475569;">3,240 经验值</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:1.25rem;">🎯</div>
+            <div style="font-size:0.8125rem;font-weight:600;color:#a78bfa;margin:4px 0;">每日挑战</div>
+            <div style="font-size:0.6875rem;color:#475569;">今日 5/10 句</div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem;font-weight:600;color:#475569;margin-bottom:8px;">🔥 推荐内容</div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;background:rgba(139,92,246,0.06);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:0.8125rem;font-weight:600;color:#e2e8f0;">GOT</div>
+            <div style="font-size:0.6875rem;color:#64748b;">你练了 67%</div>
+            <div style="font-size:0.625rem;color:#475569;">未完待续 →</div>
+          </div>
+          <div style="flex:1;background:rgba(139,92,246,0.06);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:0.8125rem;font-weight:600;color:#e2e8f0;">唐顿庄园</div>
+            <div style="font-size:0.6875rem;color:#64748b;">新剧推荐</div>
+            <div style="font-size:0.625rem;color:#475569;">开始 →</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="leaderboard">
+            <div class="lb-item">
+              <div class="lb-rank gold">🥇</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">你</div>
+              <div class="lb-name" style="font-weight:600;">你</div>
+              <div class="lb-score">本周 847 句</div>
+              <div class="lb-badge">🔥</div>
+            </div>
+            <div class="lb-item">
+              <div class="lb-rank silver">🥈</div>
+              <div class="lb-avatar">M</div>
+              <div class="lb-name">小明</div>
+              <div class="lb-score">652 句</div>
+            </div>
+            <div class="lb-item">
+              <div class="lb-rank bronze">🥉</div>
+              <div class="lb-avatar">L</div>
+              <div class="lb-name">Lucy</div>
+              <div class="lb-score">431 句</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-mock">
+      <div class="bn-item active"><span class="icon">🎯</span><span>Practice</span></div>
+      <div class="bn-item active"><span class="icon">❌</span><span>Review</span></div>
+      <div class="bn-item active"><span class="icon">🏆</span><span>赛道</span></div>
+      <div class="bn-item active"><span class="icon">🔥</span><span>发现</span></div>
+    </div>
+
+    <ul class="feature-list">
+      <li>等级体系：练习积累经验值，解锁称号/勋章（听力青铜→白银→黄金⋯）</li>
+      <li>每日挑战：每日随机 10 句限时挑战，记录通关率</li>
+      <li>智能推荐：根据练习记录推荐「未完成的剧集」和「新剧」</li>
+      <li>好友排行：微信/邀请好友，查看学习排名</li>
+    </ul>
+
+    <div class="pros-cons">
+      <div class="pc-pro">
+        <h4>Pro</h4>
+        <ul>
+          <li>游戏化保持长期动力</li>
+          <li>好友排行社交裂变</li>
+          <li>推荐系统提升内容利用率</li>
+        </ul>
+      </div>
+      <div class="pc-con">
+        <h4>Con</h4>
+        <ul>
+          <li>开发量大</li>
+          <li>等级体系设计需推敲</li>
+          <li>适合高活跃阶段</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

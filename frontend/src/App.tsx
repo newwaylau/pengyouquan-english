@@ -7,9 +7,12 @@ import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
 import DemoPage from './DemoPage';
+import ArenaPage from './ArenaPage';
+import LeaderboardPage from './LeaderboardPage';
+import ChangePasswordModal from './ChangePasswordModal';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
-import { IconTarget, IconClose, IconSearch, IconBook, IconSettings } from './Icons';
+import { IconTarget, IconClose, IconSettings } from './Icons';
 import './index.css';
 import './v2-missing.css';
 
@@ -17,13 +20,17 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [notifications, setNotifications] = useState<any[]>([]);
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
   const [wrongCount, setWrongCount] = useState(0);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [loginMode, setLoginMode] = useState<'login' | 'register' | 'forgot'>('login');
   const { theme, toggleTheme, isDark } = useTheme();
   const mainRef = useRef<HTMLElement>(null);
 
@@ -82,7 +89,7 @@ export default function App() {
   };
 
   if (page === 'login' || (!getToken() && page !== 'practice' && page !== 'demo')) {
-    return <LoginPage onLogin={handleLogin} onHome={() => setPage('practice')} />;
+    return <LoginPage onLogin={(token) => { setLoginMode('login'); handleLogin(token); }} onHome={() => setPage('practice')} initialMode={loginMode} />;
   }
 
   return (
@@ -98,20 +105,15 @@ export default function App() {
           </span>
           <div className="topnav-mobile-right">
             {user?.role === 'admin' && (
-              <button className={`topnav-mobile-admin-btn ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')}>
-                <IconSettings size={14} /> Admin
+              <button className={`topnav-mobile-admin-btn ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')} title="管理后台">
+                <IconSettings size={14} />
+                {onlineCount !== null && <span className="topbar-badge">{onlineCount}</span>}
               </button>
             )}
-            <button className="topnav-mobile-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
-              {isDark ? '☀️' : '🌙'}
-            </button>
             {user ? (
-              <>
-                <div className="topnav-mobile-avatar" onClick={() => setPage('practice')} title={user.nickname}>
-                  {user.nickname?.charAt(0)?.toUpperCase() || '?'}
-                </div>
-                <button className="topnav-mobile-logout-btn" onClick={handleLogout} title="退出登录">退出</button>
-              </>
+              <div className="topnav-mobile-avatar" onClick={() => setShowUserMenu(true)} title={user.nickname}>
+                {user.nickname?.charAt(0)?.toUpperCase() || '?'}
+              </div>
             ) : (
               <button onClick={() => setPage('login')} className="topnav-mobile-login-btn">登录</button>
             )}
@@ -128,6 +130,8 @@ export default function App() {
               {page === 'browse' && '浏览'}
               {page === 'admin' && '管理后台'}
               {page === 'demo' && 'Demo'}
+              {page === 'arena' && '演武场'}
+              {page === 'clan' && '七国铁王座'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
@@ -186,6 +190,8 @@ export default function App() {
           {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
           {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
+          {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} />}
+          {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
         </main>
 
         {/* 手机端底部导航 */}
@@ -193,8 +199,8 @@ export default function App() {
           {[
             { key: 'practice', icon: <IconTarget size={20} />, label: 'Practice' },
             { key: 'wrong', icon: <IconClose size={20} />, label: 'Review', requiresLogin: true, badge: true },
-            { key: 'browse', icon: <IconBook size={20} />, label: 'Library' },
-            { key: 'search', icon: <IconSearch size={20} />, label: 'Search' },
+            { key: 'arena', icon: <span>⚔️</span>, label: '演武', requiresLogin: true },
+            { key: 'clan', icon: <span>👑</span>, label: '封臣', requiresLogin: true },
           ].map(item => {
             const disabled = item.requiresLogin && !user;
             return (
@@ -211,6 +217,59 @@ export default function App() {
             );
           })}
         </nav>
+
+        {/* 底部用户菜单面板 */}
+        {showUserMenu && (
+          <div className="user-menu-overlay" onClick={() => setShowUserMenu(false)} />
+        )}
+        {user && (
+        <div className={`user-menu-panel ${showUserMenu ? 'open' : ''}`}>
+          <div className="user-menu-drag" />
+          <div className="user-menu-header">
+            <div className="user-menu-avatar">{user?.nickname?.charAt(0)?.toUpperCase() || '?'}</div>
+            <div className="user-menu-info">
+              <div className="user-menu-name">{user?.nickname || '用户'}</div>
+              <div className="user-menu-email">{user?.email || ''}</div>
+            </div>
+          </div>
+          <div className="user-menu-items">
+            <div className="user-menu-item" onClick={() => { setShowUserMenu(false); setShowChangePassword(true); }}>
+              <span className="user-menu-item-icon key">🔑</span>
+              <span className="user-menu-item-text">修改密码</span>
+              <span className="user-menu-arrow">›</span>
+            </div>
+            <div className="user-menu-item" onClick={toggleTheme}>
+              <span className="user-menu-item-icon theme">🌙</span>
+              <span className="user-menu-item-text">{isDark ? '夜间模式' : '白天模式'}</span>
+              <span className="user-menu-toggle-label">{isDark ? '已开启' : '已关闭'}</span>
+              <button className={`user-menu-toggle ${isDark ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); toggleTheme(); }} />
+            </div>
+            <div className="user-menu-item" onClick={() => { setShowUserMenu(false); setShowLogoutConfirm(true); }}>
+              <span className="user-menu-item-icon logout">🚪</span>
+              <span className="user-menu-item-text">退出登录</span>
+              <span className="user-menu-arrow">›</span>
+            </div>
+          </div>
+        </div>
+        )}
+        {/* 修改密码弹窗 */}
+        {showChangePassword && (
+          <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+        )}
+        {/* 退出确认弹窗 */}
+        {showLogoutConfirm && (
+          <div className="logout-overlay" onClick={() => setShowLogoutConfirm(false)}>
+            <div className="logout-modal" onClick={e => e.stopPropagation()}>
+              <div className="logout-modal-icon">🚪</div>
+              <div className="logout-modal-title">退出登录</div>
+              <div className="logout-modal-desc">确定要退出当前账号吗？</div>
+              <div className="logout-modal-actions">
+                <button className="logout-modal-btn cancel" onClick={() => setShowLogoutConfirm(false)}>取消</button>
+                <button className="logout-modal-btn confirm" onClick={() => { setShowLogoutConfirm(false); handleLogout(); }}>确定退出</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

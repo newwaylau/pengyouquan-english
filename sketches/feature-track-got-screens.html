@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>维斯特洛 · 赛道设计稿</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#070b15;
+    color:#d4c9b8;
+    font-family:'Inter',-apple-system,sans-serif;
+    display:flex;flex-direction:column;align-items:center;
+    padding:40px 16px 80px;gap:48px;
+  }
+  .section-label{
+    text-align:center;font-size:0.75rem;color:#3a2a1a;
+    letter-spacing:0.15em;text-transform:uppercase;
+    margin-bottom:16px;
+  }
+
+  /* ── Phone frame ── */
+  .phone{
+    width:390px;background:#0a0e1a;
+    border-radius:32px;border:1px solid rgba(196,163,90,0.06);
+    overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    position:relative;
+  }
+  .phone-notch{
+    width:120px;height:24px;background:#070b15;
+    border-radius:0 0 16px 16px;margin:0 auto;
+  }
+
+  /* ── Status bar ── */
+  .status-bar{
+    display:flex;justify-content:space-between;
+    padding:10px 24px 6px;font-size:0.75rem;color:#5a4a3a;
+  }
+  .top-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 16px 10px;border-bottom:1px solid rgba(196,163,90,0.04);
+  }
+  .top-bar-left{display:flex;align-items:center;gap:8px;font-size:0.875rem;font-weight:600;color:#c4a35a;font-family:'Georgia',serif;letter-spacing:0.03em;}
+  .top-bar-left .dot{width:8px;height:8px;border-radius:50%;background:#c4a35a;box-shadow:0 0 6px rgba(196,163,90,0.3);}
+  .top-bar-right{display:flex;align-items:center;gap:10px;}
+
+  .avatar-mini{
+    width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(135deg,#8b6914,#c4a35a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.75rem;font-weight:700;color:#0a0e1a;
+  }
+
+  /* ── Content ── */
+  .content{padding:16px 16px 8px;}
+
+  .hero-card{
+    background:linear-gradient(135deg,rgba(196,163,90,0.04),rgba(139,105,20,0.02));
+    border:1px solid rgba(196,163,90,0.06);
+    border-radius:14px;padding:18px;margin-bottom:16px;
+  }
+  .hero-row{display:flex;align-items:center;gap:14px;}
+  .hero-avatar{
+    width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(135deg,#8b6914,#c4a35a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.35rem;font-weight:700;color:#0a0e1a;flex-shrink:0;
+    box-shadow:0 0 12px rgba(196,163,90,0.15);
+  }
+  .hero-info{flex:1;}
+  .hero-name{font-size:0.9375rem;font-weight:600;color:#c4b998;}
+  .hero-title{font-size:0.75rem;color:#c4a35a;margin:2px 0;}
+  .hero-title .badge-rank{
+    display:inline-block;padding:0 6px;border-radius:3px;
+    background:rgba(196,163,90,0.08);font-size:0.625rem;font-weight:600;
+  }
+  .hero-xp-row{display:flex;gap:8px;font-size:0.6875rem;color:#5a4a3a;margin-top:2px;}
+  .hero-xp-row strong{color:#c4a35a;font-weight:600;}
+  .xp-bar{height:4px;border-radius:2px;background:rgba(196,163,90,0.04);margin-top:6px;overflow:hidden;}
+  .xp-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#8b6914,#c4a35a);width:45%;}
+
+  /* ── Stats grid ── */
+  .stats-row{display:flex;gap:8px;margin-bottom:16px;}
+  .stat-card{
+    flex:1;text-align:center;padding:12px 4px;
+    background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.04);
+    border-radius:10px;
+  }
+  .stat-num{font-size:1.25rem;font-weight:700;}
+  .stat-num.gold{color:#c4a35a;}
+  .stat-num.ice{color:#88c0d0;}
+  .stat-num.fire{color:#d06040;}
+  .stat-label{font-size:0.625rem;color:#4a3a2a;margin-top:4px;}
+
+  /* ── Quick actions ── */
+  .quick-row{display:flex;gap:8px;margin-bottom:16px;}
+  .quick-btn{
+    flex:1;padding:12px 4px;border-radius:10px;text-align:center;
+    cursor:default;transition:all 0.12s;
+  }
+  .quick-btn .ico{font-size:1.25rem;}
+  .quick-btn .lab{font-size:0.65rem;margin-top:4px;font-weight:500;}
+  .quick-btn.primary{
+    background:linear-gradient(135deg,rgba(196,163,90,0.08),rgba(139,105,20,0.04));
+    border:1px solid rgba(196,163,90,0.08);
+  }
+  .quick-btn.primary .lab{color:#c4a35a;}
+  .quick-btn.secondary{
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .quick-btn.secondary .lab{color:#4a3a2a;}
+
+  /* ── Section titles ── */
+  .sec-title{
+    display:flex;align-items:center;gap:6px;
+    font-size:0.75rem;font-weight:600;color:#5a4a3a;
+    text-transform:uppercase;letter-spacing:0.08em;
+    margin-bottom:10px;
+  }
+
+  /* ── Conquest progress ── */
+  .conquest-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .conquest-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;
+    background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.04);
+  }
+  .conquest-icon{font-size:1.1rem;width:28px;text-align:center;}
+  .conquest-info{flex:1;}
+  .conquest-name{font-size:0.8125rem;font-weight:500;color:#c4b998;}
+  .conquest-meta{font-size:0.625rem;color:#4a3a2a;margin-top:1px;}
+  .conquest-pct{font-size:0.75rem;font-weight:600;color:#c4a35a;}
+
+  .c-bar{height:3px;border-radius:2px;background:rgba(196,163,90,0.04);margin-top:5px;overflow:hidden;}
+  .c-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#8b6914,#c4a35a);}
+
+  /* ── Recent deeds ── */
+  .deed-item{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 0;border-bottom:1px solid rgba(196,163,90,0.02);
+    font-size:0.75rem;
+  }
+  .deed-item:last-child{border-bottom:none;}
+  .deed-icon{width:20px;text-align:center;}
+  .deed-text{flex:1;color:#5a4a3a;}
+  .deed-time{color:#3a2a1a;font-size:0.625rem;}
+
+  /* ── Daily Challenge Screen ── */
+  .dc-header{
+    text-align:center;padding:16px 0 12px;
+    border-bottom:1px solid rgba(196,163,90,0.04);
+  }
+  .dc-header .title{
+    font-size:1rem;font-weight:700;color:#c4a35a;
+    font-family:'Georgia',serif;letter-spacing:0.05em;
+  }
+  .dc-header .streak{
+    font-size:0.75rem;color:#5a4a3a;margin-top:4px;
+  }
+  .dc-steps{
+    display:flex;gap:4px;padding:0 16px;margin:12px 0;
+  }
+  .dc-step{
+    flex:1;height:5px;border-radius:3px;background:rgba(196,163,90,0.04);
+  }
+  .dc-step.done{background:#c4a35a;}
+  .dc-step.cur{background:#88c0d0;}
+
+  .dc-card{
+    background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.04);
+    border-radius:14px;padding:20px;margin:0 16px 12px;
+  }
+  .dc-q{
+    font-size:1.25rem;font-weight:600;color:#c4b998;
+    line-height:1.5;text-align:center;margin-bottom:20px;
+  }
+  .dc-input{
+    width:100%;height:48px;
+    border:1px solid rgba(196,163,90,0.06);
+    border-radius:10px;background:rgba(0,0,0,0.2);
+    padding:0 16px;color:#c4b998;font-size:1rem;
+    font-family:inherit;outline:none;
+    transition:border-color 0.15s;
+  }
+  .dc-input:focus{border-color:rgba(196,163,90,0.2);}
+  .dc-input::placeholder{color:#3a2a1a;}
+  .dc-actions{
+    display:flex;gap:10px;margin:16px 0 0;
+  }
+  .dc-btn{
+    flex:1;height:44px;border-radius:10px;border:none;
+    font-size:0.875rem;font-weight:600;font-family:inherit;
+    cursor:default;transition:all 0.12s;
+  }
+  .dc-btn.primary{
+    background:linear-gradient(135deg,#8b6914,#c4a35a);
+    color:#0a0e1a;
+  }
+  .dc-btn.secondary{
+    background:rgba(255,255,255,0.04);
+    color:#5a4a3a;
+  }
+  .dc-progress-label{
+    display:flex;justify-content:space-between;
+    padding:0 16px;font-size:0.6875rem;color:#4a3a2a;
+  }
+
+  .dc-result{
+    text-align:center;padding:32px 16px;
+  }
+  .dc-result .emoji{font-size:3rem;margin-bottom:12px;}
+  .dc-result .r-title{font-size:1.125rem;font-weight:700;color:#c4b998;}
+  .dc-result .r-sub{font-size:0.8125rem;color:#5a4a3a;margin:6px 0 20px;}
+
+  /* ── LB ── */
+  .lb-tabs{
+    display:flex;gap:4px;margin-bottom:14px;
+    background:rgba(0,0,0,0.15);border-radius:8px;padding:3px;
+  }
+  .lb-tab{
+    flex:1;text-align:center;padding:7px 0;
+    border-radius:6px;font-size:0.75rem;font-weight:500;
+    color:#4a3a2a;cursor:default;
+  }
+  .lb-tab.active{background:rgba(196,163,90,0.08);color:#c4a35a;}
+
+  .lb-row{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 0;border-bottom:1px solid rgba(196,163,90,0.02);
+  }
+  .lb-rank{width:24px;text-align:center;font-size:0.8125rem;font-weight:700;color:#4a3a2a;}
+  .lb-rank.top1{color:#c4a35a;}
+  .lb-rank.top2{color:#88c0d0;}
+  .lb-rank.top3{color:#d06040;}
+  .lb-ava{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,#8b6914,#c4a35a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.625rem;font-weight:600;color:#0a0e1a;flex-shrink:0;
+  }
+  .lb-ava.alt{background:linear-gradient(135deg,#5a3a1a,#8b6914);}
+  .lb-name{flex:1;font-size:0.8125rem;font-weight:500;color:#c4b998;}
+  .lb-meta{font-size:0.6875rem;color:#5a4a3a;}
+  .lb-rank-tag{
+    font-size:0.625rem;padding:1px 6px;border-radius:3px;
+    background:rgba(196,163,90,0.06);color:#c4a35a;margin-left:auto;
+  }
+
+  /* Bottom nav */
+  .bottom-nav{
+    display:flex;justify-content:space-around;
+    padding:8px 0 12px;
+    border-top:1px solid rgba(196,163,90,0.04);
+    margin-top:4px;
+  }
+  .nav-item{text-align:center;cursor:default;}
+  .nav-item .ico{font-size:1.25rem;}
+  .nav-item .lab{font-size:0.6rem;color:#3a2a1a;margin-top:2px;}
+  .nav-item.active .lab{color:#c4a35a;font-weight:600;}
+
+  @media(max-width:420px){
+    .phone{width:100%;border-radius:0;}
+    body{padding:20px 0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="section-label">— Screen 1 · 赛道首页（维斯特洛） —</div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="status-bar"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="top-bar">
+    <div class="top-bar-left"><span class="dot"></span>维斯特洛</div>
+    <div class="top-bar-right">
+      <div class="avatar-mini">H</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Hero -->
+    <div class="hero-card">
+      <div class="hero-row">
+        <div class="hero-avatar">H</div>
+        <div class="hero-info">
+          <div class="hero-name">Heaton</div>
+          <div class="hero-title">
+            🗡️ 骑士 · <span class="badge-rank">"吾盾为誓"</span>
+          </div>
+          <div class="hero-xp-row">
+            <span>威望 <strong>2,500</strong> / 4,500</span>
+            <span>· 下一爵位：🏰 领主</span>
+          </div>
+          <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num gold">12🔥</div>
+        <div class="stat-label">统治天数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num ice">6/10</div>
+        <div class="stat-label">御前挑战</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num fire">#1</div>
+        <div class="stat-label">狼群排行</div>
+      </div>
+    </div>
+
+    <!-- Quick -->
+    <div class="quick-row">
+      <div class="quick-btn primary">
+        <div class="ico">⚔️</div>
+        <div class="lab">御前挑战</div>
+      </div>
+      <div class="quick-btn secondary">
+        <div class="ico">👑</div>
+        <div class="lab">铁王座</div>
+      </div>
+      <div class="quick-btn secondary">
+        <div class="ico">🎖️</div>
+        <div class="lab">丰功伟绩</div>
+      </div>
+      <div class="quick-btn secondary">
+        <div class="ico">🐺</div>
+        <div class="lab">狼群</div>
+      </div>
+    </div>
+
+    <!-- Conquest Progress -->
+    <div class="sec-title">⚔️ 征战进度</div>
+    <div class="conquest-list">
+      <div class="conquest-item">
+        <div class="conquest-icon">🐉</div>
+        <div class="conquest-info">
+          <div class="conquest-name">权力的游戏</div>
+          <div class="conquest-meta">1,230 句 · 征服中</div>
+          <div class="c-bar"><div class="c-fill" style="width:67%"></div></div>
+        </div>
+        <div class="conquest-pct">67%</div>
+      </div>
+      <div class="conquest-item">
+        <div class="conquest-icon">🏰</div>
+        <div class="conquest-info">
+          <div class="conquest-name">唐顿庄园</div>
+          <div class="conquest-meta">630 句 · 新领土</div>
+          <div class="c-bar"><div class="c-fill" style="width:12%"></div></div>
+        </div>
+        <div class="conquest-pct">12%</div>
+      </div>
+    </div>
+
+    <!-- Recent deeds -->
+    <div class="sec-title">📜 近期战报</div>
+    <div class="deed-item">
+      <div class="deed-icon">⚔️</div>
+      <div class="deed-text">完成御前挑战第 6 句 · +10 威望</div>
+      <div class="deed-time">2 分钟前</div>
+    </div>
+    <div class="deed-item">
+      <div class="deed-icon">🐺</div>
+      <div class="deed-text">狼群盟约 · 小明完成 15 句 · +5 威望</div>
+      <div class="deed-time">15 分钟前</div>
+    </div>
+    <div class="deed-item">
+      <div class="deed-icon">🎖️</div>
+      <div class="deed-text">丰功伟绩解锁：长城守望（7天连续）</div>
+      <div class="deed-time">昨天</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><div class="ico">🎯</div><div class="lab">Practice</div></div>
+    <div class="nav-item"><div class="ico">❌</div><div class="lab">Review</div></div>
+    <div class="nav-item active"><div class="ico">⚔️</div><div class="lab">维斯特洛</div></div>
+    <div class="nav-item"><div class="ico">🐉</div><div class="lab">发现</div></div>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:32px;">— Screen 2 · 御前挑战 —</div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="status-bar"><span>9:41</span><span>🔋 98%</span></div>
+  <div class="top-bar">
+    <div class="top-bar-left" style="gap:14px;">
+      <span style="font-size:0.75rem;color:#4a3a2a;cursor:default;">←</span>
+      <span class="dot"></span>御前挑战
+    </div>
+    <div class="top-bar-right">
+      <span style="font-size:0.75rem;color:#c4a35a;font-weight:600;font-family:'Georgia',serif;">第 6 句</span>
+    </div>
+  </div>
+
+  <div class="dc-header">
+    <div class="title">⚔️ 今日御前令</div>
+    <div class="streak">🔥 统治第 12 天 · 已完成 6/10</div>
+  </div>
+  <div class="dc-steps">
+    <div class="dc-step done"></div><div class="dc-step done"></div>
+    <div class="dc-step done"></div><div class="dc-step done"></div>
+    <div class="dc-step done"></div><div class="dc-step done"></div>
+    <div class="dc-step cur"></div><div class="dc-step"></div>
+    <div class="dc-step"></div><div class="dc-step"></div>
+  </div>
+  <div class="dc-progress-label">
+    <span>准确率 83%</span>
+    <span>🔥 连击 +3 威望</span>
+  </div>
+
+  <div class="dc-card">
+    <div class="dc-q">"The lone wolf dies,<br>but the pack survives."</div>
+    <input class="dc-input" type="text" placeholder="听写输入..." value="The lone wolf di" readonly>
+    <div class="dc-actions">
+      <div class="dc-btn secondary">🔄 重听</div>
+      <div class="dc-btn primary">⚔️ 提交</div>
+    </div>
+  </div>
+
+  <div style="font-size:0.6875rem;color:#3a2a1a;text-align:center;padding:8px 16px;font-style:italic;font-family:'Georgia',serif;">
+    "每一句正确的听写，都是对抗异鬼的利剑。"
+  </div>
+
+  <div class="bottom-nav" style="border-top:none;margin-top:8px;">
+    <div class="nav-item"><div class="ico">🎯</div><div class="lab">Practice</div></div>
+    <div class="nav-item"><div class="ico">❌</div><div class="lab">Review</div></div>
+    <div class="nav-item active"><div class="ico">⚔️</div><div class="lab">维斯特洛</div></div>
+    <div class="nav-item"><div class="ico">🐉</div><div class="lab">发现</div></div>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:32px;">— Screen 3 · 七国铁王座（排行榜） —</div>
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="status-bar"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="top-bar">
+    <div class="top-bar-left" style="gap:14px;">
+      <span style="font-size:0.75rem;color:#4a3a2a;cursor:default;">←</span>
+      <span class="dot"></span>铁王座
+    </div>
+    <div class="top-bar-right">
+      <span style="font-size:0.75rem;color:#c4a35a;font-weight:600;">👑 你 · #1</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="lb-tabs">
+      <div class="lb-tab active">今日御前</div>
+      <div class="lb-tab">本周朝会</div>
+      <div class="lb-tab">本月征战</div>
+      <div class="lb-tab">🐺 狼群</div>
+    </div>
+
+    <div class="lb-row">
+      <div class="lb-rank top1">1</div>
+      <div class="lb-ava">H</div>
+      <div class="lb-name">你</div>
+      <span class="lb-rank-tag">🏰 领主</span>
+      <div class="lb-meta">47 句</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-rank top2">2</div>
+      <div class="lb-ava alt">M</div>
+      <div class="lb-name">小明</div>
+      <span class="lb-rank-tag">⚔️ 守夜人</span>
+      <div class="lb-meta">35 句</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-rank top3">3</div>
+      <div class="lb-ava alt">L</div>
+      <div class="lb-name">Lucy</div>
+      <span class="lb-rank-tag">📜 学士</span>
+      <div class="lb-meta">28 句</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-rank">4</div>
+      <div class="lb-ava alt" style="background:linear-gradient(135deg,#3a2a1a,#5a3a1a);">M</div>
+      <div class="lb-name">Mike</div>
+      <span class="lb-rank-tag">🌲 自由民</span>
+      <div class="lb-meta">22 句</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-rank">5</div>
+      <div class="lb-ava alt">S</div>
+      <div class="lb-name">Sansa</div>
+      <span class="lb-rank-tag">🌲 自由民</span>
+      <div class="lb-meta">18 句</div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px;background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.04);border-radius:10px;text-align:center;">
+      <div style="font-size:0.75rem;color:#5a4a3a;">邀请好友加入狼群</div>
+      <div style="font-size:1rem;font-weight:700;letter-spacing:0.2em;color:#c4a35a;margin:6px 0;font-family:'Georgia',serif;">WINTER-2026</div>
+      <div style="display:inline-block;padding:8px 24px;border-radius:8px;background:linear-gradient(135deg,#5a3a1a,#8b6914);color:#d4c9b8;font-size:0.75rem;font-weight:600;">📤 派乌鸦送信</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><div class="ico">🎯</div><div class="lab">Practice</div></div>
+    <div class="nav-item"><div class="ico">❌</div><div class="lab">Review</div></div>
+    <div class="nav-item active"><div class="ico">⚔️</div><div class="lab">维斯特洛</div></div>
+    <div class="nav-item"><div class="ico">🐉</div><div class="lab">发现</div></div>
+  </div>
+</div>
+
+<div style="max-width:390px;text-align:center;padding:24px;background:rgba(196,163,90,0.02);border:1px solid rgba(196,163,90,0.06);border-radius:14px;">
+  <div style="font-size:1.25rem;font-weight:700;color:#c4a35a;font-family:'Georgia',serif;margin-bottom:12px;">📋 三个屏幕的交互流程</div>
+  <div style="font-size:0.8125rem;color:#5a4a3a;line-height:1.8;text-align:left;">
+    <strong style="color:#c4a35a;">入口</strong>：底部导航 ⚔️ 维斯特洛<br>
+    ↓<br>
+    <strong style="color:#c4a35a;">赛道首页</strong>：看到封号/威望/统治天数/征战进度/近期战报<br>
+    ↓ 点「御前挑战」<br>
+    <strong style="color:#88c0d0;">御前挑战页</strong>：10句听写限时挑战 · 连击 bonus · 进度可视化<br>
+    ↓ 点「铁王座」<br>
+    <strong style="color:#d06040;">排行榜页</strong>：今日/本周/本月/狼群 · 每个好友显示封号 · 底部邀请入口
+  </div>
+</div>
+
+</body>
+</html>

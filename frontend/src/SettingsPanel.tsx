@@ -154,8 +154,8 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         <section className="settings-v2-section">
           <div className="cap">模式</div>
           <button className={`settings-v2-radio ${mode === 'dictation' ? 'active' : ''}`} onClick={() => { onModeChange('dictation'); save('mode', 'dictation'); }}>
-            <span><IconPen /></span>
-            <span><strong>听写模式</strong><small>逐词输入，适合精听训练</small></span>
+            <IconPen size={16} />
+            <span>听写模式</span>
             <span className="chip chip-teal">推荐</span>
           </button>
         </section>
@@ -188,10 +188,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
               <button key={s} className={speed === s ? 'active' : ''} onClick={() => { onSpeedChange(s); save('speed', String(s)); }}>{s}x</button>
             ))}
           </div>
-        </section>
-
-        <section className="settings-v2-section">
-          <div className="cap">外观</div>
           <label className="settings-v2-toggle-row">
             <span><IconSpeaker /> 原音优先<small>有剧集原音时优先播放原音</small></span>
             <button className={`toggle ${preferOriginal ? 'on' : ''}`} onClick={e => { e.preventDefault(); const next = !preferOriginal; onPreferOriginalChange(next); save('preferOriginal', String(next)); }} />
@@ -200,8 +196,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
             <span><IconMic /> 自动播放<small>切换句子后自动播放音频</small></span>
             <button className={`toggle ${autoPlay ? 'on' : ''}`} onClick={e => { e.preventDefault(); const next = !autoPlay; onAutoPlayChange(next); save('autoPlay', String(next)); }} />
           </label>
-          <div className="seg"><button>浅色</button><button className="active">深色</button><button>跟随系统</button></div>
-          <div className="seg"><button>小</button><button className="active">标准</button><button>大</button></div>
         </section>
       </div>
     </div>

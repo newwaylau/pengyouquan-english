@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习赛道 · 完整概念方案</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070b15;
+    color: #eef2f8;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 24px 80px;
+  }
+  .header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 48px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a78bfa, #14b8a6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .header p { color: #5a6a8a; font-size: 0.9375rem; line-height: 1.6; }
+
+  /* Section */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 56px;
+  }
+  .sec-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #eef2f8;
+    margin-bottom: 8px;
+  }
+  .sec-sub {
+    color: #5a6a8a;
+    font-size: 0.875rem;
+    margin-bottom: 24px;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .card {
+    background: #111a2e;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .card-header {
+    padding: 18px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header .icon { font-size: 1.5rem; }
+  .card-header h3 { font-size: 1rem; font-weight: 600; color: #eef2f8; }
+  .card-body { padding: 0 20px 20px; }
+
+  /* Mockup blocks inside cards */
+  .mock-block {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .mock-block:last-child { margin-bottom: 0; }
+
+  /* Rank badges */
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-icon { font-size: 1.25rem; width: 32px; text-align: center; }
+  .rank-name { flex: 1; font-size: 0.8125rem; font-weight: 500; color: #c8d0dc; }
+  .rank-info { font-size: 0.6875rem; color: #5a6a8a; }
+
+  /* Progress bar */
+  .pbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.04); margin: 6px 0; overflow: hidden; }
+  .pbar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .pbar-fill.purple { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+  .pbar-fill.teal { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+  .pbar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .pbar-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+  }
+  .badge.purple { background: rgba(139,92,246,0.12); color: #a78bfa; }
+  .badge.teal { background: rgba(20,184,166,0.12); color: #2dd4bf; }
+  .badge.amber { background: rgba(245,158,11,0.12); color: #fbbf24; }
+  .badge.danger { background: rgba(239,68,68,0.12); color: #f87171; }
+  .badge.gray { background: rgba(255,255,255,0.04); color: #5a6a8a; }
+
+  /* Bottom nav */
+  .bn-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 12px 0 8px;
+    margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .bn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.6rem;
+    color: #3b4a6a;
+  }
+  .bn-item .ico { font-size: 1.25rem; }
+  .bn-item.active { color: #14b8a6; }
+  .bn-item.hot { color: #a78bfa; }
+
+  /* Feature tag */
+  .ftag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    margin: 3px;
+  }
+  .ftag.purple { background: rgba(139,92,246,0.08); color: #a78bfa; border: 1px solid rgba(139,92,246,0.12); }
+  .ftag.teal { background: rgba(20,184,166,0.08); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.12); }
+  .ftag.amber { background: rgba(245,158,11,0.08); color: #fbbf24; border: 1px solid rgba(245,158,11,0.12); }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 20px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .flow-step {
+    padding: 8px 16px;
+    background: rgba(139,92,246,0.06);
+    border: 1px solid rgba(139,92,246,0.1);
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    color: #c8d0dc;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: #3b4a6a; font-size: 1rem; }
+
+  /* Two-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* Wide card */
+  .wide-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  @media (max-width: 800px) {
+    .cards { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .wide-cards { grid-template-columns: 1fr; }
+  }
+
+  /* Leaderboard detail */
+  .lb-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .lb-tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #5a6a8a;
+    cursor: default;
+  }
+  .lb-tab.active { background: rgba(139,92,246,0.12); color: #a78bfa; }
+
+  /* Invite card */
+  .invite-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(20,184,166,0.04));
+    border: 1px solid rgba(139,92,246,0.1);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .invite-card .code {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #a78bfa;
+    margin: 8px 0;
+  }
+  .invite-card .btn {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #8b5cf6, #14b8a6);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+    margin: 32px 0;
+  }
+
+  .summary-box {
+    background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(20,184,166,0.04));
+    border: 1px solid rgba(139,92,246,0.08);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .summary-box h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eef2f8;
+    margin-bottom: 12px;
+  }
+  .summary-box ul {
+    list-style: none;
+  }
+  .summary-box li {
+    padding: 8px 0;
+    font-size: 0.875rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .summary-box li:last-child { border-bottom: none; }
+  .summary-box li .num {
+    color: #a78bfa;
+    font-weight: 700;
+    min-width: 30px;
+  }
+  .summary-box li .label { flex: 1; }
+  .summary-box li .cost {
+    color: #5a6a8a;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .progress-steps {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .pstep {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+  }
+  .pstep.done { background: #8b5cf6; }
+  .pstep.cur { background: #14b8a6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏆 学习赛道 · 完整方案</h1>
+  <p>把「跟读练习」变成有目标、有社交、有成就感的学习旅程。<br>
+  底部导航从 4 个缩成 3 个核心页签，Library + Search 合并为「发现」。</p>
+</div>
+
+<!-- Bottom nav preview -->
+<div class="section" style="max-width:500px;">
+  <div style="background:#0c1322;border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:16px 20px;">
+    <div style="display:flex;justify-content:space-around;">
+      <div style="text-align:center;"><div style="font-size:1.25rem;">🎯</div><div style="font-size:0.625rem;color:#14b8a6;margin-top:3px;font-weight:600;">Practice</div></div>
+      <div style="text-align:center;"><div style="font-size:1.25rem;">❌</div><div style="font-size:0.625rem;color:#5a6a8a;margin-top:3px;">Review</div></div>
+      <div style="text-align:center;position:relative;"><div style="font-size:1.5rem;filter:drop-shadow(0 0 8px rgba(139,92,246,0.3));">🏆</div><div style="font-size:0.625rem;color:#a78bfa;margin-top:3px;font-weight:600;">赛道</div></div>
+      <div style="text-align:center;"><div style="font-size:1.25rem;">🔍</div><div style="font-size:0.625rem;color:#5a6a8a;margin-top:3px;">发现</div></div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:0.75rem;color:#3b4a6a;">赛道 = 等级 + 挑战 + 排行榜 + 邀请 · 发现 = 内容推荐 + 剧集浏览 + 搜索</div>
+  </div>
+</div>
+
+<!-- 1. 核心循环 -->
+<div class="section">
+  <div class="sec-title">🔄 核心学习循环</div>
+  <div class="sec-sub">用户每天打开 app 做什么？一个完整的飞轮</div>
+  <div class="flow">
+    <span class="flow-step">🎯 练习 3-5 句</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">📈 获得经验值</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🏅 升级 / 解锁成就</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">📊 排行榜攀升</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">👥 邀请好友组队</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🔥 每日挑战保 streak</span>
+  </div>
+</div>
+
+<!-- 2. 等级体系 -->
+<div class="section">
+  <div class="sec-title">📊 等级体系 · 10段位</div>
+  <div class="sec-sub">从青铜到传说，每个段位有对应的称号和勋章</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header">
+        <span class="icon">🥉</span>
+        <h3>青铜 → 白银 → 黄金</h3>
+      </div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-row">
+            <span class="rank-icon">🥉</span>
+            <span class="rank-name">听力青铜</span>
+            <span class="rank-info">0 → 500 XP</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">🥈</span>
+            <span class="rank-name">听力白银</span>
+            <span class="rank-info">500 → 1,500 XP</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">🥇</span>
+            <span class="rank-name">听力黄金</span>
+            <span class="rank-info">1,500 → 3,500 XP</span>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:#5a6a8a;margin-top:8px;">✅ 每句正确 +10 XP · 连续正确 bonus · 每日首练 bonus</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="icon">💎</span>
+        <h3>铂金 → 钻石 → 大师</h3>
+      </div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-row">
+            <span class="rank-icon">💎</span>
+            <span class="rank-name">听力铂金</span>
+            <span class="rank-info">3,500 → 6,000 XP</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">💠</span>
+            <span class="rank-name">听力钻石</span>
+            <span class="rank-info">6,000 → 10,000 XP</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">🏅</span>
+            <span class="rank-name">听力大师</span>
+            <span class="rank-info">10,000 → 15,000 XP</span>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:#5a6a8a;margin-top:8px;">🔥 大师解锁「自定义每日目标」「高级统计」</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="icon">👑</span>
+        <h3>宗师 → 传说（终局）</h3>
+      </div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="rank-row">
+            <span class="rank-icon">👑</span>
+            <span class="rank-name">听力宗师</span>
+            <span class="rank-info">15,000 → 25,000 XP</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">🌟</span>
+            <span class="rank-name">✨ 听力传说</span>
+            <span class="rank-info">25,000+ XP</span>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:#a78bfa;margin-top:8px;">🏆 传说 · 全服排名展示 · 专属称号框</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. XP 获取规则 -->
+<div class="section">
+  <div class="sec-title">💰 XP 获取规则</div>
+  <div class="sec-sub">让每个操作都有反馈，但不会过度膨胀</div>
+  <div class="summary-box">
+    <ul>
+      <li><span class="num">+10</span><span class="label">完成一句练习（不限正确/错误，鼓励尝试）</span><span class="cost">每次</span></li>
+      <li><span class="num">+5</span><span class="label">正确 bonus（正确时额外奖励）</span><span class="cost">每次</span></li>
+      <li><span class="num">+3</span><span class="label">连续正确（第3句起，每句+3，断掉重置）</span><span class="cost">每次</span></li>
+      <li><span class="num">+15</span><span class="label">每日首练 bonus（每天第一句练习）</span><span class="cost">每日1次</span></li>
+      <li><span class="num">+30</span><span class="label">完成每日挑战（每日10句通关）</span><span class="cost">每日1次</span></li>
+      <li><span class="num">+50</span><span class="label">邀请好友注册（好友完成首练后发放）</span><span class="cost">每好友</span></li>
+      <li><span class="num">+20</span><span class="label">组队日常完成（跟朋友一起练习>5句）</span><span class="cost">每日1次</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- 4. 成就勋章 -->
+<div class="section">
+  <div class="sec-title">🎖️ 成就勋章 · 30+ 个可解锁</div>
+  <div class="sec-sub">覆盖练习、社交、坚持、内容探索四类，满足收集欲</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">🔥</span><h3>坚持类</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span class="ftag teal">🔥 初燃 · 3天连续</span>
+            <span class="ftag teal">🔥🔥 狂热 · 7天连续</span>
+            <span class="ftag teal">🔥🔥🔥 不灭 · 30天连续</span>
+            <span class="ftag purple">💪 百日修行 · 100天</span>
+            <span class="ftag amber">🕯️ 365 · 一年全勤</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🎯</span><h3>练习类</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span class="ftag teal">🎯 第一句</span>
+            <span class="ftag teal">💯 第100句</span>
+            <span class="ftag amber">📚 第1000句</span>
+            <span class="ftag purple">🎓 第10000句</span>
+            <span class="ftag purple">🎯 满分通关 · 每日挑战全对</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">👥</span><h3>社交类</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span class="ftag teal">🤝 首次邀请</span>
+            <span class="ftag teal">👥 组队初体验</span>
+            <span class="ftag amber">🌟 人气之星 · 邀请5人</span>
+            <span class="ftag purple">👑 社群领袖 · 邀请20人</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. 每日挑战 -->
+<div class="section">
+  <div class="sec-title">⚡ 每日挑战</div>
+  <div class="sec-sub">每天 10 句随机句子，限时完成，记录 streak 和通关率</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="icon">⚡</span><h3>今日挑战面板</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:0.8125rem;font-weight:600;color:#eef2f8;">🔥 连续 12 天</span>
+            <span style="font-size:0.8125rem;color:#5a6a8a;">今日 6/10 句</span>
+          </div>
+          <div class="progress-steps">
+            <div class="pstep done"></div><div class="pstep done"></div><div class="pstep done"></div><div class="pstep done"></div><div class="pstep done"></div><div class="pstep done"></div><div class="pstep cur"></div><div class="pstep"></div><div class="pstep"></div><div class="pstep"></div>
+          </div>
+          <div style="font-size:0.75rem;color:#5a6a8a;">今日正确率: 83%</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📅</span><h3>Streak 日历</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:4px;margin-bottom:8px;">
+            <span class="badge teal">M</span><span class="badge teal">T</span><span class="badge teal">W</span><span class="badge teal">T</span><span class="badge purple">F</span><span class="badge gray">S</span><span class="badge teal">S</span>
+          </div>
+          <div style="font-size:0.75rem;color:#5a6a8a;">断一天 streak 重置，可用「复活卡」续一次</div>
+          <div style="margin-top:8px;">
+            <span class="ftag amber">💊 复活卡 · 邀请好友获得</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 社交裂变 -->
+<div class="section">
+  <div class="sec-title">👥 社交裂变设计</div>
+  <div class="sec-sub">让用户愿意拉朋友进来，而且拉进来后双方都有收益</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">📤</span><h3>邀请机制</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="invite-card">
+            <div style="font-size:0.75rem;color:#5a6a8a;">你的专属邀请码</div>
+            <div class="code">PQ2026</div>
+            <div style="font-size:0.75rem;color:#c8d0dc;margin-bottom:10px;">分享给好友 · 双方各得 +50 XP</div>
+            <div class="btn">📤 分享给微信好友</div>
+          </div>
+          <div style="font-size:0.75rem;color:#5a6a8a;margin-top:10px;">
+            ✅ 被邀请好友完成首练后，邀请者 XP 到账<br>
+            ✅ 被邀请者自动获得「新人礼包」+100 XP
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🤝</span><h3>好友组队</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="font-size:0.8125rem;font-weight:600;color:#eef2f8;margin-bottom:8px;">你的学习小队</div>
+          <div class="rank-row">
+            <span class="rank-icon">👤</span>
+            <span class="rank-name">你 · 听力黄金</span>
+            <span class="rank-info">🔥 今日 23 句</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">👤</span>
+            <span class="rank-name">小明 · 听力白银</span>
+            <span class="rank-info">🔥 今日 15 句</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon">👤</span>
+            <span class="rank-name">Lucy · 听力青铜</span>
+            <span class="rank-info">昨日 8 句</span>
+          </div>
+          <div style="margin-top:8px;font-size:0.75rem;color:#a78bfa;">
+            🎯 小队目标：今日合计 50 句 · 已完成 38/50
+          </div>
+          <div class="pbar" style="margin-top:4px;"><div class="pbar-fill purple" style="width:76%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🏆</span><h3>排行榜</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div class="lb-tabs">
+            <div class="lb-tab active">今日</div>
+            <div class="lb-tab">本周</div>
+            <div class="lb-tab">本月</div>
+            <div class="lb-tab">好友</div>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon" style="color:#f59e0b;">🥇</span>
+            <span class="rank-name" style="font-weight:600;">你</span>
+            <span class="rank-info">47 句</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon" style="color:#94a3b8;">🥈</span>
+            <span class="rank-name">小明</span>
+            <span class="rank-info">35 句</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon" style="color:#d97706;">🥉</span>
+            <span class="rank-name">Lucy</span>
+            <span class="rank-info">28 句</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-icon" style="color:#3b4a6a;">4</span>
+            <span class="rank-name">Mike</span>
+            <span class="rank-info">22 句</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. 内容发现 -->
+<div class="section">
+  <div class="sec-title">🔍 发现页 · 替代 Library + Search</div>
+  <div class="sec-sub">智能推荐 + 剧集浏览 + 搜索，三合一</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="icon">🤖</span><h3>AI 推荐区</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="font-size:0.75rem;font-weight:600;color:#a78bfa;margin-bottom:8px;">🔥 为你推荐</div>
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;background:rgba(139,92,246,0.04);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(139,92,246,0.06);">
+              <div style="font-size:0.8125rem;font-weight:600;">GOT S01</div>
+              <div style="font-size:0.625rem;color:#5a6a8a;">进度 67%</div>
+              <div class="pbar"><div class="pbar-fill purple" style="width:67%"></div></div>
+              <div style="font-size:0.625rem;color:#a78bfa;">继续 →</div>
+            </div>
+            <div style="flex:1;background:rgba(20,184,166,0.04);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(20,184,166,0.06);">
+              <div style="font-size:0.8125rem;font-weight:600;">唐顿庄园</div>
+              <div style="font-size:0.625rem;color:#5a6a8a;">新剧推荐</div>
+              <div style="font-size:0.625rem;color:#2dd4bf;margin-top:4px;">开始探索 →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📚</span><h3>剧集浏览 + 搜索</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <span class="ftag gray">全部</span>
+            <span class="ftag teal">进行中</span>
+            <span class="ftag purple">未开始</span>
+            <span class="ftag amber">已完成</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#c8d0dc;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+            🐉 GOT · 进度 67% <span style="color:#5a6a8a;float:right;">1,230句</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#c8d0dc;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+            🏰 唐顿庄园 · 新 <span style="color:#2dd4bf;float:right;">630句</span>
+          </div>
+          <div style="font-size:0.8125rem;color:#c8d0dc;padding:6px 0;">
+            💬 老友记 · 即将上线 <span style="color:#5a6a8a;float:right;">敬请期待</span>
+          </div>
+          <div style="margin-top:8px;">
+            <input type="text" placeholder="🔍 搜索台词、剧集..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#eef2f8;font-size:0.8125rem;font-family:inherit;outline:none;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. 赛道页面原型 -->
+<div class="section">
+  <div class="sec-title">📱 赛道页 · 完整布局</div>
+  <div class="sec-sub">进入「赛道」tab 后看到的全貌</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><span class="icon">🏅</span><h3>顶部 · 用户状态</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:700;color:#fff;flex-shrink:0;">H</div>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:0.9375rem;">Heaton</div>
+              <div style="font-size:0.75rem;color:#a78bfa;">🏅 听力黄金</div>
+              <div style="font-size:0.6875rem;color:#5a6a8a;">1,820 / 3,500 XP → 铂金</div>
+              <div class="pbar"><div class="pbar-fill purple" style="width:52%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">📊</span><h3>中部 · 今日面板</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;">
+              <div style="font-size:1.25rem;font-weight:700;color:#14b8a6;">12🔥</div>
+              <div style="font-size:0.625rem;color:#5a6a8a;">连续天数</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;">
+              <div style="font-size:1.25rem;font-weight:700;color:#f59e0b;">6/10</div>
+              <div style="font-size:0.625rem;color:#5a6a8a;">每日挑战</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;">
+              <div style="font-size:1.25rem;font-weight:700;color:#a78bfa;">#1</div>
+              <div style="font-size:0.625rem;color:#5a6a8a;">好友排行</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🎯</span><h3>底部 · 快捷入口</h3></div>
+      <div class="card-body">
+        <div class="mock-block">
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;padding:10px;background:rgba(139,92,246,0.06);border-radius:10px;text-align:center;border:1px solid rgba(139,92,246,0.08);">
+              <div style="font-size:1.25rem;">⚡</div>
+              <div style="font-size:0.6875rem;color:#a78bfa;">每日挑战</div>
+            </div>
+            <div style="flex:1;padding:10px;background:rgba(20,184,166,0.06);border-radius:10px;text-align:center;border:1px solid rgba(20,184,166,0.08);">
+              <div style="font-size:1.25rem;">🏆</div>
+              <div style="font-size:0.6875rem;color:#2dd4bf;">排行榜</div>
+            </div>
+            <div style="flex:1;padding:10px;background:rgba(245,158,11,0.06);border-radius:10px;text-align:center;border:1px solid rgba(245,158,11,0.08);">
+              <div style="font-size:1.25rem;">🎖️</div>
+              <div style="font-size:0.6875rem;color:#fbbf24;">成就</div>
+            </div>
+            <div style="flex:1;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.04);">
+              <div style="font-size:1.25rem;">👥</div>
+              <div style="font-size:0.6875rem;color:#5a6a8a;">小队</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. 开发成本 -->
+<div class="section">
+  <div class="sec-title">📋 开发成本评估</div>
+  <div class="sec-sub">按优先级分批落地，不一定要一次全部做完</div>
+  <div class="summary-box">
+    <h3>建议分 3 期落地</h3>
+    <ul>
+      <li><span class="num">P0</span><span class="label">🔥 等级体系 + XP 系统 + 赛道首页 · 核心后台（用户等级表、经验值流水）</span><span class="cost">~3天</span></li>
+      <li><span class="num">P1</span><span class="label">🏆 每日挑战 + Streak + 发现页（AI 推荐 + 合并 Library/Search）</span><span class="cost">~3天</span></li>
+      <li><span class="num">P2</span><span class="label">👥 邀请好友 + 排行榜 + 组队 + 成就勋章 · 社交裂变全链路</span><span class="cost">~4天</span></li>
+    </ul>
+    <div style="font-size:0.75rem;color:#5a6a8a;margin-top:12px;">
+      💡 上线即生效的 P0：改底部导航 + 添加 XP 计算 + 展示用户等级，后端只需一个字段和简单规则
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Bottom line -->
+<div style="max-width:800px;margin:0 auto;text-align:center;">
+  <div style="font-size:2rem;margin-bottom:12px;">🏆</div>
+  <div style="font-size:1.125rem;font-weight:600;color:#eef2f8;margin-bottom:8px;">这套方案的核心逻辑</div>
+  <div style="color:#5a6a8a;font-size:0.875rem;line-height:1.7;">
+    <strong style="color:#a78bfa;">练习就是升级</strong> — 每一个句子练习都有 XP 反馈<br>
+    <strong style="color:#14b8a6;">每天都有目标</strong> — 每日挑战 + Streak 保持回来<br>
+    <strong style="color:#fbbf24;">拉朋友一起学</strong> — 组队 + 排行 + 邀请奖励
+  </div>
+</div>
+
+</body>
+</html>

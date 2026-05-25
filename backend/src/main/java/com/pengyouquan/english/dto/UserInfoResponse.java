@@ -16,6 +16,9 @@ public class UserInfoResponse {
     private String avatar;
     private String role;
     private String createdAt;
+    private int prestige;
+    private int rankTier;
+    private int consecutiveDays;
 
     public static UserInfoResponse fromUser(User user) {
         return new UserInfoResponse(
@@ -24,7 +27,10 @@ public class UserInfoResponse {
             user.getNickname(),
             user.getAvatar(),
             user.getRole(),
-            user.getCreatedAt() != null ? user.getCreatedAt().toString() : ""
+            user.getCreatedAt() != null ? user.getCreatedAt().toString() : "",
+            user.getPrestige() != null ? user.getPrestige() : 0,
+            user.getRankTier() != null ? user.getRankTier() : 1,
+            user.getConsecutiveDays() != null ? user.getConsecutiveDays() : 0
         );
     }
 }

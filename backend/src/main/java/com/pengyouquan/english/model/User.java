@@ -2,6 +2,7 @@ package com.pengyouquan.english.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -43,6 +44,18 @@ public class User {
 
     @Column(name = "invited_by", length = 100)
     private String invitedBy = "";
+
+    @Column(nullable = false)
+    private Integer prestige = 0;
+
+    @Column(name = "rank_tier", nullable = false)
+    private Integer rankTier = 1;
+
+    @Column(name = "consecutive_days", nullable = false)
+    private Integer consecutiveDays = 0;
+
+    @Column(name = "last_daily_date")
+    private LocalDate lastDailyDate;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

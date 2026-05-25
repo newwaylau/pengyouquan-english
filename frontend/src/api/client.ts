@@ -98,3 +98,15 @@ export const api = {
   demoGreeting: (name?: string) =>
     request(`/api/demo/greeting?name=${encodeURIComponent(name || '访客')}`),
 };
+
+// 游戏化相关 API
+export const gameApi = {
+  getPrestige: () => request('/api/game/prestige'),
+  getDailyChallenge: () => request('/api/game/daily-challenge'),
+  submitAnswer: (challengeId: number, questionId: number, answer: string) =>
+    request(`/api/game/daily-challenge/${challengeId}/submit`, { method: 'POST', body: JSON.stringify({ questionId, answer }) }),
+  completeChallenge: (challengeId: number) =>
+    request(`/api/game/daily-challenge/${challengeId}/complete`, { method: 'POST', body: JSON.stringify({}) }),
+  getLeaderboard: (period: string = 'today') =>
+    request(`/api/game/leaderboard?period=${period}`),
+};
