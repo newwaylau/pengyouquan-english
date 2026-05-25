@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { gameApi } from './api/client';
 
-export default function ArenaPage({ user, onNavigate }: { user: any, onNavigate: (target: string, data?: any) => void }) {
+export default function ArenaPage({ user, onNavigate, refreshKey }: { user: any, onNavigate: (target: string, data?: any) => void, refreshKey?: number }) {
   const [prestige, setPrestige] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -10,7 +11,10 @@ export default function ArenaPage({ user, onNavigate }: { user: any, onNavigate:
       if (r.code === 200) setPrestige(r.data);
       setLoading(false);
     });
-  }, []);
+    gameApi.getHistory().then(r => {
+      if (r.code === 200) setHistory(r.data || []);
+    });
+  }, [refreshKey]);
 
   if (loading) return <div className="page-loading">加载中...</div>;
 
@@ -95,12 +99,40 @@ export default function ArenaPage({ user, onNavigate }: { user: any, onNavigate:
         </button>
       </div>
 
-      {/* 近期战报流 - placeholder */}
+      {/* 近期战报 */}
       <div style={{ padding: '0 16px', marginTop: 16 }}>
         <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 8 }}>📜 近期战报</div>
-        <div style={{ color: '#64748b', fontSize: 12, textAlign: 'center', padding: 20 }}>
-          完成御前挑战后将在此显示战绩
-        </div>
+        {history.length > 0 ? (
+          <div>
+            {history.map((h: any, i: number) => {
+              const pct = h.totalQuestions > 0 ? Math.round(h.correctCount / h.totalQuestions * 100) : 0;
+              return (
+                <div key={i} style={{
+                  background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+                  borderRadius: 12, padding: '12px 16px', marginBottom: 8,
+                  border: '1px solid rgba(20,184,166,0.15)',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 500 }}>
+                      {h.date || '--'}
+                    </div>
+                    <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>
+                      ⚔️ {h.correctCount}/{h.totalQuestions} · {pct}%
+                    </div>
+                  </div>
+                  <div style={{ color: '#fbbf24', fontSize: 14, fontWeight: 600 }}>
+                    +{h.prestigeEarned}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ color: '#64748b', fontSize: 12, textAlign: 'center', padding: 20 }}>
+            完成御前挑战后将在此显示战绩
+          </div>
+        )}
       </div>
     </div>
   );

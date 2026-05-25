@@ -32,6 +32,7 @@ export default function App() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [loginMode, setLoginMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [refreshKey, setRefreshKey] = useState(0);
   const { theme, toggleTheme, isDark } = useTheme();
   const mainRef = useRef<HTMLElement>(null);
 
@@ -191,9 +192,9 @@ export default function App() {
           {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
           {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
-          {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} />}
+          {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} refreshKey={refreshKey} />}
           {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
-          {page === 'daily-challenge' && <DailyChallengePage onBack={() => setPage('arena')} />}
+          {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
         </main>
 
         {/* 手机端底部导航 */}

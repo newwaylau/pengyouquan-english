@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gameApi } from './api/client';
+import { getAudioUrl, getTtsUrl } from './audioBase';
 
 interface Question {
   id: number;
@@ -203,6 +204,22 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {/* 封号晋升通知 */}
+        {completionResult.oldRankTier !== undefined && completionResult.oldRankTier !== completionResult.newRankTier && (
+          <div style={{
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05))',
+            borderRadius: 16, padding: 20, marginBottom: 16,
+            border: '1px solid rgba(251,191,36,0.3)'
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 4 }}>👑</div>
+            <div style={{ color: '#fbbf24', fontSize: 18, fontWeight: 700 }}>封号晋升!</div>
+            <div style={{ color: '#e2e8f0', fontSize: 14 }}>
+              {completionResult.oldTitleCn || ''} → <span style={{ color: '#fbbf24', fontWeight: 600, fontSize: 18 }}>{completionResult.newTitleCn}</span>
+            </div>
+          </div>
+        )}
+
         {/* 返回按钮 */}
         <button onClick={onBack}
           style={{
@@ -273,6 +290,36 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
           {/* 英文 */}
           <div style={{ color: '#e2e8f0', fontSize: 16, fontWeight: 500, lineHeight: 1.5, marginBottom: 12 }}>
             {currentQuestion.englishText}
+          </div>
+
+          {/* 音频播放按钮 */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <button onClick={() => {
+              if (currentQuestion.audioFile) {
+                const a = new Audio(getAudioUrl('/api/audio/' + encodeURIComponent(currentQuestion.audioFile)));
+                a.play().catch(() => {});
+              }
+            }} style={{
+              padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(20,184,166,0.3)',
+              background: 'rgba(20,184,166,0.08)', color: '#14b8a6', cursor: 'pointer',
+              fontSize: 13, fontWeight: 500
+            }}>
+              🔊 原音
+            </button>
+            <button onClick={() => {
+              if (currentQuestion.englishText) {
+                // 提取英文（去除中文字符和编号标记）
+                const clean = currentQuestion.englishText.replace(/#\d+\s*/, '').trim();
+                const a = new Audio(getTtsUrl(clean, 'default'));
+                a.play().catch(() => {});
+              }
+            }} style={{
+              padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(167,139,250,0.3)',
+              background: 'rgba(167,139,250,0.08)', color: '#a78bfa', cursor: 'pointer',
+              fontSize: 13, fontWeight: 500
+            }}>
+              🎤 TTS
+            </button>
           </div>
 
           {/* 中文提示 */}

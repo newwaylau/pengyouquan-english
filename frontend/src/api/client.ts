@@ -109,4 +109,5 @@ export const gameApi = {
     request(`/api/game/daily-challenge/${challengeId}/complete`, { method: 'POST', body: JSON.stringify({}) }),
   getLeaderboard: (period: string = 'today') =>
     request(`/api/game/leaderboard?period=${period}`),
+  getHistory: () => request('/api/game/history'),
 };

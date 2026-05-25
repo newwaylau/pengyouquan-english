@@ -1,6 +1,7 @@
 package com.pengyouquan.english.repository;
 
 import com.pengyouquan.english.model.DailyChallenge;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +17,6 @@ public interface DailyChallengeRepository extends JpaRepository<DailyChallenge, 
     List<DailyChallenge> findByUserIdAndChallengeDateBetweenOrderByChallengeDateDesc(Long userId, LocalDate start, LocalDate end);
 
     List<DailyChallenge> findByCompletedAndChallengeDateBetween(Boolean completed, LocalDate start, LocalDate end);
+
+    List<DailyChallenge> findByUserIdAndCompletedTrueOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }

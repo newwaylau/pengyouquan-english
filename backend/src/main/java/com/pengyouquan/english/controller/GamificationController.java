@@ -61,4 +61,10 @@ public class GamificationController {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         return ApiResponse.success(gamificationService.getLeaderboard(userId, period));
     }
+
+    @GetMapping("/history")
+    public ApiResponse<List<ChallengeHistoryEntry>> getHistory(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(gamificationService.getChallengeHistory(userId));
+    }
 }

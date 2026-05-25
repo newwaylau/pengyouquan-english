@@ -6,6 +6,8 @@ import com.pengyouquan.english.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.PageRequest;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -165,6 +167,7 @@ public class GamificationService {
         // 更新用户
         LocalDate today = LocalDate.now();
         User user = userRepository.findById(userId).orElseThrow();
+        int oldRankTierVal = user.getRankTier() != null ? user.getRankTier() : 1;
         user.setPrestige(user.getPrestige() + totalPrestigeEarned);
         user.setRankTier(RankTier.fromPrestige(user.getPrestige()).getTier());
 
@@ -177,7 +180,23 @@ public class GamificationService {
         user.setLastDailyDate(today);
         userRepository.save(user);
 
-        return new CompleteChallengeResult((int) correct, challenge.getTotalQuestions(), baseReward, comboBonus, totalPrestigeEarned);
+        // Check rank tier change
+        RankTier oldRank = RankTier.fromTier(oldRankTierVal);
+        int newRankTierVal = RankTier.fromPrestige(user.getPrestige()).getTier();
+        RankTier newRank = RankTier.fromTier(newRankTierVal);
+
+        return new CompleteChallengeResult((int) correct, challenge.getTotalQuestions(), baseReward,
+            comboBonus, totalPrestigeEarned, oldRankTierVal, newRankTierVal,
+            oldRank.getTitleCn(), oldRank.getTitleEn(),
+            newRank.getTitleCn(), newRank.getTitleEn());
+    }
+
+    public List<ChallengeHistoryEntry> getChallengeHistory(Long userId) {
+        var challenges = dailyChallengeRepository
+            .findByUserIdAndCompletedTrueOrderByCreatedAtDesc(userId, PageRequest.of(0, 5));
+        return challenges.stream()
+            .map(c -> new ChallengeHistoryEntry(c.getChallengeDate(), c.getCorrectCount(), c.getTotalQuestions(), c.getPrestigeEarned()))
+            .collect(Collectors.toList());
     }
 
     public List<LeaderboardEntry> getLeaderboard(Long userId, String period) {
@@ -192,7 +211,9 @@ public class GamificationService {
                 startDate = today.withDayOfMonth(1);
                 break;
             case "friends":
+                // 由于目前无好友系统，回退到今日排行
                 startDate = today;
+                period = "today";
                 break;
             default: // today
                 startDate = today;
@@ -312,13 +333,27 @@ public class GamificationService {
         private int baseReward;
         private int comboBonus;
         private int totalReward;
+        private int oldRankTier;
+        private int newRankTier;
+        private String oldTitleCn;
+        private String oldTitleEn;
+        private String newTitleCn;
+        private String newTitleEn;
 
-        public CompleteChallengeResult(int correctCount, int totalQuestions, int baseReward, int comboBonus, int totalReward) {
+        public CompleteChallengeResult(int correctCount, int totalQuestions, int baseReward, int comboBonus, int totalReward,
+                                       int oldRankTier, int newRankTier,
+                                       String oldTitleCn, String oldTitleEn, String newTitleCn, String newTitleEn) {
             this.correctCount = correctCount;
             this.totalQuestions = totalQuestions;
             this.baseReward = baseReward;
             this.comboBonus = comboBonus;
             this.totalReward = totalReward;
+            this.oldRankTier = oldRankTier;
+            this.newRankTier = newRankTier;
+            this.oldTitleCn = oldTitleCn;
+            this.oldTitleEn = oldTitleEn;
+            this.newTitleCn = newTitleCn;
+            this.newTitleEn = newTitleEn;
         }
 
         public int getCorrectCount() { return correctCount; }
@@ -326,5 +361,11 @@ public class GamificationService {
         public int getBaseReward() { return baseReward; }
         public int getComboBonus() { return comboBonus; }
         public int getTotalReward() { return totalReward; }
+        public int getOldRankTier() { return oldRankTier; }
+        public int getNewRankTier() { return newRankTier; }
+        public String getOldTitleCn() { return oldTitleCn; }
+        public String getOldTitleEn() { return oldTitleEn; }
+        public String getNewTitleCn() { return newTitleCn; }
+        public String getNewTitleEn() { return newTitleEn; }
     }
 }
