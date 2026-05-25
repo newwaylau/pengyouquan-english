@@ -9,6 +9,7 @@ import AdminPage from './AdminPage';
 import DemoPage from './DemoPage';
 import ArenaPage from './ArenaPage';
 import LeaderboardPage from './LeaderboardPage';
+import DailyChallengePage from './DailyChallengePage';
 import ChangePasswordModal from './ChangePasswordModal';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
@@ -20,7 +21,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -192,6 +193,7 @@ export default function App() {
           {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
           {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} />}
           {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
+          {page === 'daily-challenge' && <DailyChallengePage onBack={() => setPage('arena')} />}
         </main>
 
         {/* 手机端底部导航 */}

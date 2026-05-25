@@ -87,7 +87,7 @@ export default function ArenaPage({ user, onNavigate }: { user: any, onNavigate:
           <div style={{ color: '#14b8a6', fontWeight: 600, fontSize: 14 }}>继续听写</div>
           <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>续写征战</div>
         </button>
-        <button className="arena-quick-btn" onClick={() => onNavigate?.('practice')}
+        <button className="arena-quick-btn" onClick={() => onNavigate?.('daily-challenge')}
           style={{ background: 'linear-gradient(135deg, #2a1e3a, #1a0f2a)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 12, padding: 20, textAlign: 'left' }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>🗡️</div>
           <div style={{ color: '#a78bfa', fontWeight: 600, fontSize: 14 }}>御前挑战</div>

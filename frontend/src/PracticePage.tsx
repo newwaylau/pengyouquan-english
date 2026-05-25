@@ -781,9 +781,9 @@ export default function PracticePage({
           </div>
           <div className="bottom-section">
             <div className="bottom-nav">
-              <button className="bottom-nav-btn" aria-disabled="true" aria-label="浏览功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
-                <span className="bottom-nav-icon"><IconConstruction /></span>
-                <span className="bottom-nav-label">浏览(Browse)</span>
+              <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('arena')}>
+                <span className="bottom-nav-icon">⚔️</span>
+                <span className="bottom-nav-label">演武(Arena)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
                 <span className="bottom-nav-icon"><IconClose /></span>
@@ -793,9 +793,9 @@ export default function PracticePage({
                 <span className="bottom-nav-icon"><IconSettings /></span>
                 <span className="bottom-nav-label">设置(Settings)</span>
               </button>
-              <button className="bottom-nav-btn" aria-disabled="true" aria-label="搜索功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
-                <span className="bottom-nav-icon"><IconConstruction /></span>
-                <span className="bottom-nav-label">搜索(Search)</span>
+              <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('clan')}>
+                <span className="bottom-nav-icon">👑</span>
+                <span className="bottom-nav-label">封臣(Clan)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
                 <span className="bottom-nav-icon"><IconMeditation /></span>

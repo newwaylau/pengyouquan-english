@@ -5700,6 +5700,7 @@ h3 {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-bottom: 72px;
   }
   .main-content-new {
     padding: 24px 32px;
@@ -7080,7 +7081,7 @@ h3 {
 @media (min-width: 769px) {
   .cd-sidebar { display: flex; }
   .topnav-mobile { display: none !important; }
-  .mobile-bottom-nav { display: none !important; }
+  .mobile-bottom-nav { display: flex; }
   .mobile-drawer-overlay { display: none !important; }
   .mobile-drawer { display: none !important; }
 
