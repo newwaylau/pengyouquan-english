@@ -4598,12 +4598,14 @@ h3 {
 /* =====================================================
    Teal Modern — Login Page (redesigned)
    ===================================================== */
-.login-page-new {
+.login-page-new,
+.login-v2-page {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
 }
-.login-brand-new {
+.login-brand-new,
+.login-v2-art {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -4614,7 +4616,8 @@ h3 {
   position: relative;
   overflow: hidden;
 }
-.login-brand-new::before {
+.login-brand-new::before,
+.login-v2-art::before {
   content: '';
   position: absolute;
   width: 400px; height: 400px;
@@ -4623,7 +4626,8 @@ h3 {
   top: -120px; right: -100px;
   pointer-events: none;
 }
-.login-brand-new::after {
+.login-brand-new::after,
+.login-v2-art::after {
   content: '';
   position: absolute;
   width: 300px; height: 300px;
@@ -4684,6 +4688,7 @@ h3 {
   margin-top: 4px;
 }
 .login-form-panel,
+.login-v2-panel,
 .login-form-panel-new {
   width: 460px;
   min-width: 460px;
@@ -4695,6 +4700,7 @@ h3 {
   padding: 40px;
 }
 .login-form-inner,
+.login-v2-inner,
 .login-form-new {
   max-width: 360px;
   width: 100%;
@@ -4873,6 +4879,71 @@ h3 {
 }
 .login-form-inner .ping-success { color: #22c55e; }
 .login-form-inner .ping-error { color: #ef4444; }
+
+/* ── Login v2 新增类 ── */
+.login-v2-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #14b8a6;
+  letter-spacing: -0.02em;
+}
+.login-v2-form-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.login-v2-mini-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+.login-v2-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #334155;
+  margin-bottom: 24px;
+}
+.login-v2-tabs button {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.login-v2-tabs button:hover { color: #94a3b8; }
+.login-v2-tabs button.active { color: #14b8a6; border-bottom-color: #14b8a6; }
+.login-v2-art-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+.login-v2-art-stats div { text-align: center; }
+.login-v2-art-stats strong { display: block; font-size: 1.5rem; color: #14b8a6; }
+.login-v2-art-stats span { font-size: 0.75rem; color: #64748b; }
+.login-v2-quote-name { font-size: 0.8125rem; color: #64748b; margin-top: 8px; }
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 6px 12px;
+  transition: color 0.15s;
+}
+.btn-ghost:hover { color: #f1f5f9; }
 
 /* Welcome panel — Teal Modern */
 .login-card-welcome-new {
