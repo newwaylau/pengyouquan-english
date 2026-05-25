@@ -20,12 +20,12 @@ interface Props {
 }
 
 const VOICES = [
-  { id: 'en-US-JennyNeural', label: '🇺🇸 Jenny 美式女声' },
-  { id: 'en-US-GuyNeural', label: '🇺🇸 Guy 美式男声' },
-  { id: 'en-GB-SoniaNeural', label: '🇬🇧 Sonia 英式女声' },
-  { id: 'en-GB-RyanNeural', label: '🇬🇧 Ryan 英式男声' },
-  { id: 'en-AU-NatashaNeural', label: '🇦🇺 Natasha 澳式女声' },
-  { id: 'en-AU-WilliamNeural', label: '🇦🇺 William 澳式男声' },
+  { id: 'en-US-JennyNeural', label: 'Jenny 美式女声' },
+  { id: 'en-US-GuyNeural', label: 'Guy 美式男声' },
+  { id: 'en-GB-SoniaNeural', label: 'Sonia 英式女声' },
+  { id: 'en-GB-RyanNeural', label: 'Ryan 英式男声' },
+  { id: 'en-AU-NatashaNeural', label: 'Natasha 澳式女声' },
+  { id: 'en-AU-WilliamNeural', label: 'William 澳式男声' },
 ];
 
 const DEFAULTS = {
@@ -37,7 +37,6 @@ const DEFAULTS = {
   preferOriginal: false,
 };
 
-// 解析剧集名称为层级结构
 function parseShowGroups(shows: any[]) {
   const groups: Record<string, any> = {};
   shows.forEach((s: any) => {
@@ -58,6 +57,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
   const [selectedShowTitle, setSelectedShowTitle] = useState('');
   const [selectedSeason, setSelectedSeason] = useState('');
   const [internalShowId, setInternalShowId] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
     if (open) api.shows().then(r => {
@@ -65,7 +65,6 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
         setShows(r.data);
         const groups = parseShowGroups(r.data);
         setShowGroups(groups);
-        // 从已保存的selectedShow/selectedSeason回显（仅登录用户）
         const token = localStorage.getItem('token');
         if (token) {
           api.getSettings().then(sr => {
@@ -84,10 +83,7 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     });
   }, [open]);
 
-  const [toastMsg, setToastMsg] = useState('');
-
   const save = async (key: string, value: string) => {
-    // 未登录时直接弹 toast，不调 API（避免 request() 的 401 自动跳转）
     if (!localStorage.getItem('token')) {
       setToastMsg('请先登录才能保存设置');
       setTimeout(() => setToastMsg(''), 3000);
@@ -100,14 +96,12 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     }
   };
 
-  // 选剧集时
   const handleShowSelect = (title: string) => {
     setSelectedShowTitle(title);
     setSelectedSeason('');
     save('selectedShow', title);
     save('selectedSeason', '');
     save('showId', '');
-    // 传所有匹配的数据库ID
     if (title) {
       const ids = shows.filter(s => s.name.startsWith(title + ' ')).map((s: any) => s.id);
       if (ids.length > 0) onShowChange(ids.join(','));
@@ -117,12 +111,10 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     }
   };
 
-  // 选季时
   const handleSeasonSelect = (seasonKey: string) => {
     setSelectedSeason(seasonKey);
     save('selectedSeason', seasonKey);
     save('showId', '');
-    // 传该季所有集的数据库ID
     if (seasonKey && selectedShowTitle) {
       const ids = shows.filter(s => s.name.startsWith(selectedShowTitle + ' ') && s.name.includes(' ' + seasonKey)).map((s: any) => s.id);
       if (ids.length > 0) onShowChange(ids.join(','));
@@ -132,12 +124,9 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     }
   };
 
-  // 选具体集时
-  // 集下拉框选中时
   const handleEpisodeChange = (val: string) => {
     setInternalShowId(val);
     save('showId', val);
-    // 传数据库ID到外部（用于过滤句子）
     if (val && selectedShowTitle && selectedSeason) {
       const ep = showGroups[selectedShowTitle]?.seasons[selectedSeason]
         ?.find((ep: any) => ep.episode === val);
@@ -148,137 +137,72 @@ export default function SettingsPanel({ open, onClose, mode, onModeChange, voice
     }
   };
 
-  // 选剧集/季时，计算所有匹配的showIds
-  const handleShowOrSeasonChange = () => {
-    if (!selectedShowTitle) {
-      onShowChange('');
-      save('showId', '');
-      return;
-    }
-    const ids = shows
-      .filter(s => s.name.startsWith(selectedShowTitle + ' '))
-      .filter(s => !selectedSeason || s.name.includes(' ' + selectedSeason))
-      .map(s => s.id);
-    if (ids.length > 0) {
-      onShowChange(ids.join(','));
-      save('showId', ids.join(','));
-    }
-  };
-
   if (!open) return null;
 
   return (
-    <div className="settings-overlay" onClick={onClose}>
+    <div className="settings-overlay settings-v2-overlay" onClick={onClose}>
       {toastMsg && <div className="toast-msg">{toastMsg}</div>}
-      <div className="settings-panel" onClick={e => e.stopPropagation()}>
-        <div className="settings-header">
-          <h3><><IconSettings /> 设置</></h3>
-          <button className="close-btn" onClick={onClose}><><IconClose /> 关闭</></button>
-        </div>
+      <div className="settings-panel settings-v2-panel" onClick={e => e.stopPropagation()}>
+        <header className="settings-v2-header">
+          <div>
+            <div className="page-eyebrow">SETTINGS</div>
+            <h3><IconSettings /> 设置</h3>
+          </div>
+          <button className="btn btn-icon" onClick={onClose}><IconClose /></button>
+        </header>
 
-        {/* 练习模式 */}
-        <div className="settings-section">
-          <label>练习模式</label>
-          <div className="voice-pills">
-            {['dictation'].map(m => (
-              <label key={m} className={`mode-pill ${mode === m ? 'active' : ''}`}
-                onClick={() => { onModeChange(m); save('mode', m); }}>
-                <input type="radio" name="mode" checked={mode === m} readOnly />
-                <span><><IconPen /> 听写模式</></span>
-              </label>
+        <section className="settings-v2-section">
+          <div className="cap">模式</div>
+          <button className={`settings-v2-radio ${mode === 'dictation' ? 'active' : ''}`} onClick={() => { onModeChange('dictation'); save('mode', 'dictation'); }}>
+            <span><IconPen /></span>
+            <span><strong>听写模式</strong><small>逐词输入，适合精听训练</small></span>
+            <span className="chip chip-teal">推荐</span>
+          </button>
+        </section>
+
+        <section className="settings-v2-section">
+          <div className="cap">剧集</div>
+          <select className="select" value={selectedShowTitle} onChange={e => handleShowSelect(e.target.value)}>
+            <option value="">全部剧集</option>
+            {Object.keys(showGroups).sort().map(title => <option key={title} value={title}>{title}</option>)}
+          </select>
+          <select className="select" value={selectedSeason} onChange={e => handleSeasonSelect(e.target.value)}>
+            <option value="">全部季</option>
+            {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select className="select" value={internalShowId} onChange={e => handleEpisodeChange(e.target.value)}>
+            <option value="">全部集</option>
+            {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
+              .sort((a: any, b: any) => parseInt(a.episode.replace('E','')) - parseInt(b.episode.replace('E','')))
+              .map((ep: any) => <option key={ep.id} value={ep.episode}>{ep.name} ({ep.sentenceCount}句)</option>)}
+          </select>
+        </section>
+
+        <section className="settings-v2-section">
+          <div className="cap">语音</div>
+          <select className="select" value={voice} onChange={e => { onVoiceChange(e.target.value); save('voice', e.target.value); }}>
+            {VOICES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
+          </select>
+          <div className="seg settings-v2-speed">
+            {[0.5, 0.75, 1, 1.25, 1.5].map(s => (
+              <button key={s} className={speed === s ? 'active' : ''} onClick={() => { onSpeedChange(s); save('speed', String(s)); }}>{s}x</button>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* 剧集选择（三级联动） */}
-        <div className="settings-section">
-          <label>剧集选择</label>
-          <div style={{display:'flex',flexDirection:'column',gap:4}}>
-            <select className="show-select" style={{width:'100%'}}
-              value={selectedShowTitle}
-              onChange={e => { handleShowSelect(e.target.value); }}>
-              <option value=""><><IconFilm /> 全部剧集</></option>
-              {Object.keys(showGroups).sort().map(title => (
-                <option key={title} value={title}>{title}</option>
-              ))}
-            </select>
-            <select className="show-select" style={{width:'100%'}}
-              value={selectedSeason}
-              onChange={e => { handleSeasonSelect(e.target.value); }}>
-              <option value=""><><IconTV /> 全部季</></option>
-              {Object.keys(showGroups[selectedShowTitle]?.seasons || {}).sort().map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <select className="show-select" style={{width:'100%'}}
-              value={internalShowId}
-              onChange={e => { handleEpisodeChange(e.target.value); }}>
-              <option value=""><><IconFilm /> 全部集</></option>
-              {[...(showGroups[selectedShowTitle]?.seasons[selectedSeason] || [])]
-                .sort((a: any, b: any) => parseInt(a.episode.replace('E','')) - parseInt(b.episode.replace('E','')))
-                .map((ep: any) => (
-                <option key={ep.id} value={ep.episode}>{ep.name} ({ep.sentenceCount}句)</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* 音色 */}
-        <div className="settings-section">
-          <label>音色</label>
-          <div className="voice-radio-group">
-            <div className="voice-section-label">剧集原音</div>
-            <div className="voice-pills">
-              <label className="voice-pill">
-                <input type="checkbox" checked={true} readOnly />
-                <span>默认</span>
-              </label>
-            </div>
-            <hr className="voice-radio-divider" />
-            <div className="voice-section-label">导播</div>
-            <div className="voice-pills voice-pills-grid">
-              {VOICES.map(v => (
-                <label key={v.id} className="voice-pill">
-                  <input type="radio" name="voice" checked={voice === v.id}
-                    onChange={() => { onVoiceChange(v.id); save('voice', v.id); }} />
-                  <span>{v.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 自动播放 */}
-        <div className="settings-section">
-          <label>自动播放（建议选择导播）</label>
-          <div className="voice-pills">
-            {['browser', 'server'].map(val => (
-              <label key={val} className="voice-pill">
-                <input type="radio" name="autoPlay"
-                  checked={val === 'browser' ? preferOriginal : !preferOriginal}
-                  onChange={() => {
-                    if (val === 'browser') { onPreferOriginalChange(true); save('preferOriginal', 'true'); }
-                    else { onPreferOriginalChange(false); save('preferOriginal', 'false'); }
-                  }} />
-                <span>{val === 'browser' ? <><IconSpeaker /> 剧集原音</> : <><IconMic /> 导播</>}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* 播放速度 */}
-        <div className="settings-section">
-          <label>播放速度</label>
-          <div className="voice-pills">
-            {[0.5, 0.75, 1, 1.5].map(s => (
-              <button key={s} className={`btn-sm speed-btn ${speed === s ? 'speed-active' : ''}`}
-                onClick={() => { onSpeedChange(s); save('speed', String(s)); }}>
-                {s}x
-              </button>
-            ))}
-          </div>
-        </div>
-
+        <section className="settings-v2-section">
+          <div className="cap">外观</div>
+          <label className="settings-v2-toggle-row">
+            <span><IconSpeaker /> 原音优先<small>有剧集原音时优先播放原音</small></span>
+            <button className={`toggle ${preferOriginal ? 'on' : ''}`} onClick={e => { e.preventDefault(); const next = !preferOriginal; onPreferOriginalChange(next); save('preferOriginal', String(next)); }} />
+          </label>
+          <label className="settings-v2-toggle-row">
+            <span><IconMic /> 自动播放<small>切换句子后自动播放音频</small></span>
+            <button className={`toggle ${autoPlay ? 'on' : ''}`} onClick={e => { e.preventDefault(); const next = !autoPlay; onAutoPlayChange(next); save('autoPlay', String(next)); }} />
+          </label>
+          <div className="seg"><button>浅色</button><button className="active">深色</button><button>跟随系统</button></div>
+          <div className="seg"><button>小</button><button className="active">标准</button><button>大</button></div>
+        </section>
       </div>
     </div>
   );

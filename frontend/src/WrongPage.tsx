@@ -93,73 +93,51 @@ export default function WrongPage({ onJump, onBack }: Props) {
   }
 
   return (
-    <div className="wrong-page">
-      {/* 顶部导航 */}
-      <div className="wrong-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="back-btn" onClick={onBack}>← 返回</button>
-          <h2><IconBookClosed /> 错题复习</h2>
-          <span className="wrong-count">（共{total}句）</span>
+    <div className="wrong-page wrong-v2-page">
+      <header className="wrong-v2-header">
+        <div>
+          <div className="page-eyebrow">WRONG BOOK</div>
+          <h1 className="page-title">错题复习</h1>
+          <p className="page-sub">按间隔重复节奏复习听写错误的句子。</p>
         </div>
-      </div>
-
-      {/* 筛选工具栏 */}
-      <div className="wrong-toolbar">
-        <div className="wrong-filter-group">
-          <label className="wrong-filter-label">剧集</label>
-          <select
-            className="wrong-filter-select"
-            value={filterShow}
-            onChange={e => setFilterShow(e.target.value)}
-          >
-            <option value="">全部剧集</option>
-            {showNames.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* 批量复习 — 只出今天要复习的 */}
-        <button
-          className="batch-review-btn"
-          onClick={handleBatchPractice}
-          disabled={dueItems.length === 0}
-        >
-          <><IconTarget /> 开始错题复习（{dueCount}句）</>
+        <button className="btn btn-primary" onClick={handleBatchPractice} disabled={dueItems.length === 0}>
+          <IconTarget /> 立即复习
         </button>
+      </header>
+
+      <section className="wrong-v2-stats">
+        <div className="card card-elevated wrong-v2-stat err"><span className="cap">今日到期</span><strong>{dueCount}</strong></div>
+        <div className="card card-elevated wrong-v2-stat warn"><span className="cap">即将到期</span><strong>{upcomingCount}</strong></div>
+        <div className="card card-elevated wrong-v2-stat"><span className="cap">累计错题</span><strong>{total}</strong></div>
+      </section>
+
+      <div className="wrong-v2-toolbar">
+        <div className="seg">
+          <button className={!filterShow ? 'active' : ''} onClick={() => setFilterShow('')}>全部</button>
+          <button className={filterShow ? 'active' : ''} disabled>剧集筛选</button>
+        </div>
+        <select className="select wrong-v2-select" value={filterShow} onChange={e => setFilterShow(e.target.value)}>
+          <option value="">全部剧集</option>
+          {showNames.map(name => <option key={name} value={name}>{name}</option>)}
+        </select>
+        <button className="btn btn-ghost btn-sm" onClick={onBack}>返回练习</button>
       </div>
 
-      {/* 加载态 */}
-      {loading && (
-        <div className="loading" style={{ padding: '40px 0' }}>
-          加载中...
-        </div>
-      )}
+      {loading && <div className="loading" style={{ padding: '40px 0' }}>加载中...</div>}
 
       {!loading && (
         <>
-          {/* ⭐ 今天要复习分组 */}
           {dueItems.length > 0 && (
-            <div className="wrong-section">
-              <h3 className="wrong-section-title due-section">
-                <IconCalendar /> 今天要复习（{dueCount}句）
-              </h3>
-              <div className="wrong-section-items">
-                {renderItems(dueItems)}
-              </div>
-            </div>
+            <section className="wrong-v2-section">
+              <h2 className="cap"><IconCalendar /> 到期 · {dueCount} 句</h2>
+              <div className="wrong-v2-list">{renderItems(dueItems)}</div>
+            </section>
           )}
-
-          {/* ⚪ 以后复习分组 */}
           {upcomingItems.length > 0 && (
-            <div className="wrong-section">
-              <h3 className="wrong-section-title upcoming-section">
-                <IconCalendarUpcoming /> 以后复习（{upcomingCount}句）
-              </h3>
-              <div className="wrong-section-items">
-                {renderItems(upcomingItems)}
-              </div>
-            </div>
+            <section className="wrong-v2-section">
+              <h2 className="cap"><IconCalendarUpcoming /> 即将到期 · {upcomingCount} 句</h2>
+              <div className="wrong-v2-list">{renderItems(upcomingItems)}</div>
+            </section>
           )}
         </>
       )}
@@ -180,53 +158,27 @@ export default function WrongPage({ onJump, onBack }: Props) {
     return (
       <>
         {pagedGroup.map((item: any) => (
-          <div
-            key={item.sentenceId}
-            className="wrong-item clickable"
-            onClick={() => onJump(item.sentenceId)}
-          >
-            <div className="wrong-item-body">
-              {/* 英文原文 */}
-              <div className="wrong-text">{item.text}</div>
-
-              {/* 元信息行 */}
-              <div className="wrong-meta-row">
-                {item.showName && (
-                  <span className="wrong-meta-tag show-name">{item.showName}</span>
-                )}
-                <span className="wrong-meta-tag error-count">
-                  <IconClose /> 错{item.errorCount}次
-                </span>
-                {/* 复习间隔标签 */}
-                <span className="wrong-meta-tag review-label">
-                  <IconClock /> {getReviewLabel(item.nextReviewAt)}
-                </span>
-                {item.isDisabled && (
-                  <span className="wrong-meta-tag disabled-label">
-                    <IconForbidden /> 该句子已停用
-                  </span>
-                )}
+          <div key={item.sentenceId} className="wrong-v2-row" onClick={() => onJump(item.sentenceId)}>
+            <span className="mono wrong-v2-id">#{item.sentenceId}</span>
+            <div className="wrong-v2-body">
+              <div className="wrong-v2-text">{item.text}</div>
+              <div className="wrong-v2-meta">
+                {item.showName && <span className="chip">{item.showName}</span>}
+                <span className="chip chip-err"><IconClose /> 错{item.errorCount}次</span>
+                <span className="chip chip-teal"><IconClock /> {getReviewLabel(item.nextReviewAt)}</span>
+                {item.isDisabled && <span className="chip chip-warn"><IconForbidden /> 已停用</span>}
               </div>
             </div>
-
-            {/* 操作按钮组 */}
-            <div className="wrong-item-actions">
-              <button
-                className="small-btn practice-btn"
-                onClick={e => { e.stopPropagation(); onJump(item.sentenceId); }}
-              >
-                [练习]
-              </button>
-            </div>
+            <button className="btn btn-primary btn-sm" onClick={e => { e.stopPropagation(); onJump(item.sentenceId); }}>复习</button>
+            <button className="btn btn-icon btn-sm" onClick={e => e.stopPropagation()}>···</button>
           </div>
         ))}
 
-        {/* 分页 */}
         {totalPages > 1 && (
-          <div className="pagination">
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>上一页</button>
-            <span>第 {page + 1}/{totalPages} 页</span>
-            <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>下一页</button>
+          <div className="pagination wrong-v2-pagination">
+            <button className="btn btn-ghost btn-sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>上一页</button>
+            <span className="chip">{page + 1} / {totalPages}</span>
+            <button className="btn btn-ghost btn-sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>下一页</button>
           </div>
         )}
       </>

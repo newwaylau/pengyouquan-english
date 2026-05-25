@@ -425,38 +425,38 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
   // ── 未登录：左右分栏布局 ──
   return (
-    <div className="login-page-new">
-      {/* 左侧品牌区 */}
-      <div className="login-brand-new">
-        <div className="login-brand-icon-new">🎬</div>
-        <h1>英语<span className="accent">剧场</span></h1>
-        <p className="login-brand-tagline">跟读经典美剧片段，在台词中掌握地道英语</p>
-        <div className="login-brand-stats">
-          <div className="login-brand-stat-card">
-            <div className="login-brand-stat-value">3000+</div>
-            <div className="login-brand-stat-label">影视句子</div>
-          </div>
-          <div className="login-brand-stat-card">
-            <div className="login-brand-stat-value">20+</div>
-            <div className="login-brand-stat-label">经典剧集</div>
-          </div>
-          <div className="login-brand-stat-card">
-            <div className="login-brand-stat-value">1M+</div>
-            <div className="login-brand-stat-label">练习次数</div>
-          </div>
+    <div className="login-page-new login-v2-page">
+      <div className="login-v2-art">
+        <div className="login-v2-brand">
+          <span className="brand-logo-v2">剧</span>
+          <span><strong>英语剧场</strong><small>DICTATION · S2</small></span>
+        </div>
+        <blockquote>“The night is dark and full of terrors.”</blockquote>
+        <p className="login-v2-quote-name">Melisandre · Game of Thrones</p>
+        <div className="login-v2-art-stats">
+          <div><strong>6</strong><span>剧集季</span></div>
+          <div><strong>13K+</strong><span>影视句子</span></div>
+          <div><strong>5K+</strong><span>练习记录</span></div>
         </div>
       </div>
 
-      {/* 右侧表单区 */}
-      <div className="login-form-panel">
-        <div className="login-form-inner">
+      <div className="login-form-panel login-v2-panel">
+        <div className="login-form-inner login-v2-inner">
         {onHome && (
-          <button className="login-back-btn" onClick={onHome} type="button">
-            ← 返回首页
+          <button className="btn btn-ghost btn-sm" onClick={onHome} type="button">
+            先逛逛 · 不登录
           </button>
         )}
-        <h2>欢迎回来</h2>
-        <p className="form-subtitle">登录你的账号继续学习</p>
+        <div className="login-v2-form-head">
+          <div className="login-v2-mini-brand"><span className="brand-logo-v2">剧</span><span>英语剧场</span></div>
+          <h2>欢迎回来</h2>
+          <p className="form-subtitle">登录你的账号继续学习</p>
+          <div className="seg login-v2-tabs">
+            <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>登录</button>
+            <button type="button" className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')}>注册</button>
+            <button type="button" className={mode === 'forgot' ? 'active' : ''} onClick={goToForgot}>忘记密码</button>
+          </div>
+        </div>
         <form onSubmit={handleSubmit}>
 
           {/* ── 登录模式 ── */}

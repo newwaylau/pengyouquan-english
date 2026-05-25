@@ -833,6 +833,10 @@ export default function PracticePage({
   // 用户实际输入词统计
   const userTotal = words.filter((_, i) => !hints.has(i)).length;
   const userCorrectCount = words.filter((_, i) => !hints.has(i) && correctWords.has(i)).length;
+  const practiceProgress = mode === 'wrong' && wrongSentences.length > 0
+    ? Math.round(((wrongIndex + 1) / wrongSentences.length) * 100)
+    : accuracy;
+  const firstOpenIndex = words.findIndex((_, i) => !hints.has(i) && !correctWords.has(i));
 
   return (
     <div className={`practice-page ${focusMode ? 'focus-mode' : ''} ${phoneMode ? 'phone-mode' : ''}`}>
@@ -920,220 +924,159 @@ export default function PracticePage({
           </div>
         </div>
       )}
-      {/* Stats Bar — 4卡片: 总句子 / 今日练习 / 正确率 / 错题 */}
-      {user && !phoneMode && (
-        <div className="stats-bar-new">
-          <div className="stat-item-new">
-            <div className="stat-value-new">{stats.totalPractices}</div>
-            <div className="stat-label-new">总句子</div>
-          </div>
-          <div className="stat-item-new">
-            <div className="stat-value-new">{stats.todayPractices}</div>
-            <div className="stat-label-new">今日练习</div>
-          </div>
-          <div className="stat-item-new">
-            <div className="stat-value-new">{accuracy}%</div>
-            <div className="stat-label-new">正确率</div>
-          </div>
-          <div className="stat-item-new clickable" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-            <div className="stat-value-new">{wrongCount}</div>
-            <div className="stat-label-new">错题</div>
-          </div>
-        </div>
-      )}
-
-      {/* 错题练习进度 */}
-      {mode === 'wrong' && wrongSentences.length > 0 && (
-        <div className="wrong-progress-bar">
-          <div className="wrong-progress-text">
-            第 {wrongIndex + 1}/{wrongSentences.length} 句
-          </div>
-          <div className="wrong-progress-track">
-            <div
-              className="wrong-progress-fill"
-              style={{ width: `${((wrongIndex + 1) / wrongSentences.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* 专注模式：专注 | 手机 | 退出（非手机模式时显示） */}
-      {focusMode && !phoneMode && (
-        <div style={{textAlign:'center',marginBottom:8,display:'flex',justifyContent:'center',gap:6}}>
-          <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}><><IconMeditation /> 专注</></button>
-          <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}><><IconPhone /> 手机</></button>
-          <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}><><IconClose /> 退出</></button>
-        </div>
-      )}
-
-      {/* 主卡片 */}
       {!phoneMode && (
-      <div className="practice-card-new card-enter">
-        <div className="card-body" key={sentence?.id || 'no-sentence'}>
-        {/* 卡片头部：模式徽章 + 剧集信息 */}
-        <div className="card-header-new">
-          <span className="mode-badge-new">{MODE_LABELS[mode] || <><IconEdit /> 练习模式</>}</span>
-          <span className="episode-badge-new">{sentence.showName} · #{sentence.id}</span>
-        </div>
+        <>
+          <section className="practice-v2-hero">
+            <div>
+              <div className="page-eyebrow">DICTATION · {mode === 'wrong' ? '错题复习模式' : '纯听写模式'}</div>
+              <h1 className={`page-title page-title-serif ${!showEn ? 'blurred' : ''}`} aria-hidden={!showEn}>{en}</h1>
+              <p className="page-sub">{sentence.showName || '英语剧场'} · #{sentence.id} · {MODE_LABELS[mode] || '练习模式'}</p>
+            </div>
+            {user && (
+              <div className="practice-v2-stats">
+                <span><strong>{stats.totalPractices}</strong> 总句子</span>
+                <span><strong>{stats.todayPractices}</strong> 今日</span>
+                <span><strong>{accuracy}%</strong> 正确率</span>
+                <button className="chip chip-err" onClick={() => checkLogin() && onNavigate?.('wrong')}>错题 {wrongCount}</button>
+              </div>
+            )}
+          </section>
 
-        {/* 英文显示区 */}
-        <div className={`sentence-en-new sentence-fade-in ${!showEn ? 'blurred' : ''}`} aria-hidden={!showEn}>
-          {en}
-        </div>
-
-        {/* 中文显示区 */}
-        {cn && (
-          <div className={`sentence-cn-new sentence-fade-in ${mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}`}>
-            {cn}
-          </div>
-        )}
-
-        {/* 逐词输入（未完成时显示） */}
-        {/* 输入框始终显示，回答后变为只读 */}
-        {!phoneMode && (<>
-          {/* 隐藏输入框（手机键盘触发用） */}
-          <input ref={hiddenInputRef}
-            style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
-            onBlur={() => {
-              // 隐藏输入框失焦时，聚焦到实际输入框
-              let first = 0;
-              while (first < words.length && hints.has(first)) first++;
-              inputRefs.current[first]?.focus({ preventScroll: true });
-            }}
-          />
-          <div className="word-inputs">
-            {words.map((w, i) => {
-              const parts = splitWordParts(w);
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {parts.prefix && <span className="word-sep">{parts.prefix}</span>}
-                  <input
-                    ref={el => { inputRefs.current[i] = el; }}
-                    className={`word-input-new ${hints.has(i) ? 'hint-word' : ''} ${correctWords.has(i) ? 'correct' : ''} ${wrongWords.has(i) ? 'wrong' : ''}`}
-                    size={Math.max(3, parts.letters.length * 2 - 1)}
-                    maxLength={parts.letters.length}
-                    placeholder={Array(parts.letters.length).fill('_').join(' ')}
-                    value={hints.has(i) ? parts.letters : inputs[i]}
-                    onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
-                    onKeyDown={e => handleKeyDown(i, e)}
-                    disabled={hints.has(i) || answered}
-                  />
-                  {parts.suffix && <span className="word-sep">{parts.suffix}</span>}
-                  {i < words.length - 1 && <span className="word-sep"> </span>}
-                </div>
-              );
-            })}
-          </div>
-        </>)}
-
-        {/* 反馈区域 */}
-        {answered && (
-          <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
-            {wrongWords.size === 0
-              ? <><IconCheck /> 完全正确！</>
-              : <><IconClose /> 正确 {userCorrectCount}/{userTotal} 个词</>}
-          </div>
-        )}
-        {retryCount === 1 && !answered && (
-          <div className="feedback retry"><><IconClose /> 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</></div>
-        )}
-
-        {/* 举报按钮（仅答完题后显示） */}
-        {answered && user && (
-          <div className="flag-section">
-            <button
-              className={`flag-btn ${flaggedSentenceIds.has(sentence.id) ? 'flagged' : ''}`}
-              onClick={toggleFlag}
-              disabled={flagLoading}
-              title={flaggedSentenceIds.has(sentence.id) ? '取消举报' : '标记：这句台词跟原音对不上'}
-            >
-              <IconFlag /> {flaggedSentenceIds.has(sentence.id) ? '已标记' : '报告问题'}
-            </button>
-          </div>
-        )}
-
-        </div>
-      </div>
-      )}
-
-      {/* 按钮区 */}
-      {!phoneMode && (
-      <>
-      <div className="bottom-section">
-      <div className="button-area card-enter-delay-1">
-        <hr className="action-divider" />
-
-        {/* 操作按钮组：提交/下一句 — Primary */}
-        <div className="action-buttons">
-          {!answered ? (
-            <button className="action-btn-new primary" ref={submitRef} onClick={handleSubmit}>提交</button>
-          ) : (
-            <button className="action-btn-new primary" onClick={goNext}>下一句</button>
+          {focusMode && (
+            <div className="practice-v2-focus-actions">
+              <button className={`btn btn-sm ${!phoneMode ? 'btn-secondary' : 'btn-ghost'}`} onClick={() => setPhoneMode(false)}><IconMeditation /> 专注</button>
+              <button className={`btn btn-sm ${phoneMode ? 'btn-secondary' : 'btn-ghost'}`} onClick={() => setPhoneMode(true)}><IconPhone /> 手机</button>
+              <button className="btn btn-sm btn-ghost" onClick={() => { setFocusMode(false); setPhoneMode(false); }}><IconClose /> 退出</button>
+            </div>
           )}
-        </div>
 
-        {/* 操作按钮组：音效 + 下一句 — Secondary */}
-        <div className="action-buttons">
-          <button className="action-btn-new" onClick={playOriginal}>剧集原音</button>
-          <button className="action-btn-new" onClick={() => playTts(en)}>{VOICES.find(v => v.id === voice)?.label || '导播'}</button>
-          <button className="action-btn-new" onClick={goNext}>下一句</button>
-          {mode === 'dictation' && (
-            <button className="action-btn-new" onClick={() => setShowCn(s => !s)}>
-              {showCn ? '隐藏中文' : '显示中文'}
-            </button>
-          )}
-          <button className="action-btn-new" onClick={() => setShowEn(s => !s)}>
-            {showEn ? '隐藏英文' : '显示英文'}
-          </button>
-        </div>
+          <section className="card card-elevated practice-v2-card" key={sentence?.id || 'no-sentence'}>
+            <div className="practice-v2-progress-row">
+              <span className="mono">{mode === 'wrong' && wrongSentences.length > 0 ? `${wrongIndex + 1} / ${wrongSentences.length} 句` : `${stats.todayPractices} / ${Math.max(stats.totalPractices, stats.todayPractices || 1)} 句`}</span>
+              <span className="practice-v2-progress"><span style={{ width: `${practiceProgress}%` }} /></span>
+              <span className="mono">{practiceProgress}%</span>
+              {retryCount > 0 && <span className="chip chip-warn">重试 ×{retryCount}</span>}
+            </div>
 
-        {/* 操作行3：速度 */}
-        <div className="action-row-split">
-          <div className="action-row-half">
-            {SPEEDS.map(s => (
-              <button
-                key={s}
-                className={`btn-speed ${speed === s ? 'active' : ''}`}
-                onClick={() => setSpeed(s)}
-              >
-                {s}x
+            <div className="practice-v2-audio-row">
+              <button className="btn btn-icon" onClick={playOriginal} aria-label="剧集原音"><IconRefresh /></button>
+              <button className="practice-v2-play" onClick={preferOriginal ? playOriginal : () => playTts(en)} aria-label="播放">
+                <span className="practice-v2-play-ring" />
+                <IconNext size={28} />
               </button>
-            ))}
+              <button className="btn btn-icon" onClick={() => playTts(en)} aria-label="TTS"><IconSpeaker /></button>
+            </div>
+
+            <div className="practice-v2-wave" aria-hidden="true">
+              {Array.from({ length: 48 }).map((_, i) => <i key={i} style={{ height: `${20 + ((i * 7) % 60)}%` }} />)}
+            </div>
+
+            <input ref={hiddenInputRef}
+              style={{ position: "fixed", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+              onBlur={() => {
+                let first = 0;
+                while (first < words.length && hints.has(first)) first++;
+                inputRefs.current[first]?.focus({ preventScroll: true });
+              }}
+            />
+
+            <div className="practice-v2-words">
+              {words.map((w, i) => {
+                const parts = splitWordParts(w);
+                const value = hints.has(i) ? parts.letters : inputs[i];
+                const state = correctWords.has(i) ? 'correct' : wrongWords.has(i) ? 'wrong' : firstOpenIndex === i ? 'active' : value ? 'active' : 'blank';
+                return (
+                  <span key={i} className={`word ${state}`}>
+                    {parts.prefix && <span>{parts.prefix}</span>}
+                    <input
+                      ref={el => { inputRefs.current[i] = el; }}
+                      className="practice-v2-word-input"
+                      size={Math.max(3, parts.letters.length)}
+                      maxLength={parts.letters.length}
+                      placeholder={Array(Math.min(parts.letters.length, 5)).fill('_').join('')}
+                      value={value}
+                      onChange={e => { if (!hints.has(i)) handleInputChange(i, e.target.value); }}
+                      onKeyDown={e => handleKeyDown(i, e)}
+                      disabled={hints.has(i) || answered}
+                    />
+                    {parts.suffix && <span>{parts.suffix}</span>}
+                  </span>
+                );
+              })}
+            </div>
+
+            <div className="practice-v2-submit-row">
+              <input
+                className="input practice-v2-inline-input"
+                placeholder="输入下一个单词..."
+                value={firstOpenIndex >= 0 ? inputs[firstOpenIndex] || '' : ''}
+                onChange={e => firstOpenIndex >= 0 && handleInputChange(firstOpenIndex, e.target.value)}
+                onKeyDown={e => firstOpenIndex >= 0 && handleKeyDown(firstOpenIndex, e)}
+                disabled={answered || firstOpenIndex < 0}
+              />
+              {!answered ? (
+                <button className="btn btn-primary btn-lg" ref={submitRef} onClick={handleSubmit}>提交 <kbd>Enter</kbd></button>
+              ) : (
+                <button className="btn btn-primary btn-lg" onClick={goNext}>下一句 <IconSkipNext /></button>
+              )}
+            </div>
+
+            <div className="practice-v2-hints">
+              <span><kbd>R</kbd> 重播</span>
+              <span><kbd>⌥N</kbd> 下一句</span>
+              <span><kbd>?</kbd> 提示</span>
+              <span><kbd>⌘K</kbd> 设置</span>
+            </div>
+
+            {answered && (
+              <div className={`feedback ${wrongWords.size === 0 ? 'correct' : 'wrong'}`}>
+                {wrongWords.size === 0 ? <><IconCheck /> 完全正确！</> : <><IconClose /> 正确 {userCorrectCount}/{userTotal} 个词</>}
+              </div>
+            )}
+            {retryCount === 1 && !answered && (
+              <div className="feedback retry"><><IconClose /> 有错误，再试一次 ({userTotal > 0 ? Math.round(userCorrectCount/userTotal*100) : 0}%)</></div>
+            )}
+            {answered && user && (
+              <div className="flag-section">
+                <button
+                  className={`flag-btn ${flaggedSentenceIds.has(sentence.id) ? 'flagged' : ''}`}
+                  onClick={toggleFlag}
+                  disabled={flagLoading}
+                  title={flaggedSentenceIds.has(sentence.id) ? '取消举报' : '标记：这句台词跟原音对不上'}
+                >
+                  <IconFlag /> {flaggedSentenceIds.has(sentence.id) ? '已标记' : '报告问题'}
+                </button>
+              </div>
+            )}
+          </section>
+
+          <div className="practice-v2-toolbar">
+            <div className="seg" title="语速">
+              {SPEEDS.map(s => <button key={s} className={speed === s ? 'active' : ''} onClick={() => setSpeed(s)}>{s}x</button>)}
+            </div>
+            <div className="seg" title="语音">
+              <button onClick={playOriginal}>原音</button>
+              {VOICES.slice(0, 3).map(v => <button key={v.id} className={voice === v.id ? 'active' : ''} onClick={() => setVoice(v.id)}>{v.label}</button>)}
+            </div>
+            <span className="spacer" />
+            {mode === 'dictation' && <button className="btn btn-ghost btn-sm" onClick={() => setShowCn(s => !s)}>{showCn ? '隐藏中文' : '显示中文'}</button>}
+            <button className="btn btn-ghost btn-sm" onClick={toggleFlag} disabled={!user || flagLoading}>{flaggedSentenceIds.has(sentence.id) ? '已报错' : '报错'}</button>
+            <button className="btn btn-secondary btn-sm" onClick={goNext}>下一句</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setSettingsOpen(true)}><IconSettings /> 设置</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setFocusMode(f => !f)}><IconMeditation /> {focusMode ? '退出专注' : '专注'}</button>
           </div>
-        </div>
 
-        {/* 快捷键提示 */}
-        <div className="shortcuts-section-new">
-          <kbd>-</kbd> 原音 <kbd>=</kbd> 音色 <kbd>\</kbd> 下一句 <kbd>[</kbd> 中文 <kbd>]</kbd> 英文 <kbd>Enter</kbd> 提交
-        </div>
-      </div>
-
-      {/* 底部导航 */}
-      <div className="bottom-nav">
-        <button className="bottom-nav-btn" aria-disabled="true" aria-label="浏览功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
-          <span className="bottom-nav-icon"><IconConstruction /></span>
-          <span className="bottom-nav-label">浏览(Browse)</span>
-        </button>
-        <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
-          <span className="bottom-nav-icon"><IconClose /></span>
-          <span className="bottom-nav-label">错题(Wrong)</span>
-        </button>
-        <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
-          <span className="bottom-nav-icon"><IconSettings /></span>
-          <span className="bottom-nav-label">设置(Settings)</span>
-        </button>
-        <button className="bottom-nav-btn" aria-disabled="true" aria-label="搜索功能开发中" style={{opacity:0.5,cursor:'not-allowed'}}>
-          <span className="bottom-nav-icon"><IconConstruction /></span>
-          <span className="bottom-nav-label">搜索(Search)</span>
-        </button>
-        <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
-          <span className="bottom-nav-icon"><IconMeditation /></span>
-          <span className="bottom-nav-label">{focusMode ? '退出(Exit)' : '专注(Focus)'}</span>
-        </button>
-      </div> {/* end bottom-nav */}
-
-      </div> {/* end bottom-section */}
-      </>
+          {cn && (
+            <section className="card practice-v2-translation">
+              <div className="row">
+                <span className="cap">中文翻译</span>
+                <span className="spacer" />
+                <button className="btn btn-ghost btn-sm" onClick={() => setShowCn(s => !s)}>{showCn ? '隐藏' : '显示'}</button>
+              </div>
+              <p className={mode === 'dictation' && !showCn && !answered ? 'blurred' : ''}>“{cn}”</p>
+            </section>
+          )}
+        </>
       )}
       {/* 设置面板 */}
       <SettingsPanel

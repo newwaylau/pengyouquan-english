@@ -11,10 +11,21 @@ import DemoPage from './DemoPage';
 import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
+import { IconTarget, IconClose, IconSearch, IconBook, IconSettings } from './Icons';
 import './index.css';
 
 // 应用启动时检测 IPv6 连通性
 initAudioBase();
+
+const PAGE_LABELS: Record<string, string> = {
+  practice: '练习',
+  wrong: '错题本',
+  search: '搜索',
+  browse: '剧库',
+  admin: '管理后台',
+  subtitle: '字幕导入',
+  demo: 'Demo',
+};
 
 export default function App() {
   const parseHash = (): 'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo' => {
@@ -121,50 +132,23 @@ export default function App() {
         wrongCount={wrongCount}
       />
 
-      <div className="app-content app-content-new">
-        {/* 手机端精简顶部导航 */}
-        <nav className="topnav-mobile">
-          <span className="topnav-mobile-logo" onClick={() => setPage('practice')}>
-            <span className="topnav-mobile-dot" />
-            英语剧场
-          </span>
-          <div className="topnav-mobile-right">
-            {user?.role === 'admin' && (
-              <span className="topnav-mobile-online">
-                <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
-                {onlineCount !== null ? onlineCount : '...'}
-              </span>
-            )}
-            {user ? (
-              <button onClick={handleLogout} className="topnav-mobile-logout btn-outline">退出</button>
-            ) : (
-              <button onClick={() => setPage('login')} className="topnav-mobile-login btn-primary">登录</button>
-            )}
+      <div className="app-main-v2">
+        <header className="app-header-v2">
+          <div className="crumbs-v2">
+            <span>主页</span>
+            <span className="sep">/</span>
+            <strong>{PAGE_LABELS[page]}</strong>
+            {page === 'practice' && <><span className="sep">/</span><span>Game of Thrones</span></>}
           </div>
-        </nav>
-
-        {/* 桌面端 Topbar */}
-        <header className="topbar">
-          <div className="topbar-left">
-            <div className="topbar-title">
-              {page === 'practice' && '练习'}
-              {page === 'wrong' && '错题本'}
-              {page === 'search' && '搜索'}
-              {page === 'browse' && '浏览'}
-              {page === 'admin' && '管理后台'}
-              {page === 'subtitle' && '字幕导入'}
-              {page === 'demo' && 'Demo'}
-            </div>
-            <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
-          </div>
-          <div className="topbar-right topbar-actions">
-            <button className="topbar-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
-              {isDark ? '☀️' : '🌙'}
+          <div className="head-spacer" />
+          <div className="head-actions-v2">
+            <button className="btn btn-icon" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+              {isDark ? '☀' : '☾'}
             </button>
             {user ? (
-              <button className="topbar-login-btn btn-outline-style" onClick={handleLogout}>退出</button>
+              <button className="btn btn-secondary btn-sm" onClick={handleLogout}>退出</button>
             ) : (
-              <button className="topbar-login-btn" onClick={() => setPage('login')}>登录</button>
+              <button className="btn btn-primary btn-sm" onClick={() => setPage('login')}>登录</button>
             )}
           </div>
         </header>
@@ -189,7 +173,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="page-enter main-content-new" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
+        <main className="page-enter app-content-v2" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
           {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} onWrongCountChange={setWrongCount} />}
           {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
@@ -198,6 +182,13 @@ export default function App() {
           {page === 'subtitle' && <SubtitlePage />}
           {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
         </main>
+        <nav className="mobile-tabbar" aria-label="底部导航">
+          <button className={page === 'practice' ? 'active' : ''} onClick={() => setPage('practice')}><IconTarget />练习</button>
+          <button className={page === 'wrong' ? 'active' : ''} onClick={() => setPage('wrong')}><IconClose />错题</button>
+          <button className={page === 'search' ? 'active' : ''} onClick={() => setPage('search')}><IconSearch />搜索</button>
+          <button className={page === 'browse' ? 'active' : ''} onClick={() => setPage('browse')}><IconBook />剧库</button>
+          <button className={page === 'login' ? 'active' : ''} onClick={() => setPage(user ? 'practice' : 'login')}><IconSettings />我的</button>
+        </nav>
       </div>
     </div>
   );

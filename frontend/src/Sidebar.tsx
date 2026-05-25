@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconSun, IconMoon } from './Icons';
+import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconSun, IconMoon, IconTV } from './Icons';
 
 interface SidebarProps {
   page: string;
@@ -16,32 +16,28 @@ const NAV_ITEMS: { key: string; icon: React.ReactNode; label: string; requiresLo
   { key: 'practice', icon: <IconTarget />, label: '练习' },
   { key: 'wrong', icon: <IconClose />, label: '错题本', requiresLogin: true, badge: 'wrongCount' },
   { key: 'search', icon: <IconSearch />, label: '搜索' },
-  { key: 'browse', icon: <IconBook />, label: '浏览' },
+  { key: 'browse', icon: <IconBook />, label: '剧库' },
 ];
-
-const OTHER_ITEMS: { key: string; icon: React.ReactNode; label: string; requiresLogin?: boolean }[] = [];
 
 export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout, isDark, onToggleTheme, wrongCount = 0 }: SidebarProps) {
   return (
-    <aside className="sidebar-new">
-      {/* Logo */}
-      <div className="sidebar-logo-new" onClick={() => onNavigate('practice')}>
-        <div className="sidebar-logo-circle">🎬</div>
-        <div className="sidebar-logo-text-group">
-          <span className="sidebar-logo-title">英语剧场</span>
-          <span className="sidebar-logo-subtitle">跟读经典美剧台词</span>
-        </div>
-      </div>
+    <aside className="sidebar-v2">
+      <button className="brand-v2" onClick={() => onNavigate('practice')}>
+        <span className="brand-logo-v2">剧</span>
+        <span className="brand-copy-v2">
+          <span className="brand-name-v2">英语剧场</span>
+          <span className="brand-tag-v2">DICTATION · S2</span>
+        </span>
+      </button>
 
-      {/* Section: 主菜单 */}
-      <div className="sidebar-section-header">主菜单</div>
-      <nav className="sidebar-nav-new">
+      <div className="cap sidebar-cap">主菜单</div>
+      <nav className="sidebar-nav-v2">
         {NAV_ITEMS.map(item => {
           const disabled = item.requiresLogin && !user;
           return (
             <button
               key={item.key}
-              className={`sidebar-nav-item ${page === item.key ? 'active' : ''}`}
+              className={`nav-item-v2 ${page === item.key ? 'active' : ''}`}
               onClick={() => {
                 if (disabled) return;
                 onNavigate(item.key);
@@ -49,87 +45,55 @@ export default function Sidebar({ page, onNavigate, user, onlineCount, onLogout,
               disabled={disabled}
               title={disabled ? '请先登录' : item.label}
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
-              {item.badge === 'wrongCount' && wrongCount > 0 && (
-                <span className="sidebar-nav-badge">{wrongCount}</span>
-              )}
+              <span className="nav-icon-v2">{item.icon}</span>
+              <span className="nav-label-v2">{item.label}</span>
+              {item.badge === 'wrongCount' && wrongCount > 0 && <span className="nav-badge-v2">{wrongCount}</span>}
             </button>
           );
         })}
-
-        {/* Admin link */}
-        {user?.role === 'admin' && (
-          <button
-            className={`sidebar-nav-item ${page === 'admin' ? 'active' : ''}`}
-            onClick={() => onNavigate('admin')}
-          >
-            <span className="nav-icon"><IconSettings /></span>
-            <span className="nav-label">管理后台</span>
-          </button>
-        )}
       </nav>
 
-      {/* Section: 其他 */}
-      {OTHER_ITEMS.length > 0 && (
+      {user?.role === 'admin' && (
         <>
-          <div className="sidebar-section-header">其他</div>
-          <nav className="sidebar-nav-new">
-            {OTHER_ITEMS.map(item => {
-              const disabled = item.requiresLogin && !user;
-              return (
-                <button
-                  key={item.key}
-                  className={`sidebar-nav-item ${page === item.key ? 'active' : ''}`}
-                  onClick={() => {
-                    if (disabled) return;
-                    onNavigate(item.key);
-                  }}
-                  disabled={disabled}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-label">{item.label}</span>
-                </button>
-              );
-            })}
+          <div className="cap sidebar-cap">管理</div>
+          <nav className="sidebar-nav-v2">
+            <button className={`nav-item-v2 ${page === 'admin' ? 'active' : ''}`} onClick={() => onNavigate('admin')}>
+              <span className="nav-icon-v2"><IconSettings /></span>
+              <span className="nav-label-v2">管理后台</span>
+              {onlineCount !== null && <span className="nav-badge-v2">{onlineCount}</span>}
+            </button>
+            <button className={`nav-item-v2 ${page === 'subtitle' ? 'active' : ''}`} onClick={() => onNavigate('subtitle')}>
+              <span className="nav-icon-v2"><IconTV /></span>
+              <span className="nav-label-v2">字幕导入</span>
+            </button>
           </nav>
         </>
       )}
 
-      {/* Spacer */}
-      <div className="sidebar-spacer" />
+      <div className="sidebar-fill-v2" />
 
-      {/* Theme toggle */}
-      <div className="sidebar-theme-row">
-        <button className="sidebar-nav-item" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
-          <span className="nav-icon">{isDark ? <IconSun /> : <IconMoon />}</span>
-          <span className="nav-label">{isDark ? '浅色模式' : '深色模式'}</span>
-        </button>
-      </div>
+      <button className="nav-item-v2" onClick={onToggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+        <span className="nav-icon-v2">{isDark ? <IconSun /> : <IconMoon />}</span>
+        <span className="nav-label-v2">{isDark ? '浅色模式' : '深色模式'}</span>
+      </button>
 
-      {/* Divider */}
-      <div className="sidebar-footer-divider" />
-
-      {/* User section */}
       {user ? (
-        <div className="sidebar-user-new">
-          <div className="sidebar-avatar-new">
+        <div className="user-mini-v2">
+          <button className="user-face-v2" onClick={() => onNavigate('practice')}>
             {user.nickname?.charAt(0)?.toUpperCase() || '?'}
-          </div>
-          <div className="sidebar-user-info-new">
-            <span className="sidebar-username-new">{user.nickname}</span>
-            {user?.role === 'admin' && onlineCount !== null && (
-              <span className="sidebar-email-new">在线 {onlineCount}</span>
-            )}
-          </div>
-          <button className="sidebar-nav-item" onClick={onLogout} style={{ padding: '6px 10px', fontSize: 12, marginLeft: 'auto' }}>
-            退出
           </button>
+          <button className="user-copy-v2" onClick={() => onNavigate('practice')}>
+            <span className="user-name-v2">{user.nickname}</span>
+            <span className="user-meta-v2">连续天数 · {wrongCount} 错题</span>
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={onLogout}>退出</button>
         </div>
       ) : (
-        <div className="sidebar-user-new">
-          <button className="sidebar-nav-item" onClick={() => onNavigate('login')} style={{ width: '100%', justifyContent: 'center', background: '#14b8a6', color: '#fff', fontWeight: 600 }}>
-            登录
+        <div className="user-mini-v2">
+          <button className="user-face-v2" onClick={() => onNavigate('login')}>访</button>
+          <button className="user-copy-v2" onClick={() => onNavigate('login')}>
+            <span className="user-name-v2">未登录</span>
+            <span className="user-meta-v2">登录同步进度</span>
           </button>
         </div>
       )}

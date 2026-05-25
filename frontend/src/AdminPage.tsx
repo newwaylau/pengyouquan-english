@@ -9,36 +9,22 @@ export default function AdminPage({ onlineCount }: { onlineCount: number | null 
   const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications' | 'sentence-flags'>('stats');
 
   return (
-    <div className="admin-page">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <span className="admin-sidebar-logo"><IconBarChart /></span>
-          <span className="admin-sidebar-title">管理后台</span>
+    <div className="admin-page admin-v2-page">
+      <header className="admin-v2-top">
+        <div>
+          <div className="page-eyebrow">ADMIN</div>
+          <h1 className="page-title">系统概览</h1>
+          <p className="page-sub">最后更新 · {new Date().toLocaleString()}</p>
         </div>
-        <nav className="admin-sidebar-nav">
-          <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}>
-            <span className="admin-nav-icon"><IconLineChart /></span>
-            <span className="admin-nav-label">仪表盘</span>
-          </button>
-          <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>
-            <span className="admin-nav-icon"><IconUser /></span>
-            <span className="admin-nav-label">用户管理</span>
-          </button>
-          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
-            <span className="admin-nav-icon"><IconSettings /></span>
-            <span className="admin-nav-label">系统设置</span>
-          </button>
-          <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}>
-            <span className="admin-nav-icon"><IconNotification /></span>
-            <span className="admin-nav-label">通知管理</span>
-          </button>
-          <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}>
-            <span className="admin-nav-icon"><IconFlag /></span>
-            <span className="admin-nav-label">句子报告</span>
-          </button>
-        </nav>
-      </aside>
-      <main className="admin-content">
+        <div className="seg admin-v2-tabs">
+          <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}><IconLineChart /> 统计</button>
+          <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}><IconUser /> 用户</button>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}><IconSettings /> 设置</button>
+          <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}><IconNotification /> 通知</button>
+          <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}><IconFlag /> 报告</button>
+        </div>
+      </header>
+      <main className="admin-content admin-v2-content">
         {tab === 'stats' && <AdminDashboard onlineCount={onlineCount} />}
         {tab === 'users' && <UserManagement />}
         {tab === 'settings' && <SystemSettings />}
