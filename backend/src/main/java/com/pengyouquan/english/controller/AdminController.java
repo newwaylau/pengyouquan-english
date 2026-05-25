@@ -4,6 +4,7 @@ import com.pengyouquan.english.config.RequestLoggingInterceptor;
 import com.pengyouquan.english.dto.ApiResponse;
 import com.pengyouquan.english.model.Notification;
 import com.pengyouquan.english.model.Sentence;
+import com.pengyouquan.english.model.Show;
 import com.pengyouquan.english.model.SystemSetting;
 import com.pengyouquan.english.repository.NotificationRepository;
 import com.pengyouquan.english.repository.PracticeLogRepository;
@@ -14,8 +15,10 @@ import com.pengyouquan.english.repository.SystemSettingRepository;
 import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.security.CurrentUserId;
 import com.pengyouquan.english.service.OnlineUserTracker;
+import com.pengyouquan.english.service.SubtitleService;
 import com.pengyouquan.english.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +42,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.MediaType;
 
 /**
  * 管理后台统计接口
@@ -58,6 +63,7 @@ public class AdminController {
     private final RequestLoggingInterceptor requestLoggingInterceptor;
     private final NotificationRepository notificationRepository;
     private final OnlineUserTracker onlineUserTracker;
+    private final SubtitleService subtitleService;
 
     public AdminController(UserService userService,
                            PracticeLogRepository practiceLogRepository,
@@ -68,7 +74,8 @@ public class AdminController {
                            SystemSettingRepository systemSettingRepository,
                            RequestLoggingInterceptor requestLoggingInterceptor,
                            NotificationRepository notificationRepository,
-                           OnlineUserTracker onlineUserTracker) {
+                           OnlineUserTracker onlineUserTracker,
+                           SubtitleService subtitleService) {
         this.userService = userService;
         this.practiceLogRepository = practiceLogRepository;
         this.userRepository = userRepository;
@@ -79,6 +86,7 @@ public class AdminController {
         this.requestLoggingInterceptor = requestLoggingInterceptor;
         this.notificationRepository = notificationRepository;
         this.onlineUserTracker = onlineUserTracker;
+        this.subtitleService = subtitleService;
     }
 
     /** 管理后台统计数据总览 */
@@ -514,6 +522,83 @@ public class AdminController {
             return "\"" + value.replace("\"", "\"\"") + "\"";
         }
         return value;
+    }
+
+    /**
+     * 导入字幕文件
+     * 支持SRT/ASS/VTT格式
+     */
+    @PostMapping(value = "/import/subtitle", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Map<String, Object>> importSubtitle(@CurrentUserId Long userId,
+                                                            @RequestParam("file") MultipartFile file,
+                                                            @RequestParam("showName") String showName,
+                                                            @RequestParam("season") Integer season,
+                                                            @RequestParam("episode") Integer episode,
+                                                            @RequestParam(value = "coverUrl", required = false) String coverUrl,
+                                                            @RequestParam(value = "description", required = false) String description) throws IOException {
+        // 权限校验
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        userService.checkAdmin(userId);
+        
+        // 参数校验
+        if (file.isEmpty()) return ApiResponse.badRequest("文件不能为空");
+        if (showName.isBlank()) return ApiResponse.badRequest("剧集名称不能为空");
+        if (season == null || season < 1) return ApiResponse.badRequest("季数必须大于0");
+        if (episode == null || episode < 1) return ApiResponse.badRequest("集数必须大于0");
+        
+        // 检查文件格式
+        String fileName = file.getOriginalFilename();
+        String ext = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        if (!List.of("srt", "ass", "vtt").contains(ext)) {
+            return ApiResponse.badRequest("不支持的文件格式，仅支持SRT/ASS/VTT");
+        }
+        
+        // 检查是否已存在相同的剧集
+        boolean exists = showRepository.existsByNameAndSeasonAndEpisode(showName, season, episode);
+        if (exists) {
+            return ApiResponse.badRequest("该剧集已存在，请勿重复导入");
+        }
+        
+        // 读取文件内容
+        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+        
+        // 解析字幕
+        List<SubtitleService.SubtitleEntry> entries = subtitleService.parse(content, ext);
+        if (entries.isEmpty()) {
+            return ApiResponse.badRequest("未解析到有效字幕内容");
+        }
+        
+        // 创建剧集
+        Show show = new Show();
+        show.setName(showName);
+        show.setSeason(season);
+        show.setEpisode(episode);
+        show.setCoverUrl(coverUrl);
+        show.setDescription(description);
+        show = showRepository.save(show);
+        
+        // 批量创建句子
+        List<Sentence> sentences = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            SubtitleService.SubtitleEntry entry = entries.get(i);
+            Sentence sentence = new Sentence();
+            sentence.setShowId(show.getId());
+            sentence.setText(entry.text.trim());
+            sentence.setStartTime(entry.startTime);
+            sentence.setEndTime(entry.endTime);
+            sentence.setEpisodeInfo(show.getName() + " S" + String.format("%02d", show.getSeason()) + "E" + String.format("%02d", show.getEpisode()) + " 第" + (i+1) + "句");
+            sentence.setIsDisabled(false);
+            sentences.add(sentence);
+        }
+        
+        // 批量保存
+        sentenceRepository.saveAll(sentences);
+        
+        // 返回结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("showId", show.getId());
+        result.put("importedCount", sentences.size());
+        return ApiResponse.success(result);
     }
 
     // ── ──

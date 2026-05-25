@@ -6,7 +6,7 @@ import { IconBarChart, IconLineChart, IconUser, IconSettings, IconNotification, 
 const COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2'];
 
 export default function AdminPage({ onlineCount }: { onlineCount: number | null }) {
-  const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications' | 'sentence-flags'>('stats');
+  const [tab, setTab] = useState<'stats' | 'users' | 'settings' | 'notifications' | 'sentence-flags' | 'import'>('stats');
 
   return (
     <div className="admin-page admin-v2-page">
@@ -19,6 +19,7 @@ export default function AdminPage({ onlineCount }: { onlineCount: number | null 
         <div className="seg admin-v2-tabs">
           <button className={tab === 'stats' ? 'active' : ''} onClick={() => setTab('stats')}><IconLineChart /> 统计</button>
           <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}><IconUser /> 用户</button>
+          <button className={tab === 'import' ? 'active' : ''} onClick={() => setTab('import')}><IconTheaterMasks /> 导入字幕</button>
           <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}><IconSettings /> 设置</button>
           <button className={tab === 'notifications' ? 'active' : ''} onClick={() => setTab('notifications')}><IconNotification /> 通知</button>
           <button className={tab === 'sentence-flags' ? 'active' : ''} onClick={() => setTab('sentence-flags')}><IconFlag /> 报告</button>
@@ -27,6 +28,7 @@ export default function AdminPage({ onlineCount }: { onlineCount: number | null 
       <main className="admin-content admin-v2-content">
         {tab === 'stats' && <AdminDashboard onlineCount={onlineCount} />}
         {tab === 'users' && <UserManagement />}
+        {tab === 'import' && <SubtitleImport />}
         {tab === 'settings' && <SystemSettings />}
         {tab === 'notifications' && <NotificationManagement />}
         {tab === 'sentence-flags' && <SentenceFlagManagement />}
@@ -613,6 +615,176 @@ function SentenceFlagManagement() {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+// 字幕导入组件
+function SubtitleImport() {
+  const [form, setForm] = useState({
+    showName: '',
+    season: 1,
+    episode: 1,
+    coverUrl: '',
+    description: ''
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ success?: boolean; message?: string; importedCount?: number } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      setResult({ success: false, message: '请选择字幕文件' });
+      return;
+    }
+    if (!form.showName.trim()) {
+      setResult({ success: false, message: '请输入剧集名称' });
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('showName', form.showName);
+      formData.append('season', String(form.season));
+      formData.append('episode', String(form.episode));
+      if (form.coverUrl.trim()) formData.append('coverUrl', form.coverUrl);
+      if (form.description.trim()) formData.append('description', form.description);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/import/subtitle', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.code === 200) {
+        setResult({
+          success: true,
+          message: `导入成功！共导入 ${data.data.importedCount} 条字幕`,
+          importedCount: data.data.importedCount
+        });
+        // 重置表单
+        setForm({ showName: '', season: 1, episode: 1, coverUrl: '', description: '' });
+        setFile(null);
+      } else {
+        setResult({ success: false, message: data.message || '导入失败' });
+      }
+    } catch (err) {
+      setResult({ success: false, message: '网络错误，请稍后重试' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="subtitle-import-page">
+      <h2><IconTheaterMasks /> 批量导入字幕</h2>
+      <p className="page-sub">支持 SRT / ASS / VTT 格式的字幕文件，导入后自动解析入库</p>
+
+      <div className="card import-form-card">
+        <form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>剧集名称 <span className="required">*</span></label>
+              <input
+                type="text"
+                className="input"
+                placeholder="例如：权力的游戏"
+                value={form.showName}
+                onChange={e => setForm({ ...form, showName: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label>季数 <span className="required">*</span></label>
+              <input
+                type="number"
+                min="1"
+                className="input"
+                value={form.season}
+                onChange={e => setForm({ ...form, season: parseInt(e.target.value) || 1 })}
+                disabled={loading}
+              />
+            </div>
+            <div className="form-group">
+              <label>集数 <span className="required">*</span></label>
+              <input
+                type="number"
+                min="1"
+                className="input"
+                value={form.episode}
+                onChange={e => setForm({ ...form, episode: parseInt(e.target.value) || 1 })}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>封面图URL（可选）</label>
+              <input
+                type="url"
+                className="input"
+                placeholder="https://xxx.com/cover.jpg"
+                value={form.coverUrl}
+                onChange={e => setForm({ ...form, coverUrl: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>剧集简介（可选）</label>
+              <textarea
+                className="input"
+                rows={3}
+                placeholder="简单介绍剧集内容"
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>字幕文件 <span className="required">*</span></label>
+              <input
+                type="file"
+                accept=".srt,.ass,.vtt"
+                className="input file-input"
+                onChange={e => setFile(e.target.files?.[0] || null)}
+                disabled={loading}
+              />
+              {file && <p className="file-info">已选择：{file.name} ({(file.size / 1024).toFixed(2)} KB)</p>}
+            </div>
+          </div>
+
+          {result && (
+            <div className={`alert ${result.success ? 'alert-success' : 'alert-error'}`}>
+              {result.message}
+            </div>
+          )}
+
+          <div className="form-actions">
+            <button type="submit" className="btn primary" disabled={loading}>
+              {loading ? '导入中...' : '开始导入'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

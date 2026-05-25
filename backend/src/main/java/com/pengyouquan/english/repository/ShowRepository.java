@@ -20,7 +20,10 @@ public interface ShowRepository extends JpaRepository<Show, Long> {
     /** 按名称搜索剧集 */
     List<Show> findByNameContaining(String name);
 
-    /** 获取剧集总数 */
-    @Query("SELECT COUNT(s) FROM Show s")
-    long countAll();
+/** 获取剧集总数 */
+@Query("SELECT COUNT(s) FROM Show s")
+long countAll();
+
+/** 检查是否存在相同名称、季、集的剧集 */
+boolean existsByNameAndSeasonAndEpisode(String name, Integer season, Integer episode);
 }

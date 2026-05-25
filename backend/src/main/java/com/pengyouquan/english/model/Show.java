@@ -20,6 +20,16 @@ public class Show {
     @Column(nullable = false)
     private String name;
 
+    private Integer season;
+
+    private Integer episode;
+
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    @Column(length = 1000)
+    private String description;
+
     @Column(name = "source_file")
     private String sourceFile;
 
