@@ -12,6 +12,7 @@ import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
 import './index.css';
+import './v2-missing.css';
 
 // 应用启动时检测 IPv6 连通性
 initAudioBase();
