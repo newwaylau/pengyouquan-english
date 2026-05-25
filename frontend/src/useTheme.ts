@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 type Theme = 'dark' | 'light';
 
 function getSystemTheme(): Theme {
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return 'dark';
 }
 
 function getStoredTheme(): Theme | null {
