@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Variant A — 沉浸剧场</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060a14;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+
+.phone{width:375px;max-width:100%;background:#0a0e1a;border-radius:32px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 12px 48px rgba(0,0,0,.6)}
+.notch{width:126px;height:26px;background:#000;border-radius:0 0 18px 18px;margin:0 auto}
+.status{display:flex;justify-content:space-between;padding:8px 24px 0;font-size:.7rem;color:rgba(255,255,255,.35);font-weight:500}
+
+.screen{min-height:840px;display:flex;flex-direction:column;padding:0 0 20px;position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse 160% 50% at 50% -40%,rgba(20,184,166,.08) 0%,transparent 70%),
+    radial-gradient(ellipse 100% 40% at 70% 130%,rgba(20,184,166,.04) 0%,transparent 60%),
+    linear-gradient(180deg,#070b18 0%,#0d1225 100%)
+}
+
+.deco-1{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(20,184,166,.05),transparent 70%);top:-100px;right:-80px;pointer-events:none;z-index:0}
+.deco-2{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(20,184,166,.03),transparent 70%);bottom:200px;left:-60px;pointer-events:none;z-index:0}
+
+.scroll{position:relative;z-index:1;flex:1;overflow-y:auto;padding:0 20px;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:0}
+
+/* ── brand ── */
+.brand{display:flex;align-items:center;gap:8px;padding:14px 0 12px;position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#0a0e1a 60%,transparent)}
+.brand .mark{width:28px;height:28px;border-radius:7px;background:#14b8a6;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#0a0e1a}
+.brand span{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5)}
+.brand .spacer{flex:1}
+.brand .skip-btn{font-family:'Inter',sans-serif;font-size:.65rem;color:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.04);border-radius:6px;padding:4px 10px;background:transparent;cursor:pointer;transition:all .15s}
+.brand .skip-btn:hover{color:rgba(255,255,255,.25);border-color:rgba(255,255,255,.1)}
+
+/* ── hero ── */
+.hero{text-align:center;padding:16px 0 20px}
+.hero h1{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-bottom:6px}
+.hero .sub{font-size:.8rem;color:rgba(255,255,255,.3);line-height:1.5}
+
+/* ── 电影感语录 ── */
+.spotlight{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:14px;padding:18px;margin-bottom:16px;position:relative}
+.spotlight::before{content:'';position:absolute;top:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,rgba(20,184,166,.2),transparent)}
+.spotlight blockquote{font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;font-style:italic;font-weight:400;color:rgba(255,255,255,.55);line-height:1.65;margin-bottom:8px}
+.spotlight .meta{display:flex;align-items:center;gap:8px;font-size:.6rem;color:rgba(255,255,255,.15)}
+.spotlight .meta .tag{padding:2px 8px;border-radius:4px;background:rgba(20,184,166,.08);color:#14b8a6;font-weight:500;font-size:.55rem;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── 内容亮点卡片 ── */
+.highlights{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.highlights .h-card{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.03);border-radius:10px}
+.highlights .h-card .num{width:28px;height:28px;border-radius:50%;background:rgba(20,184,166,.08);color:#14b8a6;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.highlights .h-card .body{flex:1}
+.highlights .h-card .body .title{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:2px}
+.highlights .h-card .body .desc{font-size:.7rem;color:rgba(255,255,255,.25);line-height:1.4}
+
+/* ── 多剧集展示 ── */
+.shows{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.shows .s-card{padding:12px;border-radius:10px;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.03)}
+.shows .s-card .badge{font-size:.5rem;font-weight:600;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:block}
+.shows .s-card .line{font-family:'Playfair Display',Georgia,serif;font-size:.75rem;font-style:italic;color:rgba(255,255,255,.35);line-height:1.5;margin-bottom:3px}
+.shows .s-card .src{font-size:.5rem;color:rgba(255,255,255,.08)}
+.shows .s-card .src em{font-style:normal;color:rgba(20,184,166,.3)}
+
+/* ── stats ── */
+.stats{display:flex;justify-content:center;gap:24px;margin-bottom:16px;padding:14px 0;border-top:1px solid rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.03)}
+.stats .item{text-align:center}
+.stats .item .num{font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:-.01em}
+.stats .item .lbl{font-size:.55rem;color:rgba(255,255,255,.12);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+/* ── testimonial ── */
+.testimonial{padding:12px 14px;background:rgba(20,184,166,.04);border:1px solid rgba(20,184,166,.08);border-radius:10px;margin-bottom:16px}
+.testimonial .text{font-size:.7rem;color:rgba(255,255,255,.45);line-height:1.5;margin-bottom:4px}
+.testimonial .text::before{content:'"';color:#14b8a6}
+.testimonial .text::after{content:'"';color:#14b8a6}
+.testimonial .author{font-size:.6rem;color:rgba(255,255,255,.15)}
+.testimonial .author em{font-style:normal;color:#14b8a6}
+
+/* ── form ── */
+.form{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:14px;padding:16px;margin-bottom:12px}
+.form .f-title{font-size:.85rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:2px}
+.form .f-sub{font-size:.65rem;color:rgba(255,255,255,.15);margin-bottom:12px}
+
+.field{margin-bottom:10px}
+.field label{font-size:.6rem;font-weight:600;color:rgba(255,255,255,.12);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:block}
+.input-wrap{position:relative}
+.input-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.1);pointer-events:none;display:flex}
+.input-wrap input{width:100%;padding:12px 40px 12px 42px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:rgba(255,255,255,.9);font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:all .15s;-webkit-appearance:none}
+.input-wrap input:focus{border-color:rgba(20,184,166,.25);background:rgba(255,255,255,.05)}
+.input-wrap input::placeholder{color:rgba(255,255,255,.08)}
+.input-wrap .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.1);cursor:pointer;padding:6px;display:flex}
+
+.forgot{text-align:right;margin:0 0 12px}
+.forgot button{font-family:'Inter',sans-serif;font-size:.65rem;color:rgba(255,255,255,.1);border:none;background:none;cursor:pointer;transition:color .15s;padding:4px 0}
+.forgot button:hover{color:#14b8a6}
+
+.cta-row{display:flex;gap:8px}
+.cta-row .login{flex:1;padding:13px;border:none;border-radius:10px;background:#14b8a6;color:#0a0e1a;font-size:.85rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s}
+.cta-row .login:hover{background:#0d9488}
+.cta-row .register{flex:1;padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:transparent;color:rgba(255,255,255,.4);font-size:.85rem;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s}
+.cta-row .register:hover{background:rgba(255,255,255,.03);border-color:rgba(20,184,166,.2);color:#14b8a6}
+
+/* ── bottom ── */
+.bottom{padding:8px 0;text-align:center}
+.bottom .skip{font-family:'Inter',sans-serif;font-size:.6rem;color:rgba(255,255,255,.06);border:none;background:none;cursor:pointer;padding:8px;transition:color .15s}
+.bottom .skip:hover{color:rgba(255,255,255,.15)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status"><span>9:41</span><span>🔋 96%</span></div>
+  <div class="screen">
+    <div class="deco-1"></div>
+    <div class="deco-2"></div>
+    <div class="scroll">
+
+      <div class="brand">
+        <div class="mark">剧</div>
+        <span>英语剧场</span>
+        <div class="spacer"></div>
+        <button class="skip-btn">跳过 →</button>
+      </div>
+
+      <div class="hero">
+        <h1>沉浸在<br>经典台词里</h1>
+        <div class="sub">逐句精听，像追剧一样学会地道英语</div>
+      </div>
+
+      <div class="spotlight">
+        <blockquote>“The night is dark and full of terrors.”</blockquote>
+        <div class="meta">
+          <span class="tag">S01E04</span>
+          <span style="color:rgba(255,255,255,.12)">Melisandre · Game of Thrones</span>
+        </div>
+      </div>
+
+      <div class="highlights">
+        <div class="h-card">
+          <div class="num">🎬</div>
+          <div class="body">
+            <div class="title">影视原声，真实语境</div>
+            <div class="desc">Game of Thrones、Downton Abbey 等经典剧集原声片段，听最地道的发音和语调</div>
+          </div>
+        </div>
+        <div class="h-card">
+          <div class="num">🎯</div>
+          <div class="body">
+            <div class="title">逐词精听，不留死角</div>
+            <div class="desc">每句话拆解到单词级别，听不清的反复听，直到完全掌握</div>
+          </div>
+        </div>
+        <div class="h-card">
+          <div class="num">🗣️</div>
+          <div class="body">
+            <div class="title">跟读对比，纠正口音</div>
+            <div class="desc">录音对比原声，AI 评分反馈，口音进步看得见</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shows">
+        <div class="s-card">
+          <span class="badge">Game of Thrones</span>
+          <div class="line">“When you play the game of thrones, you win or you die.”</div>
+          <div class="src">Cersei · <em>S01E07</em></div>
+        </div>
+        <div class="s-card">
+          <span class="badge">Downton Abbey</span>
+          <div class="line">“What is a weekend?”</div>
+          <div class="src">Cora · <em>S01E01</em></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="item"><div class="num">6</div><div class="lbl">剧集</div></div>
+        <div class="item"><div class="num">13K+</div><div class="lbl">台词</div></div>
+        <div class="item"><div class="num">5K+</div><div class="lbl">用户</div></div>
+      </div>
+
+      <div class="testimonial">
+        <div class="text">用它练了一个月，再看美剧不用字幕了。以前试过很多App，只有这个是真的让我坚持下来了</div>
+        <div class="author">— 李同学 · <em>已学习 47 天</em></div>
+      </div>
+
+      <div class="form">
+        <div class="f-title">登录 · 注册</div>
+        <div class="f-sub">免费开始，保存你的学习记录</div>
+        <div class="field">
+          <label>邮箱 / 手机号</label>
+          <div class="input-wrap">
+            <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg></span>
+            <input type="text" placeholder="邮箱或手机号">
+          </div>
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <div class="input-wrap">
+            <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <input type="password" placeholder="请输入密码">
+            <button class="eye"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <div class="forgot"><button>忘记密码？</button></div>
+        <div class="cta-row">
+          <button class="login">登录</button>
+          <button class="register">注册</button>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <button class="skip">先逛逛 · 不登录</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

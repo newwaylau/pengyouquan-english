@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 温暖学习</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #121721;
+  color: #eef2f6;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar (Rounded, Friendly) ── */
+.sidebar {
+  width: 230px;
+  background: #1a2030;
+  border-radius: 0 16px 16px 0;
+  margin: 8px 0;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+}
+.logo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #eef2f6;
+  padding: 4px 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  margin-bottom: 14px;
+}
+.logo-emoji {
+  font-size: 1.2rem;
+}
+.logo-sub {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #4a5a7a;
+  margin-left: auto;
+  letter-spacing: 0.05em;
+  background: rgba(255,255,255,0.03);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8a9bb8;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #eef2f6; }
+.nav-item.active {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(20,184,166,0.25);
+}
+.nav-item[disabled] { opacity: 0.3; cursor: not-allowed; }
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-spacer { flex: 1; }
+.nav-bottom {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #5a6a8a;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.nav-pill:hover { background: rgba(255,255,255,0.03); color: #eef2f6; }
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.header-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.header-text { }
+.header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #eef2f6;
+}
+.header-sub {
+  font-size: 0.75rem;
+  color: #5a6a8a;
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-badge {
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(20,184,166,0.1);
+  color: #14b8a6;
+  border: 1px solid rgba(20,184,166,0.12);
+  font-weight: 600;
+}
+.header-streak {
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.04);
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: #eef2f6;
+}
+/* ── Practice Card ── */
+.practice-card {
+  background: #1a2030;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+/* ── Audio ── */
+.audio-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 14px;
+}
+.play-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.play-btn:hover { transform: scale(1.05); }
+.play-btn svg { width: 18px; height: 18px; }
+.audio-info { min-width: 50px; }
+.audio-label2 {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #8a9bb8;
+}
+.audio-desc {
+  font-size: 0.6rem;
+  color: #4a5a7a;
+}
+.audio-wave2 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+}
+.audio-wave2 span {
+  width: 3px;
+  background: rgba(20,184,166,0.25);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.audio-wave2 span:nth-child(odd) { height: 60%; }
+.audio-wave2 span:nth-child(even) { height: 80%; }
+.audio-wave2 span.active { background: #14b8a6; }
+
+/* ── Sentence ── */
+.sentence-area {
+  margin-bottom: 20px;
+}
+.sentence-main {
+  font-size: 1.3rem;
+  line-height: 1.8;
+  font-weight: 600;
+  color: #eef2f6;
+  margin-bottom: 8px;
+}
+.blank-warm { 
+  color: #14b8a6; 
+  border-bottom: 3px dotted rgba(20,184,166,0.35); 
+  padding: 0 3px; 
+  display: inline-block;
+  min-width: 50px;
+}
+.filled-warm { 
+  color: #5eead4; 
+  font-weight: 700;
+  display: inline-block;
+  padding: 0 3px;
+}
+.sentence-sub {
+  font-size: 0.85rem;
+  color: #4a5a7a;
+  line-height: 1.6;
+}
+
+/* ── Input ── */
+.input-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.input-warm {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  color: #eef2f6;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.15s;
+}
+.input-warm:focus { border-color: #14b8a6; background: rgba(20,184,166,0.04); }
+.btn-warm {
+  padding: 14px 24px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-warm:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(20,184,166,0.3); }
+
+/* ── Bottom Row ── */
+.bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.badge-group {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.02);
+  padding: 3px;
+  border-radius: 12px;
+}
+.badge-btn {
+  padding: 5px 10px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #5a6a8a;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.badge-btn:hover { color: #8a9bb8; }
+.badge-btn.active { background: rgba(20,184,166,0.1); color: #14b8a6; }
+.badge-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.04); margin: 0 4px; }
+.badge-btn.action { color: #14b8a6; }
+.badge-btn.action:hover { background: rgba(20,184,166,0.08); }
+.badge-right { margin-left: auto; display: flex; gap: 4px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <span class="logo-emoji">🎬</span> 英语剧场
+    <span class="logo-sub">v2</span>
+  </div>
+  <button class="nav-item active">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    练习
+  </button>
+  <button class="nav-item" disabled>
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    错题本
+  </button>
+  <button class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    搜索
+  </button>
+  <button class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    剧库
+  </button>
+  <div class="nav-spacer"></div>
+  <div class="nav-bottom">
+    <button class="nav-pill">
+      <span>☀️</span> 浅色模式
+    </button>
+    <button class="nav-pill" style="margin-top:4px;">
+      <span>👤</span> 未登录
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="header">
+    <div class="header-icon">🎯</div>
+    <div class="header-text">
+      <div class="header-title">每日练习</div>
+      <div class="header-sub">跟读经典美剧台词 · 逐词精听</div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">🔥 3日连击</span>
+      <span class="header-streak">GOT S01E01</span>
+    </div>
+  </div>
+
+  <div class="practice-card">
+    <!-- Audio -->
+    <div class="audio-row">
+      <button class="play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      <div class="audio-info">
+        <div class="audio-label2">原音</div>
+        <div class="audio-desc">0:32 / 1:15</div>
+      </div>
+      <div class="audio-wave2">
+        <span></span><span></span><span></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span><span></span><span></span>
+        <span></span><span></span><span class="active"></span><span class="active"></span>
+        <span class="active"></span><span></span><span></span><span></span>
+        <span></span><span class="active"></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Sentence -->
+    <div class="sentence-area">
+      <div class="sentence-main">
+        Winter is <span class="filled-warm">coming</span>. You know <span class="blank-warm">________</span>, Lord Stark.
+      </div>
+      <div class="sentence-sub">凛冬将至。你知道________，史塔克大人。</div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-box">
+      <input class="input-warm" placeholder="输入下一个单词..." autofocus>
+      <button class="btn-warm">↵ 提交</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="bottom-row">
+      <div class="badge-group">
+        <button class="badge-btn active">0.5x</button>
+        <button class="badge-btn">0.75x</button>
+        <button class="badge-btn">1x</button>
+        <button class="badge-btn">1.5x</button>
+      </div>
+      <div class="badge-sep"></div>
+      <div class="badge-group">
+        <button class="badge-btn active"><span style="color:#14b8a6;">●</span> 原音</button>
+        <button class="badge-btn">Jenny</button>
+        <button class="badge-btn">Guy</button>
+        <button class="badge-btn">Sonia</button>
+      </div>
+      <div class="badge-right">
+        <button class="badge-btn action">📖 中文</button>
+        <button class="badge-btn">⏭ 跳过</button>
+        <button class="badge-btn action">→ 下一句</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

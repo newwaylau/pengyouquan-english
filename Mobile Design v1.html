@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英语剧场 · 手机端设计</title>
+<style>
+  /* ========== Design Tokens ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-deep: #070b15;
+    --bg-surface: #0c1322;
+    --bg-card: #111a2e;
+    --bg-elevated: #1a2645;
+    --bg-input: rgba(255,255,255,0.04);
+    --teal: #14b8a6;
+    --teal-dark: #0d9488;
+    --teal-light: #5eead4;
+    --teal-glow: rgba(20,184,166,0.15);
+    --teal-subtle: rgba(20,184,166,0.08);
+    --text-primary: #eef2f8;
+    --text-secondary: #94a3b8;
+    --text-muted: #5a6a8a;
+    --text-dim: #3b4a6a;
+    --border-subtle: rgba(255,255,255,0.04);
+    --border-card: rgba(255,255,255,0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  body {
+    font-family: var(--font);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  /* ========== Phone Frame ========== */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg-deep);
+    border-radius: 40px;
+    border: 2px solid var(--border-card);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  /* ========== Status Bar ========== */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 24px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  /* ========== Top Navigation ========== */
+  .topnav {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    flex-shrink: 0;
+    gap: 12px;
+  }
+  .hamburger {
+    width: 36px; height: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .hamburger:hover { background: var(--teal-subtle); }
+  .hamburger span {
+    display: block;
+    width: 20px; height: 2px;
+    background: var(--text-secondary);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+  }
+  .hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+  .hamburger.open span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(4px, -4px);
+  }
+
+  .topnav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  .topnav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+
+  .topnav-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .topnav-login {
+    padding: 6px 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+  }
+
+  /* ========== Overlay ========== */
+  .drawer-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+  }
+  .drawer-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ========== Drawer ========== */
+  .drawer {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 280px;
+    background: var(--bg-surface);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid var(--border-subtle);
+    padding: 16px 0;
+  }
+  .drawer.open {
+    transform: translateX(0);
+  }
+
+  .drawer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 12px;
+  }
+  .drawer-logo-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--bg-deep);
+    box-shadow: 0 0 12px var(--teal-glow);
+  }
+  .drawer-logo-text {
+    font-size: 15px; font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .drawer-logo-sub {
+    font-size: 9px; font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  .drawer-section {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 20px 6px;
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 10px;
+  }
+  .drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .drawer-item:hover { background: var(--teal-subtle); color: var(--text-primary); }
+  .drawer-item.active { color: var(--teal); background: var(--teal-subtle); }
+  .drawer-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px; width: 2px;
+    background: var(--teal);
+    border-radius: 1px;
+    box-shadow: 0 0 6px var(--teal);
+  }
+  .drawer-item .icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+  .drawer-item .badge {
+    margin-left: auto;
+    background: var(--teal-subtle);
+    color: var(--teal);
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .drawer-item[disabled] { opacity: 0.3; cursor: not-allowed; }
+
+  .drawer-spacer { flex: 1; }
+
+  .drawer-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .drawer-footer-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .drawer-footer-info { flex: 1; }
+  .drawer-footer-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .drawer-footer-status { font-size: 11px; color: var(--text-dim); }
+  .drawer-theme-btn {
+    width: 32px; height: 32px;
+    border: none; background: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .drawer-theme-btn:hover { background: var(--teal-subtle); }
+  .drawer-footer-guest {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .drawer-footer-guest-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ========== Bottom Nav ========== */
+  .bottom-nav {
+    display: flex;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    padding: 4px 8px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s;
+    color: var(--text-muted);
+    font-family: var(--font);
+    position: relative;
+  }
+  .nav-tab .tab-icon { font-size: 20px; line-height: 1; }
+  .nav-tab .tab-label { font-size: 10px; font-weight: 500; }
+  .nav-tab.active { color: var(--teal); }
+  .nav-tab.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 2px;
+    background: var(--teal);
+    border-radius: 1px;
+    box-shadow: 0 0 8px var(--teal-glow);
+  }
+  .nav-tab[disabled] { opacity: 0.3; cursor: not-allowed; }
+  .nav-tab .tab-badge {
+    position: absolute;
+    top: 2px; right: 50%;
+    margin-right: -18px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* ========== Page Content ========== */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+  .content::-webkit-scrollbar { width: 0; }
+
+  /* ========== Practice Page (mobile) ========== */
+  .practice-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .practice-eyebrow {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .practice-title {
+    font-size: 22px; font-weight: 700;
+    color: var(--text-primary);
+  }
+  .practice-meta {
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .audio-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .audio-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .play-btn {
+    width: 44px; height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    box-shadow: 0 0 20px var(--teal-glow);
+    transition: all 0.15s;
+  }
+  .play-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--teal-glow); }
+  .play-btn:active { transform: scale(0.95); }
+
+  .waveform {
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .bar {
+    flex: 1;
+    background: var(--border-card);
+    border-radius: 2px;
+    height: 60%;
+    transition: all 0.1s;
+  }
+  .bar.active {
+    background: var(--teal);
+    box-shadow: 0 0 4px var(--teal-glow);
+  }
+  .bar:nth-child(odd) { height: 40%; }
+  .bar:nth-child(3n) { height: 80%; }
+  .bar:nth-child(5n+2) { height: 55%; }
+  .bar:nth-child(7n+4) { height: 70%; }
+
+  .audio-time {
+    font-size: 11px; color: var(--text-dim);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--teal), var(--teal-light));
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Sentence Card */
+  .sentence-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sentence-en {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+  .sentence-word {
+    display: inline-block;
+    padding: 1px 0;
+    margin: 0 1px;
+  }
+  .sentence-word.filled {
+    border-bottom: 2px solid var(--teal-light);
+    color: var(--teal-light);
+  }
+  .sentence-word.blank {
+    border-bottom: 2px dashed var(--teal);
+    min-width: 50px;
+    color: transparent;
+  }
+  .sentence-cn {
+    font-size: 13px; color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Input Area */
+  .input-area {
+    display: flex;
+    gap: 8px;
+  }
+  .input-area input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-area input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-glow);
+  }
+  .input-area input::placeholder { color: var(--text-dim); }
+  .input-area button {
+    padding: 12px 20px;
+    border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .input-area button:active { transform: scale(0.97); }
+
+  /* Shortcut row */
+  .shortcuts {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .shortcut {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .shortcut:hover { border-color: var(--teal-subtle); color: var(--teal); }
+  .shortcut kbd {
+    background: var(--bg-elevated);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-family: monospace;
+  }
+
+  /* Settings row */
+  .settings-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .speed-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .speed-btn.active { border-color: var(--teal); color: var(--teal); background: var(--teal-subtle); }
+  .speed-btn:hover { border-color: var(--teal-subtle); }
+
+  .voice-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .voice-btn.active { border-color: var(--teal); color: var(--teal); background: var(--teal-subtle); }
+
+  /* ========== Browse Page (mobile) ========== */
+  .browse-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .show-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-card);
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .show-card:active { transform: scale(0.98); }
+  .show-card-poster {
+    width: 50px; height: 70px;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  .show-card-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .show-card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .show-card-meta { font-size: 11px; color: var(--text-dim); }
+  .show-card-tag {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--teal-subtle);
+    color: var(--teal);
+  }
+
+  /* ========== Search Page (mobile) ========== */
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+  }
+  .search-box .search-icon { font-size: 16px; color: var(--text-dim); }
+  .search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: var(--font);
+    outline: none;
+  }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .search-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    padding: 5px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 16px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .chip:active { background: var(--teal-subtle); border-color: var(--teal); color: var(--teal); }
+  .search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .result-item {
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-card);
+    cursor: pointer;
+  }
+  .result-item:active { background: var(--bg-elevated); }
+  .result-text { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+  .result-meta { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ========== Wrong Page (mobile) ========== */
+  .wrong-group { margin-bottom: 16px; }
+  .wrong-group-title {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .wrong-group-title .count {
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  .wrong-item {
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-card);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .wrong-item:active { background: var(--bg-elevated); }
+  .wrong-item-en { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+  .wrong-item-cn { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .wrong-item-meta { font-size: 11px; color: var(--text-dim); margin-top: 6px; display: flex; gap: 8px; }
+
+  /* ========== Section Labels ========== */
+  .section-label {
+    text-align: center;
+    padding: 8px 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-deep);
+    flex-shrink: 0;
+  }
+
+  /* ========== Page State Tabs ========== */
+  .page-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .page-tab {
+    padding: 5px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    background: none;
+    color: var(--text-dim);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .page-tab.active { background: var(--teal-subtle); border-color: var(--teal); color: var(--teal); }
+
+  /* ========== Label ========== */
+  .mockup-label {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ========== Empty State ========== */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .empty-state .icon { font-size: 40px; }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .empty-state p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ========== Phone 1: Practice Page ========== -->
+<div class="phone" id="phone1">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <!-- Top Navigation -->
+  <div class="topnav">
+    <button class="hamburger" id="hamburger1" onclick="toggleDrawer('drawer1','overlay1','hamburger1')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topnav-logo">
+      <span class="topnav-dot"></span>
+      剧场
+    </div>
+    <button class="topnav-avatar">H</button>
+  </div>
+
+  <!-- Overlay -->
+  <div class="drawer-overlay" id="overlay1" onclick="toggleDrawer('drawer1','overlay1','hamburger1')"></div>
+
+  <!-- Drawer -->
+  <div class="drawer" id="drawer1">
+    <div class="drawer-logo" onclick="toggleDrawer('drawer1','overlay1','hamburger1')">
+      <div class="drawer-logo-mark">🎬</div>
+      <span class="drawer-logo-text">剧场</span>
+      <span class="drawer-logo-sub">DICTATION</span>
+    </div>
+    <div class="drawer-section">Main</div>
+    <div class="drawer-nav">
+      <button class="drawer-item active" onclick="closeDrawer('drawer1','overlay1','hamburger1')"><span class="icon">🎯</span>Practice</button>
+      <button class="drawer-item" disabled><span class="icon">✕</span>Review <span class="badge">3</span></button>
+      <button class="drawer-item" onclick="closeDrawer('drawer1','overlay1','hamburger1')"><span class="icon">🔍</span>Search</button>
+      <button class="drawer-item" onclick="closeDrawer('drawer1','overlay1','hamburger1')"><span class="icon">📚</span>Library</button>
+    </div>
+    <div class="drawer-section">Admin</div>
+    <div class="drawer-nav">
+      <button class="drawer-item" onclick="closeDrawer('drawer1','overlay1','hamburger1')"><span class="icon">⚙️</span>Admin</button>
+      <button class="drawer-item" onclick="closeDrawer('drawer1','overlay1','hamburger1')"><span class="icon">📺</span>Subtitles</button>
+    </div>
+    <div class="drawer-spacer"></div>
+    <div class="drawer-footer">
+      <div class="drawer-footer-avatar">H</div>
+      <div class="drawer-footer-info">
+        <div class="drawer-footer-name">Heaton</div>
+        <div class="drawer-footer-status">3 wrong · streak</div>
+      </div>
+      <button class="drawer-theme-btn">☀️</button>
+    </div>
+  </div>
+
+  <!-- Page tabs -->
+  <div style="padding: 8px 16px 0; flex-shrink:0">
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="switchPhoneTab('phone1', 'practice')">练习</button>
+      <button class="page-tab" onclick="switchPhoneTab('phone1', 'library')">剧库</button>
+      <button class="page-tab" onclick="switchPhoneTab('phone1', 'search')">搜索</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content1">
+    <!-- Practice content -->
+    <div id="practiceContent">
+      <div class="practice-header">
+        <div class="practice-eyebrow">DICTATION · 纯听写模式</div>
+        <div class="practice-title">练习</div>
+        <div class="practice-meta">Downton Abbey S01E03 · #11705</div>
+      </div>
+
+      <div class="audio-card">
+        <div class="audio-row">
+          <button class="play-btn">▶</button>
+          <div class="waveform">
+            <div class="bar active"></div><div class="bar active"></div><div class="bar active"></div>
+            <div class="bar active"></div><div class="bar active"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar active"></div><div class="bar active"></div>
+            <div class="bar active"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar active"></div><div class="bar active"></div>
+            <div class="bar active"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+          <span class="audio-time">0:12 / 1:48</span>
+        </div>
+        <div class="progress-row">
+          <span class="audio-time">0 / 1 句</span>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 12%"></div>
+          </div>
+          <span class="audio-time">12%</span>
+        </div>
+      </div>
+
+      <div class="sentence-card">
+        <div class="sentence-en">
+          <span class="sentence-word filled">I</span>
+          <span class="sentence-word filled">have</span>
+          <span class="sentence-word blank">...</span>
+          <span class="sentence-word filled">to</span>
+          <span class="sentence-word filled">say,</span>
+          <span class="sentence-word blank">...</span>
+          <span class="sentence-word filled">this</span>
+          <span class="sentence-word blank">...</span>
+          <span class="sentence-word filled">is</span>
+          <span class="sentence-word blank">...</span>
+          <span class="sentence-word filled">delicious.</span>
+        </div>
+        <div class="sentence-cn">我不得不说，这道菜非常美味。</div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" placeholder="输入下一个单词..." />
+        <button>提交</button>
+      </div>
+
+      <div class="shortcuts">
+        <button class="shortcut"><kbd>R</kbd> 重播</button>
+        <button class="shortcut"><kbd>Ctrl+N</kbd> 下一句</button>
+        <button class="shortcut"><kbd>?</kbd> 提示</button>
+        <button class="shortcut"><kbd>K</kbd> 设置</button>
+      </div>
+
+      <div class="settings-row">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+          <button class="speed-btn">0.5x</button>
+          <button class="speed-btn active">0.75x</button>
+          <button class="speed-btn">1x</button>
+          <button class="speed-btn">1.5x</button>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="voice-btn active">原音</button>
+          <button class="voice-btn">Jenny</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Library content (hidden) -->
+    <div id="libraryContent" style="display:none">
+      <div class="practice-header">
+        <div class="practice-eyebrow">LIBRARY</div>
+        <div class="practice-title">剧库</div>
+        <div class="practice-meta">浏览所有剧集与句子</div>
+      </div>
+      <div class="browse-grid">
+        <div class="show-card">
+          <div class="show-card-poster">👑</div>
+          <div class="show-card-info">
+            <div class="show-card-title">Game of Thrones</div>
+            <div class="show-card-meta">8 季 · 1,284 句</div>
+            <div class="show-card-tag">进行中</div>
+          </div>
+        </div>
+        <div class="show-card">
+          <div class="show-card-poster">🏰</div>
+          <div class="show-card-info">
+            <div class="show-card-title">Downton Abbey</div>
+            <div class="show-card-meta">6 季 · 6,303 句</div>
+            <div class="show-card-tag">已导入</div>
+          </div>
+        </div>
+        <div class="show-card">
+          <div class="show-card-poster">🧪</div>
+          <div class="show-card-info">
+            <div class="show-card-title">Breaking Bad</div>
+            <div class="show-card-meta">5 季 · 892 句</div>
+            <div class="show-card-tag">已导入</div>
+          </div>
+        </div>
+        <div class="show-card">
+          <div class="show-card-poster">📱</div>
+          <div class="show-card-info">
+            <div class="show-card-title">Friends</div>
+            <div class="show-card-meta">10 季 · 1,456 句</div>
+            <div class="show-card-tag">已导入</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search content (hidden) -->
+    <div id="searchContent" style="display:none">
+      <div class="practice-header">
+        <div class="practice-eyebrow">SEARCH</div>
+        <div class="practice-title">搜索</div>
+        <div class="practice-meta">找到想练的那一句</div>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="搜索句子（中英文）..." />
+      </div>
+      <div class="search-chips">
+        <button class="chip">:wrong</button>
+        <button class="chip">:got</button>
+        <button class="chip">winter</button>
+        <button class="chip">king</button>
+        <button class="chip">love</button>
+      </div>
+      <div class="empty-state">
+        <div class="icon">🔍</div>
+        <h3>搜索你想练的句子</h3>
+        <p>输入中英文关键词，或点击上方快捷标签</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <button class="nav-tab active"><span class="tab-icon">🎯</span><span class="tab-label">Practice</span></button>
+    <button class="nav-tab" disabled><span class="tab-icon">🔁</span><span class="tab-label">Review</span><span class="tab-badge">3</span></button>
+    <button class="nav-tab"><span class="tab-icon">🎬</span><span class="tab-label">Library</span></button>
+    <button class="nav-tab"><span class="tab-icon">🔍</span><span class="tab-label">Search</span></button>
+  </div>
+</div>
+
+<!-- ========== Phone 2: Login Page & Drawer Open State ========== -->
+<div class="phone" id="phone2">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <div class="section-label">抽屉菜单打开状态</div>
+
+  <!-- Top Navigation (with drawer open) -->
+  <div class="topnav" style="opacity:0.5">
+    <button class="hamburger open">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topnav-logo">
+      <span class="topnav-dot"></span>
+      剧场
+    </div>
+    <button class="topnav-login">登录</button>
+  </div>
+
+  <!-- Overlay (open) -->
+  <div class="drawer-overlay open"></div>
+
+  <!-- Drawer (open) -->
+  <div class="drawer open">
+    <div class="drawer-logo">
+      <div class="drawer-logo-mark">🎬</div>
+      <span class="drawer-logo-text">剧场</span>
+      <span class="drawer-logo-sub">DICTATION</span>
+    </div>
+    <div class="drawer-section">Main</div>
+    <div class="drawer-nav">
+      <button class="drawer-item active"><span class="icon">🎯</span>Practice</button>
+      <button class="drawer-item" disabled><span class="icon">✕</span>Review <span class="badge">3</span></button>
+      <button class="drawer-item"><span class="icon">🔍</span>Search</button>
+      <button class="drawer-item"><span class="icon">📚</span>Library</button>
+    </div>
+    <div class="drawer-spacer"></div>
+    <div class="drawer-footer">
+      <div class="drawer-footer-guest">
+        <div class="drawer-footer-guest-avatar">?</div>
+        <div style="flex:1">
+          <div class="drawer-footer-name">Not signed in</div>
+          <div class="drawer-footer-status">Sign in to sync progress</div>
+        </div>
+        <button class="drawer-theme-btn">☀️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dimmed content behind drawer -->
+  <div class="content" style="opacity:0.2; pointer-events:none;">
+    <div class="practice-header">
+      <div class="practice-eyebrow">DICTATION · 纯听写模式</div>
+      <div class="practice-title">练习</div>
+    </div>
+    <div class="audio-card">
+      <div class="audio-row">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--teal-subtle);flex-shrink:0"></div>
+        <div style="flex:1;height:30px;background:var(--bg-elevated);border-radius:6px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Phone 3: Review Page ========== -->
+<div class="phone" id="phone3">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <div class="section-label">错题复习页</div>
+
+  <!-- Top Navigation -->
+  <div class="topnav">
+    <button class="hamburger" onclick="alert('抽屉菜单会从左侧滑出')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topnav-logo">
+      <span class="topnav-dot"></span>
+      剧场
+    </div>
+    <button class="topnav-avatar">H</button>
+  </div>
+
+  <div class="content">
+    <div class="practice-header">
+      <div class="practice-eyebrow">REVIEW · 错题复习</div>
+      <div class="practice-title">复习</div>
+      <div class="practice-meta">3 句待复习 · 12 句已掌握</div>
+    </div>
+
+    <div class="wrong-group">
+      <div class="wrong-group-title">待复习 <span class="count">3</span></div>
+      <div class="wrong-item">
+        <div class="wrong-item-en">I have something to say, this is delicious.</div>
+        <div class="wrong-item-cn">我不得不说，这道菜非常美味。</div>
+        <div class="wrong-item-meta"><span>🎬 Game of Thrones S01E01</span><span>❌ 错3次</span></div>
+      </div>
+      <div class="wrong-item">
+        <div class="wrong-item-en">Winter is coming.</div>
+        <div class="wrong-item-cn">凛冬将至。</div>
+        <div class="wrong-item-meta"><span>🎬 Game of Thrones S01E01</span><span>❌ 错1次</span></div>
+      </div>
+      <div class="wrong-item">
+        <div class="wrong-item-en">You know nothing, Jon Snow.</div>
+        <div class="wrong-item-cn">你什么都不知道，囧·雪诺。</div>
+        <div class="wrong-item-meta"><span>🎬 Game of Thrones S01E04</span><span>❌ 错5次</span></div>
+      </div>
+    </div>
+
+    <div class="wrong-group">
+      <div class="wrong-group-title">即将到期 <span class="count">2</span></div>
+      <div class="wrong-item">
+        <div class="wrong-item-en">The night is dark and full of terrors.</div>
+        <div class="wrong-item-cn">长夜黑暗，处处险恶。</div>
+        <div class="wrong-item-meta"><span>🎬 Game of Thrones S02E01</span><span>✅ 已掌握</span></div>
+      </div>
+      <div class="wrong-item">
+        <div class="wrong-item-en">When you play the game of thrones, you win or you die.</div>
+        <div class="wrong-item-cn">在权力的游戏中，要么赢要么死。</div>
+        <div class="wrong-item-meta"><span>🎬 Game of Thrones S01E07</span><span>✅ 已掌握</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav with Review active -->
+  <div class="bottom-nav">
+    <button class="nav-tab"><span class="tab-icon">🎯</span><span class="tab-label">Practice</span></button>
+    <button class="nav-tab active"><span class="tab-icon">🔁</span><span class="tab-label">Review</span><span class="tab-badge">3</span></button>
+    <button class="nav-tab"><span class="tab-icon">🎬</span><span class="tab-label">Library</span></button>
+    <button class="nav-tab"><span class="tab-icon">🔍</span><span class="tab-label">Search</span></button>
+  </div>
+</div>
+
+<div style="width:100%;text-align:center;padding:20px 0;color:var(--text-dim);font-size:13px">
+  ← 左右滑动比较三种页面状态 →
+</div>
+
+<script>
+function toggleDrawer(drawerId, overlayId, hamburgerId) {
+  const drawer = document.getElementById(drawerId);
+  const overlay = document.getElementById(overlayId);
+  const hamburger = document.getElementById(hamburgerId);
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open');
+  overlay.classList.toggle('open');
+  hamburger.classList.toggle('open');
+}
+
+function closeDrawer(drawerId, overlayId, hamburgerId) {
+  document.getElementById(drawerId).classList.remove('open');
+  document.getElementById(overlayId).classList.remove('open');
+  document.getElementById(hamburgerId).classList.remove('open');
+}
+
+function switchPhoneTab(phoneId, tab) {
+  const content = document.getElementById('content1');
+  const practice = document.getElementById('practiceContent');
+  const library = document.getElementById('libraryContent');
+  const search = document.getElementById('searchContent');
+
+  // Update page tabs
+  const tabs = document.querySelectorAll('#phone1 .page-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+
+  if (tab === 'practice') {
+    practice.style.display = '';
+    library.style.display = 'none';
+    search.style.display = 'none';
+    tabs[0].classList.add('active');
+    // Update bottom nav
+    document.querySelectorAll('#phone1 .nav-tab')[0].classList.add('active');
+    document.querySelectorAll('#phone1 .nav-tab')[2].classList.remove('active');
+    document.querySelectorAll('#phone1 .nav-tab')[3].classList.remove('active');
+  } else if (tab === 'library') {
+    practice.style.display = 'none';
+    library.style.display = '';
+    search.style.display = 'none';
+    tabs[1].classList.add('active');
+    document.querySelectorAll('#phone1 .nav-tab')[0].classList.remove('active');
+    document.querySelectorAll('#phone1 .nav-tab')[2].classList.add('active');
+    document.querySelectorAll('#phone1 .nav-tab')[3].classList.remove('active');
+  } else if (tab === 'search') {
+    practice.style.display = 'none';
+    library.style.display = 'none';
+    search.style.display = '';
+    tabs[2].classList.add('active');
+    document.querySelectorAll('#phone1 .nav-tab')[0].classList.remove('active');
+    document.querySelectorAll('#phone1 .nav-tab')[2].classList.remove('active');
+    document.querySelectorAll('#phone1 .nav-tab')[3].classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

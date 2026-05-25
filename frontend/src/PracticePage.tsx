@@ -97,9 +97,9 @@ export default function PracticePage({
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [phoneMode, setPhoneMode] = useState(false);
-  // ≤480px 设备默认启用 phone-mode
+  // ≤768px 设备默认启用 phone-mode
   useEffect(() => {
-    if (window.innerWidth <= 480) {
+    if (window.innerWidth <= 768) {
       setPhoneMode(true);
     }
   }, []);
@@ -844,12 +844,6 @@ export default function PracticePage({
       {/* 手机模式：三行占满上半屏，下半屏是键盘 */}
       {phoneMode && (
         <div className="phone-mode-overlay">
-          {/* 专注模式按钮 */}
-          <div style={{textAlign:'center',marginBottom:4,display:'flex',justifyContent:'center',gap:6,flexShrink:0}}>
-            <button className={`exit-focus-btn ${!phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(false)}><><IconMeditation /> 专注</></button>
-            <button className={`exit-focus-btn ${phoneMode ? 'active' : ''}`} onClick={() => setPhoneMode(true)}><><IconPhone /> 手机</></button>
-            <button className="exit-focus-btn" onClick={() => { setFocusMode(false); setPhoneMode(false); }}><><IconClose /> 退出</></button>
-          </div>
 
           {/* 第1行: 英文(3行截断) + 中文(2行灰色) */}
           <div className={`sentence-en ${!showEn ? 'blurred' : ''}`} aria-hidden={!showEn}>
@@ -907,20 +901,27 @@ export default function PracticePage({
             </div>
           )}
 
-          {/* 第3行: 按钮区（一行排满） */}
-          <div className="phone-mode-actions">
-            <button className="btn-phone-submit" ref={submitRef} onClick={handleSubmit}>提交</button>
-            <button className="btn-phone-next" onClick={goNext}>下句</button>
-            <button className="btn-phone-icon" onClick={playOriginal} title="原音">原音</button>
-            <button className="btn-phone-icon" onClick={() => playTts(en)} title="TTS">{VOICES.find(v => v.id === voice)?.label || ''}</button>
-            {mode === 'dictation' && (
-              <button className="btn-phone-icon" onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>
-                中文
-              </button>
-            )}
-            <button className="btn-phone-icon" onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>
-              英文
-            </button>
+          {/* 第3行: 按钮区（键盘上方两行固定栏） */}
+          <div className="phone-ka-row">
+            <div className="phone-ka-left">
+              <button className={`phone-ka-btn ${showCn ? 'active' : ''}`} onClick={() => setShowCn(s => !s)} title={showCn ? '隐藏中文' : '显示中文'}>中</button>
+              <button className={`phone-ka-btn ${showEn ? 'active' : ''}`} onClick={() => setShowEn(s => !s)} title={showEn ? '隐藏英文' : '显示英文'}>英</button>
+              <button className="phone-ka-btn" onClick={playOriginal} title="原音">原音</button>
+              <button className="phone-ka-btn active" onClick={() => playTts(en)} title="TTS朗读">{VOICES.find(v => v.id === voice)?.label || 'TTS'}</button>
+            </div>
+            <div className="phone-ka-right">
+              <button className="phone-ka-btn" onClick={goNext}>下一句</button>
+              <button className="phone-ka-btn phone-ka-submit" ref={submitRef} onClick={handleSubmit}>提交</button>
+            </div>
+          </div>
+          {/* 第4行: 语速 + 设置 */}
+          <div className="phone-speed-row">
+            <div className="phone-speed-group">
+              {SPEEDS.map(s => (
+                <button key={s} className={`phone-speed-btn ${speed === s ? 'active' : ''}`} onClick={() => setSpeed(s)}>{s}x</button>
+              ))}
+            </div>
+            <button className="phone-ka-btn phone-ka-settings" onClick={() => setSettingsOpen(true)}>⚙ 设置</button>
           </div>
         </div>
       )}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Variant C — 内容预览</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060a14;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+
+.phone{width:375px;max-width:100%;background:#0a0e1a;border-radius:32px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 12px 48px rgba(0,0,0,.6)}
+.notch{width:126px;height:26px;background:#000;border-radius:0 0 18px 18px;margin:0 auto}
+.status{display:flex;justify-content:space-between;padding:8px 24px 0;font-size:.7rem;color:rgba(255,255,255,.35);font-weight:500}
+
+.screen{min-height:840px;display:flex;flex-direction:column;padding:0 20px 20px;position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse 130% 50% at 50% -50%,rgba(20,184,166,.05) 0%,transparent 70%),
+    linear-gradient(180deg,#090d1c 0%,#0c1122 100%)
+}
+
+.scroll{flex:1;overflow-y:auto;padding:0;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:0}
+
+/* ── brand ── */
+.brand{display:flex;align-items:center;gap:8px;padding:14px 0 8px;position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#0a0e1a 60%,transparent)}
+.brand .mark{width:28px;height:28px;border-radius:7px;background:#14b8a6;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#0a0e1a}
+.brand span{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5)}
+.brand .flex{flex:1}
+.brand .skip-btn{font-family:'Inter',sans-serif;font-size:.65rem;color:rgba(255,255,255,.06);border:none;background:none;cursor:pointer;padding:6px}
+
+/* ── hero ── */
+.hero{padding:8px 0 4px}
+.hero h1{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:-.02em;margin-bottom:4px}
+.hero .sub{font-size:.75rem;color:rgba(255,255,255,.2);line-height:1.5}
+
+/* ── scene preview cards — 像内容 feed ── */
+.feed{display:flex;flex-direction:column;gap:8px;margin:12px 0 14px}
+.feed .scene{border-radius:12px;overflow:hidden;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04)}
+.feed .scene .head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03)}
+.feed .scene .head .show-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:700;color:#fff;flex-shrink:0}
+.feed .scene .head .info{flex:1}
+.feed .scene .head .info .sname{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.6)}
+.feed .scene .head .info .ep{font-size:.6rem;color:rgba(255,255,255,.12)}
+.feed .scene .head .play-badge{width:24px;height:24px;border-radius:50%;background:rgba(20,184,166,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.feed .scene .body{padding:12px}
+.feed .scene .body .lines{display:flex;flex-direction:column;gap:4px}
+.feed .scene .body .lines .en{font-size:.8rem;font-weight:500;color:rgba(255,255,255,.7);line-height:1.5}
+.feed .scene .body .lines .cn{font-size:.7rem;color:rgba(255,255,255,.15);line-height:1.4}
+.feed .scene .body .lines .blank{display:inline-block;width:50px;height:14px;border-bottom:2px dashed rgba(20,184,166,.15);margin:0 2px}
+.feed .scene .tags{display:flex;gap:6px;padding:0 12px 10px}
+.feed .scene .tags span{padding:2px 8px;border-radius:4px;font-size:.55rem;color:rgba(255,255,255,.15);background:rgba(255,255,255,.02)}
+.feed .scene .tags .diff-hard{color:rgba(239,68,68,.5);background:rgba(239,68,68,.06)}
+.feed .scene .tags .diff-easy{color:rgba(34,197,94,.5);background:rgba(34,197,94,.06)}
+
+/* ── action prompt ── */
+.prompt{text-align:center;padding:4px 0 14px}
+.prompt p{font-size:.7rem;color:rgba(255,255,255,.2)}
+.prompt p em{font-style:normal;color:#14b8a6;font-weight:500}
+
+/* ─── quote divider ─── */
+.quote-mini{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.quote-mini .sep{flex:1;height:1px;background:rgba(255,255,255,.03)}
+.quote-mini blockquote{font-family:'Playfair Display',Georgia,serif;font-size:.75rem;font-style:italic;color:rgba(255,255,255,.2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quote-mini .sep-r{flex:1;height:1px;background:rgba(255,255,255,.03)}
+
+/* ── stats mini ── */
+.stats{display:flex;justify-content:center;gap:20px;margin-bottom:14px}
+.stats .item{text-align:center}
+.stats .item .num{font-size:.9rem;font-weight:700;color:rgba(255,255,255,.7)}
+.stats .item .lbl{font-size:.55rem;color:rgba(255,255,255,.1);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+
+/* ── form ── */
+.form{padding:0;margin-bottom:10px}
+.form .f-row{display:flex;gap:8px;margin-bottom:10px}
+.form .f-row .input-wrap{flex:1;position:relative}
+.form .f-row .input-wrap .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.08);pointer-events:none;display:flex}
+.form .f-row .input-wrap input{width:100%;padding:11px 16px 11px 38px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:rgba(255,255,255,.9);font-size:.8rem;font-family:'Inter',sans-serif;outline:none;transition:all .15s;-webkit-appearance:none}
+.form .f-row .input-wrap input:focus{border-color:rgba(20,184,166,.25)}
+.form .f-row .input-wrap input::placeholder{color:rgba(255,255,255,.06)}
+.form .f-row .submit-btn{padding:11px 18px;border:none;border-radius:10px;background:#14b8a6;color:#0a0e1a;font-size:.8rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s;white-space:nowrap}
+.form .f-row .submit-btn:hover{background:#0d9488}
+.form .f-foot{display:flex;justify-content:center;gap:16px;align-items:center}
+.form .f-foot button{font-family:'Inter',sans-serif;font-size:.7rem;color:rgba(255,255,255,.12);border:none;background:none;cursor:pointer;padding:6px;transition:color .15s}
+.form .f-foot button:hover{color:rgba(255,255,255,.3)}
+.form .f-foot .dot{width:2px;height:2px;border-radius:50%;background:rgba(255,255,255,.06)}
+
+.footer{text-align:center;padding:4px 0}
+.footer .skip{font-family:'Inter',sans-serif;font-size:.6rem;color:rgba(255,255,255,.04);border:none;background:none;cursor:pointer;padding:8px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status"><span>9:41</span><span>🔋 96%</span></div>
+  <div class="screen">
+    <div class="scroll">
+
+      <div class="brand">
+        <div class="mark">剧</div>
+        <span>英语剧场</span>
+        <div class="flex"></div>
+        <button class="skip-btn">跳过 →</button>
+      </div>
+
+      <div class="hero">
+        <h1>你即将学到的内容</h1>
+        <div class="sub">精选自经典剧集，边看边学</div>
+      </div>
+
+      <!-- ═══ 内容预览 Feed ═══ -->
+      <div class="feed">
+        <!-- Scene 1: GoT -->
+        <div class="scene">
+          <div class="head">
+            <div class="show-icon" style="background:linear-gradient(135deg,#dc2626,#991b1b)">G</div>
+            <div class="info">
+              <div class="sname">Game of Thrones</div>
+              <div class="ep">S01E04 · 难度：中</div>
+            </div>
+            <div class="play-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="#14b8a6"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+          <div class="body">
+            <div class="lines">
+              <div class="en">The night is <span class="blank"></span> and full of terrors.</div>
+              <div class="cn">夜晚________，充满恐惧。</div>
+            </div>
+          </div>
+          <div class="tags">
+            <span>逐词听写</span>
+            <span class="diff-hard">难度 中</span>
+            <span>1,247 人练习</span>
+          </div>
+        </div>
+
+        <!-- Scene 2: Downton Abbey -->
+        <div class="scene">
+          <div class="head">
+            <div class="show-icon" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">D</div>
+            <div class="info">
+              <div class="sname">Downton Abbey</div>
+              <div class="ep">S01E01 · 难度：易</div>
+            </div>
+            <div class="play-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="#14b8a6"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+          <div class="body">
+            <div class="lines">
+              <div class="en">What <span class="blank"></span> a weekend?</div>
+              <div class="cn">什么是________？</div>
+            </div>
+          </div>
+          <div class="tags">
+            <span>逐词听写</span>
+            <span class="diff-easy">难度 易</span>
+            <span>893 人练习</span>
+          </div>
+        </div>
+
+        <!-- Scene 3: GoT -->
+        <div class="scene">
+          <div class="head">
+            <div class="show-icon" style="background:linear-gradient(135deg,#dc2626,#991b1b)">G</div>
+            <div class="info">
+              <div class="sname">Game of Thrones</div>
+              <div class="ep">S01E07 · 难度：难</div>
+            </div>
+            <div class="play-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="#14b8a6"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+          <div class="body">
+            <div class="lines">
+              <div class="en">When you play the game of thrones, you <span class="blank"></span> or you <span class="blank"></span>.</div>
+              <div class="cn">当你玩起________游戏，要么________要么________。</div>
+            </div>
+          </div>
+          <div class="tags">
+            <span>逐词听写</span>
+            <span class="diff-hard">难度 难</span>
+            <span>2,103 人练习</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt">
+        <p>还有 6 部剧集 · <em>13,000+ 句台词</em> 等你解锁</p>
+      </div>
+
+      <div class="quote-mini">
+        <span class="sep"></span>
+        <blockquote>“The night is dark and full of terrors.”</blockquote>
+        <span class="sep-r"></span>
+      </div>
+
+      <div class="stats">
+        <div class="item"><div class="num">6</div><div class="lbl">剧集</div></div>
+        <div class="item"><div class="num">13K+</div><div class="lbl">台词</div></div>
+        <div class="item"><div class="num">5K+</div><div class="lbl">用户</div></div>
+      </div>
+
+      <!-- 极简注册 -->
+      <div class="form">
+        <div class="f-row">
+          <div class="input-wrap">
+            <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg></span>
+            <input type="text" placeholder="邮箱或手机号">
+          </div>
+          <button class="submit-btn">开始练习</button>
+        </div>
+        <div class="f-foot">
+          <button>已有账号？登录</button>
+          <span class="dot"></span>
+          <button>忘记密码？</button>
+          <span class="dot"></span>
+          <button>先逛逛</button>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button class="skip">先逛逛 · 不登录</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

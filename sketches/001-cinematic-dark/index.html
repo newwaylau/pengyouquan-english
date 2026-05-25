@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 影院暗色</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #080c18;
+  color: #e8edf5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Cinematic Gradient Background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20,184,166,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 80% 100%, rgba(20,184,166,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  background: rgba(12, 18, 34, 0.85);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+.logo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #14b8a6;
+  letter-spacing: -0.02em;
+  padding: 0 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  margin-bottom: 16px;
+}
+.logo-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #14b8a6;
+  box-shadow: 0 0 8px rgba(20,184,166,0.4);
+}
+.logo-sub {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-left: auto;
+}
+.nav-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 8px 12px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #e8edf5; }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04));
+  color: #14b8a6;
+  box-shadow: inset 2px 0 0 #14b8a6;
+}
+.nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-spacer { flex: 1; }
+.nav-bottom {
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding-top: 12px;
+  margin-top: auto;
+}
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  padding: 32px 40px;
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.topbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.topbar-subtitle {
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 400;
+}
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #5eead4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #080c18;
+  cursor: pointer;
+}
+
+/* ── Practice Section ── */
+.practice-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.practice-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(20,184,166,0.12);
+  color: #14b8a6;
+  letter-spacing: 0.02em;
+}
+.practice-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-left: auto;
+}
+
+/* ── Audio Player ── */
+.audio-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.play-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #080c18;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(20,184,166,0.25);
+}
+.play-btn:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(20,184,166,0.35); }
+.play-btn svg { width: 20px; height: 20px; }
+.audio-wave {
+  flex: 1;
+  height: 32px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.audio-wave-inner {
+  height: 100%;
+  width: 35%;
+  background: linear-gradient(90deg, rgba(20,184,166,0.3), rgba(20,184,166,0.1));
+  border-radius: 8px;
+}
+.audio-time {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+}
+
+/* ── Sentence Display ── */
+.sentence-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.sentence-text {
+  font-size: 1.35rem;
+  line-height: 1.7;
+  font-weight: 500;
+  color: #e8edf5;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+.sentence-trans {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+.sentence-blank {
+  display: inline-block;
+  min-width: 60px;
+  border-bottom: 2px dashed rgba(20,184,166,0.4);
+  color: #14b8a6;
+  font-weight: 600;
+  padding: 0 4px;
+}
+.sentence-filled {
+  display: inline-block;
+  min-width: 60px;
+  border-bottom: 2px solid rgba(20,184,166,0.6);
+  color: #5eead4;
+  font-weight: 600;
+  padding: 0 4px;
+}
+.sentence-wrong {
+  display: inline-block;
+  min-width: 60px;
+  border-bottom: 2px solid rgba(239,68,68,0.5);
+  color: #f87171;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* ── Input Area ── */
+.input-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.input-field {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  color: #e8edf5;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.15s;
+}
+.input-field:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20,184,166,0.1);
+  background: rgba(255,255,255,0.06);
+}
+.input-field::placeholder { color: #475569; }
+.btn-submit {
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #080c18;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(20,184,166,0.3); }
+
+/* ── Control Bar ── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+}
+.control-btn {
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+.control-btn:hover { background: rgba(255,255,255,0.05); color: #e8edf5; }
+.control-btn.active {
+  background: rgba(20,184,166,0.1);
+  color: #14b8a6;
+}
+.control-btn.primary {
+  background: rgba(20,184,166,0.08);
+  color: #14b8a6;
+}
+.control-btn.primary:hover { background: rgba(20,184,166,0.15); }
+.control-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.06);
+}
+.controls-right {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Progress Bar ── */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #14b8a6, #5eead4);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.progress-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <span class="logo-dot"></span>
+    英语剧场
+    <span class="logo-sub">DICTATION</span>
+  </div>
+  <div class="nav-label">主菜单</div>
+  <button class="nav-item active">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    练习
+  </button>
+  <button class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    错题本
+  </button>
+  <button class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    搜索
+  </button>
+  <button class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    剧库
+  </button>
+  <div class="nav-spacer"></div>
+  <div class="nav-bottom">
+    <button class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      浅色模式
+    </button>
+    <button class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      未登录
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">练习</div>
+      <div class="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar">H</div>
+    </div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 42%;"></div>
+    </div>
+    <span class="progress-text">42 / 100 句</span>
+  </div>
+
+  <div class="practice-header">
+    <span class="practice-badge">⏵ DICTATION</span>
+    <span class="practice-badge" style="background:rgba(148,163,184,0.08);color:#94a3b8;">纯听写模式</span>
+    <span class="practice-meta">Game of Thrones S01E01 · 42% 正确率</span>
+  </div>
+
+  <!-- Audio Player -->
+  <div class="audio-card">
+    <button class="play-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <div class="audio-wave">
+      <div class="audio-wave-inner"></div>
+    </div>
+    <span class="audio-time">0:32 / 1:15</span>
+  </div>
+
+  <!-- Sentence -->
+  <div class="sentence-card">
+    <div class="sentence-text">
+      <span>Winter is </span>
+      <span class="sentence-filled">coming</span>
+      <span>. You know </span>
+      <span class="sentence-blank">______</span>
+      <span>, Lord Stark.</span>
+    </div>
+    <div class="sentence-trans">
+      凛冬将至。你知道______，史塔克大人。
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-row">
+    <input class="input-field" type="text" placeholder="输入下一个单词..." autofocus>
+    <button class="btn-submit">提交 ↵</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <button class="control-btn active">0.5x</button>
+      <button class="control-btn">0.75x</button>
+      <button class="control-btn">1x</button>
+      <button class="control-btn">1.5x</button>
+    </div>
+    <div class="control-sep"></div>
+    <div class="control-group">
+      <button class="control-btn"><span style="color:#14b8a6;">●</span> 原音</button>
+      <button class="control-btn">Jenny</button>
+      <button class="control-btn">Guy</button>
+      <button class="control-btn">Sonia</button>
+    </div>
+    <div class="controls-right">
+      <button class="control-btn primary">显示中文</button>
+      <button class="control-btn">报错</button>
+      <button class="control-btn primary">下一句 →</button>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px; display: flex; gap: 8px;">
+    <button class="control-btn" style="font-size:0.8rem;">⚙ 设置</button>
+    <button class="control-btn" style="font-size:0.8rem;">🔍 专注</button>
+    <button class="control-btn" style="font-size:0.8rem;margin-left:auto;">📖 显示原文</button>
+  </div>
+</div>
+
+</body>
+</html>

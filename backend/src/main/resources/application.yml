@@ -12,6 +12,7 @@ spring:
 
   # JPA 配置(仅用于自动建表验证,实际用 Flyway 管理)
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: false

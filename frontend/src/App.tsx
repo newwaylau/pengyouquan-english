@@ -6,11 +6,10 @@ import WrongPage from './WrongPage';
 import SearchPage from './SearchPage';
 import BrowsePage from './BrowsePage';
 import AdminPage from './AdminPage';
-import SubtitlePage from './SubtitlePage';
 import DemoPage from './DemoPage';
-import Sidebar from './Sidebar';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
+import { IconTarget, IconClose, IconSearch, IconBook, IconSettings } from './Icons';
 import './index.css';
 import './v2-missing.css';
 
@@ -18,7 +17,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'subtitle' | 'demo'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -89,36 +88,32 @@ export default function App() {
   return (
     <div className="app">
       <a href="#main-content" className="skip-to-content">跳转到主要内容</a>
-      {/* 桌面端侧边栏 */}
-      <Sidebar
-        page={page}
-        onNavigate={handleNavigate}
-        user={user}
-        onlineCount={onlineCount}
-        onLogout={handleLogout}
-        isDark={isDark}
-        onToggleTheme={toggleTheme}
-        wrongCount={wrongCount}
-      />
 
       <div className="app-content app-content-new">
         {/* 手机端精简顶部导航 */}
         <nav className="topnav-mobile">
           <span className="topnav-mobile-logo" onClick={() => setPage('practice')}>
             <span className="topnav-mobile-dot" />
-            英语剧场
+            剧场
           </span>
           <div className="topnav-mobile-right">
             {user?.role === 'admin' && (
-              <span className="topnav-mobile-online">
-                <span className={`online-dot ${onlineCount !== null && onlineCount > 0 ? 'online-dot-active' : ''}`} />
-                {onlineCount !== null ? onlineCount : '...'}
-              </span>
+              <button className={`topnav-mobile-admin-btn ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')}>
+                <IconSettings size={14} /> Admin
+              </button>
             )}
+            <button className="topnav-mobile-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+              {isDark ? '☀️' : '🌙'}
+            </button>
             {user ? (
-              <button onClick={handleLogout} className="topnav-mobile-logout btn-outline">退出</button>
+              <>
+                <div className="topnav-mobile-avatar" onClick={() => setPage('practice')} title={user.nickname}>
+                  {user.nickname?.charAt(0)?.toUpperCase() || '?'}
+                </div>
+                <button className="topnav-mobile-logout-btn" onClick={handleLogout} title="退出登录">退出</button>
+              </>
             ) : (
-              <button onClick={() => setPage('login')} className="topnav-mobile-login btn-primary">登录</button>
+              <button onClick={() => setPage('login')} className="topnav-mobile-login-btn">登录</button>
             )}
           </div>
         </nav>
@@ -132,12 +127,27 @@ export default function App() {
               {page === 'search' && '搜索'}
               {page === 'browse' && '浏览'}
               {page === 'admin' && '管理后台'}
-              {page === 'subtitle' && '字幕导入'}
               {page === 'demo' && 'Demo'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
           <div className="topbar-right hide-on-desktop">
+            <button className="topbar-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
+              {isDark ? '☀️' : '🌙'}
+            </button>
+            {user ? (
+              <button className="topbar-login-btn btn-outline-style" onClick={handleLogout}>退出</button>
+            ) : (
+              <button className="topbar-login-btn" onClick={() => setPage('login')}>登录</button>
+            )}
+          </div>
+          <div className="topbar-right show-on-desktop">
+            {user?.role === 'admin' && (
+              <button className={`topbar-admin-btn ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')}>
+                <IconSettings size={16} /> Admin
+                {onlineCount !== null && <span className="topbar-badge">{onlineCount}</span>}
+              </button>
+            )}
             <button className="topbar-theme-btn" onClick={toggleTheme} title={isDark ? '切换到浅色模式' : '切换到深色模式'}>
               {isDark ? '☀️' : '🌙'}
             </button>
@@ -175,9 +185,32 @@ export default function App() {
           {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
           {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
-          {page === 'subtitle' && <SubtitlePage />}
           {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
         </main>
+
+        {/* 手机端底部导航 */}
+        <nav className="mobile-bottom-nav">
+          {[
+            { key: 'practice', icon: <IconTarget size={20} />, label: 'Practice' },
+            { key: 'wrong', icon: <IconClose size={20} />, label: 'Review', requiresLogin: true, badge: true },
+            { key: 'browse', icon: <IconBook size={20} />, label: 'Library' },
+            { key: 'search', icon: <IconSearch size={20} />, label: 'Search' },
+          ].map(item => {
+            const disabled = item.requiresLogin && !user;
+            return (
+              <button
+                key={item.key}
+                className={`mb-nav-btn ${page === item.key ? 'active' : ''}`}
+                onClick={() => { if (disabled) return; setPage(item.key as any); }}
+                disabled={disabled}
+              >
+                <span className="mb-icon">{item.icon}</span>
+                <span className="mb-label">{item.label}</span>
+                {item.badge && wrongCount > 0 && <span className="mb-badge">{wrongCount}</span>}
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );

@@ -372,15 +372,17 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
 
               {/* 密码强度条 */}
               {newPwd && (
-                <div className="pwd-strength-bar" style={{ marginTop: -4, marginBottom: 12 }}>
+                <div className="pwd-strength-bar" style={{ marginTop: -4, marginBottom: 4 }}>
                   <div className="pwd-strength-fill" style={{
                     width: `${newPwdStrength.percent}%`,
                     background: newPwdStrength.color
                   }} />
-                  <span className="pwd-strength-label" style={{ color: newPwdStrength.color }}>
-                    {newPwdStrength.label}
-                  </span>
                 </div>
+              )}
+              {newPwd && (
+                <span className="pwd-strength-label" style={{ color: newPwdStrength.color, display: 'block', textAlign: 'right', marginBottom: 8 }}>
+                  {newPwdStrength.label}
+                </span>
               )}
 
               {/* 确认新密码 */}
@@ -423,169 +425,179 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
     );
   }
 
-  // ── 未登录：左右分栏布局 ──
+  // ── 未登录：手机端简洁设计 ──
   return (
     <div className="login-page-new login-v2-page">
-      <div className="login-v2-art">
-        <div className="login-v2-brand">
-          <span className="brand-logo-v2">剧</span>
-          <span><strong>英语剧场</strong><small>DICTATION · S2</small></span>
-        </div>
-        <blockquote>“The night is dark and full of terrors.”</blockquote>
-        <p className="login-v2-quote-name">Melisandre · Game of Thrones</p>
-        <div className="login-v2-art-stats">
-          <div><strong>6</strong><span>剧集季</span></div>
-          <div><strong>13K+</strong><span>影视句子</span></div>
-          <div><strong>5K+</strong><span>练习记录</span></div>
-        </div>
+      <div className="login-v2-topbar">
+        <div className="login-v2-brand-mark">剧</div>
+        <span className="login-v2-brand-name">英语剧场</span>
+        <div style={{ flex: 1 }}></div>
+        <button className="login-v2-skip" onClick={onHome}>先逛逛 →</button>
       </div>
 
-      <div className="login-form-panel login-v2-panel">
-        <div className="login-form-inner login-v2-inner">
-        {onHome && (
-          <button className="btn btn-ghost btn-sm" onClick={onHome} type="button">
-            先逛逛 · 不登录
-          </button>
-        )}
-        <div className="login-v2-form-head">
-          <div className="login-v2-mini-brand"><span className="brand-logo-v2">剧</span><span>英语剧场</span></div>
-          <h2>欢迎回来</h2>
-          <p className="form-subtitle">登录你的账号继续学习</p>
-          <div className="seg login-v2-tabs">
-            <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>登录</button>
-            <button type="button" className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')}>注册</button>
-            <button type="button" className={mode === 'forgot' ? 'active' : ''} onClick={goToForgot}>忘记密码</button>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit}>
+      <div className="login-v2-quote-card">
+        <blockquote>"The night is dark and full of terrors."</blockquote>
+        <div className="login-v2-quote-cite">Melisandre · Game of Thrones</div>
+      </div>
 
-          {/* ── 登录模式 ── */}
-          {mode === 'login' && (
-            <>
-              <div>
-                <label className="field-label" htmlFor="login-email">邮箱 / 手机号</label>
-                <div className="login-input-icon-wrap">
-                  <span className="login-input-icon">@</span>
-                  <input id="login-email" type="text" placeholder="邮箱或手机号" className="login-form-input with-icon"
-                    value={email}
-                    onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                    style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
-                </div>
-              </div>
+      <div className="login-v2-stats">
+        <div><strong>2</strong><span>剧</span></div>
+        <div><strong>17</strong><span>剧集</span></div>
+        <div><strong>10K+</strong><span>台词</span></div>
+      </div>
 
-              <div>
-                <label className="field-label" htmlFor="login-password">密码</label>
-                <div className="pwd-wrapper login-input-icon-wrap">
-                  <span className="login-input-icon"><IconKey /></span>
-                  <input id="login-password" className="with-icon" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
-                    onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                  <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
-                    {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
-                  </span>
-                </div>
-              </div>
+      <form onSubmit={handleSubmit}>
 
-              <div className="forgot-link">
-                <span onClick={goToForgot}>忘记密码？</span>
-              </div>
-            </>
-          )}
-
-          {/* ── 注册模式 ── */}
-          {mode === 'register' && (
-            <>
-              <div>
-                <input type="email" placeholder="邮箱" className="login-form-input"
+        {/* ── 登录模式 ── */}
+        {mode === 'login' && (
+          <>
+            <div className="field-group">
+              <label>邮箱 / 手机号</label>
+              <div className="login-input-icon-wrap">
+                <span className="login-input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <input id="login-email" type="text" placeholder="邮箱或手机号" className="login-form-input with-icon"
                   value={email}
                   onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                  style={email && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+                  style={email && email.includes('@') && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
               </div>
+            </div>
 
-              {/* 验证码 */}
-              <div>
-                <div className="code-row">
-                  <input type="text" placeholder="邮箱验证码" value={code}
-                    onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
-                    className="code-input" />
-                  <button type="button" className="btn-outline send-code-btn"
-                    onClick={handleSendCode}
-                    disabled={codeSending || codeCountdown > 0}>
-                    {codeSending ? '发送中...' : codeCountdown > 0 ? `${codeCountdown}s` : '发送验证码'}
-                  </button>
+            <div className="field-group">
+              <label>密码</label>
+              <div className="pwd-wrapper login-input-icon-wrap">
+                <span className="login-input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input id="login-password" className="with-icon" type={showLoginPwd ? 'text' : 'password'} placeholder="请输入密码" value={password}
+                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+                <span className="eye-btn btn-icon" onClick={() => setShowLoginPwd(!showLoginPwd)} aria-label={showLoginPwd ? '隐藏密码' : '显示密码'}>
+                  {showLoginPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
+            </div>
+
+            <div className="forgot-link">
+              <span onClick={goToForgot}>忘记密码？</span>
+            </div>
+
+            {error && <div className="error-msg">{error}</div>}
+            {successMsg && <div className="success-msg">{successMsg}</div>}
+
+            <div className="login-v2-actions">
+              <button type="submit" className="btn-primary login-v2-btn-primary">登录</button>
+              <button type="button" className="btn-outline login-v2-btn-secondary" onClick={() => setMode('register')}>注册</button>
+            </div>
+          </>
+        )}
+
+        {/* ── 注册模式 ── */}
+        {mode === 'register' && (
+          <>
+            <div className="field-group">
+              <input type="email" placeholder="邮箱" className="login-form-input"
+                value={email}
+                onChange={e => setEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                style={email && !isValidEmail(email) ? { borderColor: '#ef4444' } : {}} />
+            </div>
+
+            <div className="field-group">
+              <div className="code-row">
+                <input type="text" placeholder="邮箱验证码" value={code}
+                  onChange={e => setCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
+                  className="code-input" />
+                <button type="button" className="btn-outline send-code-btn"
+                  onClick={handleSendCode}
+                  disabled={codeSending || codeCountdown > 0}>
+                  {codeSending ? '发送中...' : codeCountdown > 0 ? `${codeCountdown}s` : '发送验证码'}
+                </button>
+              </div>
+            </div>
+
+            <div className="field-group">
+              <div className="pwd-wrapper">
+                <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
+                  onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? '隐藏密码' : '显示密码'}>
+                  {showPwd ? <EyeOpen /> : <EyeClosed />}
+                </span>
+              </div>
+              {password && (
+                <div className="pwd-strength-bar" style={{ marginTop: 8, marginBottom: 4 }}>
+                  <div className="pwd-strength-fill" style={{
+                    width: `${pwdStrength.percent}%`,
+                    background: pwdStrength.color
+                  }} />
                 </div>
-              </div>
+              )}
+              {password && (
+                <span className="pwd-strength-label" style={{ color: pwdStrength.color, display: 'block', textAlign: 'right', marginBottom: 8 }}>
+                  {pwdStrength.label}
+                </span>
+              )}
+            </div>
 
-              {/* 密码 */}
-              <div>
-                <div className="pwd-wrapper">
-                  <input type={showPwd ? 'text' : 'password'} placeholder="密码（至少8位，含字母和数字）" value={password}
-                    onChange={e => setPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
-                  <span className="eye-btn btn-icon" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? '隐藏密码' : '显示密码'}>
-                    {showPwd ? <EyeOpen /> : <EyeClosed />}
-                  </span>
-                </div>
-                {password && (
-                  <div className="pwd-strength-bar">
-                    <div className="pwd-strength-fill" style={{
-                      width: `${pwdStrength.percent}%`,
-                      background: pwdStrength.color
-                    }} />
-                    <span className="pwd-strength-label" style={{ color: pwdStrength.color }}>
-                      {pwdStrength.label}
-                    </span>
-                  </div>
-                )}
+            <div className="field-group">
+              <div className="pwd-wrapper">
+                <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
+                  onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
+                  style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
+                <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)} aria-label={showPwd2 ? '隐藏密码' : '显示密码'}>
+                  {showPwd2 ? <EyeOpen /> : <EyeClosed />}
+                </span>
               </div>
-              <div>
-                <div className="pwd-wrapper">
-                  <input type={showPwd2 ? 'text' : 'password'} placeholder="确认密码" value={password2}
-                    onChange={e => setPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
-                    style={password2 && !pwd2Match ? { borderColor: '#ef4444' } : {}} />
-                  <span className="eye-btn btn-icon" onClick={() => setShowPwd2(!showPwd2)} aria-label={showPwd2 ? '隐藏密码' : '显示密码'}>
-                    {showPwd2 ? <EyeOpen /> : <EyeClosed />}
-                  </span>
-                </div>
-              </div>
+            </div>
 
-              <div>
-                <input type="tel" placeholder="手机号（可选）" className="login-form-input"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
-                  style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
-              </div>
+            <div className="field-group">
+              <input type="tel" placeholder="手机号（可选）" className="login-form-input"
+                value={phone}
+                onChange={e => setPhone(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace}
+                style={phone && !isValidPhone(phone) ? { borderColor: '#ef4444' } : {}} />
+            </div>
 
-              <div>
-                <input type="text" placeholder="邀请码（可选）" className="login-form-input"
-                  value={invitedBy}
-                  onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
-              </div>
-            </>
-          )}
+            <div className="field-group">
+              <input type="text" placeholder="邀请码（可选）" className="login-form-input"
+                value={invitedBy}
+                onChange={e => setInvitedBy(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} />
+            </div>
 
-          {/* ── 忘记密码模式 ── */}
-          {mode === 'forgot' && (
-            <>
-              {forgotStep === 1 && (
-                <>
+            {error && <div className="error-msg">{error}</div>}
+            {successMsg && <div className="success-msg">{successMsg}</div>}
+
+            <div className="login-v2-actions">
+              <button type="submit" className="btn-primary login-v2-btn-primary">注册</button>
+              <button type="button" className="btn-outline login-v2-btn-secondary" onClick={() => setMode('login')}>登录</button>
+            </div>
+          </>
+        )}
+
+        {/* ── 忘记密码模式 ── */}
+        {mode === 'forgot' && (
+          <>
+            {forgotStep === 1 && (
+              <>
+                <div className="field-group">
                   <input type="email" placeholder="邮箱"
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
                     autoFocus
                     style={forgotEmail && !isValidEmail(forgotEmail) ? { borderColor: '#ef4444' } : {}} />
+                </div>
 
-                  <div className="code-row">
-                    <button type="button" className="btn-outline send-code-btn" style={{ width: '100%' }}
-                      onClick={handleForgotSendCode}
-                      disabled={forgotSending || forgotCountdown > 0}>
-                      {forgotSending ? '发送中...' : forgotCountdown > 0 ? `${forgotCountdown}s` : '发送验证码'}
-                    </button>
-                  </div>
-                </>
-              )}
+                <div className="field-group">
+                  <button type="button" className="btn-outline send-code-btn" style={{ width: '100%' }}
+                    onClick={handleForgotSendCode}
+                    disabled={forgotSending || forgotCountdown > 0}>
+                    {forgotSending ? '发送中...' : forgotCountdown > 0 ? `${forgotCountdown}s` : '发送验证码'}
+                  </button>
+                </div>
+              </>
+            )}
 
-              {forgotStep === 2 && (
-                <>
-                  {/* 验证码 */}
+            {forgotStep === 2 && (
+              <>
+                <div className="field-group">
                   <div className="code-row">
                     <input type="text" placeholder="邮箱验证码" value={forgotCode}
                       onChange={e => setForgotCode(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required maxLength={6}
@@ -596,8 +608,9 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                       {forgotSending ? '发送中...' : forgotCountdown > 0 ? `${forgotCountdown}s` : '重新发送'}
                     </button>
                   </div>
+                </div>
 
-                  {/* 新密码 */}
+                <div className="field-group">
                   <div className="pwd-wrapper">
                     <input type={forgotShowPwd ? 'text' : 'password'} placeholder="新密码（至少8位，含字母和数字）" value={forgotPassword}
                       onChange={e => setForgotPassword(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required />
@@ -606,18 +619,21 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                     </span>
                   </div>
                   {forgotPassword && (
-                    <div className="pwd-strength-bar">
+                    <div className="pwd-strength-bar" style={{ marginTop: 8, marginBottom: 4 }}>
                       <div className="pwd-strength-fill" style={{
                         width: `${forgotPwdStrength.percent}%`,
                         background: forgotPwdStrength.color
                       }} />
-                      <span className="pwd-strength-label" style={{ color: forgotPwdStrength.color }}>
-                        {forgotPwdStrength.label}
-                      </span>
                     </div>
                   )}
+                  {forgotPassword && (
+                    <span className="pwd-strength-label" style={{ color: forgotPwdStrength.color, display: 'block', textAlign: 'right', marginBottom: 8 }}>
+                      {forgotPwdStrength.label}
+                    </span>
+                  )}
+                </div>
 
-                  {/* 确认新密码 */}
+                <div className="field-group">
                   <div className="pwd-wrapper">
                     <input type={forgotShowPwd2 ? 'text' : 'password'} placeholder="确认新密码" value={forgotPassword2}
                       onChange={e => setForgotPassword2(e.target.value.replace(/\s/g, ''))} onKeyDown={preventSpace} required
@@ -626,29 +642,19 @@ export default function LoginPage({ onLogin, onHome }: { onLogin: (token: string
                       {forgotShowPwd2 ? <EyeOpen /> : <EyeClosed />}
                     </span>
                   </div>
-                </>
-              )}
-            </>
-          )}
+                </div>
+              </>
+            )}
 
-          {error && <div className="error-msg">{error}</div>}
-          {successMsg && <div className="success-msg">{successMsg}</div>}
+            {error && <div className="error-msg">{error}</div>}
+            {successMsg && <div className="success-msg">{successMsg}</div>}
 
-          <button type="submit" className="btn-primary full submit-btn">
-            {mode === 'login' ? '登录' : mode === 'register' ? '注册' : '重置密码'}
-          </button>
-        </form>
-
-        {mode === 'forgot' ? (
-          <p className="toggle-mode" onClick={switchMode}>返回登录</p>
-        ) : (
-          <p className="toggle-mode" onClick={switchMode}>
-            {mode === 'login' ? '没有账号？点击注册' : '已有账号？点击登录'}
-          </p>
+            <button type="submit" className="btn-primary login-v2-btn-primary" style={{ width: '100%' }}>重置密码</button>
+            <p className="toggle-mode" onClick={switchMode}>返回登录</p>
+          </>
         )}
 
-      </div>
-    </div>
+      </form>
     </div>
   );
 }

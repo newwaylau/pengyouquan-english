@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api/client';
-import { IconSettings, IconClose, IconPen, IconFilm, IconTV, IconSpeaker, IconMic } from './Icons';
+import { IconSettings, IconClose, IconPen, IconFilm, IconSpeaker, IconMic } from './Icons';
 
 interface Props {
   open: boolean;

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 极简现代</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #0b0f1a;
+  color: #e1e7ef;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar (Compact, Linear-style) ── */
+.sidebar {
+  width: 200px;
+  background: #0f1420;
+  border-right: 1px solid #1a1f2e;
+  padding: 20px 8px;
+  display: flex;
+  flex-direction: column;
+}
+.logo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e1e7ef;
+  padding: 4px 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.02em;
+}
+.logo-icon {
+  width: 20px; height: 20px;
+  background: #14b8a6;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 800; color: #0b0f1a;
+}
+.nav-section {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #3b4252;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 12px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #7c8394;
+  cursor: pointer;
+  transition: all 0.1s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.03); color: #e1e7ef; }
+.nav-item.active {
+  background: rgba(20,184,166,0.08);
+  color: #14b8a6;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px; width: 2px;
+  background: #14b8a6;
+  border-radius: 1px;
+}
+.nav-item[disabled] { opacity: 0.35; cursor: not-allowed; }
+.nav-spacer { flex: 1; }
+.nav-divider { height: 1px; background: #1a1f2e; margin: 8px 12px; }
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #5a6274;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.1s;
+}
+.nav-user:hover { background: rgba(255,255,255,0.03); }
+.nav-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #1a1f2e;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 600; color: #5a6274;
+}
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 800px;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.topbar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #e1e7ef;
+}
+.topbar-badge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(20,184,166,0.1);
+  color: #14b8a6;
+  border: 1px solid rgba(20,184,166,0.15);
+}
+.topbar-sub {
+  font-size: 0.75rem;
+  color: #4a5264;
+  margin-left: auto;
+}
+
+/* ── Stats Bar ── */
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: #0f1420;
+  border: 1px solid #1a1f2e;
+  border-radius: 8px;
+}
+.stat-item { }
+.stat-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e1e7ef;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 0.65rem;
+  color: #4a5264;
+  margin-top: 2px;
+}
+.stat-sep { width: 1px; background: #1a1f2e; }
+.stat-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stat-bar {
+  flex: 1;
+  height: 3px;
+  background: #1a1f2e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.stat-fill {
+  height: 100%;
+  width: 42%;
+  background: #14b8a6;
+  border-radius: 2px;
+}
+
+/* ── Audio ── */
+.audio-card {
+  background: #0f1420;
+  border: 1px solid #1a1f2e;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.play-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: #14b8a6;
+  color: #0b0f1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.play-btn:hover { opacity: 0.85; }
+.play-btn svg { width: 14px; height: 14px; }
+.audio-label { font-size: 0.75rem; color: #5a6274; min-width: 44px; }
+.audio-bar {
+  flex: 1; height: 4px;
+  background: #1a1f2e; border-radius: 2px; overflow: hidden;
+}
+.audio-fill { height: 100%; width: 35%; background: #5a6274; border-radius: 2px; }
+.audio-time { font-size: 0.7rem; color: #4a5264; font-variant-numeric: tabular-nums; }
+
+/* ── Sentence ── */
+.sentence-card {
+  background: #0f1420;
+  border: 1px solid #1a1f2e;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.sentence-text {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  font-weight: 500;
+  color: #e1e7ef;
+  margin-bottom: 4px;
+}
+.sentence-trans {
+  font-size: 0.8rem;
+  color: #4a5264;
+  line-height: 1.6;
+}
+.blank { color: #14b8a6; border-bottom: 2px dashed rgba(20,184,166,0.3); padding: 0 2px; min-width: 50px; display: inline-block; }
+.filled { color: #5eead4; border-bottom: 2px solid rgba(20,184,166,0.4); padding: 0 2px; min-width: 50px; display: inline-block; }
+
+/* ── Input ── */
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.input-field {
+  flex: 1;
+  background: #0f1420;
+  border: 1px solid #1a1f2e;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: #e1e7ef;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.1s;
+}
+.input-field:focus { border-color: #14b8a6; }
+.btn-submit {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background: #14b8a6;
+  color: #0b0f1a;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.btn-submit:hover { opacity: 0.85; }
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ctrl-group {
+  display: flex;
+  align-items: center;
+  background: #0f1420;
+  border: 1px solid #1a1f2e;
+  border-radius: 6px;
+  padding: 2px;
+}
+.ctrl-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #5a6274;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.ctrl-btn:hover { color: #e1e7ef; }
+.ctrl-btn.active { background: rgba(20,184,166,0.1); color: #14b8a6; }
+.ctrl-sep { width: 1px; height: 16px; background: #1a1f2e; margin: 0 2px; }
+.ctrl-right { margin-left: auto; display: flex; gap: 6px; }
+.ctrl-btn.action { color: #14b8a6; }
+.ctrl-btn.action:hover { background: rgba(20,184,166,0.08); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo"><span class="logo-icon">🎬</span> 英语剧场</div>
+  <div class="nav-section">Menu</div>
+  <button class="nav-item active">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Practice
+  </button>
+  <button class="nav-item" disabled>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    Review
+  </button>
+  <button class="nav-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    Search
+  </button>
+  <button class="nav-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    Library
+  </button>
+  <div class="nav-spacer"></div>
+  <div class="nav-divider"></div>
+  <div class="nav-user">
+    <div class="nav-avatar">?</div>
+    <span>Sign in to sync</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Practice</span>
+    <span class="topbar-badge">DICTATION</span>
+    <span class="topbar-sub">Game of Thrones S01E01</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-value">8/19</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <div class="stat-value">73%</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <div class="stat-value">16s</div>
+      <div class="stat-label">Avg. time</div>
+    </div>
+    <div class="stat-progress">
+      <div class="stat-bar"><div class="stat-fill"></div></div>
+      <span style="font-size:0.7rem;color:#4a5264;font-variant-numeric:tabular-nums;">42%</span>
+    </div>
+  </div>
+
+  <div class="audio-card">
+    <button class="play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+    <span class="audio-label">Original</span>
+    <div class="audio-bar"><div class="audio-fill"></div></div>
+    <span class="audio-time">0:32 / 1:15</span>
+  </div>
+
+  <div class="sentence-card">
+    <div class="sentence-text">
+      <span>Winter is </span><span class="filled">coming</span><span>. </span>
+      <span>You know </span><span class="blank">________</span><span>, Lord Stark.</span>
+    </div>
+    <div class="sentence-trans">凛冬将至。你知道________，史塔克大人。</div>
+  </div>
+
+  <div class="input-row">
+    <input class="input-field" placeholder="Type the next word..." autofocus>
+    <button class="btn-submit">Submit ↵</button>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <button class="ctrl-btn active">0.5x</button>
+      <button class="ctrl-btn">0.75x</button>
+      <button class="ctrl-btn">1x</button>
+      <button class="ctrl-btn">1.5x</button>
+    </div>
+    <div class="ctrl-sep"></div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn active"><span style="color:#14b8a6;">●</span> Original</button>
+      <button class="ctrl-btn">Jenny</button>
+      <button class="ctrl-btn">Guy</button>
+      <button class="ctrl-btn">Sonia</button>
+    </div>
+    <div class="ctrl-right">
+      <button class="ctrl-btn action">Show Chinese</button>
+      <button class="ctrl-btn">Skip</button>
+      <button class="ctrl-btn action">Next →</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

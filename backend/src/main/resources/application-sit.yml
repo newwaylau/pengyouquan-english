@@ -7,3 +7,9 @@ spring:
     url: jdbc:mysql://${SPRING_DATASOURCE_HOST:mysql}:3306/${SPRING_DATASOURCE_DB:pengyouquan_english}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:pengyouquan123}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 600000

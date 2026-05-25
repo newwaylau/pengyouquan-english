@@ -73,19 +73,6 @@ export const api = {
   // 统计
   stats: () => request('/api/users/me/stats'),
 
-  // 字幕导入
-  subtitleUpload: (formData: FormData) => {
-    const headers: Record<string, string> = {};
-    const token = localStorage.getItem('token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return fetch('/api/subtitle/upload', { method: 'POST', body: formData, headers }).then(r => r.json());
-  },
-  subtitleHistory: () => request('/api/subtitle/history'),
-  subtitleDelete: (id: number) => request(`/api/subtitle/${id}`, { method: 'DELETE' }),
-  subtitleFormats: () => request('/api/subtitle/formats'),
-  subtitleBatchImport: (directoryPath: string) =>
-    request('/api/subtitle/batch-import', { method: 'POST', body: JSON.stringify({ directoryPath }) }),
-
   // 修改密码
   updatePassword: (data: { oldPassword: string; newPassword: string }) =>
     request('/api/auth/password', { method: 'PUT', body: JSON.stringify(data) }),

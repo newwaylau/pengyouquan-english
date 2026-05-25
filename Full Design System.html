@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 全平台全页面设计系统</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-deep: #05080f; --bg-surface: #0a0f1a; --bg-card: #0f1625;
+    --bg-card-hover: #141d30; --bg-elevated: #18223a;
+    --teal: #14b8a6; --teal-dark: #0d9488; --teal-light: #5eead4;
+    --teal-glow: rgba(20,184,166,0.12); --teal-subtle: rgba(20,184,166,0.06);
+    --text-primary: #eef2f8; --text-secondary: #8ba0b8;
+    --text-muted: #5a6a8a; --text-dim: #344560;
+    --border: rgba(255,255,255,0.04); --border-card: rgba(255,255,255,0.06);
+    --danger: #ef4444; --success: #22c55e;
+    --radius: 10px; --radius-sm: 6px; --radius-lg: 14px;
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Segoe UI', Roboto, sans-serif;
+    --mono: 'SF Mono', 'JetBrains Mono', monospace;
+  }
+  body { font-family: var(--font); background: var(--bg-deep); color: var(--text-primary); }
+
+  /* ===== NAV ===== */
+  .nav-tabs {
+    display: flex; gap: 4px; padding: 20px 24px 0; max-width: 1400px; margin: 0 auto;
+    flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
+    background: var(--bg-deep); padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-tab {
+    padding: 6px 16px; border: 1px solid var(--border-card);
+    background: var(--bg-card); color: var(--text-muted); cursor: pointer;
+    border-radius: 20px; font-size: 12px; font-weight: 500;
+    font-family: var(--font); transition: all 0.15s;
+  }
+  .nav-tab:hover { border-color: var(--teal); color: var(--teal); }
+  .nav-tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+  .page-section { display: none; max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .page-section.active { display: block; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 32px 0 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .section-label:first-of-type { margin-top: 16px; }
+
+  /* ===== Device Row ===== */
+  .device-row {
+    display: flex; gap: 24px; align-items: flex-start;
+    flex-wrap: wrap; margin: 16px 0 32px;
+  }
+  .device-label {
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .device-label span {
+    padding: 2px 8px; border-radius: 4px; font-size: 9px;
+  }
+  .device-label .dt { background: var(--teal-subtle); color: var(--teal); }
+  .device-label .mb { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+  /* ===== Desktop Frame ===== */
+  .desktop {
+    width: 860px; background: var(--bg-deep);
+    border-radius: var(--radius-lg); border: 1px solid var(--border-card);
+    overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+  }
+  .desktop-top {
+    display: flex; align-items: center; padding: 10px 16px;
+    border-bottom: 1px solid var(--border); background: var(--bg-surface);
+    gap: 12px;
+  }
+  .desktop-dots { display: flex; gap: 5px; }
+  .desktop-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .desktop-dots span:nth-child(1) { background: #ef4444; }
+  .desktop-dots span:nth-child(2) { background: #f59e0b; }
+  .desktop-dots span:nth-child(3) { background: #22c55e; }
+  .desktop-url {
+    flex:1; padding: 4px 12px; background: var(--bg-elevated);
+    border-radius: 5px; font-size: 11px; color: var(--text-dim); text-align: center;
+  }
+  .desktop-body { display: flex; min-height: 420px; }
+  .ds-sidebar {
+    width: 200px; background: var(--bg-surface);
+    border-right: 1px solid var(--border); padding: 12px 0;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .ds-logo {
+    padding: 2px 14px 16px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border); margin-bottom: 10px;
+  }
+  .ds-logo-mark {
+    width: 24px; height: 24px; border-radius: 5px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--bg-deep);
+    box-shadow: 0 0 10px var(--teal-glow);
+  }
+  .ds-logo-text { font-size: 13px; font-weight: 700; }
+  .ds-logo-sub { font-size: 8px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-left: auto; }
+  .ds-nav-s { font-size: 8px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 14px 4px; }
+  .ds-nav-i {
+    display: flex; align-items: center; gap: 8px; padding: 7px 14px;
+    font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    border: none; background: none; cursor: pointer; width: 100%; text-align: left;
+    font-family: var(--font); position: relative; transition: all 0.15s;
+  }
+  .ds-nav-i:hover { background: var(--teal-subtle); color: var(--text-primary); }
+  .ds-nav-i.active { color: var(--teal); background: var(--teal-subtle); }
+  .ds-nav-i.active::before {
+    content: ''; position: absolute; left: 0; top: 5px; bottom: 5px;
+    width: 2px; background: var(--teal); border-radius: 1px;
+    box-shadow: 0 0 4px var(--teal);
+  }
+  .ds-nav-i .ni { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+  .ds-nav-i[disabled] { opacity: 0.3; cursor: not-allowed; }
+  .ds-nav-i .badge-m {
+    margin-left: auto; background: var(--teal-subtle); color: var(--teal);
+    font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 600;
+  }
+  .ds-nav-i .badge-d {
+    margin-left: auto; background: rgba(239,68,68,0.12); color: var(--danger);
+    font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 600;
+  }
+  .ds-spacer { flex: 1; }
+  .ds-foot {
+    padding: 10px 14px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ds-fav {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .ds-fn { font-size: 11px; font-weight: 600; }
+  .ds-fs { font-size: 9px; color: var(--text-dim); }
+  .ds-main { flex: 1; padding: 20px; }
+
+  /* Desktop: page header */
+  .ds-ph { margin-bottom: 16px; }
+  .ds-ph .eyebrow { font-size: 9px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .ds-ph h2 { font-size: 20px; font-weight: 700; margin: 2px 0; }
+  .ds-ph p { font-size: 12px; color: var(--text-muted); }
+
+  .ds-tabbar {
+    display: flex; gap: 4px; padding: 3px; background: var(--bg-card);
+    border: 1px solid var(--border-card); border-radius: 5px; width: fit-content; margin-bottom: 16px;
+  }
+  .ds-tabbar button {
+    padding: 6px 14px; border: none; background: none; color: var(--text-muted);
+    font-size: 11px; font-weight: 500; cursor: pointer; border-radius: 3px;
+    font-family: var(--font); transition: all 0.15s;
+  }
+  .ds-tabbar button.active { background: var(--teal); color: #fff; font-weight: 600; }
+
+  /* Desktop: cards */
+  .ds-card {
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px;
+  }
+  .ds-card-row { display: flex; align-items: center; gap: 10px; }
+  .ds-play {
+    width: 36px; height: 36px; min-width: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; color: #fff;
+    box-shadow: 0 0 12px var(--teal-glow);
+  }
+  .ds-wave {
+    flex:1; height: 24px; display: flex; align-items: center; gap: 1.5px;
+  }
+  .ds-wave .b { flex:1; background: var(--border-card); border-radius: 2px; }
+  .ds-wave .b:nth-child(odd) { height: 35%; }
+  .ds-wave .b:nth-child(3n) { height: 70%; }
+  .ds-wave .b:nth-child(5n+2) { height: 50%; }
+  .ds-wave .b.active { background: var(--teal); box-shadow: 0 0 3px var(--teal-glow); }
+  .ds-prog { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 6px 0; }
+  .ds-prog-f { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal-light)); border-radius: 2px; }
+
+  .ds-sent { font-size: 15px; line-height: 1.7; margin-bottom: 4px; }
+  .ds-wd { display: inline-block; margin: 0 1px; }
+  .ds-wd.f { border-bottom: 2px solid var(--teal-light); color: var(--teal-light); }
+  .ds-wd.b { border-bottom: 2px dashed var(--teal); min-width: 35px; color: transparent; }
+  .ds-cn { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .ds-inp { display: flex; gap: 6px; }
+  .ds-inp input {
+    flex:1; padding: 8px 10px; border: 1px solid var(--border-card);
+    border-radius: 5px; background: var(--bg-input); color: var(--text-primary);
+    font-size: 13px; font-family: var(--font); outline: none;
+  }
+  .ds-inp input:focus { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-glow); }
+  .ds-inp button {
+    padding: 8px 16px; border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff; border-radius: 5px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: var(--font);
+  }
+  .ds-sc {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .ds-sc button {
+    padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px;
+    background: none; color: var(--text-muted); font-size: 10px; cursor: pointer;
+    font-family: var(--font);
+  }
+  .ds-sc button kbd { background: var(--bg-elevated); padding: 0 3px; border-radius: 2px; font-size: 9px; color: var(--text-secondary); font-family: var(--mono); }
+
+  /* Desktop: login page */
+  .ds-login {
+    display: flex; min-height: 480px; margin: -20px;
+  }
+  .ds-login-brand {
+    flex: 1.2; padding: 40px; display: flex; flex-direction: column;
+    justify-content: center; background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+  }
+  .ds-login-brand .big-logo {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: var(--bg-deep);
+    box-shadow: 0 0 20px var(--teal-glow); margin-bottom: 16px;
+  }
+  .ds-login-brand h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+  .ds-login-brand .quote {
+    padding: 12px 16px; border-left: 3px solid var(--teal);
+    background: var(--bg-card); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 16px 0;
+  }
+  .ds-login-brand .stats { display: flex; gap: 24px; margin-top: 8px; }
+  .ds-login-brand .stats div { text-align: center; }
+  .ds-login-brand .stats .num { font-size: 20px; font-weight: 700; color: var(--teal); }
+  .ds-login-brand .stats .lbl { font-size: 10px; color: var(--text-dim); }
+  .ds-login-form {
+    flex: 0.8; padding: 40px; display: flex; flex-direction: column;
+    justify-content: center;
+  }
+  .ds-login-form .card {
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .ds-login-form .card h3 { font-size: 18px; margin-bottom: 4px; }
+  .ds-login-form .card p { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+  .ds-login-form .field {
+    margin-bottom: 12px;
+  }
+  .ds-login-form .field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+  .ds-login-form .field input {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border-card);
+    border-radius: 5px; background: var(--bg-input); color: var(--text-primary);
+    font-size: 13px; font-family: var(--font); outline: none;
+  }
+  .ds-login-form .field input:focus { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-glow); }
+  .ds-login-form .btn-primary {
+    width: 100%; padding: 10px; border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff; border-radius: 5px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); margin-top: 4px;
+  }
+  .ds-login-form .links { display: flex; justify-content: space-between; font-size: 11px; margin-top: 12px; }
+  .ds-login-form .links a { color: var(--text-muted); cursor: pointer; text-decoration: none; }
+  .ds-login-form .links a:hover { color: var(--teal); }
+
+  /* Desktop: browse / search / wrong shared */
+  .ds-2col { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+  .ds-show-list { display: flex; flex-direction: column; gap: 4px; }
+  .ds-show-item {
+    padding: 8px 12px; border-radius: 5px; cursor: pointer;
+    font-size: 12px; color: var(--text-secondary); transition: all 0.15s;
+  }
+  .ds-show-item:hover { background: var(--teal-subtle); color: var(--text-primary); }
+  .ds-show-item.active { background: var(--teal); color: #fff; font-weight: 600; }
+  .ds-show-item .sm { font-size: 10px; color: var(--text-dim); }
+  .ds-show-item.active .sm { color: rgba(255,255,255,0.6); }
+
+  .ds-sent-list { display: flex; flex-direction: column; gap: 6px; }
+  .ds-sent-item {
+    padding: 10px 14px; background: var(--bg-card);
+    border: 1px solid var(--border-card); border-radius: 5px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ds-sent-item:hover { border-color: var(--teal); background: var(--bg-card-hover); }
+  .ds-sent-item .sen { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+  .ds-sent-item .meta { font-size: 10px; color: var(--text-dim); margin-top: 3px; display: flex; gap: 8px; }
+  .ds-sent-item .tag {
+    padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600;
+  }
+  .ds-sent-item .tag.due { background: rgba(239,68,68,0.1); color: var(--danger); }
+  .ds-sent-item .tag.done { background: rgba(34,197,94,0.1); color: var(--success); }
+  .ds-sent-item .tag.ok { background: var(--teal-subtle); color: var(--teal); }
+
+  .ds-search-box {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: 8px; margin-bottom: 12px;
+  }
+  .ds-search-box input {
+    flex:1; border: none; background: none; color: var(--text-primary);
+    font-size: 13px; font-family: var(--font); outline: none;
+  }
+  .ds-search-box input::placeholder { color: var(--text-dim); }
+  .ds-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ds-chip {
+    padding: 4px 10px; background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: 14px; color: var(--text-secondary); font-size: 11px;
+    cursor: pointer; font-family: var(--font);
+  }
+  .ds-chip:hover { border-color: var(--teal); color: var(--teal); }
+
+  .ds-empty {
+    text-align: center; padding: 40px 20px; color: var(--text-dim);
+  }
+  .ds-empty .ei { font-size: 36px; margin-bottom: 8px; }
+  .ds-empty h4 { font-size: 15px; color: var(--text-secondary); margin-bottom: 4px; }
+  .ds-empty p { font-size: 12px; }
+
+  /* Desktop: Admin page */
+  .ds-admin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .ds-stat-card {
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); padding: 16px;
+  }
+  .ds-stat-card .num { font-size: 24px; font-weight: 700; color: var(--teal); }
+  .ds-stat-card .lbl { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .ds-table {
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); overflow: hidden;
+  }
+  .ds-table-row {
+    display: flex; padding: 10px 14px; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .ds-table-row:last-child { border-bottom: none; }
+  .ds-table-row.h { color: var(--text-dim); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ds-table-row .c1 { width: 120px; flex-shrink: 0; color: var(--text-secondary); }
+  .ds-table-row .c2 { flex: 1; color: var(--text-primary); }
+
+  /* ===== Phone Frame ===== */
+  .phone {
+    width: 280px; background: var(--bg-deep); border-radius: 28px;
+    border: 1px solid var(--border-card); overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5); flex-shrink: 0;
+  }
+  .p-status { display: flex; justify-content: space-between; padding: 8px 16px 2px; font-size: 10px; font-weight: 600; color: var(--text-secondary); }
+  .p-top {
+    display: flex; align-items: center; padding: 6px 12px; gap: 8px;
+    border-bottom: 1px solid var(--border); background: var(--bg-surface);
+  }
+  .p-ham {
+    width: 26px; height: 26px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    border: none; background: none; cursor: pointer; border-radius: 3px; flex-shrink: 0;
+  }
+  .p-ham span { display: block; width: 14px; height: 1.5px; background: var(--text-secondary); border-radius: 1px; }
+  .p-logo { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; flex: 1; }
+  .p-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+  .p-av {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .p-login {
+    padding: 4px 10px; border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff; border-radius: 16px; font-size: 10px; font-weight: 600;
+    cursor: pointer; font-family: var(--font);
+  }
+
+  .p-body { padding: 10px 12px; min-height: 380px; }
+  .p-eyeb { font-size: 8px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .p-title { font-size: 17px; font-weight: 700; }
+  .p-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .p-card {
+    background: var(--bg-card); border: 1px solid var(--border-card);
+    border-radius: 5px; padding: 10px; margin-bottom: 8px;
+  }
+  .p-ar {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .p-play {
+    width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; color: #fff;
+    box-shadow: 0 0 8px var(--teal-glow);
+  }
+  .p-wave {
+    flex:1; height: 18px; display: flex; align-items: center; gap: 1px;
+  }
+  .p-wave .b { flex:1; background: var(--border-card); border-radius: 1.5px; }
+  .p-wave .b:nth-child(odd) { height: 30%; }
+  .p-wave .b:nth-child(3n) { height: 65%; }
+  .p-wave .b:nth-child(5n+2) { height: 45%; }
+  .p-wave .b.active { background: var(--teal); }
+
+  .p-sent { font-size: 12px; line-height: 1.6; }
+  .p-cn { font-size: 10px; color: var(--text-muted); margin: 4px 0 6px; }
+  .p-inp { display: flex; gap: 4px; }
+  .p-inp input {
+    flex:1; padding: 6px 8px; border: 1px solid var(--border-card);
+    border-radius: 4px; background: var(--bg-input); color: var(--text-primary);
+    font-size: 11px; font-family: var(--font); outline: none;
+  }
+  .p-inp input:focus { border-color: var(--teal); }
+  .p-inp button {
+    padding: 6px 10px; border: none;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600;
+    cursor: pointer; font-family: var(--font);
+  }
+  .p-badges { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 6px; }
+  .p-badge {
+    padding: 2px 6px; border: 1px solid var(--border); border-radius: 3px;
+    color: var(--text-muted); font-size: 9px; cursor: pointer; background: none; font-family: var(--font);
+  }
+  .p-badge kbd { background: var(--bg-elevated); padding: 0 2px; border-radius: 2px; font-size: 8px; }
+
+  .p-bot {
+    display: flex; background: var(--bg-surface); border-top: 1px solid var(--border);
+    padding: 3px 4px; padding-bottom: max(3px, env(safe-area-inset-bottom));
+  }
+  .p-bt {
+    flex:1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+    padding: 4px 2px; border: none; background: none; cursor: pointer;
+    color: var(--text-dim); font-family: var(--font); border-radius: 3px;
+    position: relative; transition: all 0.15s;
+  }
+  .p-bt .pi { font-size: 15px; line-height: 1; }
+  .p-bt .pl { font-size: 8px; font-weight: 500; }
+  .p-bt.active { color: var(--teal); }
+  .p-bt.active::after {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 14px; height: 1.5px; background: var(--teal); border-radius: 1px;
+    box-shadow: 0 0 4px var(--teal-glow);
+  }
+  .p-bt[disabled] { opacity: 0.3; cursor: not-allowed; }
+  .p-bt .pb {
+    position: absolute; top: 0; right: 50%; margin-right: -12px;
+    background: var(--danger); color: #fff; font-size: 7px; font-weight: 700;
+    padding: 0 3px; border-radius: 5px; min-width: 11px; text-align: center;
+  }
+
+  /* Phone: login */
+  .p-login-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 12px; }
+  .p-login-page .brand {
+    text-align: center; padding: 20px 0 8px;
+  }
+  .p-login-page .brand .bm {
+    width: 40px; height: 40px; border-radius: 10px; margin: 0 auto 8px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: var(--bg-deep);
+    box-shadow: 0 0 16px var(--teal-glow);
+  }
+  .p-login-page .brand h3 { font-size: 17px; font-weight: 700; }
+  .p-login-page .brand p { font-size: 11px; color: var(--text-muted); }
+  .p-login-page .p-card { padding: 16px; }
+  .p-login-page .field { margin-bottom: 10px; }
+  .p-login-page .field label { font-size: 10px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 3px; }
+  .p-login-page .field input {
+    width: 100%; padding: 7px 10px; border: 1px solid var(--border-card);
+    border-radius: 4px; background: var(--bg-input); color: var(--text-primary);
+    font-size: 12px; font-family: var(--font); outline: none;
+  }
+  .p-login-page .field input:focus { border-color: var(--teal); }
+
+  /* Phone: browse */
+  .p-show-item {
+    display: flex; gap: 8px; padding: 8px; background: var(--bg-card);
+    border: 1px solid var(--border-card); border-radius: 5px; margin-bottom: 6px;
+    cursor: pointer;
+  }
+  .p-show-item .poster {
+    width: 36px; height: 50px; border-radius: 4px;
+    background: var(--bg-elevated); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .p-show-item .info { flex: 1; }
+  .p-show-item .info .nm { font-size: 12px; font-weight: 600; }
+  .p-show-item .info .sm { font-size: 9px; color: var(--text-dim); }
+  .p-show-item .info .tag {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 8px; font-weight: 600; background: var(--teal-subtle); color: var(--teal); margin-top: 2px;
+  }
+
+  .p-empty { text-align: center; padding: 24px 12px; }
+  .p-empty .ei { font-size: 28px; }
+  .p-empty h4 { font-size: 13px; color: var(--text-secondary); }
+  .p-empty p { font-size: 10px; color: var(--text-dim); }
+
+  /* ===== Admin page tabs ===== */
+  .admin-tabs {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-shrink: 0;
+  }
+  .admin-tab {
+    padding: 4px 12px; border: 1px solid var(--border-card);
+    background: var(--bg-card); color: var(--text-muted); cursor: pointer;
+    border-radius: 16px; font-size: 10px; font-weight: 500;
+    font-family: var(--font);
+  }
+  .admin-tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+  @media (max-width: 900px) {
+    .desktop { width: 100%; }
+    .ds-sidebar { width: 160px; }
+    .ds-2col { grid-template-columns: 1fr; }
+    .ds-login { flex-direction: column; }
+    .ds-login-brand { border-right: none; border-bottom: 1px solid var(--border); padding: 24px; }
+    .ds-login-form { padding: 24px; }
+    .ds-admin-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TABS ===== -->
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" onclick="switchPage('practice')">🎯 练习页</button>
+  <button class="nav-tab" onclick="switchPage('review')">🔁 错题复习</button>
+  <button class="nav-tab" onclick="switchPage('browse')">🎬 剧库</button>
+  <button class="nav-tab" onclick="switchPage('search')">🔍 搜索</button>
+  <button class="nav-tab" onclick="switchPage('login')">🔐 登录</button>
+  <button class="nav-tab" onclick="switchPage('admin')">⚙️ 管理</button>
+</div>
+
+<!-- ===== PRACTICE ===== -->
+<div class="page-section active" id="page-practice">
+  <div class="section-label">🎯 练习页 — 核心听写流程</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / practice</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-sidebar">
+            <div class="ds-logo"><div class="ds-logo-mark">🎬</div><span class="ds-logo-text">剧场</span><span class="ds-logo-sub">Dictation</span></div>
+            <div class="ds-nav-s">Main</div>
+            <button class="ds-nav-i active"><span class="ni">🎯</span>Practice</button>
+            <button class="ds-nav-i" disabled><span class="ni">🔁</span>Review</button>
+            <button class="ds-nav-i"><span class="ni">🎬</span>Library</button>
+            <button class="ds-nav-i"><span class="ni">🔍</span>Search</button>
+            <div class="ds-spacer"></div>
+            <div class="ds-foot"><div class="ds-fav">H</div><div><div class="ds-fn">Heaton</div><div class="ds-fs">3 wrong · streak</div></div></div>
+          </div>
+          <div class="ds-main">
+            <div class="ds-ph"><div class="eyebrow">Dictation</div><h2>练习</h2><p>跟读经典美剧台词，逐词精听练习</p></div>
+            <div class="ds-tabbar">
+              <button class="active">🎯 Practice</button><button>🔁 Review</button><button>🎬 Library</button><button>🔍 Search</button>
+            </div>
+            <div class="ds-card">
+              <div class="ds-card-row">
+                <button class="ds-play">▶</button>
+                <div class="ds-wave">
+                  <div class="b active"></div><div class="b active"></div><div class="b active"></div>
+                  <div class="b active"></div><div class="b"></div><div class="b"></div>
+                  <div class="b"></div><div class="b active"></div><div class="b active"></div>
+                  <div class="b"></div><div class="b"></div><div class="b active"></div>
+                  <div class="b"></div><div class="b"></div><div class="b"></div>
+                </div>
+                <span style="font-size:10px;color:var(--text-dim);flex-shrink:0">0:12 / 1:48</span>
+              </div>
+              <div class="ds-prog"><div class="ds-prog-f" style="width:15%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim)"><span>0 / 1 句</span><span>Downton Abbey S01E03 · #11705</span></div>
+            </div>
+            <div class="ds-card">
+              <div class="ds-sent">
+                <span class="ds-wd f">I</span> <span class="ds-wd f">have</span>
+                <span class="ds-wd b">.....</span> <span class="ds-wd f">to</span>
+                <span class="ds-wd f">say,</span> <span class="ds-wd b">.....</span>
+                <span class="ds-wd f">this</span> <span class="ds-wd b">.....</span>
+                <span class="ds-wd f">is</span> <span class="ds-wd b">.....</span>
+                <span class="ds-wd f">delicious.</span>
+              </div>
+              <div class="ds-cn">我不得不说，这道菜非常美味。</div>
+              <div class="ds-inp"><input placeholder="输入下一个单词..." /><button>提交</button></div>
+              <div class="ds-sc">
+                <button><kbd>R</kbd> 重播</button><button><kbd>Ctrl+N</kbd> 下一句</button>
+                <button><kbd>?</kbd> 提示</button><button><kbd>K</kbd> 设置</button>
+                <button style="border-color:var(--teal-subtle);color:var(--teal)">0.75x</button>
+                <button>1x</button>
+                <button style="border-color:var(--teal-subtle);color:var(--teal)">原音</button>
+                <button>Jenny</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <div class="p-av">H</div>
+        </div>
+        <div class="p-body">
+          <div class="p-eyeb">Dictation · 纯听写</div>
+          <div class="p-title">练习</div>
+          <div class="p-meta">Downton Abbey S01E03 · #11705</div>
+          <div class="p-card">
+            <div class="p-ar">
+              <button class="p-play">▶</button>
+              <div class="p-wave">
+                <div class="b active"></div><div class="b active"></div><div class="b active"></div>
+                <div class="b active"></div><div class="b"></div><div class="b"></div>
+                <div class="b"></div><div class="b active"></div><div class="b active"></div>
+                <div class="b"></div><div class="b"></div><div class="b"></div>
+                <div class="b"></div><div class="b active"></div><div class="b"></div>
+              </div>
+              <span style="font-size:9px;color:var(--text-dim);flex-shrink:0">0:12</span>
+            </div>
+            <div class="ds-prog" style="margin:3px 0"><div class="ds-prog-f" style="width:12%"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim)"><span>0/1</span><span>12%</span></div>
+          </div>
+          <div class="p-card">
+            <div class="p-sent">
+              <span class="ds-wd f">I</span> <span class="ds-wd f">have</span>
+              <span class="ds-wd b">..</span> <span class="ds-wd f">to</span>
+              <span class="ds-wd f">say,</span> <span class="ds-wd b">..</span>
+              <span class="ds-wd f">this</span> <span class="ds-wd b">..</span>
+              <span class="ds-wd f">is</span> <span class="ds-wd b">..</span>
+              <span class="ds-wd f">delicious.</span>
+            </div>
+            <div class="p-cn">我不得不说，这道菜非常美味。</div>
+            <div class="p-inp"><input placeholder="输入下一个单词..." /><button>提交</button></div>
+          </div>
+          <div class="p-badges">
+            <button class="p-badge"><kbd>R</kbd> 重播</button>
+            <button class="p-badge"><kbd>Ctrl+N</kbd> 下一句</button>
+            <button class="p-badge"><kbd>?</kbd> 提示</button>
+            <button class="p-badge" style="border-color:var(--teal-subtle);color:var(--teal)">0.75x</button>
+            <button class="p-badge">原音</button>
+          </div>
+        </div>
+        <div class="p-bot">
+          <button class="p-bt active"><span class="pi">🎯</span><span class="pl">Practice</span></button>
+          <button class="p-bt" disabled><span class="pi">🔁</span><span class="pl">Review</span><span class="pb">3</span></button>
+          <button class="p-bt"><span class="pi">🎬</span><span class="pl">Library</span></button>
+          <button class="p-bt"><span class="pi">🔍</span><span class="pl">Search</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REVIEW ===== -->
+<div class="page-section" id="page-review">
+  <div class="section-label">🔁 错题复习页 — 待复习 + 即将到期</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / review</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-sidebar">
+            <div class="ds-logo"><div class="ds-logo-mark">🎬</div><span class="ds-logo-text">剧场</span><span class="ds-logo-sub">Dictation</span></div>
+            <div class="ds-nav-s">Main</div>
+            <button class="ds-nav-i"><span class="ni">🎯</span>Practice</button>
+            <button class="ds-nav-i active"><span class="ni">🔁</span>Review <span class="badge-d">3</span></button>
+            <button class="ds-nav-i"><span class="ni">🎬</span>Library</button>
+            <button class="ds-nav-i"><span class="ni">🔍</span>Search</button>
+            <div class="ds-spacer"></div>
+            <div class="ds-foot"><div class="ds-fav">H</div><div><div class="ds-fn">Heaton</div><div class="ds-fs">3 wrong · streak</div></div></div>
+          </div>
+          <div class="ds-main">
+            <div class="ds-ph"><div class="eyebrow">Review · 间隔复习</div><h2>错题复习</h2><p>3 句待复习 · 12 句已掌握</p></div>
+            <div class="ds-tabbar">
+              <button>🎯 Practice</button><button class="active">🔁 Review</button><button>🎬 Library</button><button>🔍 Search</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">待复习 <span style="color:var(--text-dim);font-weight:400">3</span></div>
+                <div class="ds-sent-item"><div class="sen">I have something to say, this is delicious.</div><div class="meta"><span>🎬 Game of Thrones S01E01</span><span class="tag due">❌ 错3次</span></div></div>
+                <div class="ds-sent-item"><div class="sen">Winter is coming.</div><div class="meta"><span>🎬 Game of Thrones S01E01</span><span class="tag due">❌ 错1次</span></div></div>
+                <div class="ds-sent-item"><div class="sen">You know nothing, Jon Snow.</div><div class="meta"><span>🎬 Game of Thrones S01E04</span><span class="tag due">❌ 错5次</span></div></div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">即将到期 <span style="color:var(--text-dim);font-weight:400">2</span></div>
+                <div class="ds-sent-item"><div class="sen">The night is dark and full of terrors.</div><div class="meta"><span>🎬 Game of Thrones S02E01</span><span class="tag done">✅ 已掌握</span></div></div>
+                <div class="ds-sent-item"><div class="sen">When you play the game of thrones, you win or you die.</div><div class="meta"><span>🎬 Game of Thrones S01E07</span><span class="tag done">✅ 已掌握</span></div></div>
+                <div style="margin-top:8px">
+                  <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:4px">按剧集筛选</div>
+                  <div class="ds-chips">
+                    <button class="ds-chip" style="border-color:var(--teal);color:var(--teal)">全部</button>
+                    <button class="ds-chip">Game of Thrones</button>
+                    <button class="ds-chip">Downton Abbey</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <div class="p-av">H</div>
+        </div>
+        <div class="p-body">
+          <div class="p-eyeb">Review · 错题复习</div>
+          <div class="p-title">复习</div>
+          <div class="p-meta">3 句待复习 · 12 已掌握</div>
+          <div style="margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">待复习</div>
+            <div class="p-card" style="padding:8px;margin-bottom:4px"><div style="font-size:11px;line-height:1.5">I have something to say, this is delicious.</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px">🎬 GOT S01E01 · ❌ 3次</div></div>
+            <div class="p-card" style="padding:8px;margin-bottom:4px"><div style="font-size:11px;line-height:1.5">Winter is coming.</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px">🎬 GOT S01E01 · ❌ 1次</div></div>
+            <div class="p-card" style="padding:8px"><div style="font-size:11px;line-height:1.5">You know nothing, Jon Snow.</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px">🎬 GOT S01E04 · ❌ 5次</div></div>
+          </div>
+          <div><div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">即将到期</div>
+            <div class="p-card" style="padding:8px"><div style="font-size:11px;line-height:1.5">The night is dark and full of terrors.</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px">🎬 GOT S02E01 · ✅ 已掌握</div></div>
+          </div>
+        </div>
+        <div class="p-bot">
+          <button class="p-bt"><span class="pi">🎯</span><span class="pl">Practice</span></button>
+          <button class="p-bt active"><span class="pi">🔁</span><span class="pl">Review</span><span class="pb">3</span></button>
+          <button class="p-bt"><span class="pi">🎬</span><span class="pl">Library</span></button>
+          <button class="p-bt"><span class="pi">🔍</span><span class="pl">Search</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BROWSE ===== -->
+<div class="page-section" id="page-browse">
+  <div class="section-label">🎬 剧库页 — 浏览剧集与句子</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / library</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-sidebar">
+            <div class="ds-logo"><div class="ds-logo-mark">🎬</div><span class="ds-logo-text">剧场</span><span class="ds-logo-sub">Dictation</span></div>
+            <div class="ds-nav-s">Main</div>
+            <button class="ds-nav-i"><span class="ni">🎯</span>Practice</button>
+            <button class="ds-nav-i"><span class="ni">🔁</span>Review <span class="badge-d">3</span></button>
+            <button class="ds-nav-i active"><span class="ni">🎬</span>Library</button>
+            <button class="ds-nav-i"><span class="ni">🔍</span>Search</button>
+            <div class="ds-spacer"></div>
+            <div class="ds-foot"><div class="ds-fav">H</div><div><div class="ds-fn">Heaton</div><div class="ds-fs">3 wrong · streak</div></div></div>
+          </div>
+          <div class="ds-main">
+            <div class="ds-ph"><div class="eyebrow">Library</div><h2>剧库</h2><p>按剧集浏览字幕句库，快速跳转到指定句子练习。</p></div>
+            <div class="ds-tabbar">
+              <button>🎯 Practice</button><button>🔁 Review</button><button class="active">🎬 Library</button><button>🔍 Search</button>
+            </div>
+            <div class="ds-2col">
+              <div>
+                <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">剧集选择</div>
+                <div class="ds-show-list">
+                  <div class="ds-show-item active">👑 Game of Thrones <div class="sm">8季 · 1,284句</div></div>
+                  <div class="ds-show-item">🏰 Downton Abbey <div class="sm">6季 · 6,303句</div></div>
+                  <div class="ds-show-item">🧪 Breaking Bad <div class="sm">5季 · 892句</div></div>
+                  <div class="ds-show-item">📱 Friends <div class="sm">10季 · 1,456句</div></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <span style="font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em">句子列表</span>
+                  <div style="display:flex;gap:4px;align-items:center">
+                    <span style="font-size:10px;color:var(--text-dim)">跳转到#</span>
+                    <input style="width:60px;padding:3px 6px;border:1px solid var(--border-card);border-radius:3px;background:var(--bg-input);color:var(--text-primary);font-size:11px;font-family:var(--font);outline:none" placeholder="编号" />
+                  </div>
+                </div>
+                <div class="ds-sent-list">
+                  <div class="ds-sent-item"><div class="sen">Winter is coming.</div><div class="meta"><span>S01E01 · #1</span><span class="tag ok">进行中</span></div></div>
+                  <div class="ds-sent-item"><div class="sen">You know nothing, Jon Snow.</div><div class="meta"><span>S01E04 · #285</span><span class="tag ok">进行中</span></div></div>
+                  <div class="ds-sent-item"><div class="sen">When you play the game of thrones, you win or you die.</div><div class="meta"><span>S01E07 · #522</span><span class="tag done">已完成</span></div></div>
+                  <div class="ds-sent-item"><div class="sen">The night is dark and full of terrors.</div><div class="meta"><span>S02E01 · #648</span><span class="tag done">已完成</span></div></div>
+                  <div class="ds-sent-item"><div class="sen">A Lannister always pays his debts.</div><div class="meta"><span>S02E03 · #801</span><span class="tag ok">进行中</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <div class="p-av">H</div>
+        </div>
+        <div class="p-body">
+          <div class="p-eyeb">Library</div>
+          <div class="p-title">剧库</div>
+          <div class="p-meta">浏览所有剧集与句子</div>
+          <div class="p-show-item">
+            <div class="poster">👑</div>
+            <div class="info"><div class="nm">Game of Thrones</div><div class="sm">8季 · 1,284句</div><div class="tag">进行中</div></div>
+          </div>
+          <div class="p-show-item">
+            <div class="poster">🏰</div>
+            <div class="info"><div class="nm">Downton Abbey</div><div class="sm">6季 · 6,303句</div><div class="tag">已导入</div></div>
+          </div>
+          <div class="p-show-item">
+            <div class="poster">🧪</div>
+            <div class="info"><div class="nm">Breaking Bad</div><div class="sm">5季 · 892句</div><div class="tag">已导入</div></div>
+          </div>
+          <div class="p-show-item">
+            <div class="poster">📱</div>
+            <div class="info"><div class="nm">Friends</div><div class="sm">10季 · 1,456句</div><div class="tag">已导入</div></div>
+          </div>
+        </div>
+        <div class="p-bot">
+          <button class="p-bt"><span class="pi">🎯</span><span class="pl">Practice</span></button>
+          <button class="p-bt"><span class="pi">🔁</span><span class="pl">Review</span><span class="pb">3</span></button>
+          <button class="p-bt active"><span class="pi">🎬</span><span class="pl">Library</span></button>
+          <button class="p-bt"><span class="pi">🔍</span><span class="pl">Search</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SEARCH ===== -->
+<div class="page-section" id="page-search">
+  <div class="section-label">🔍 搜索页 — 中英文关键词搜索</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / search</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-sidebar">
+            <div class="ds-logo"><div class="ds-logo-mark">🎬</div><span class="ds-logo-text">剧场</span><span class="ds-logo-sub">Dictation</span></div>
+            <div class="ds-nav-s">Main</div>
+            <button class="ds-nav-i"><span class="ni">🎯</span>Practice</button>
+            <button class="ds-nav-i"><span class="ni">🔁</span>Review <span class="badge-d">3</span></button>
+            <button class="ds-nav-i"><span class="ni">🎬</span>Library</button>
+            <button class="ds-nav-i active"><span class="ni">🔍</span>Search</button>
+            <div class="ds-spacer"></div>
+            <div class="ds-foot"><div class="ds-fav">H</div><div><div class="ds-fn">Heaton</div><div class="ds-fs">3 wrong · streak</div></div></div>
+          </div>
+          <div class="ds-main">
+            <div class="ds-ph"><div class="eyebrow">Search</div><h2>搜索</h2><p>找到想练的那一句，支持中英文关键词。</p></div>
+            <div class="ds-tabbar">
+              <button>🎯 Practice</button><button>🔁 Review</button><button>🎬 Library</button><button class="active">🔍 Search</button>
+            </div>
+            <div class="ds-search-box">
+              <span style="color:var(--text-dim)">🔍</span>
+              <input placeholder="搜索句子（中英文）..." />
+            </div>
+            <div class="ds-chips">
+              <button class="ds-chip">:wrong</button><button class="ds-chip">:got</button>
+              <button class="ds-chip">winter</button><button class="ds-chip">king</button>
+              <button class="ds-chip">love</button>
+            </div>
+            <div class="ds-empty"><div class="ei">🔍</div><h4>搜索你想练的句子</h4><p>输入中英文关键词，或点击上方快捷标签快速筛选</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <div class="p-av">H</div>
+        </div>
+        <div class="p-body">
+          <div class="p-eyeb">Search</div>
+          <div class="p-title">搜索</div>
+          <div class="p-meta">找到想练的那一句</div>
+          <div class="p-card" style="display:flex;align-items:center;gap:6px;padding:8px 10px">
+            <span style="font-size:12px;color:var(--text-dim)">🔍</span>
+            <input style="flex:1;border:none;background:none;color:var(--text-primary);font-size:12px;font-family:var(--font);outline:none" placeholder="搜索句子..." />
+          </div>
+          <div class="p-badges">
+            <button class="p-badge">:wrong</button><button class="p-badge">:got</button>
+            <button class="p-badge">winter</button><button class="p-badge">king</button>
+          </div>
+          <div class="p-empty"><div class="ei">🔍</div><h4>搜索你想练的句子</h4><p>输入中英文关键词搜索</p></div>
+        </div>
+        <div class="p-bot">
+          <button class="p-bt"><span class="pi">🎯</span><span class="pl">Practice</span></button>
+          <button class="p-bt"><span class="pi">🔁</span><span class="pl">Review</span><span class="pb">3</span></button>
+          <button class="p-bt"><span class="pi">🎬</span><span class="pl">Library</span></button>
+          <button class="p-bt active"><span class="pi">🔍</span><span class="pl">Search</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="page-section" id="page-login">
+  <div class="section-label">🔐 登录页 — 品牌 + 表单</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / login</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-login">
+            <div class="ds-login-brand">
+              <div class="big-logo">🎬</div>
+              <h1>Learn English<br>through cinema</h1>
+              <div class="quote">"The best way to learn a language is to hear it spoken by natives in context."</div>
+              <div class="stats">
+                <div><div class="num">4</div><div class="lbl">剧集</div></div>
+                <div><div class="num">6,303</div><div class="lbl">句子</div></div>
+                <div><div class="num">2</div><div class="lbl">语言</div></div>
+              </div>
+            </div>
+            <div class="ds-login-form">
+              <div class="card">
+                <h3>Welcome back</h3>
+                <p>登录后同步你的练习进度</p>
+                <div class="field"><label>邮箱</label><input placeholder="your@email.com" /></div>
+                <div class="field"><label>密码</label><input type="password" placeholder="••••••••" /></div>
+                <button class="btn-primary">登录</button>
+                <div class="links"><a>没有账号？去注册</a><a>忘记密码</a></div>
+              </div>
+              <div style="text-align:center;margin-top:8px">
+                <span style="font-size:11px;color:var(--text-dim);cursor:pointer">不登录，先看看 →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <button class="p-login">登录</button>
+        </div>
+        <div class="p-body p-login-page">
+          <div class="brand">
+            <div class="bm">🎬</div>
+            <h3>Learn English<br>through cinema</h3>
+            <p>登录后同步你的练习进度</p>
+          </div>
+          <div class="p-card" style="padding:14px">
+            <div class="field"><label>邮箱</label><input placeholder="your@email.com" /></div>
+            <div class="field"><label>密码</label><input type="password" placeholder="••••••••" /></div>
+            <button style="width:100%;padding:8px;border:none;background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:#fff;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">登录</button>
+            <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:8px">
+              <span style="color:var(--text-muted);cursor:pointer">去注册</span>
+              <span style="color:var(--text-muted);cursor:pointer">忘记密码</span>
+            </div>
+          </div>
+          <div style="text-align:center"><span style="font-size:10px;color:var(--text-dim);cursor:pointer">不登录，先看看 →</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="page-section" id="page-admin">
+  <div class="section-label">⚙️ 管理后台 — 管理员控制面板</div>
+  <div class="device-row">
+    <div>
+      <div class="device-label"><span class="dt">● 桌面端</span></div>
+      <div class="desktop">
+        <div class="desktop-top">
+          <div class="desktop-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-url">🔒 english.pengyouquan.top / admin</div>
+        </div>
+        <div class="desktop-body">
+          <div class="ds-sidebar" style="padding-top:62px">
+            <div class="ds-nav-s">Main</div>
+            <button class="ds-nav-i"><span class="ni">🎯</span>Practice</button>
+            <button class="ds-nav-i" disabled><span class="ni">🔁</span>Review <span class="badge-d">3</span></button>
+            <button class="ds-nav-i"><span class="ni">🎬</span>Library</button>
+            <button class="ds-nav-i"><span class="ni">🔍</span>Search</button>
+            <div class="ds-nav-s">Admin</div>
+            <button class="ds-nav-i active"><span class="ni">⚙️</span>Admin</button>
+            <button class="ds-nav-i"><span class="ni">📺</span>Subtitles</button>
+            <div class="ds-spacer"></div>
+            <div class="ds-foot"><div class="ds-fav">H</div><div><div class="ds-fn">Heaton</div><div class="ds-fs">3 wrong · streak</div></div></div>
+          </div>
+          <div class="ds-main">
+            <div class="ds-ph"><div class="eyebrow">Admin</div><h2>管理后台</h2><p>用户管理、数据统计、系统设置</p></div>
+            <div class="ds-admin-grid">
+              <div class="ds-stat-card"><div class="num">42</div><div class="lbl">注册用户</div></div>
+              <div class="ds-stat-card"><div class="num">3</div><div class="lbl">在线人数</div></div>
+              <div class="ds-stat-card"><div class="num">8,395</div><div class="lbl">总练习句子</div></div>
+            </div>
+            <div class="ds-tabbar" style="margin-bottom:8px">
+              <button class="active">用户列表</button><button>内容管理</button><button>系统设置</button>
+            </div>
+            <div class="ds-table">
+              <div class="ds-table-row h"><div class="c1">用户</div><div class="c2">邮箱</div><div style="width:80px;flex-shrink:0">角色</div><div style="width:60px;flex-shrink:0">操作</div></div>
+              <div class="ds-table-row"><div class="c1">Heaton</div><div class="c2">newwaylau@hotmail.com</div><div style="width:80px;flex-shrink:0"><span class="tag ok" style="padding:1px 6px;border-radius:3px;font-size:9px">Admin</span></div><div style="width:60px;flex-shrink:0"><span style="color:var(--text-dim);font-size:10px;cursor:pointer">编辑</span></div></div>
+              <div class="ds-table-row"><div class="c1">tester1</div><div class="c2">tester1@test.com</div><div style="width:80px;flex-shrink:0"><span class="tag done" style="padding:1px 6px;border-radius:3px;font-size:9px">User</span></div><div style="width:60px;flex-shrink:0"><span style="color:var(--text-dim);font-size:10px;cursor:pointer">编辑</span></div></div>
+              <div class="ds-table-row"><div class="c1">tester2</div><div class="c2">tester2@test.com</div><div style="width:80px;flex-shrink:0"><span class="tag done" style="padding:1px 6px;border-radius:3px;font-size:9px">User</span></div><div style="width:60px;flex-shrink:0"><span style="color:var(--text-dim);font-size:10px;cursor:pointer">编辑</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="device-label"><span class="mb">● 手机端 (Admin标签)</span></div>
+      <div class="phone">
+        <div class="p-status"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="p-top">
+          <button class="p-ham"><span></span><span></span><span></span></button>
+          <div class="p-logo"><span class="p-dot"></span>剧场</div>
+          <div class="p-av">H</div>
+        </div>
+        <div class="p-body">
+          <div class="p-eyeb">Admin</div>
+          <div class="p-title">管理后台</div>
+          <div class="p-meta">用户管理 · 数据统计</div>
+          <div class="admin-tabs">
+            <button class="admin-tab active">用户</button>
+            <button class="admin-tab">内容</button>
+            <button class="admin-tab">系统</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+            <div class="p-card" style="text-align:center;padding:8px"><div style="font-size:16px;font-weight:700;color:var(--teal)">42</div><div style="font-size:8px;color:var(--text-dim)">用户</div></div>
+            <div class="p-card" style="text-align:center;padding:8px"><div style="font-size:16px;font-weight:700;color:var(--teal)">3</div><div style="font-size:8px;color:var(--text-dim)">在线</div></div>
+          </div>
+          <div class="p-show-item" style="padding:6px 8px">
+            <div style="flex:1"><div style="font-size:11px;font-weight:600">Heaton</div><div style="font-size:9px;color:var(--text-dim)">newwaylau@hotmail.com</div></div>
+            <div style="font-size:8px;padding:1px 5px;border-radius:3px;background:var(--teal-subtle);color:var(--teal);font-weight:600">Admin</div>
+          </div>
+          <div class="p-show-item" style="padding:6px 8px">
+            <div style="flex:1"><div style="font-size:11px;font-weight:600">tester1</div><div style="font-size:9px;color:var(--text-dim)">tester1@test.com</div></div>
+            <div style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.04);color:var(--text-dim);font-weight:600">User</div>
+          </div>
+          <div class="p-show-item" style="padding:6px 8px">
+            <div style="flex:1"><div style="font-size:11px;font-weight:600">tester2</div><div style="font-size:9px;color:var(--text-dim)">tester2@test.com</div></div>
+            <div style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.04);color:var(--text-dim);font-weight:600">User</div>
+          </div>
+        </div>
+        <div class="p-bot">
+          <button class="p-bt"><span class="pi">🎯</span><span class="pl">Practice</span></button>
+          <button class="p-bt"><span class="pi">🔁</span><span class="pl">Review</span><span class="pb">3</span></button>
+          <button class="p-bt"><span class="pi">🎬</span><span class="pl">Library</span></button>
+          <button class="p-bt"><span class="pi">🔍</span><span class="pl">Search</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchPage(id) {
+  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelector(`.nav-tab[onclick*="${id}"]`).classList.add('active');
+}
+</script>
+</body>
+</html>
