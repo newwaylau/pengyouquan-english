@@ -6,6 +6,7 @@ import com.pengyouquan.english.service.CardService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -76,5 +77,52 @@ public class CardController {
     public ApiResponse<List<DeckDTO>> getDecks(@CurrentUserId Long userId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         return ApiResponse.success(cardService.getDeckList(userId));
+    }
+
+    // ========== 星尘系统 ==========
+
+    /**
+     * 分解卡牌
+     */
+    @PostMapping("/cards/disenchant")
+    public ApiResponse<Map<String, Object>> disenchantCard(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = Long.valueOf(body.get("cardId").toString());
+            return ApiResponse.success(cardService.disenchantCard(userId, cardId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    /**
+     * 合成卡牌
+     */
+    @PostMapping("/cards/craft")
+    public ApiResponse<Map<String, Object>> craftCard(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = Long.valueOf(body.get("cardId").toString());
+            return ApiResponse.success(cardService.craftCard(userId, cardId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户星尘数量
+     */
+    @GetMapping("/cards/stardust")
+    public ApiResponse<Map<String, Object>> getStardust(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            return ApiResponse.success(cardService.getStardust(userId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
     }
 }

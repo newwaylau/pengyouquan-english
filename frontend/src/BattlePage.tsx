@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cardApi } from './api/cardClient';
+import ChestPanel from './ChestPanel';
 
 export default function BattlePage({ user, onNavigate }: { user: any; onNavigate: (target: string, data?: any) => void }) {
   const [tab, setTab] = useState<'battle' | 'history' | 'rank'>('battle');
@@ -171,6 +172,9 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
           🏆 排名
         </button>
       </div>
+
+      {/* 宝箱面板 */}
+      <ChestPanel user={user} />
 
       {/* Tab: ⚔️ 对战 */}
       {tab === 'battle' && (

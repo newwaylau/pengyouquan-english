@@ -3,7 +3,9 @@ package com.pengyouquan.english.controller;
 import com.pengyouquan.english.dto.*;
 import com.pengyouquan.english.model.SentenceFlag;
 import com.pengyouquan.english.repository.SentenceFlagRepository;
+import com.pengyouquan.english.model.UserChest;
 import com.pengyouquan.english.security.CurrentUserId;
+import com.pengyouquan.english.service.ChestService;
 import com.pengyouquan.english.service.PracticeService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
@@ -25,14 +27,17 @@ public class PracticeController {
 
     private final PracticeService practiceService;
     private final SentenceFlagRepository sentenceFlagRepository;
+    private final ChestService chestService;
 
     public PracticeController(PracticeService practiceService,
-                              SentenceFlagRepository sentenceFlagRepository) {
+                              SentenceFlagRepository sentenceFlagRepository,
+                              ChestService chestService) {
         this.practiceService = practiceService;
         this.sentenceFlagRepository = sentenceFlagRepository;
+        this.chestService = chestService;
     }
 
-    /** 记录一次练习结果（增强版：返回错题检查信息） */
+    /** 记录一次练习结果（增强版：返回错题检查信息 + 宝箱进度） */
     @PostMapping("/practice/log")
     public ApiResponse<Map<String, Object>> logPractice(@CurrentUserId Long userId,
                                                         @RequestBody Map<String, Object> body) {
@@ -43,6 +48,11 @@ public class PracticeController {
         int totalWords = Integer.parseInt(body.getOrDefault("totalWords", "0").toString());
         String mode = (String) body.getOrDefault("mode", "sentry");
         Map<String, Object> result = practiceService.logPractice(userId, sentenceId, correct, correctCount, totalWords, mode);
+        // 推进宝箱解锁进度（每个练习句推进1句）
+        if (userId != null) {
+            List<UserChest> chestUpdates = chestService.progressChest(userId, 1);
+            result.put("chestUpdates", chestUpdates);
+        }
         return ApiResponse.success(result);
     }
 

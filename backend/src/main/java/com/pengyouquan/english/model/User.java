@@ -60,6 +60,9 @@ public class User {
     @Column(name = "last_daily_date")
     private LocalDate lastDailyDate;
 
+    @Column(nullable = false)
+    private Integer stardust = 0;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

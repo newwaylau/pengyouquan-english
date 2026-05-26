@@ -3,14 +3,8 @@ package com.pengyouquan.english.service;
 import com.pengyouquan.english.dto.CardPackResult;
 import com.pengyouquan.english.dto.CardResponse;
 import com.pengyouquan.english.dto.DeckDTO;
-import com.pengyouquan.english.model.Card;
-import com.pengyouquan.english.model.Deck;
-import com.pengyouquan.english.model.UserCard;
-import com.pengyouquan.english.model.Show;
-import com.pengyouquan.english.repository.CardRepository;
-import com.pengyouquan.english.repository.DeckRepository;
-import com.pengyouquan.english.repository.ShowRepository;
-import com.pengyouquan.english.repository.UserCardRepository;
+import com.pengyouquan.english.model.*;
+import com.pengyouquan.english.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +18,28 @@ public class CardService {
     private final UserCardRepository userCardRepository;
     private final DeckRepository deckRepository;
     private final ShowRepository showRepository;
+    private final UserRepository userRepository;
+    private final StardustLogRepository stardustLogRepository;
+
+    private static final java.util.Map<String, Integer> DISENCHANT_VALUES = java.util.Map.of(
+        "common", 5, "rare", 20, "epic", 100, "legendary", 400
+    );
+    private static final java.util.Map<String, Integer> CRAFT_COSTS = java.util.Map.of(
+        "common", 40, "rare", 160, "epic", 800, "legendary", 3200
+    );
 
     public CardService(CardRepository cardRepository,
                        UserCardRepository userCardRepository,
                        DeckRepository deckRepository,
-                       ShowRepository showRepository) {
+                       ShowRepository showRepository,
+                       UserRepository userRepository,
+                       StardustLogRepository stardustLogRepository) {
         this.cardRepository = cardRepository;
         this.userCardRepository = userCardRepository;
         this.deckRepository = deckRepository;
         this.showRepository = showRepository;
+        this.userRepository = userRepository;
+        this.stardustLogRepository = stardustLogRepository;
     }
 
     /**
@@ -210,6 +217,123 @@ public class CardService {
         return showRepository.findById(showId)
             .map(Show::getName)
             .orElse("");
+    }
+
+    // ========== 星尘系统 ==========
+
+    /**
+     * 分解卡牌
+     */
+    @Transactional
+    public Map<String, Object> disenchantCard(Long userId, Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalStateException("卡牌不存在"));
+
+        UserCard userCard = userCardRepository.findByUserIdAndCardId(userId, cardId)
+                .orElseThrow(() -> new IllegalStateException("你没有这张卡牌"));
+
+        if (userCard.getQuantity() <= 0) {
+            throw new IllegalStateException("你没有这张卡牌可分解");
+        }
+
+        int stardustGain = DISENCHANT_VALUES.getOrDefault(card.getRarity(), 0);
+        if (stardustGain <= 0) {
+            throw new IllegalStateException("该卡牌无法分解");
+        }
+
+        // 减少数量或删除
+        if (userCard.getQuantity() > 1) {
+            userCard.setQuantity(userCard.getQuantity() - 1);
+            userCardRepository.save(userCard);
+        } else {
+            userCardRepository.delete(userCard);
+        }
+
+        // 增加星尘
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("用户不存在"));
+        user.setStardust(user.getStardust() + stardustGain);
+        userRepository.save(user);
+
+        // 记录日志
+        StardustLog log = new StardustLog();
+        log.setUserId(userId);
+        log.setCardId(cardId);
+        log.setCardName(card.getNameCn());
+        log.setAction("disenchant");
+        log.setStardustAmount(stardustGain);
+        stardustLogRepository.save(log);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("stardustGained", stardustGain);
+        result.put("newStardust", user.getStardust());
+        result.put("remainingQuantity", userCard.getQuantity() > 1 ? userCard.getQuantity() - 1 : 0);
+        return result;
+    }
+
+    /**
+     * 合成卡牌
+     */
+    @Transactional
+    public Map<String, Object> craftCard(Long userId, Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalStateException("卡牌不存在"));
+
+        int cost = CRAFT_COSTS.getOrDefault(card.getRarity(), 0);
+        if (cost <= 0) {
+            throw new IllegalStateException("该卡牌无法合成");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("用户不存在"));
+
+        if (user.getStardust() < cost) {
+            throw new IllegalStateException("星尘不足，需要 " + cost + " 星尘");
+        }
+
+        // 扣除星尘
+        user.setStardust(user.getStardust() - cost);
+        userRepository.save(user);
+
+        // 新增 user_cards 记录
+        Optional<UserCard> existing = userCardRepository.findByUserIdAndCardId(userId, cardId);
+        if (existing.isPresent()) {
+            UserCard uc = existing.get();
+            uc.setQuantity(uc.getQuantity() + 1);
+            userCardRepository.save(uc);
+        } else {
+            UserCard uc = new UserCard();
+            uc.setUserId(userId);
+            uc.setCardId(cardId);
+            uc.setQuantity(1);
+            userCardRepository.save(uc);
+        }
+
+        // 记录日志
+        StardustLog log = new StardustLog();
+        log.setUserId(userId);
+        log.setCardId(cardId);
+        log.setCardName(card.getNameCn());
+        log.setAction("craft");
+        log.setStardustAmount(-cost);
+        stardustLogRepository.save(log);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("stardustCost", cost);
+        result.put("newStardust", user.getStardust());
+        result.put("cardName", card.getNameCn());
+        return result;
+    }
+
+    /**
+     * 获取用户星尘数量
+     */
+    public Map<String, Object> getStardust(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("用户不存在"));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("stardust", user.getStardust());
+        return result;
     }
 
     private List<Long> parseCardIds(String cardIdsJson) {

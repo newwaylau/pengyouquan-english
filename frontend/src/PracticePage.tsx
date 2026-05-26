@@ -4,6 +4,7 @@ import { api } from './api/client';
 import { cardApi } from './api/cardClient';
 import { getAudioUrl, getTtsUrl } from './audioBase';
 import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconEdit, IconPen, IconFilm, IconMic, IconEye, IconEyeOff, IconFlag, IconCheck, IconCheckCircle, IconMeditation, IconNext, IconSkipNext, IconRefresh, IconConstruction, IconPhone, IconCheckPlain, IconCelebration, IconBookClosed, IconCalendar, IconSpeaker, IconRocket, IconKey } from './Icons';
+import PackOpeningModal from './PackOpeningModal';
 
 /** 从字幕文本中提取英文（含大小写校正） */
 function extractEn(text: string) {
@@ -1210,70 +1211,11 @@ export default function PracticePage({
 
       {/* 开包弹窗 */}
       {packResult && (
-        <div className="settings-overlay" onClick={() => setPackResult(null)}>
-          <div className="pack-open-modal" onClick={e => e.stopPropagation()}>
-            <div className="pack-open-header">
-              <div className="pack-open-icon">🎊</div>
-              <div className="pack-open-title">获得新卡牌！</div>
-              <div className="pack-open-subtitle">
-                整集练习完成，获得 {packResult.cards?.length || 0} 张卡牌
-              </div>
-              <div className="pack-open-type">
-                {packResult.packType === 'golden' ? '🌟 黄金卡包' :
-                 packResult.packType === 'silver' ? '🥈 白银卡包' :
-                 packResult.packType === 'bronze' ? '🥉 青铜卡包' : '📦 基础卡包'}
-              </div>
-            </div>
-            <div className="pack-open-cards">
-              {packResult.cards?.map((card: any, idx: number) => {
-                const rarityColors: Record<string, string> = {
-                  legendary: '#ff8c00',
-                  epic: '#a335ee',
-                  rare: '#0070dd',
-                  common: '#9d9d9d',
-                };
-                const rarityCn: Record<string, string> = {
-                  legendary: '传说',
-                  epic: '史诗',
-                  rare: '稀有',
-                  common: '普通',
-                };
-                const typeIcons: Record<string, string> = {
-                  minion: '⚔️',
-                  spell: '✨',
-                  equipment: '🛡️',
-                  location: '🏰',
-                };
-                return (
-                  <div key={idx} className="pack-card-item" style={{ borderColor: rarityColors[card.rarity] || '#9d9d9d' }}>
-                    <div className="pack-card-type">{typeIcons[card.cardType] || '🃏'}</div>
-                    <div className="pack-card-cost">{card.cost}</div>
-                    <div className="pack-card-rarity" style={{ color: rarityColors[card.rarity] || '#9d9d9d' }}>
-                      {rarityCn[card.rarity] || card.rarity}
-                    </div>
-                    <div className="pack-card-name">{card.nameCn}</div>
-                    <div className="pack-card-name-en">{card.nameEn}</div>
-                    {card.attack !== null && (
-                      <div className="pack-card-stats">
-                        <span>⚔️{card.attack}</span>
-                        <span>❤️{card.health}</span>
-                      </div>
-                    )}
-                    <div className="pack-card-owned">×{card.quantity}</div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="pack-open-actions">
-              <button className="btn btn-primary" onClick={() => setPackResult(null)}>
-                确认
-              </button>
-              <button className="btn btn-secondary" onClick={() => { setPackResult(null); onNavigate?.('cards'); }}>
-                📖 前往查看
-              </button>
-            </div>
-          </div>
-        </div>
+        <PackOpeningModal
+          cards={packResult.cards || []}
+          packType={packResult.packType}
+          onClose={() => { setPackResult(null); }}
+        />
       )}
 
     </div>

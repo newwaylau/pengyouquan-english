@@ -58,4 +58,16 @@ export const cardApi = {
   getBattleHistory: async () => request('/api/battle/history'),
   getRank: async () => request('/api/battle/rank'),
   getLeaderboard: async () => request('/api/battle/leaderboard'),
+
+  // 宝箱系统
+  getChests: async () => request('/api/chests'),
+  claimChest: async (chestId: number) =>
+    request(`/api/chests/claim/${chestId}`, { method: 'POST', body: JSON.stringify({}) }),
+
+  // 星尘系统
+  disenchantCard: async (cardId: number) =>
+    request('/api/cards/disenchant', { method: 'POST', body: JSON.stringify({ cardId }) }),
+  craftCard: async (cardId: number) =>
+    request('/api/cards/craft', { method: 'POST', body: JSON.stringify({ cardId }) }),
+  getStardust: async () => request('/api/cards/stardust'),
 };

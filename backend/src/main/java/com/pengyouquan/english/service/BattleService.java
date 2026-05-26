@@ -25,6 +25,7 @@ public class BattleService {
     private final TrophyService trophyService;
     private final UserStatsRepository userStatsRepository;
     private final TrophyTierRepository trophyTierRepository;
+    private final ChestService chestService;
 
     private static final int TROPHY_GAIN = 30;
     private static final int TROPHY_LOSS = 25;
@@ -36,7 +37,8 @@ public class BattleService {
                          PracticeLogRepository practiceLogRepository,
                          TrophyService trophyService,
                          UserStatsRepository userStatsRepository,
-                         TrophyTierRepository trophyTierRepository) {
+                         TrophyTierRepository trophyTierRepository,
+                         ChestService chestService) {
         this.battleHistoryRepository = battleHistoryRepository;
         this.userRepository = userRepository;
         this.deckRepository = deckRepository;
@@ -45,6 +47,7 @@ public class BattleService {
         this.trophyService = trophyService;
         this.userStatsRepository = userStatsRepository;
         this.trophyTierRepository = trophyTierRepository;
+        this.chestService = chestService;
     }
 
     /** 发起挑战 */
@@ -148,6 +151,11 @@ public class BattleService {
         battle.setStatus("completed");
         battle.setCompletedAt(LocalDateTime.now());
         battle = battleHistoryRepository.save(battle);
+
+        // 6. 宝箱发放：防守方（当前用户）获胜发放宝箱
+        if (winnerId != null && winnerId.equals(battle.getDefenderId())) {
+            chestService.grantBattleChest(battle.getDefenderId(), "pvp_battle");
+        }
 
         User challenger = userRepository.findById(battle.getChallengerId()).orElse(null);
         User defender = userRepository.findById(battle.getDefenderId()).orElse(null);
