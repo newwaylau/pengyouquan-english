@@ -10,9 +10,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,15 +20,21 @@ public class GamificationService {
     private final SentenceRepository sentenceRepository;
     private final DailyChallengeRepository dailyChallengeRepository;
     private final DailyChallengeQuestionRepository dailyChallengeQuestionRepository;
+    private final StreakRewardRepository streakRewardRepository;
+    private final UserStreakRewardRepository userStreakRewardRepository;
 
     public GamificationService(UserRepository userRepository,
                                SentenceRepository sentenceRepository,
                                DailyChallengeRepository dailyChallengeRepository,
-                               DailyChallengeQuestionRepository dailyChallengeQuestionRepository) {
+                               DailyChallengeQuestionRepository dailyChallengeQuestionRepository,
+                               StreakRewardRepository streakRewardRepository,
+                               UserStreakRewardRepository userStreakRewardRepository) {
         this.userRepository = userRepository;
         this.sentenceRepository = sentenceRepository;
         this.dailyChallengeRepository = dailyChallengeRepository;
         this.dailyChallengeQuestionRepository = dailyChallengeQuestionRepository;
+        this.streakRewardRepository = streakRewardRepository;
+        this.userStreakRewardRepository = userStreakRewardRepository;
     }
 
     public PrestigeResponse getPrestige(Long userId) {
@@ -258,6 +262,110 @@ public class GamificationService {
         }
 
         return entries;
+    }
+
+    // ---- 邀请封臣系统 ----
+
+    @Transactional
+    public Map<String, String> getInviteCode(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        if (user.getInviteCode() == null || user.getInviteCode().isEmpty()) {
+            String code = generateInviteCode(user);
+            user.setInviteCode(code);
+            userRepository.save(user);
+        }
+        return Collections.singletonMap("inviteCode", user.getInviteCode());
+    }
+
+    private String generateInviteCode(User user) {
+        String idPart = String.format("%04d", user.getId());
+        String randPart = UUID.randomUUID().toString().substring(0, 2).toUpperCase();
+        return "PYQ-" + idPart + randPart;
+    }
+
+    @Transactional
+    public Map<String, String> recruit(Long userId, String inviteCode) {
+        if (inviteCode == null || inviteCode.isBlank()) {
+            throw new IllegalStateException("邀请码不能为空");
+        }
+        User inviter = userRepository.findByInviteCode(inviteCode)
+            .orElseThrow(() -> new IllegalStateException("邀请码无效"));
+        if (inviter.getId().equals(userId)) {
+            throw new IllegalStateException("不能招募自己");
+        }
+        User user = userRepository.findById(userId).orElseThrow();
+        if (user.getInvitedBy() != null && !user.getInvitedBy().isEmpty()) {
+            throw new IllegalStateException("已被招募过");
+        }
+        user.setInvitedBy(inviteCode);
+        userRepository.save(user);
+        return Collections.singletonMap("recruited", user.getNickname() != null ? user.getNickname() : "");
+    }
+
+    public List<ClanMemberVO> getClan(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        String myInviteCode = user.getInviteCode();
+        if (myInviteCode == null || myInviteCode.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<User> clanMembers = userRepository.findByInvitedBy(myInviteCode);
+        return clanMembers.stream().map(u -> {
+            RankTier rank = RankTier.fromPrestige(u.getPrestige() != null ? u.getPrestige() : 0);
+            return new ClanMemberVO(
+                u.getId(),
+                u.getNickname() != null ? u.getNickname() : "",
+                u.getPrestige() != null ? u.getPrestige() : 0,
+                rank.getTier(),
+                rank.getTitleCn(),
+                u.getCreatedAt() != null ? u.getCreatedAt().toLocalDate().toString() : ""
+            );
+        }).collect(Collectors.toList());
+    }
+
+    // ---- 封号路线 ----
+
+    public List<RankTierVO> getRankTiers(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        int currentTier = user.getRankTier() != null ? user.getRankTier() : 1;
+        List<RankTierVO> result = new ArrayList<>();
+        for (RankTier rt : RankTier.values()) {
+            result.add(new RankTierVO(rt.getTier(), rt.getTitleCn(), rt.getTitleEn(),
+                rt.getRequiredPrestige(), rt.getTier() == currentTier));
+        }
+        return result;
+    }
+
+    // ---- 连续统治奖励 ----
+
+    public List<StreakRewardVO> getStreakRewards(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        int consecutiveDays = user.getConsecutiveDays() != null ? user.getConsecutiveDays() : 0;
+        List<StreakReward> allRewards = streakRewardRepository.findAllByOrderByDaysRequiredAsc();
+        List<UserStreakReward> claimed = userStreakRewardRepository.findByUserId(userId);
+        Set<Long> claimedIds = claimed.stream().map(UserStreakReward::getRewardId).collect(Collectors.toSet());
+
+        return allRewards.stream().map(r -> new StreakRewardVO(
+            r.getId(), r.getDaysRequired(), r.getRewardType(), r.getRewardName(),
+            r.getRewardIcon(), r.getDescription(), consecutiveDays, claimedIds.contains(r.getId())
+        )).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void claimStreakReward(Long userId, Long rewardId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        StreakReward reward = streakRewardRepository.findById(rewardId)
+            .orElseThrow(() -> new IllegalStateException("奖励不存在"));
+        int consecutiveDays = user.getConsecutiveDays() != null ? user.getConsecutiveDays() : 0;
+        if (consecutiveDays < reward.getDaysRequired()) {
+            throw new IllegalStateException("未达到领取条件，需要连续" + reward.getDaysRequired() + "天");
+        }
+        if (userStreakRewardRepository.findByUserIdAndRewardId(userId, rewardId).isPresent()) {
+            throw new IllegalStateException("已领取过该奖励");
+        }
+        UserStreakReward usr = new UserStreakReward();
+        usr.setUserId(userId);
+        usr.setRewardId(rewardId);
+        userStreakRewardRepository.save(usr);
     }
 
     // ---- 内部方法 ----

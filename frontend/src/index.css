@@ -8101,3 +8101,21 @@ body {
   background: rgba(239,68,68,0.06);
 }
 
+/* ── Arena Page Reward Dot ── */
+.reward-dot {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger, #ef4444);
+  box-shadow: 0 0 6px rgba(239,68,68,0.6);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.3); }
+}
+

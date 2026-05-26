@@ -45,6 +45,9 @@ public class User {
     @Column(name = "invited_by", length = 100)
     private String invitedBy = "";
 
+    @Column(name = "invite_code", length = 20, unique = true)
+    private String inviteCode;
+
     @Column(nullable = false)
     private Integer prestige = 0;
 

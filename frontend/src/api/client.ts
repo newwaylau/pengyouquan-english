@@ -110,4 +110,12 @@ export const gameApi = {
   getLeaderboard: (period: string = 'today') =>
     request(`/api/game/leaderboard?period=${period}`),
   getHistory: () => request('/api/game/history'),
+  getInviteCode: () => request('/api/game/invite-code'),
+  recruit: (inviteCode: string) =>
+    request('/api/game/recruit', { method: 'POST', body: JSON.stringify({ inviteCode }) }),
+  getClan: () => request('/api/game/clan'),
+  getRankTiers: () => request('/api/game/rank-tiers'),
+  getStreakRewards: () => request('/api/game/streak-rewards'),
+  claimStreakReward: (id: number) =>
+    request(`/api/game/streak-rewards/${id}/claim`, { method: 'POST', body: JSON.stringify({}) }),
 };

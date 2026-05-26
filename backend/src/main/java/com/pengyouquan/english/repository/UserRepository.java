@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,4 +29,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** 按角色查找（分页，管理员用） */
     Page<User> findByRole(String role, Pageable pageable);
+
+    /** 按邀请码查找用户 */
+    Optional<User> findByInviteCode(String inviteCode);
+
+    /** 按邀请者查找封臣 */
+    List<User> findByInvitedBy(String invitedBy);
 }

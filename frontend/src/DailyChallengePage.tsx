@@ -132,7 +132,7 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
   if (loading) {
     return (
       <div className="daily-challenge-page" style={{ padding: 24, maxWidth: 600, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>⚔️ 集结兵力...</div>
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>⚔️ 集结兵力...</div>
       </div>
     );
   }
@@ -140,8 +140,8 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
   if (!challenge) {
     return (
       <div className="daily-challenge-page" style={{ padding: 24, maxWidth: 600, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', color: '#ef4444', padding: 40 }}>加载御前挑战失败</div>
-        <button onClick={onBack} style={{ display: 'block', margin: '0 auto', padding: '10px 24px', background: '#14b8a6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>返回演武场</button>
+        <div style={{ textAlign: 'center', color: 'var(--danger)', padding: 40 }}>加载御前挑战失败</div>
+        <button onClick={onBack} style={{ display: 'block', margin: '0 auto', padding: '10px 24px', background: 'var(--teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>返回演武场</button>
       </div>
     );
   }
@@ -159,40 +159,40 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
         <div style={{ fontSize: 48, marginBottom: 8 }}>
           {allCorrect ? '🏆' : correctCount >= 8 ? '⚔️' : '🛡️'}
         </div>
-        <div style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+        <div style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
           御前挑战 {allCorrect ? '大捷' : '完成'}!
         </div>
-        <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
+        <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
           {challenge.completed ? '今日挑战已结算' : '战绩已载入史册'}
         </div>
 
         {/* 战绩卡片 */}
         <div style={{
-          background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-          borderRadius: 16, padding: 24, marginBottom: 20,
+          background: 'linear-gradient(135deg, var(--card), var(--bg))',
+          borderRadius: 'var(--radius-lg)', padding: 24, marginBottom: 20,
           border: `1px solid ${allCorrect ? 'rgba(251,191,36,0.3)' : 'rgba(20,184,166,0.2)'}`
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 20 }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ color: '#e2e8f0', fontSize: 28, fontWeight: 700 }}>{correctCount}/10</div>
-              <div style={{ color: '#94a3b8', fontSize: 12 }}>正确</div>
+              <div style={{ color: 'var(--text-primary)', fontSize: 28, fontWeight: 700 }}>{correctCount}/10</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>正确</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ color: '#fbbf24', fontSize: 28, fontWeight: 700 }}>+{prestigeEarned}</div>
-              <div style={{ color: '#94a3b8', fontSize: 12 }}>威望</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>威望</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ color: '#14b8a6', fontSize: 28, fontWeight: 700 }}>🔥 {maxCombo}</div>
-              <div style={{ color: '#94a3b8', fontSize: 12 }}>最大连击</div>
+              <div style={{ color: 'var(--teal)', fontSize: 28, fontWeight: 700 }}>🔥 {maxCombo}</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>最大连击</div>
             </div>
           </div>
 
           {/* 威望变化 */}
           <div style={{
             background: 'rgba(255,255,255,0.04)',
-            borderRadius: 12, padding: 16
+            borderRadius: 'var(--radius-md)', padding: 16
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: 13, marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
               <span>⚡ 威望变化</span>
               <span style={{ color: '#fbbf24', fontWeight: 600 }}>+{prestigeEarned}</span>
             </div>
@@ -209,12 +209,12 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
           <div style={{
             textAlign: 'center',
             background: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05))',
-            borderRadius: 16, padding: 20, marginBottom: 16,
+            borderRadius: 'var(--radius-lg)', padding: 20, marginBottom: 16,
             border: '1px solid rgba(251,191,36,0.3)'
           }}>
             <div style={{ fontSize: 40, marginBottom: 4 }}>👑</div>
             <div style={{ color: '#fbbf24', fontSize: 18, fontWeight: 700 }}>封号晋升!</div>
-            <div style={{ color: '#e2e8f0', fontSize: 14 }}>
+            <div style={{ color: 'var(--text-primary)', fontSize: 14 }}>
               {completionResult.oldTitleCn || ''} → <span style={{ color: '#fbbf24', fontWeight: 600, fontSize: 18 }}>{completionResult.newTitleCn}</span>
             </div>
           </div>
@@ -223,8 +223,8 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
         {/* 返回按钮 */}
         <button onClick={onBack}
           style={{
-            width: '100%', padding: 14, border: 'none', borderRadius: 12, cursor: 'pointer',
-            background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+            width: '100%', padding: 14, border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+            background: 'linear-gradient(135deg, var(--teal), var(--teal-dark))',
             color: '#fff', fontWeight: 600, fontSize: 15
           }}>
           返回演武场
@@ -240,16 +240,16 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
     <div className="daily-challenge-page" style={{ padding: 16, maxWidth: 600, margin: '0 auto' }}>
       {/* 顶栏 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 14, cursor: 'pointer', padding: 4 }}>
+        <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 14, cursor: 'pointer', padding: 4 }}>
           ← 退出
         </button>
-        <div style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600 }}>
+        <div style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }}>
           ⚔️ 御前挑战
         </div>
         {combo >= 3 && (
           <div style={{
-            background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-            color: '#1e293b', fontSize: 11, fontWeight: 700, padding: '4px 10px',
+            background: 'linear-gradient(135deg, #fbbf24, var(--warning))',
+            color: 'var(--card)', fontSize: 11, fontWeight: 700, padding: '4px 10px',
             borderRadius: 20
           }}>
             🔥 {combo}连击!
@@ -260,7 +260,7 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
 
       {/* 进度条 */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#94a3b8', marginBottom: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
           <span>进度 {challenge.answeredCount}/{totalQuestions}</span>
           <span>正确 {correctSoFar}</span>
         </div>
@@ -268,7 +268,7 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
           <div style={{
             width: `${(challenge.answeredCount / totalQuestions) * 100}%`,
             height: '100%',
-            background: 'linear-gradient(90deg, #14b8a6, #2dd4bf)',
+            background: 'linear-gradient(90deg, var(--teal), var(--teal-light))',
             borderRadius: 3,
             transition: 'width 0.4s ease'
           }} />
@@ -278,17 +278,17 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
       {/* 当前题目 */}
       {currentQuestion && !completed && (
         <div style={{
-          background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-          borderRadius: 16, padding: 24,
+          background: 'linear-gradient(135deg, var(--card), var(--bg))',
+          borderRadius: 'var(--radius-lg)', padding: 24,
           border: '1px solid rgba(20,184,166,0.2)'
         }}>
           {/* 题号 */}
-          <div style={{ color: '#14b8a6', fontSize: 12, fontWeight: 600, marginBottom: 12 }}>
+          <div style={{ color: 'var(--teal)', fontSize: 12, fontWeight: 600, marginBottom: 12 }}>
             第 {currentIndex + 1} 题
           </div>
 
           {/* 英文 */}
-          <div style={{ color: '#e2e8f0', fontSize: 16, fontWeight: 500, lineHeight: 1.5, marginBottom: 12 }}>
+          <div style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 500, lineHeight: 1.5, marginBottom: 12 }}>
             {currentQuestion.englishText}
           </div>
 
@@ -300,8 +300,8 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
                 a.play().catch(() => {});
               }
             }} style={{
-              padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(20,184,166,0.3)',
-              background: 'rgba(20,184,166,0.08)', color: '#14b8a6', cursor: 'pointer',
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(20,184,166,0.3)',
+              background: 'rgba(20,184,166,0.08)', color: 'var(--teal)', cursor: 'pointer',
               fontSize: 13, fontWeight: 500
             }}>
               🔊 原音
@@ -314,7 +314,7 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
                 a.play().catch(() => {});
               }
             }} style={{
-              padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(167,139,250,0.3)',
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(167,139,250,0.3)',
               background: 'rgba(167,139,250,0.08)', color: '#a78bfa', cursor: 'pointer',
               fontSize: 13, fontWeight: 500
             }}>
@@ -323,7 +323,7 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* 中文提示 */}
-          <div style={{ color: '#64748b', fontSize: 13, marginBottom: 20, fontStyle: 'italic' }}>
+          <div style={{ color: 'var(--text-tertiary)', fontSize: 13, marginBottom: 20, fontStyle: 'italic' }}>
             💡 {currentQuestion.chineseText || '无中文提示'}
           </div>
 
@@ -343,8 +343,8 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
                     width: '100%', padding: '14px 16px',
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 12, outline: 'none',
-                    color: '#e2e8f0', fontSize: 16,
+                    borderRadius: 'var(--radius-md)', outline: 'none',
+                    color: 'var(--text-primary)', fontSize: 16,
                     boxSizing: 'border-box'
                   }}
                 />
@@ -353,9 +353,9 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
                 onClick={handleSubmit}
                 disabled={submitting || !answer.trim()}
                 style={{
-                  width: '100%', padding: 14, border: 'none', borderRadius: 12, cursor: 'pointer',
+                  width: '100%', padding: 14, border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
                   background: submitting || !answer.trim()
-                    ? 'rgba(20,184,166,0.3)' : 'linear-gradient(135deg, #14b8a6, #0d9488)',
+                    ? 'rgba(20,184,166,0.3)' : 'linear-gradient(135deg, var(--teal), var(--teal-dark))',
                   color: '#fff', fontWeight: 600, fontSize: 15,
                   opacity: submitting || !answer.trim() ? 0.5 : 1
                 }}
@@ -367,16 +367,16 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
             /* 反馈区域 */
             <div>
               <div style={{
-                padding: 16, borderRadius: 12, marginBottom: 12,
+                padding: 16, borderRadius: 'var(--radius-md)', marginBottom: 12,
                 background: feedback.correct ? 'rgba(20,184,166,0.08)' : 'rgba(239,68,68,0.08)',
                 border: `1px solid ${feedback.correct ? 'rgba(20,184,166,0.2)' : 'rgba(239,68,68,0.2)'}`
               }}>
-                <div style={{ color: feedback.correct ? '#2dd4bf' : '#f87171', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
+                <div style={{ color: feedback.correct ? 'var(--teal-light)' : '#f87171', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
                   {feedback.correct ? '✅ 正确!' : '❌ 答错了'}
                 </div>
                 {!feedback.correct && (
-                  <div style={{ color: '#e2e8f0', fontSize: 14, lineHeight: 1.5 }}>
-                    正确答案: <span style={{ color: '#2dd4bf', fontWeight: 600 }}>{currentQuestion.englishText}</span>
+                  <div style={{ color: 'var(--text-primary)', fontSize: 14, lineHeight: 1.5 }}>
+                    正确答案: <span style={{ color: 'var(--teal-light)', fontWeight: 600 }}>{currentQuestion.englishText}</span>
                   </div>
                 )}
                 {combo >= 3 && feedback.correct && (
@@ -388,9 +388,9 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
               <button
                 onClick={handleNext}
                 style={{
-                  width: '100%', padding: 14, border: 'none', borderRadius: 12, cursor: 'pointer',
+                  width: '100%', padding: 14, border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
                   background: currentIndex < totalQuestions - 1
-                    ? 'linear-gradient(135deg, #14b8a6, #0d9488)'
+                    ? 'linear-gradient(135deg, var(--teal), var(--teal-dark))'
                     : 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
                   color: '#fff', fontWeight: 600, fontSize: 15
                 }}
@@ -405,14 +405,14 @@ export default function DailyChallengePage({ onBack }: { onBack: () => void }) {
       {/* 全部答完 → 结算按钮 */}
       {allAnswered && !completed && (
         <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 8 }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
             已答完全部 {totalQuestions} 题，获得 {correctSoFar} 个胜场
           </div>
           <button onClick={handleComplete}
             style={{
-              width: '100%', padding: 16, border: 'none', borderRadius: 12, cursor: 'pointer',
-              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-              color: '#1e293b', fontWeight: 700, fontSize: 16
+              width: '100%', padding: 16, border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #fbbf24, var(--warning))',
+              color: 'var(--card)', fontWeight: 700, fontSize: 16
             }}>
             🏆 结算御前挑战
           </button>

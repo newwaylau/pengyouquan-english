@@ -6,6 +6,7 @@ import com.pengyouquan.english.service.GamificationService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/game")
@@ -66,5 +67,56 @@ public class GamificationController {
     public ApiResponse<List<ChallengeHistoryEntry>> getHistory(@CurrentUserId Long userId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         return ApiResponse.success(gamificationService.getChallengeHistory(userId));
+    }
+
+    // 邀请码
+    @GetMapping("/invite-code")
+    public ApiResponse<?> getInviteCode(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(gamificationService.getInviteCode(userId));
+    }
+
+    // 招募
+    @PostMapping("/recruit")
+    public ApiResponse<?> recruit(@CurrentUserId Long userId, @RequestBody Map<String, String> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            return ApiResponse.success(gamificationService.recruit(userId, body.get("inviteCode")));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    // 封臣列表
+    @GetMapping("/clan")
+    public ApiResponse<List<ClanMemberVO>> getClan(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(gamificationService.getClan(userId));
+    }
+
+    // 封号路线
+    @GetMapping("/rank-tiers")
+    public ApiResponse<List<RankTierVO>> getRankTiers(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(gamificationService.getRankTiers(userId));
+    }
+
+    // 统治奖励列表
+    @GetMapping("/streak-rewards")
+    public ApiResponse<List<StreakRewardVO>> getStreakRewards(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(gamificationService.getStreakRewards(userId));
+    }
+
+    // 领取统治奖励
+    @PostMapping("/streak-rewards/{id}/claim")
+    public ApiResponse<?> claimStreakReward(@CurrentUserId Long userId, @PathVariable Long id) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            gamificationService.claimStreakReward(userId, id);
+            return ApiResponse.success(null);
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
     }
 }
