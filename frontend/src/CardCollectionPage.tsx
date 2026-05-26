@@ -23,6 +23,17 @@ const TYPE_ICONS: Record<string, string> = {
   location: '🏰',
 };
 
+// 关键词配置：中文名 + 颜色
+const KEYWORD_CONFIG: Record<string, { label: string; color: string }> = {
+  taunt: { label: '嘲讽', color: '#e74c3c' },
+  divine_shield: { label: '圣盾', color: '#f1c40f' },
+  deathrattle: { label: '亡语', color: '#8e44ad' },
+  battlecry: { label: '战吼', color: '#3498db' },
+  stealth: { label: '潜行', color: '#2ecc71' },
+  rush: { label: '突袭', color: '#e67e22' },
+  charge: { label: '冲锋', color: '#e67e22' },
+};
+
 export default function CardCollectionPage({ user, onNavigate }: { user: any; onNavigate: (target: string, data?: any) => void }) {
   const [tab, setTab] = useState<'cards' | 'decks' | 'arena' | 'craft' | 'achievements'>('cards');
   const [craftSubTab, setCraftSubTab] = useState<'normal' | 'golden'>('normal');
@@ -207,6 +218,27 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
                 {card.attack !== null && <span className="cg-atk" style={{ color: card.golden ? '#ffd700' : undefined }}>⚔️{card.attack}</span>}
                 {card.health !== null && <span className="cg-hp" style={{ color: card.golden ? '#ffd700' : undefined }}>❤️{card.health}</span>}
               </div>
+              {/* 关键词徽章 */}
+              {card.keywords && (() => {
+                try {
+                  const kws = typeof card.keywords === 'string' ? JSON.parse(card.keywords) : card.keywords;
+                  if (Array.isArray(kws) && kws.length > 0) {
+                    return (
+                      <div className="cg-keywords">
+                        {kws.map((kw: string) => {
+                          const cfg = KEYWORD_CONFIG[kw];
+                          return cfg ? (
+                            <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color }}>
+                              {cfg.label}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    );
+                  }
+                } catch {}
+                return null;
+              })()}
               {card.golden ? (
                 <div className="cg-owned" style={{ background: 'linear-gradient(90deg, #ffd700, #ffaa00)', color: '#000' }}>🌟 金卡</div>
               ) : card.quantity > 0 ? (
@@ -217,16 +249,15 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
               {card.quantity > 0 && !card.golden && (
                 <button className="cg-disenchant-btn"
                   onClick={e => { e.stopPropagation(); setDisenchantConfirm(card); }}
-                  title="分解卡牌"
+                  title="分解"
                   style={{
-                    position: 'absolute', top: 4, right: 4, width: 32, height: 32,
-                    background: 'rgba(220,38,38,0.85)', border: 'none', borderRadius: '50%',
-                    color: '#fff', fontSize: 16, cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10,
-                    boxShadow: '0 2px 8px rgba(220,38,38,0.5)',
+                    position: 'absolute', top: 4, left: 4, width: 24, height: 24,
+                    background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%',
+                    color: '#ef4444', fontSize: 12, cursor: 'pointer', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 2,
                   }}
                 >
-                  ✦
+                  ⛏️
                 </button>
               )}
             </div>
@@ -514,12 +545,6 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
 
       {/* 成就 tab */}
       {tab === 'achievements' && <AchievementPage />}
-
-      <div className="cc-match-btn">
-        <button className="btn btn-lg" disabled style={{ width: '100%', opacity: 0.5 }}>
-          ⚔️ 匹配对战 · 即将开放
-        </button>
-      </div>
 
       {disenchantConfirm && (
         <div className="card-detail-overlay" onClick={() => setDisenchantConfirm(null)}>

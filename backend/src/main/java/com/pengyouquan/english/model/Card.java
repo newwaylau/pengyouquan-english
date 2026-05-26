@@ -38,6 +38,9 @@ public class Card {
     @Column(name = "effect_json", columnDefinition = "TEXT")
     private String effectJson;
 
+    @Column(name = "keywords", columnDefinition = "JSON")
+    private String keywords;
+
     @Column(name = "challenge_type", length = 20)
     private String challengeType;
 

@@ -153,8 +153,12 @@ public class ExpeditionService {
             throw new IllegalStateException("当前节点不是战斗节点");
         }
 
-        // 获取当前层的敌人列表
-        List<ExpeditionEnemy> enemies = expeditionEnemyRepository.findByShowIdAndAct(exp.getShowId(), exp.getAct());
+        // 获取当前层的敌人列表（先按具体 showId 查找，未找到则按系列 showId=1 回退）
+        Long lookupShowId = exp.getShowId();
+        List<ExpeditionEnemy> enemies = expeditionEnemyRepository.findByShowIdAndAct(lookupShowId, exp.getAct());
+        if (enemies.isEmpty() && !lookupShowId.equals(1L)) {
+            enemies = expeditionEnemyRepository.findByShowIdAndAct(1L, exp.getAct());
+        }
         if (enemies.isEmpty()) {
             throw new IllegalStateException("未找到敌人配置");
         }
@@ -379,6 +383,10 @@ public class ExpeditionService {
         }
 
         List<ExpeditionEvent> events = expeditionEventRepository.findByShowIdAndAct(exp.getShowId(), exp.getAct());
+        // 按具体 showId 未找到，回退到系列 showId
+        if (events.isEmpty() && !exp.getShowId().equals(1L)) {
+            events = expeditionEventRepository.findByShowIdAndAct(1L, exp.getAct());
+        }
         if (events.isEmpty()) {
             throw new IllegalStateException("未找到事件配置");
         }
@@ -822,6 +830,10 @@ public class ExpeditionService {
 
     private List<Map<String, Object>> getCurrentEventData(Expedition exp) {
         List<ExpeditionEvent> events = expeditionEventRepository.findByShowIdAndAct(exp.getShowId(), exp.getAct());
+        // 按具体 showId 未找到，回退到系列 showId
+        if (events.isEmpty() && !exp.getShowId().equals(1L)) {
+            events = expeditionEventRepository.findByShowIdAndAct(1L, exp.getAct());
+        }
         if (events.isEmpty()) return List.of();
 
         int eventIndex = (exp.getNode() - 1) % events.size();

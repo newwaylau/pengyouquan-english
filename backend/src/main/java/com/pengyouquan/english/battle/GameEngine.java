@@ -202,8 +202,25 @@ public class GameEngine {
             // 卡牌上场
             if (!"spell".equals(action.getCard().getCardType())) {
                 if (player.getBoard() == null) player.setBoard(new ArrayList<>());
-                action.getCard().setCanAttack(false); // 刚上场的随从本回合不能攻击
-                player.getBoard().add(action.getCard());
+                CardState playedCard = action.getCard();
+
+                // 突袭(Rush)：出场本回合即可攻击
+                if (playedCard.isHasRush()) {
+                    playedCard.setCanAttack(true);
+                } else {
+                    playedCard.setCanAttack(false); // 刚上场的随从本回合不能攻击（除非有突袭）
+                }
+
+                // 潜行(Stealth)：刚出场不可被攻击
+                // stealthRevealed starts as false, opponent can't target
+
+                player.getBoard().add(playedCard);
+
+                // 战吼(Battlecry)：出牌时触发一次性效果
+                if (playedCard.isHasBattlecry() && !playedCard.isBattlecryTriggered()) {
+                    playedCard.setBattlecryTriggered(true);
+                    applyBattlecryEffect(player, session.getOpponent(userId), playedCard);
+                }
             }
 
             // 检查连击（3连正确 → 下一张免费）
@@ -299,6 +316,11 @@ public class GameEngine {
             CardState target = findCardOnBoard(opponent, targetId);
             if (target == null) return new AttackDeclarationResult(false, "目标不存在");
 
+            // 检查潜行(Stealth)：不能攻击潜行随从
+            if (target.isHasStealth() && !target.isStealthRevealed()) {
+                return new AttackDeclarationResult(false, "该随从具有潜行，无法被攻击");
+            }
+
             // 检查对手场上是否有嘲讽随从
             boolean hasTaunt = opponent.getBoard() != null &&
                     opponent.getBoard().stream().anyMatch(CardState::isHasTaunt);
@@ -318,6 +340,11 @@ public class GameEngine {
         attacker.setCanAttack(false);
         player.setHasAttackedThisTurn(true);
         session.setLastActionTime(System.currentTimeMillis());
+
+        // 潜行(Stealth)：攻击后暴露，失去潜行效果
+        if (attacker.isHasStealth() && !attacker.isStealthRevealed()) {
+            attacker.setStealthRevealed(true);
+        }
 
         // 生成防御题给对手
         String defenseQuestionJson = generateDefenseQuestionJson(session, opponent, attacker);
@@ -383,12 +410,27 @@ public class GameEngine {
             // 攻击随从
             CardState targetCard = findCardOnBoard(defender, pending.getTargetId());
             if (targetCard != null) {
-                targetCard.setHealth(targetCard.getHealth() - actualDamage);
+                int damage = actualDamage;
+
+                // 圣盾(Divine Shield)：抵挡一次伤害后消失
+                if (targetCard.isHasDivineShield()) {
+                    targetCard.setHasDivineShield(false);
+                    damage = 0;
+                    result.divineShieldBlocked = true;
+                }
+
+                if (damage > 0) {
+                    targetCard.setHealth(targetCard.getHealth() - damage);
+                }
                 result.defenderId = pending.getTargetId();
                 result.defenderHealthLeft = targetCard.getHealth();
                 result.defenderDead = targetCard.getHealth() <= 0;
 
                 if (targetCard.getHealth() <= 0) {
+                    // 亡语(Deathrattle)：随从死亡时触发效果
+                    if (targetCard.isHasDeathrattle()) {
+                        triggerDeathrattle(session, defender, attacker, targetCard);
+                    }
                     defender.getBoard().remove(targetCard);
                 }
             } else {
@@ -500,14 +542,87 @@ public class GameEngine {
     }
 
     private List<CardState> cardsToCardStates(List<Card> cards) {
-        return cards.stream().map(c -> new CardState(
-                c.getId(), c.getNameCn(), c.getNameEn(),
-                c.getCardType(), c.getRarity(),
-                c.getCost() != null ? c.getCost() : 0,
-                c.getAttack() != null ? c.getAttack() : 0,
-                c.getHealth() != null ? c.getHealth() : 0,
-                c.getEffectJson(), c.getChallengeSentenceId()
-        )).collect(Collectors.toList());
+        return cards.stream().map(c -> {
+            CardState cs = new CardState(
+                    c.getId(), c.getNameCn(), c.getNameEn(),
+                    c.getCardType(), c.getRarity(),
+                    c.getCost() != null ? c.getCost() : 0,
+                    c.getAttack() != null ? c.getAttack() : 0,
+                    c.getHealth() != null ? c.getHealth() : 0,
+                    c.getEffectJson(), c.getChallengeSentenceId()
+            );
+            // 解析关键词
+            parseKeywords(cs, c);
+            return cs;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 从卡牌数据解析关键词，设置 CardState 的标志位
+     */
+    private void parseKeywords(CardState cs, Card card) {
+        // 优先使用独立的 keywords 字段
+        String kw = card.getKeywords();
+        if (kw == null || kw.isEmpty() || "[]".equals(kw.trim())) {
+            // 回退到 effect_json 中的 keywords 数组
+            String effectJson = card.getEffectJson();
+            if (effectJson != null && !effectJson.isEmpty()) {
+                try {
+                    com.fasterxml.jackson.databind.JsonNode node =
+                            new com.fasterxml.jackson.databind.ObjectMapper().readTree(effectJson);
+                    com.fasterxml.jackson.databind.JsonNode kws = node.get("keywords");
+                    if (kws != null && kws.isArray()) {
+                        for (com.fasterxml.jackson.databind.JsonNode k : kws) {
+                            applyKeyword(cs, k.asText());
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to parse effect_json keywords for card {}: {}", card.getId(), e.getMessage());
+                }
+            }
+        } else {
+            try {
+                com.fasterxml.jackson.databind.JsonNode kws =
+                        new com.fasterxml.jackson.databind.ObjectMapper().readTree(kw);
+                if (kws.isArray()) {
+                    for (com.fasterxml.jackson.databind.JsonNode k : kws) {
+                        applyKeyword(cs, k.asText());
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to parse keywords for card {}: {}", card.getId(), e.getMessage());
+            }
+        }
+        cs.setKeywords(kw);
+    }
+
+    /**
+     * 应用单个关键词到 CardState
+     */
+    private void applyKeyword(CardState cs, String keyword) {
+        switch (keyword.toLowerCase()) {
+            case "taunt":
+                cs.setHasTaunt(true);
+                break;
+            case "divine_shield":
+                cs.setHasDivineShield(true);
+                break;
+            case "deathrattle":
+                cs.setHasDeathrattle(true);
+                break;
+            case "battlecry":
+                cs.setHasBattlecry(true);
+                break;
+            case "stealth":
+                cs.setHasStealth(true);
+                break;
+            case "rush":
+                cs.setHasRush(true);
+                break;
+            case "charge":
+                cs.setHasRush(true); // 兼容旧数据中的 "charge" 关键词
+                break;
+        }
     }
 
     private CardState drawCard(PlayerState player) {
@@ -540,6 +655,29 @@ public class GameEngine {
 
     private int calculateSpellDamage(CardState card) {
         return Math.max(1, card.getCost());
+    }
+
+    /**
+     * 应用战吼效果（基础实现：恢复2点生命给英雄）
+     */
+    private void applyBattlecryEffect(PlayerState player, PlayerState opponent, CardState card) {
+        // 基础战吼效果：为当前玩家英雄恢复2点生命
+        player.setHealth(Math.min(30, player.getHealth() + 2));
+        log.info("Battlecry triggered for {}: heal owner for 2", card.getNameCn());
+    }
+
+    /**
+     * 触发亡语效果（基础实现：对敌方英雄造成2点伤害）
+     */
+    private void triggerDeathrattle(GameSession session, PlayerState defender, PlayerState attacker, CardState card) {
+        // 基础亡语效果：对敌方英雄造成2点伤害
+        attacker.setHealth(attacker.getHealth() - 2);
+        if (attacker.getHealth() <= 0) {
+            attacker.setHealth(0);
+            session.setPhase(GamePhase.FINISHED);
+            session.setWinnerId(defender.getUserId());
+        }
+        log.info("Deathrattle triggered for {}: deal 2 damage to enemy hero", card.getNameCn());
     }
 
     private String getQuestionType(int cost) {
@@ -884,6 +1022,7 @@ public class GameEngine {
         public boolean defenderDead;
         public boolean gameOver;
         public String targetType;
+        public boolean divineShieldBlocked;
 
         public DefenseResult(boolean success, String errorMessage) {
             this.success = success;

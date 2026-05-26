@@ -2,6 +2,24 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BattleWebSocket from './api/battleWebSocket';
 import './battle-arena.css';
 
+// ===================== 关键词配置 =====================
+const KEYWORD_CONFIG: Record<string, { label: string; color: string }> = {
+  taunt: { label: '嘲讽', color: '#e74c3c' },
+  divine_shield: { label: '圣盾', color: '#f1c40f' },
+  deathrattle: { label: '亡语', color: '#8e44ad' },
+  battlecry: { label: '战吼', color: '#3498db' },
+  stealth: { label: '潜行', color: '#2ecc71' },
+  rush: { label: '突袭', color: '#e67e22' },
+  charge: { label: '冲锋', color: '#e67e22' },
+};
+
+// 解析关键词数组
+function parseKeywords(kw: any): string[] {
+  if (!kw) return [];
+  if (Array.isArray(kw)) return kw;
+  try { const p = JSON.parse(kw); return Array.isArray(p) ? p : []; } catch { return []; }
+}
+
 // ===================== Types =====================
 
 interface CardData {
@@ -17,6 +35,7 @@ interface CardData {
   baseHealth: number;
   canAttack: boolean;
   hasTaunt: boolean;
+  keywords?: any;
 }
 
 interface QuestionData {
@@ -636,6 +655,7 @@ export default function BattleArenaPage({
               <span className="battle-arena-minion-attack">⚔️{card.attack}</span>
               <span className="battle-arena-minion-health">♥{card.health}</span>
             </div>
+            {card.hasTaunt && <div className="battle-arena-minion-keyword" style={{ color: '#e74c3c', fontSize: 9, fontWeight: 600 }}>🛡️</div>}
           </div>
         ))}
       </div>
@@ -680,6 +700,22 @@ export default function BattleArenaPage({
               <span className="battle-arena-minion-health">♥{card.health}</span>
             </div>
             {card.canAttack && <div className="battle-arena-minion-ready">⚡</div>}
+            {/* 关键词徽章 */}
+            {(() => {
+              const kws = parseKeywords(card.keywords);
+              return kws.length > 0 ? (
+                <div className="cg-keywords" style={{ marginTop: 2 }}>
+                  {kws.map((kw: string) => {
+                    const cfg = KEYWORD_CONFIG[kw];
+                    return cfg ? (
+                      <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7 }}>
+                        {cfg.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              ) : null;
+            })()}
           </div>
         ))}
       </div>
@@ -712,6 +748,22 @@ export default function BattleArenaPage({
             <div className="battle-arena-hand-cost">{card.cost}</div>
             <div className="battle-arena-hand-name">{card.nameCn}</div>
             <div className="battle-arena-hand-type">{card.cardType}</div>
+            {/* 关键词徽章 */}
+            {(() => {
+              const kws = parseKeywords(card.keywords);
+              return kws.length > 0 ? (
+                <div className="cg-keywords" style={{ marginTop: 1 }}>
+                  {kws.map((kw: string) => {
+                    const cfg = KEYWORD_CONFIG[kw];
+                    return cfg ? (
+                      <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7 }}>
+                        {cfg.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              ) : null;
+            })()}
             <div className="battle-arena-hand-stats">
               {card.attack > 0 && <span>⚔️{card.attack}</span>}
               {card.health > 0 && <span>♥{card.health}</span>}

@@ -16,6 +16,22 @@ const TYPE_ICONS: Record<string, string> = {
   location: '🏰',
 };
 
+const KEYWORD_CONFIG: Record<string, { label: string; color: string }> = {
+  taunt: { label: '嘲讽', color: '#e74c3c' },
+  divine_shield: { label: '圣盾', color: '#f1c40f' },
+  deathrattle: { label: '亡语', color: '#8e44ad' },
+  battlecry: { label: '战吼', color: '#3498db' },
+  stealth: { label: '潜行', color: '#2ecc71' },
+  rush: { label: '突袭', color: '#e67e22' },
+  charge: { label: '冲锋', color: '#e67e22' },
+};
+
+function parseKeywords(kw: any): string[] {
+  if (!kw) return [];
+  if (Array.isArray(kw)) return kw;
+  try { const p = JSON.parse(kw); return Array.isArray(p) ? p : []; } catch { return []; }
+}
+
 export default function DeckBuilderPage({
   user, myCards, onBack, onSave,
 }: {
@@ -143,6 +159,22 @@ export default function DeckBuilderPage({
                 <span className="db-card-type">{card.cardType}</span>
                 {card.attack !== null && <span className="db-atk">⚔️{card.attack}</span>}
                 {card.health !== null && <span className="db-hp">❤️{card.health}</span>}
+                {/* 关键词徽章 */}
+                {(() => {
+                  const kws = parseKeywords(card.keywords);
+                  return kws.length > 0 ? (
+                    <span className="db-keywords">
+                      {kws.slice(0, 2).map((kw: string) => {
+                        const cfg = KEYWORD_CONFIG[kw];
+                        return cfg ? (
+                          <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7, marginLeft: 2 }}>
+                            {cfg.label}
+                          </span>
+                        ) : null;
+                      })}
+                    </span>
+                  ) : null;
+                })()}
                 <span className="db-owned-count" style={{ color: RARITY_COLORS[card.rarity] }}>
                   ×{ownedMap.get(card.id) || 0}
                 </span>
@@ -168,6 +200,22 @@ export default function DeckBuilderPage({
                     <span className="db-card-name">{card.nameCn}</span>
                     {card.attack !== null && <span className="db-atk">⚔️{card.attack}</span>}
                     {card.health !== null && <span className="db-hp">❤️{card.health}</span>}
+                    {/* 关键词徽章 */}
+                    {(() => {
+                      const kws = parseKeywords(card.keywords);
+                      return kws.length > 0 ? (
+                        <span className="db-keywords">
+                          {kws.slice(0, 2).map((kw: string) => {
+                            const cfg = KEYWORD_CONFIG[kw];
+                            return cfg ? (
+                              <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7, marginLeft: 2 }}>
+                                {cfg.label}
+                              </span>
+                            ) : null;
+                          })}
+                        </span>
+                      ) : null;
+                    })()}
                     <button className="db-remove-btn" onClick={() => removeCard(index)}>✕</button>
                   </div>
                 );

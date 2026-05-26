@@ -1,5 +1,7 @@
 package com.pengyouquan.english.battle;
 
+import java.util.List;
+
 public class CardState {
     private Long cardId;
     private String nameCn;
@@ -12,8 +14,16 @@ public class CardState {
     private int baseAttack;
     private int baseHealth;
     private String effectJson;
+    private String keywords; // JSON array string like '["taunt","battlecry"]'
     private boolean canAttack;
     private boolean hasTaunt;
+    private boolean hasDivineShield;
+    private boolean hasDeathrattle;
+    private boolean hasBattlecry;
+    private boolean hasStealth;
+    private boolean hasRush;
+    private boolean battlecryTriggered;
+    private boolean stealthRevealed;
     private Long challengeSentenceId;
 
     public CardState() {}
@@ -33,6 +43,13 @@ public class CardState {
         this.effectJson = effectJson;
         this.canAttack = false;
         this.hasTaunt = false;
+        this.hasDivineShield = false;
+        this.hasDeathrattle = false;
+        this.hasBattlecry = false;
+        this.hasStealth = false;
+        this.hasRush = false;
+        this.battlecryTriggered = false;
+        this.stealthRevealed = false;
         this.challengeSentenceId = challengeSentenceId;
     }
 
@@ -71,11 +88,35 @@ public class CardState {
     public String getEffectJson() { return effectJson; }
     public void setEffectJson(String effectJson) { this.effectJson = effectJson; }
 
+    public String getKeywords() { return keywords; }
+    public void setKeywords(String keywords) { this.keywords = keywords; }
+
     public boolean isCanAttack() { return canAttack; }
     public void setCanAttack(boolean canAttack) { this.canAttack = canAttack; }
 
     public boolean isHasTaunt() { return hasTaunt; }
     public void setHasTaunt(boolean hasTaunt) { this.hasTaunt = hasTaunt; }
+
+    public boolean isHasDivineShield() { return hasDivineShield; }
+    public void setHasDivineShield(boolean hasDivineShield) { this.hasDivineShield = hasDivineShield; }
+
+    public boolean isHasDeathrattle() { return hasDeathrattle; }
+    public void setHasDeathrattle(boolean hasDeathrattle) { this.hasDeathrattle = hasDeathrattle; }
+
+    public boolean isHasBattlecry() { return hasBattlecry; }
+    public void setHasBattlecry(boolean hasBattlecry) { this.hasBattlecry = hasBattlecry; }
+
+    public boolean isHasStealth() { return hasStealth; }
+    public void setHasStealth(boolean hasStealth) { this.hasStealth = hasStealth; }
+
+    public boolean isHasRush() { return hasRush; }
+    public void setHasRush(boolean hasRush) { this.hasRush = hasRush; }
+
+    public boolean isBattlecryTriggered() { return battlecryTriggered; }
+    public void setBattlecryTriggered(boolean battlecryTriggered) { this.battlecryTriggered = battlecryTriggered; }
+
+    public boolean isStealthRevealed() { return stealthRevealed; }
+    public void setStealthRevealed(boolean stealthRevealed) { this.stealthRevealed = stealthRevealed; }
 
     public Long getChallengeSentenceId() { return challengeSentenceId; }
     public void setChallengeSentenceId(Long challengeSentenceId) { this.challengeSentenceId = challengeSentenceId; }

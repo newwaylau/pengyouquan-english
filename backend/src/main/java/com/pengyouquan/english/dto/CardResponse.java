@@ -18,6 +18,7 @@ public class CardResponse {
     private Integer attack;
     private Integer health;
     private String effectJson;
+    private String keywords;
     private String challengeType;
     private String faction;
     private String quoteText;
@@ -38,6 +39,7 @@ public class CardResponse {
             card.getAttack(),
             card.getHealth(),
             card.getEffectJson(),
+            card.getKeywords(),
             card.getChallengeType(),
             card.getFaction(),
             card.getQuoteText(),

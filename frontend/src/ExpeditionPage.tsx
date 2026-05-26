@@ -134,6 +134,8 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       setHandCards(res.data.hand || []);
       setPhase('combat');
       fetchSentence();
+    } else {
+      alert(res.message || '进入战斗失败，请重试');
     }
   }
 
@@ -669,14 +671,14 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               选择剧集
             </p>
             <div className="expedition-show-select">
-              {shows.filter((s: any) => s.id === 1 || s.id === 2).map((show: any) => (
+              {shows.map((show: any) => (
                 <button
                   key={show.id}
                   className={`expedition-show-btn ${selectedShow === show.id ? 'selected' : ''}`}
                   onClick={() => setSelectedShow(show.id)}
                 >
-                  <div style={{ fontSize: 24, marginBottom: 4 }}>{show.id === 1 ? '🐉' : '🏰'}</div>
-                  <div>{show.name || (show.id === 1 ? 'Game of Thrones' : 'Downton Abbey')}</div>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>{show.name?.includes('Game of Thrones') ? '🐉' : '🏰'}</div>
+                  <div>{show.name || '未知剧集'}</div>
                 </button>
               ))}
             </div>
