@@ -1,0 +1,825 @@
+/* ====== Expedition Page (PVE远征) ====== */
+
+.expedition-page {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 8px;
+  color: var(--text);
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+}
+
+.expedition-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.expedition-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.expedition-tab.active {
+  background: var(--teal);
+  color: white;
+}
+
+/* Lobby */
+.expedition-lobby {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expedition-lobby-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  padding: 16px 0 8px;
+}
+
+.expedition-show-select {
+  display: flex;
+  gap: 8px;
+}
+
+.expedition-show-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.expedition-show-btn:hover {
+  border-color: var(--teal);
+  background: var(--hover-bg);
+}
+
+.expedition-show-btn.selected {
+  border-color: var(--teal);
+  background: rgba(20,184,166,0.15);
+}
+
+.expedition-deck-section h3 {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.expedition-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.expedition-card-item {
+  padding: 10px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.expedition-card-item.selected {
+  border-color: var(--teal);
+  background: rgba(20,184,166,0.1);
+}
+
+.expedition-card-item.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.expedition-card-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.expedition-card-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.expedition-card-rarity-common { border-left: 3px solid #94a3b8; }
+.expedition-card-rarity-rare { border-left: 3px solid #3b82f6; }
+.expedition-card-rarity-epic { border-left: 3px solid #a855f7; }
+.expedition-card-rarity-legendary { border-left: 3px solid #f59e0b; }
+
+.expedition-start-btn {
+  padding: 14px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: auto;
+}
+
+.expedition-start-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Map */
+.expedition-map {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 0;
+  position: relative;
+}
+
+.expedition-map-act {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.expedition-map-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  width: 100%;
+}
+
+.expedition-node {
+  width: 80px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  position: relative;
+  z-index: 1;
+  gap: 4px;
+}
+
+.expedition-node.completed {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text-muted);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.expedition-node.current {
+  background: var(--teal);
+  border-color: var(--teal-glow);
+  color: white;
+  box-shadow: 0 0 16px var(--teal-glow);
+  animation: node-pulse 2s infinite;
+}
+
+.expedition-node.future {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.expedition-node-line {
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+}
+
+.expedition-node-line.completed {
+  background: var(--teal);
+  opacity: 0.4;
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--teal-glow); }
+  50% { box-shadow: 0 0 20px var(--teal-glow); }
+}
+
+/* Combat */
+.expedition-combat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expedition-enemy-area {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.expedition-enemy-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.expedition-enemy-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.expedition-enemy-hp-bar {
+  height: 10px;
+  background: var(--bg);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.expedition-enemy-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.expedition-enemy-hp-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.expedition-boss-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.expedition-special-rules {
+  font-size: 11px;
+  color: var(--warning);
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: var(--warning-bg);
+  border-radius: var(--radius-sm);
+}
+
+.expedition-player-area {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+}
+
+.expedition-player-hp-bar {
+  height: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.expedition-player-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #14b8a6);
+  border-radius: var(--radius-full);
+  transition: width 0.3s;
+}
+
+.expedition-player-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Question Input */
+.expedition-question-area {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+
+.expedition-question-text {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  text-align: center;
+  color: var(--text);
+}
+
+.expedition-question-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.expedition-question-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.expedition-question-input:focus {
+  border-color: var(--teal);
+}
+
+.expedition-question-submit {
+  padding: 10px 20px;
+  background: var(--teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.expedition-question-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cards in hand */
+.expedition-hand {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.expedition-hand-card {
+  min-width: 90px;
+  padding: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.expedition-hand-card-name {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.expedition-hand-card-attack {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.expedition-hand-card-cost {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* Result overlay */
+.expedition-result-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s;
+}
+
+.expedition-result-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.expedition-result-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.expedition-result-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.expedition-result-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.expedition-result-btn {
+  padding: 12px 32px;
+  background: var(--teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Reward choices */
+.expedition-rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expedition-reward-btn {
+  padding: 16px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.expedition-reward-btn:hover {
+  border-color: var(--teal);
+  background: var(--hover-bg);
+}
+
+/* Event */
+.expedition-event {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expedition-event-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.expedition-event-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  text-align: center;
+  padding: 16px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+}
+
+.expedition-event-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Rest */
+.expedition-rest {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.expedition-rest-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.expedition-rest-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.expedition-rest-btn {
+  flex: 1;
+  padding: 20px 16px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.expedition-rest-btn:hover {
+  border-color: var(--teal);
+  background: var(--hover-bg);
+}
+
+.expedition-rest-heal-amount {
+  font-size: 12px;
+  color: var(--success);
+  margin-top: 4px;
+}
+
+/* Shop */
+.expedition-shop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expedition-shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.expedition-shop-gold {
+  color: var(--warning);
+}
+
+.expedition-shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expedition-shop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.expedition-shop-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expedition-shop-item-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.expedition-shop-item-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.expedition-shop-buy-btn {
+  padding: 6px 16px;
+  background: var(--teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.expedition-shop-buy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Settlement */
+.expedition-settlement {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.expedition-settlement-icon {
+  font-size: 64px;
+}
+
+.expedition-settlement-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.expedition-settlement-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.expedition-settlement-stat {
+  padding: 16px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.expedition-settlement-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--teal);
+}
+
+.expedition-settlement-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.expedition-settlement-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* History */
+.expedition-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expedition-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.expedition-history-status {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.expedition-history-status.cleared {
+  background: rgba(34,197,94,0.15);
+  color: var(--success);
+}
+
+.expedition-history-status.dead {
+  background: rgba(239,68,68,0.15);
+  color: var(--danger);
+}
+
+.expedition-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Damage number animation */
+.expedition-damage-number {
+  position: fixed;
+  font-size: 32px;
+  font-weight: 800;
+  pointer-events: none;
+  animation: float-up 1s ease-out forwards;
+  z-index: 50;
+}
+
+.expedition-damage-number.damage-dealt {
+  color: #ef4444;
+  right: 30%;
+  top: 30%;
+}
+
+.expedition-damage-number.damage-taken {
+  color: #22c55e;
+  left: 30%;
+  bottom: 40%;
+}
+
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(1.5); }
+}
+
+/* Active expedition header bar */
+.expedition-active-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.expedition-active-bar .act-label {
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.expedition-abandon-btn {
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* Damage flash */
+.expedition-flash {
+  animation: flash-red 0.3s;
+}
+
+@keyframes flash-red {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(239,68,68,0.2); }
+}

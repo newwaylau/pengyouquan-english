@@ -16,6 +16,8 @@ import BattleArenaPage from './BattleArenaPage';
 import EquipmentPage from './EquipmentPage';
 import HeroSelectPage from './HeroSelectPage';
 import ChangePasswordModal from './ChangePasswordModal';
+import ExpeditionPage from './ExpeditionPage';
+import GuildPage from './GuildPage';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
 import { IconTarget, IconClose, IconSettings } from './Icons';
@@ -26,7 +28,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero' | 'expedition' | 'guild'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -144,6 +146,8 @@ export default function App() {
               {page === 'clan' && '七国铁王座'}
               {page === 'equipment' && '装备'}
               {page === 'hero' && '英雄'}
+              {page === 'expedition' && '远征'}
+              {page === 'guild' && '公会'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
@@ -209,18 +213,20 @@ export default function App() {
           {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
           {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
           {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
+          {page === 'expedition' && <ExpeditionPage user={user} onNavigate={handleNavigate} />}
+          {page === 'guild' && <GuildPage user={user} onNavigate={handleNavigate} />}
           {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
         </main>
 
         {/* 手机端底部导航 */}
         <nav className="mobile-bottom-nav">
           {[
-            { key: 'practice', icon: <IconTarget size={20} />, label: 'Practice' },
-            { key: 'wrong', icon: <IconClose size={20} />, label: 'Review', requiresLogin: true, badge: true },
+            { key: 'practice', icon: <IconTarget size={20} />, label: '练习' },
             { key: 'cards', icon: <span>🎴</span>, label: '卡牌', requiresLogin: true },
             { key: 'battle', icon: <span>⚔️</span>, label: '对战', requiresLogin: true },
-            { key: 'clan', icon: <span>👑</span>, label: '封臣', requiresLogin: true },
             { key: 'hero', icon: <span>🦸</span>, label: '英雄', requiresLogin: true },
+            { key: 'expedition', icon: <span>🗡️</span>, label: '远征', requiresLogin: true },
+            { key: 'guild', icon: <span>🏰</span>, label: '公会', requiresLogin: true },
           ].map(item => {
             const disabled = item.requiresLogin && !user;
             return (
@@ -232,7 +238,6 @@ export default function App() {
               >
                 <span className="mb-icon">{item.icon}</span>
                 <span className="mb-label">{item.label}</span>
-                {item.badge && wrongCount > 0 && <span className="mb-badge">{wrongCount}</span>}
               </button>
             );
           })}
