@@ -84,6 +84,33 @@ public class BattleWebSocketHandler {
         log.info("User {} cancelled matchmaking", userId);
     }
 
+    /** 加入指定的对战会话（好友切磋） */
+    @MessageMapping("/battle/join-session")
+    public void joinSession(@Payload Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
+        Long userId = getUserId(headerAccessor);
+        if (userId == null) { sendError(null, null, "未认证"); return; }
+
+        String sessionId = getString(payload, "sessionId");
+        if (sessionId == null) { sendError(null, userId, "缺少sessionId"); return; }
+
+        GameSession session = gameEngine.getSession(sessionId);
+        if (session == null) {
+            sendError(sessionId, userId, "对战会话不存在或已结束");
+            return;
+        }
+
+        // 检查玩家是否参与此会话
+        if (!session.getPlayer1Id().equals(userId) && !session.getPlayer2Id().equals(userId)) {
+            sendError(sessionId, userId, "无权加入此对战");
+            return;
+        }
+
+        log.info("User {} joining session {}", userId, sessionId);
+
+        // 发送游戏开始
+        sendGameStart(sessionId, userId);
+    }
+
     // ==================== 出牌 ====================
 
     @MessageMapping("/battle/play-card")

@@ -22,6 +22,7 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
   const [seasonReward, setSeasonReward] = useState<any>(null);
   const [seasonRanking, setSeasonRanking] = useState<any>(null);
   const [seasonTop100, setSeasonTop100] = useState<any[]>([]);
+  const [seasonCountdown, setSeasonCountdown] = useState<number>(0);
 
   // 挑战表单
   const [challengeDeckId, setChallengeDeckId] = useState<number | null>(null);
@@ -37,16 +38,18 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
   }, []);
 
   const loadSeason = async () => {
-    const [curRes, rewRes, rankRes, topRes] = await Promise.all([
+    const [curRes, rewRes, rankRes, topRes, cdRes] = await Promise.all([
       cardApi.getCurrentSeason(),
       cardApi.getSeasonRewards(),
       cardApi.getSeasonRanking(),
       cardApi.getSeasonTop100(),
+      cardApi.getSeasonCountdown(),
     ]);
     if (curRes.code === 200) setSeasonData(curRes.data);
     if (rewRes.code === 200) setSeasonReward(rewRes.data);
     if (rankRes.code === 200) setSeasonRanking(rankRes.data);
     if (topRes.code === 200) setSeasonTop100(topRes.data || []);
+    if (cdRes.code === 200) setSeasonCountdown(cdRes.data.daysLeft);
   };
 
   const loadAll = async () => {
@@ -242,6 +245,41 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
                   <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>排名 #{rank.rank} · 胜 {rank.wins} 负 {rank.losses}</div>
                 </div>
               </div>
+              {/* 连胜信息 */}
+              {rank.winStreak > 0 && (
+                <div style={{
+                  marginTop: 12, padding: '8px 12px',
+                  background: 'rgba(255, 165, 0, 0.1)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid rgba(255, 165, 0, 0.3)',
+                  display: 'flex', alignItems: 'center', gap: 8
+                }}>
+                  <span style={{ fontSize: 18 }}>🔥</span>
+                  <span style={{ color: '#ff8c00', fontSize: 14, fontWeight: 600 }}>
+                    {rank.winStreak}连胜
+                  </span>
+                  {rank.streakBonus > 0 && (
+                    <span style={{ color: 'var(--teal)', fontSize: 12 }}>
+                      每场额外+{rank.streakBonus}奖杯
+                    </span>
+                  )}
+                </div>
+              )}
+              {/* 段位保护状态 */}
+              {rank.protected_ && (
+                <div style={{
+                  marginTop: 8, padding: '8px 12px',
+                  background: 'rgba(46, 204, 113, 0.1)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid rgba(46, 204, 113, 0.3)',
+                  display: 'flex', alignItems: 'center', gap: 8
+                }}>
+                  <span style={{ fontSize: 18 }}>🛡️</span>
+                  <span style={{ color: '#2ecc71', fontSize: 13, fontWeight: 500 }}>
+                    段位保护中 · 最低 {rank.tierFloor} 奖杯
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -487,6 +525,12 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
                 <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                   {seasonData.daysLeft > 0 ? `还剩 ${seasonData.daysLeft} 天` : '赛季已结束'}
                 </div>
+                {/* 赛季倒计时（距下月重置） */}
+                {seasonCountdown > 0 && (
+                  <div style={{ fontSize: 11, color: 'var(--warning)', marginTop: 4 }}>
+                    ⏰ 距段位重置还有 {seasonCountdown} 天
+                  </div>
+                )}
               </div>
               {seasonData.progress > 0 && (
                 <div style={{

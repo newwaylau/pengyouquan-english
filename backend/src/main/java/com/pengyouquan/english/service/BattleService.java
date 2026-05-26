@@ -28,6 +28,7 @@ public class BattleService {
     private final ChestService chestService;
     private final AchievementService achievementService;
 
+    // 基础奖杯变化（不含连胜加成）
     private static final int TROPHY_GAIN = 30;
     private static final int TROPHY_LOSS = 25;
 
@@ -135,18 +136,18 @@ public class BattleService {
         }
         battle.setWinnerId(winnerId);
 
-        // 4. 更新奖杯
+        // 4. 更新奖杯（含段位保护 + 连胜加成）
         int trophyChange;
         if (winnerId == null) {
             trophyChange = 0; // 平局不变化
         } else if (winnerId.equals(battle.getChallengerId())) {
-            trophyChange = TROPHY_GAIN;
-            trophyService.updateTrophies(battle.getChallengerId(), TROPHY_GAIN);
-            trophyService.updateTrophies(battle.getDefenderId(), -TROPHY_LOSS);
+            int actualGain = trophyService.updateTrophies(battle.getChallengerId(), TROPHY_GAIN);
+            int actualLoss = trophyService.updateTrophies(battle.getDefenderId(), -TROPHY_LOSS);
+            trophyChange = Math.abs(actualGain);
         } else {
-            trophyChange = -TROPHY_LOSS;
-            trophyService.updateTrophies(battle.getChallengerId(), -TROPHY_LOSS);
-            trophyService.updateTrophies(battle.getDefenderId(), TROPHY_GAIN);
+            int actualLoss = trophyService.updateTrophies(battle.getChallengerId(), -TROPHY_LOSS);
+            int actualGain = trophyService.updateTrophies(battle.getDefenderId(), TROPHY_GAIN);
+            trophyChange = Math.abs(actualLoss);
         }
         battle.setTrophyChange(Math.abs(trophyChange));
 
@@ -253,6 +254,11 @@ public class BattleService {
             if (s.getTrophies() > trophies) rank++;
         }
 
+        int winStreak = stats.getWinStreak();
+        int streakBonus = 0;
+        if (winStreak >= 5) streakBonus = 10;
+        else if (winStreak >= 3) streakBonus = 5;
+
         return new RankInfoDTO(
                 trophies,
                 tier != null ? tier.getNameCn() : "未排名",
@@ -260,9 +266,12 @@ public class BattleService {
                 rank,
                 tier != null ? tier.getSeasonRewardType() : "",
                 tier != null ? tier.getSeasonRewardCount() : 0,
-                stats.getWinStreak(),
+                winStreak,
                 stats.getWins(),
-                stats.getLosses()
+                stats.getLosses(),
+                stats.getTierFloor(),
+                stats.getTrophies() <= stats.getTierFloor() && stats.getTierFloor() > 0,
+                streakBonus
         );
     }
 
@@ -285,7 +294,10 @@ public class BattleService {
                     tier != null ? tier.getSeasonRewardCount() : 0,
                     stats.getWinStreak(),
                     stats.getWins(),
-                    stats.getLosses()
+                    stats.getLosses(),
+                    stats.getTierFloor(),
+                    stats.getTrophies() <= stats.getTierFloor() && stats.getTierFloor() > 0,
+                    stats.getWinStreak() >= 5 ? 10 : stats.getWinStreak() >= 3 ? 5 : 0
             ));
         }
         return result;

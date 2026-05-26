@@ -2,6 +2,7 @@ package com.pengyouquan.english.controller;
 
 import com.pengyouquan.english.dto.ApiResponse;
 import com.pengyouquan.english.security.CurrentUserId;
+import com.pengyouquan.english.service.SeasonResetService;
 import com.pengyouquan.english.service.SeasonService;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +14,11 @@ import java.util.Map;
 public class SeasonController {
 
     private final SeasonService seasonService;
+    private final SeasonResetService seasonResetService;
 
-    public SeasonController(SeasonService seasonService) {
+    public SeasonController(SeasonService seasonService, SeasonResetService seasonResetService) {
         this.seasonService = seasonService;
+        this.seasonResetService = seasonResetService;
     }
 
     @GetMapping("/current")
@@ -92,5 +95,12 @@ public class SeasonController {
         int seasonNumber = active.containsKey("seasonNumber") ?
                 ((Number) active.get("seasonNumber")).intValue() : 1;
         return ApiResponse.success(seasonService.awardSeasonTitles(seasonNumber));
+    }
+
+    /** 获取赛季倒计时（距离下个月1号的天数） */
+    @GetMapping("/countdown")
+    public ApiResponse<Map<String, Object>> getSeasonCountdown() {
+        int daysLeft = seasonResetService.getDaysUntilNextSeason();
+        return ApiResponse.success(Map.of("daysLeft", daysLeft));
     }
 }

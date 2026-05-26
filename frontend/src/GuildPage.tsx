@@ -34,6 +34,20 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
   // League
   const [leagueData, setLeagueData] = useState<any[]>([]);
 
+  // War state
+  const [warData, setWarData] = useState<any>(null);
+  const [contributeCount, setContributeCount] = useState<number>(1);
+
+  // Trade state
+  const [tradeReceived, setTradeReceived] = useState<any[]>([]);
+  const [tradeSent, setTradeSent] = useState<any[]>([]);
+  const [tradeHistory, setTradeHistory] = useState<any[]>([]);
+  const [tradeDailyLimit, setTradeDailyLimit] = useState<any>(null);
+  const [showTradeModal, setShowTradeModal] = useState<any>(null);
+  const [tradeReceiverId, setTradeReceiverId] = useState<number | null>(null);
+  const [tradeRequestedCardId, setTradeRequestedCardId] = useState<number | null>(null);
+  const [tradeOfferedCardId, setTradeOfferedCardId] = useState<number | null>(null);
+
   useEffect(() => {
     loadMyGuild();
     loadLeaderboard();
@@ -132,6 +146,93 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
     if (res.code === 200) {
       alert(`领取成功！获得${res.data.reward}星尘`);
       loadMyGuild();
+    } else {
+      alert(res.message);
+    }
+  }
+
+  // ==================== War Functions ====================
+
+  async function loadWar() {
+    const res = await apiFetch('/api/guilds/war/status');
+    if (res.code === 200) setWarData(res.data);
+  }
+
+  async function handleContribute() {
+    const res = await apiFetch('/api/guilds/war/contribute', {
+      method: 'POST',
+      body: JSON.stringify({ cardCount: contributeCount }),
+    });
+    if (res.code === 200) {
+      alert(`贡献成功！共贡献 ${res.data.cardsContributed} 张卡牌`);
+      loadWar();
+    } else {
+      alert(res.message);
+    }
+  }
+
+  async function handleRecordBattleResult(won: boolean) {
+    const res = await apiFetch('/api/guilds/war/battle-result', {
+      method: 'POST',
+      body: JSON.stringify({ won }),
+    });
+    if (res.code === 200) {
+      alert(`记录成功！本场${won ? '胜利' : '失败'}，还有 ${res.data.battlesLeft} 场剩余`);
+      loadWar();
+    } else {
+      alert(res.message);
+    }
+  }
+
+  // ==================== Trade Functions ====================
+
+  async function loadTrade() {
+    const [rec, sent, hist, limit] = await Promise.all([
+      apiFetch('/api/cards/trade/received'),
+      apiFetch('/api/cards/trade/sent'),
+      apiFetch('/api/cards/trade/history'),
+      apiFetch('/api/cards/trade/daily-limit'),
+    ]);
+    if (rec.code === 200) setTradeReceived(rec.data || []);
+    if (sent.code === 200) setTradeSent(sent.data || []);
+    if (hist.code === 200) setTradeHistory(hist.data || []);
+    if (limit.code === 200) setTradeDailyLimit(limit.data);
+  }
+
+  async function handleSendTrade() {
+    if (!tradeReceiverId || !tradeRequestedCardId) return;
+    const res = await apiFetch('/api/cards/trade/request', {
+      method: 'POST',
+      body: JSON.stringify({
+        receiverId: tradeReceiverId,
+        requestedCardId: tradeRequestedCardId,
+        offeredCardId: tradeOfferedCardId || undefined,
+      }),
+    });
+    if (res.code === 200) {
+      alert('换卡请求已发送！');
+      setShowTradeModal(null);
+      loadTrade();
+    } else {
+      alert(res.message);
+    }
+  }
+
+  async function handleAcceptTrade(tradeId: number) {
+    const res = await apiFetch(`/api/cards/trade/${tradeId}/accept`, { method: 'POST' });
+    if (res.code === 200) {
+      alert(res.data.message || '换卡成功！');
+      loadTrade();
+      loadMyGuild();
+    } else {
+      alert(res.message);
+    }
+  }
+
+  async function handleRejectTrade(tradeId: number) {
+    const res = await apiFetch(`/api/cards/trade/${tradeId}/reject`, { method: 'POST' });
+    if (res.code === 200) {
+      loadTrade();
     } else {
       alert(res.message);
     }

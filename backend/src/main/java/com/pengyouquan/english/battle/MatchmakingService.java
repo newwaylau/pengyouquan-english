@@ -132,6 +132,25 @@ public class MatchmakingService {
         pendingRequests.put(userId, request);
     }
 
+    /**
+     * 创建直接对战（好友切磋），跳过匹配队列
+     */
+    public GameSession createDirectGame(Long userId1, Long userId2, String nickname1, String nickname2,
+                                         int trophies1, int trophies2, MatchResultCallback callback1,
+                                         MatchResultCallback callback2) {
+        // 创建游戏会话
+        GameSession session = gameEngine.createGame(userId1, userId2, nickname1, nickname2, trophies1, trophies2);
+
+        // 通知双方
+        MatchResult result1 = new MatchResult(session.getSessionId(), userId2, nickname2, trophies2);
+        MatchResult result2 = new MatchResult(session.getSessionId(), userId1, nickname1, trophies1);
+
+        if (callback1 != null) callback1.onMatched(result1);
+        if (callback2 != null) callback2.onMatched(result2);
+
+        return session;
+    }
+
     /** 主动取消匹配 */
     public synchronized void cancelMatch(Long userId) {
         pendingRequests.remove(userId);

@@ -15,4 +15,7 @@ public class RankInfoDTO {
     private int winStreak;
     private int wins;
     private int losses;
+    private int tierFloor;      // 段位保护底线
+    private boolean protected_; // 是否受段位保护
+    private int streakBonus;    // 当前连胜加成
 }

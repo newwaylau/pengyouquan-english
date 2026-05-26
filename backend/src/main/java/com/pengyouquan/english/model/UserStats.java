@@ -25,4 +25,7 @@ public class UserStats {
 
     @Column(name = "best_trophies", nullable = false)
     private Integer bestTrophies = 0;
+
+    @Column(name = "tier_floor", nullable = false)
+    private Integer tierFloor = 0;
 }

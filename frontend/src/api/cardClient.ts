@@ -118,4 +118,42 @@ export const cardApi = {
   // 公会联赛
   getGuildLeague: async () => request('/api/guilds/league'),
   getGuildLeagueInfo: async (guildId: number) => request(`/api/guilds/${guildId}/league`),
+
+  // ===== P2 Features =====
+
+  // 赛季倒计时
+  getSeasonCountdown: async () => request('/api/season/countdown'),
+
+  // 好友切磋
+  getFriendsWithDetails: async () => request('/api/friends/list'),
+  sendFriendChallenge: async (friendId: number) =>
+    request(`/api/friends/challenge/${friendId}`, { method: 'POST' }),
+  acceptFriendChallenge: async (challengeId: number) =>
+    request(`/api/friends/challenge/${challengeId}/accept`, { method: 'POST' }),
+  rejectFriendChallenge: async (challengeId: number) =>
+    request(`/api/friends/challenge/${challengeId}/reject`, { method: 'POST' }),
+  getPendingChallenges: async () => request('/api/friends/challenges/pending'),
+  getAcceptedChallenges: async () => request('/api/friends/challenges/accepted'),
+
+  // 公会部落战
+  getGuildWarStatus: async () => request('/api/guilds/war/status'),
+  contributeWarCards: async (cardCount: number) =>
+    request('/api/guilds/war/contribute', { method: 'POST', body: JSON.stringify({ cardCount }) }),
+  recordWarBattleResult: async (won: boolean) =>
+    request('/api/guilds/war/battle-result', { method: 'POST', body: JSON.stringify({ won }) }),
+
+  // 公会换卡
+  sendTradeRequest: async (receiverId: number, requestedCardId: number, offeredCardId?: number) => {
+    const body: any = { receiverId, requestedCardId };
+    if (offeredCardId) body.offeredCardId = offeredCardId;
+    return request('/api/cards/trade/request', { method: 'POST', body: JSON.stringify(body) });
+  },
+  acceptTradeRequest: async (tradeId: number) =>
+    request(`/api/cards/trade/${tradeId}/accept`, { method: 'POST' }),
+  rejectTradeRequest: async (tradeId: number) =>
+    request(`/api/cards/trade/${tradeId}/reject`, { method: 'POST' }),
+  getReceivedTradeRequests: async () => request('/api/cards/trade/received'),
+  getSentTradeRequests: async () => request('/api/cards/trade/sent'),
+  getTradeHistory: async () => request('/api/cards/trade/history'),
+  getTradeDailyLimit: async () => request('/api/cards/trade/daily-limit'),
 };
