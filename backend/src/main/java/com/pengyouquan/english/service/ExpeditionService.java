@@ -15,6 +15,8 @@ public class ExpeditionService {
 
     private final ExpeditionRepository expeditionRepository;
     private final RelicRepository relicRepository;
+    private final ExpeditionRelicRepository expeditionRelicRepository;
+    private final PlayerRelicRepository playerRelicRepository;
     private final ExpeditionEnemyRepository expeditionEnemyRepository;
     private final ExpeditionEventRepository expeditionEventRepository;
     private final CardRepository cardRepository;
@@ -39,6 +41,8 @@ public class ExpeditionService {
 
     public ExpeditionService(ExpeditionRepository expeditionRepository,
                              RelicRepository relicRepository,
+                             ExpeditionRelicRepository expeditionRelicRepository,
+                             PlayerRelicRepository playerRelicRepository,
                              ExpeditionEnemyRepository expeditionEnemyRepository,
                              ExpeditionEventRepository expeditionEventRepository,
                              CardRepository cardRepository,
@@ -49,6 +53,8 @@ public class ExpeditionService {
                              AchievementService achievementService) {
         this.expeditionRepository = expeditionRepository;
         this.relicRepository = relicRepository;
+        this.expeditionRelicRepository = expeditionRelicRepository;
+        this.playerRelicRepository = playerRelicRepository;
         this.expeditionEnemyRepository = expeditionEnemyRepository;
         this.expeditionEventRepository = expeditionEventRepository;
         this.cardRepository = cardRepository;
@@ -226,11 +232,28 @@ public class ExpeditionService {
         // 检查遗物效果
         List<Long> relicIds = parseJsonList(exp.getRelics());
         Map<String, Object> relicEffects = getRelicEffects(relicIds);
+        // 获取新遗物系统的效果
+        Map<String, Integer> newRelicEffects = getNewRelicEffects(exp.getId());
 
         if (correct) {
             // 答对：造成伤害
             exp.setQuestionsAnswered(exp.getQuestionsAnswered() + 1);
             damageDealt = cardAttack;
+
+            // 新遗物系统：COMBAT_DAMAGE_BOOST
+            damageDealt += newRelicEffects.getOrDefault("COMBAT_DAMAGE_BOOST", 0);
+            // 新遗物系统：BOSS_DAMAGE_BONUS
+            boolean isBossNode = "boss".equals(getCurrentNodeType(exp));
+            if (isBossNode) {
+                int bossBonus = newRelicEffects.getOrDefault("BOSS_DAMAGE_BONUS", 0);
+                if (bossBonus > 0) {
+                    damageDealt += (int) Math.round(damageDealt * bossBonus / 100.0);
+                }
+            }
+            // 新遗物系统：DOUBLE_EDGED
+            if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
+                damageDealt *= newRelicEffects.get("DOUBLE_EDGED");
+            }
 
             // 遗物：龙焰宝珠 额外+2伤害
             if (hasRelicEffect(relicEffects, "extra_damage_on_correct")) {
@@ -257,11 +280,20 @@ public class ExpeditionService {
             exp.setCurrentEnemyHp(Math.max(0, newHp));
             resultText = "答对了！造成 " + damageDealt + " 点伤害！";
 
+            // 新遗物系统：VAMPIRIC - 造成伤害的20%回血
+            int vampPct = newRelicEffects.getOrDefault("VAMPIRIC", 0);
+            if (vampPct > 0) {
+                int vampHeal = Math.max(1, damageDealt * vampPct / 100);
+                exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + vampHeal));
+                resultText += " 汲取了 " + vampHeal + " 点生命！";
+            }
+
             // 检测敌人是否死亡
             if (exp.getCurrentEnemyHp() <= 0) {
                 exp.setEnemiesKilled(exp.getEnemiesKilled() + 1);
-                // 掉落金币
-                int goldReward = 5 + rand.nextInt(11); // 5-15
+                // 掉落金币（新遗物系统：GOLD_BONUS）
+                int goldBonus = newRelicEffects.getOrDefault("GOLD_BONUS", 0);
+                int goldReward = 5 + rand.nextInt(11) + goldBonus; // 5-15 + bonus
                 exp.setGold(exp.getGold() + goldReward);
 
                 String nodeType = getCurrentNodeType(exp);
@@ -270,6 +302,12 @@ public class ExpeditionService {
                 exp.setCurrentEnemyId(null);
                 exp.setCurrentEnemyHp(null);
                 expeditionRepository.save(exp);
+
+                // 新遗物系统：HEAL_ON_COMBAT_WIN
+                int healOnWin = newRelicEffects.getOrDefault("HEAL_ON_COMBAT_WIN", 0);
+                if (healOnWin > 0) {
+                    exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + healOnWin));
+                }
 
                 Map<String, Object> result = new HashMap<>();
                 result.put("correct", true);
@@ -296,6 +334,21 @@ public class ExpeditionService {
         } else {
             // 答错：受到伤害
             damageTaken = BASE_ENEMY_ATTACK;
+
+            // 新遗物系统：DAMAGE_REDUCTION
+            int dmgReduction = newRelicEffects.getOrDefault("DAMAGE_REDUCTION", 0);
+            damageTaken = Math.max(0, damageTaken - dmgReduction);
+
+            // 新遗物系统：WRONG_PENALTY_REDUCE
+            int penaltyReduce = newRelicEffects.getOrDefault("WRONG_PENALTY_REDUCE", 0);
+            if (penaltyReduce > 0) {
+                damageTaken = Math.max(0, damageTaken * (100 - penaltyReduce) / 100);
+            }
+
+            // 新遗物系统：DOUBLE_EDGED - 答错自伤翻倍
+            if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
+                damageTaken *= newRelicEffects.get("DOUBLE_EDGED");
+            }
 
             // 检查遗物：渡鸦之眼 首次答错不扣血
             if (hasRelicEffect(relicEffects, "first_mistake_no_damage")) {
@@ -328,6 +381,7 @@ public class ExpeditionService {
         // 检查玩家是否死亡
         if (exp.getPlayerHp() <= 0) {
             exp.setStatus("dead");
+            clearPlayerRelics(exp.getId());
             expeditionRepository.save(exp);
 
             Map<String, Object> result = new HashMap<>();
@@ -732,6 +786,12 @@ public class ExpeditionService {
                 deck.add(cardId);
                 exp.setCurrentDeck(toJson(deck));
             }
+        } else if ("new_relic".equals(type)) {
+            Number relicIdNum = (Number) rewardData.get("relicId");
+            if (relicIdNum != null) {
+                Long relicId = relicIdNum.longValue();
+                addRelicToPlayer(exp, relicId);
+            }
         } else if ("heal".equals(type)) {
             int healAmount = rewardData.get("healAmount") instanceof Number ?
                     ((Number) rewardData.get("healAmount")).intValue() : 8;
@@ -762,6 +822,8 @@ public class ExpeditionService {
     public Map<String, Object> abandonExpedition(Long userId) {
         Expedition exp = getActiveExpedition(userId);
         exp.setStatus("dead");
+        // 清除远征的遗物
+        clearPlayerRelics(exp.getId());
         expeditionRepository.save(exp);
 
         Map<String, Object> result = new HashMap<>();
@@ -852,9 +914,13 @@ public class ExpeditionService {
         if (deck.isEmpty()) return List.of();
 
         Random rand = new Random();
-        int handSize = Math.min(4, deck.size());
+        // 新遗物系统：EXTRA_DRAW
+        Map<String, Integer> newRelicEffects = getNewRelicEffects(exp.getId());
+        int extraDraw = newRelicEffects.getOrDefault("EXTRA_DRAW", 0);
+        int baseHandSize = 4 + extraDraw;
+        int handSize = Math.min(baseHandSize, deck.size());
 
-        // 手牌：随机抽取4张
+        // 手牌：随机抽取
         List<Long> drawn = new ArrayList<>(deck);
         Collections.shuffle(drawn, rand);
         drawn = drawn.subList(0, handSize);
@@ -933,19 +999,54 @@ public class ExpeditionService {
         heal.put("label", "回复8点生命值");
         rewards.add(heal);
 
-        // 3. 移除卡牌或金币
-        List<Long> deck = parseJsonList(exp.getCurrentDeck());
-        if (deck.size() > 3) {
-            Map<String, Object> remove = new HashMap<>();
-            remove.put("type", "remove");
-            remove.put("label", "从牌组移除一张牌");
-            rewards.add(remove);
+        // 3. 移除卡牌或金币 或 遗物（随机）
+        int roll = rand.nextInt(10);
+        if (roll < 3) {
+            // 30% 几率掉落遗物
+            List<ExpeditionRelic> allRelics = expeditionRelicRepository.findByShowIdOrShowIdIsNull(exp.getShowId());
+            if (!allRelics.isEmpty()) {
+                // 过滤掉已拥有的遗物
+                List<PlayerRelic> owned = playerRelicRepository.findByExpeditionId(exp.getId());
+                Set<Long> ownedIds = owned.stream().map(PlayerRelic::getRelicId).collect(Collectors.toSet());
+                List<ExpeditionRelic> available = allRelics.stream()
+                        .filter(r -> !ownedIds.contains(r.getId())).collect(Collectors.toList());
+                if (!available.isEmpty()) {
+                    ExpeditionRelic relic = available.get(rand.nextInt(available.size()));
+                    Map<String, Object> relicReward = new HashMap<>();
+                    relicReward.put("type", "new_relic");
+                    relicReward.put("relicId", relic.getId());
+                    relicReward.put("relic", relicToNewMap(relic));
+                    relicReward.put("label", relic.getIcon() + " " + relic.getNameCn());
+                    rewards.add(relicReward);
+                } else {
+                    // 已拥有全部遗物，改为金币
+                    Map<String, Object> gold = new HashMap<>();
+                    gold.put("type", "gold");
+                    gold.put("value", 15);
+                    gold.put("label", "获得15金币");
+                    rewards.add(gold);
+                }
+            } else {
+                Map<String, Object> gold = new HashMap<>();
+                gold.put("type", "gold");
+                gold.put("value", 15);
+                gold.put("label", "获得15金币");
+                rewards.add(gold);
+            }
         } else {
-            Map<String, Object> gold = new HashMap<>();
-            gold.put("type", "gold");
-            gold.put("value", 15);
-            gold.put("label", "获得15金币");
-            rewards.add(gold);
+            List<Long> deck = parseJsonList(exp.getCurrentDeck());
+            if (deck.size() > 3) {
+                Map<String, Object> remove = new HashMap<>();
+                remove.put("type", "remove");
+                remove.put("label", "从牌组移除一张牌");
+                rewards.add(remove);
+            } else {
+                Map<String, Object> gold = new HashMap<>();
+                gold.put("type", "gold");
+                gold.put("value", 15);
+                gold.put("label", "获得15金币");
+                rewards.add(gold);
+            }
         }
 
         return rewards;
@@ -953,12 +1054,13 @@ public class ExpeditionService {
 
     private List<Map<String, Object>> generateBossRewards(Expedition exp) {
         List<Map<String, Object>> rewards = new ArrayList<>();
+        Random rand = new Random();
 
         // Boss固定奖励：稀有卡牌 + 遗物 + 大量金币
         List<Card> cards = cardRepository.findByShowId(exp.getShowId());
         if (!cards.isEmpty()) {
             List<Card> shuffled = new ArrayList<>(cards);
-            Collections.shuffle(shuffled, new Random());
+            Collections.shuffle(shuffled, rand);
             Map<String, Object> cardReward = new HashMap<>();
             cardReward.put("type", "card");
             Card c = shuffled.get(0);
@@ -967,16 +1069,33 @@ public class ExpeditionService {
             rewards.add(cardReward);
         }
 
-        // 遗物
+        // 遗物（从旧表 relics）
         List<Relic> bossRelics = relicRepository.findBySource("boss");
         if (!bossRelics.isEmpty()) {
-            Random rand = new Random();
             Relic r = bossRelics.get(rand.nextInt(bossRelics.size()));
             Map<String, Object> relicReward = new HashMap<>();
             relicReward.put("type", "relic_add");
             relicReward.put("relic", relicToMap(r));
             relicReward.put("label", "获得遗物：" + r.getNameCn());
             rewards.add(relicReward);
+        }
+
+        // 遗物（从新表 expedition_relics）
+        List<ExpeditionRelic> newRelics = expeditionRelicRepository.findByShowIdOrShowIdIsNull(exp.getShowId());
+        if (!newRelics.isEmpty()) {
+            List<PlayerRelic> owned = playerRelicRepository.findByExpeditionId(exp.getId());
+            Set<Long> ownedIds = owned.stream().map(PlayerRelic::getRelicId).collect(Collectors.toSet());
+            List<ExpeditionRelic> available = newRelics.stream()
+                    .filter(r -> !ownedIds.contains(r.getId())).collect(Collectors.toList());
+            if (!available.isEmpty()) {
+                ExpeditionRelic er = available.get(rand.nextInt(available.size()));
+                Map<String, Object> newRelicReward = new HashMap<>();
+                newRelicReward.put("type", "new_relic");
+                newRelicReward.put("relicId", er.getId());
+                newRelicReward.put("relic", relicToNewMap(er));
+                newRelicReward.put("label", er.getIcon() + " " + er.getNameCn() + "（Boss掉落）");
+                rewards.add(newRelicReward);
+            }
         }
 
         Map<String, Object> gold = new HashMap<>();
@@ -1058,6 +1177,23 @@ public class ExpeditionService {
                 result.put("message", "无事发生");
                 break;
             }
+            case "relic": {
+                // 事件奖励遗物
+                List<ExpeditionRelic> relics = expeditionRelicRepository.findByShowIdOrShowIdIsNull(exp.getShowId());
+                if (!relics.isEmpty()) {
+                    List<PlayerRelic> owned = playerRelicRepository.findByExpeditionId(exp.getId());
+                    Set<Long> ownedIds = owned.stream().map(PlayerRelic::getRelicId).collect(Collectors.toSet());
+                    List<ExpeditionRelic> available = relics.stream()
+                            .filter(r -> !ownedIds.contains(r.getId())).collect(Collectors.toList());
+                    if (!available.isEmpty()) {
+                        ExpeditionRelic relic = available.get(new Random().nextInt(available.size()));
+                        addRelicToPlayer(exp, relic.getId());
+                        result.put("relicGained", relic.getNameCn());
+                        result.put("relicIcon", relic.getIcon());
+                    }
+                }
+                break;
+            }
             default: {
                 result.put("message", "效果已应用");
             }
@@ -1087,6 +1223,8 @@ public class ExpeditionService {
                 userCardRepository.save(uc);
             }
         }
+        // 清除远征的遗物（远征结束遗物消失）
+        clearPlayerRelics(exp.getId());
         userRepository.save(user);
     }
 
@@ -1134,6 +1272,53 @@ public class ExpeditionService {
         return defaultValue;
     }
 
+    /**
+     * 获取新遗物系统的效果汇总（从 player_relics + expedition_relics 表）
+     */
+    private Map<String, Integer> getNewRelicEffects(Long expeditionId) {
+        Map<String, Integer> effects = new HashMap<>();
+        List<PlayerRelic> playerRelics = playerRelicRepository.findByExpeditionId(expeditionId);
+        for (PlayerRelic pr : playerRelics) {
+            Optional<ExpeditionRelic> erOpt = expeditionRelicRepository.findById(pr.getRelicId());
+            if (erOpt.isPresent()) {
+                ExpeditionRelic er = erOpt.get();
+                String type = er.getEffectType();
+                Integer value = er.getEffectValue();
+                // 累积效果值（如多个伤害加成叠加）
+                effects.merge(type, value != null ? value : 0, Integer::sum);
+            }
+        }
+        return effects;
+    }
+
+    /**
+     * 添加遗物到玩家当前远征（同时更新 expeditions.relics JSON + player_relics 表）
+     */
+    @Transactional
+    public void addRelicToPlayer(Expedition exp, Long relicId) {
+        // 更新 player_relics 表
+        PlayerRelic pr = new PlayerRelic();
+        pr.setExpeditionId(exp.getId());
+        pr.setRelicId(relicId);
+        playerRelicRepository.save(pr);
+
+        // 同时更新 expeditions.relics JSON（保持向后兼容）
+        List<Long> relics = parseJsonList(exp.getRelics());
+        if (!relics.contains(relicId)) {
+            relics.add(relicId);
+            exp.setRelics(toJson(relics));
+            expeditionRepository.save(exp);
+        }
+    }
+
+    /**
+     * 清除玩家远征的所有遗物（远征结束时）
+     */
+    @Transactional
+    public void clearPlayerRelics(Long expeditionId) {
+        playerRelicRepository.deleteByExpeditionId(expeditionId);
+    }
+
     private Map<String, Object> buildExpeditionData(Expedition exp) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", exp.getId());
@@ -1167,10 +1352,30 @@ public class ExpeditionService {
 
         List<Long> relicIds = parseJsonList(exp.getRelics());
         List<Map<String, Object>> relicData = new ArrayList<>();
+        // 先从旧 relic 表加载
         for (Long rid : relicIds) {
             Optional<Relic> rOpt = relicRepository.findById(rid);
             if (rOpt.isPresent()) {
                 relicData.add(relicToMap(rOpt.get()));
+            }
+        }
+        // 再从新 expedition_relics 表加载（通过 player_relics）
+        List<PlayerRelic> prList = playerRelicRepository.findByExpeditionId(exp.getId());
+        for (PlayerRelic pr : prList) {
+            Optional<ExpeditionRelic> erOpt = expeditionRelicRepository.findById(pr.getRelicId());
+            if (erOpt.isPresent()) {
+                ExpeditionRelic er = erOpt.get();
+                Map<String, Object> rm = new LinkedHashMap<>();
+                rm.put("id", er.getId());
+                rm.put("nameCn", er.getNameCn());
+                rm.put("nameEn", er.getNameEn());
+                rm.put("rarity", er.getRarity());
+                rm.put("effectType", er.getEffectType());
+                rm.put("effectValue", er.getEffectValue());
+                rm.put("descriptionCn", er.getDescriptionCn());
+                rm.put("descriptionEn", er.getDescriptionEn());
+                rm.put("icon", er.getIcon());
+                relicData.add(rm);
             }
         }
         data.put("relics", relicData);
@@ -1200,6 +1405,20 @@ public class ExpeditionService {
         try {
             m.put("effectJson", objectMapper.readValue(r.getEffectJson(), Map.class));
         } catch (Exception ignored) {}
+        return m;
+    }
+
+    private Map<String, Object> relicToNewMap(ExpeditionRelic r) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", r.getId());
+        m.put("nameCn", r.getNameCn());
+        m.put("nameEn", r.getNameEn());
+        m.put("rarity", r.getRarity());
+        m.put("effectType", r.getEffectType());
+        m.put("effectValue", r.getEffectValue());
+        m.put("descriptionCn", r.getDescriptionCn());
+        m.put("descriptionEn", r.getDescriptionEn());
+        m.put("icon", r.getIcon());
         return m;
     }
 

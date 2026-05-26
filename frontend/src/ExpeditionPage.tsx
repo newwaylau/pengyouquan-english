@@ -74,6 +74,12 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Settlement state
   const [settlement, setSettlement] = useState<{ cleared: boolean; expedition: any } | null>(null);
 
+  // Relic acquisition popup
+  const [relicPopup, setRelicPopup] = useState<{ id: number; nameCn: string; nameEn: string; descriptionCn: string; icon: string; rarity: string } | null>(null);
+
+  // Hovered relic for tooltip
+  const [hoveredRelic, setHoveredRelic] = useState<number | null>(null);
+
   // Game phase
   type Phase = 'lobby' | 'map' | 'combat' | 'event' | 'rest' | 'shop' | 'reward' | 'settlement';
   const [phase, setPhase] = useState<Phase>('lobby');
@@ -204,17 +210,40 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (res.code === 200) {
       setExpedition(res.data.expedition);
       setRewardChoices([]);
+
+      // Show relic popup if a new relic was obtained
+      if (choice.type === 'new_relic' && choice.relic) {
+        setRelicPopup({
+          id: choice.relic.id,
+          nameCn: choice.relic.nameCn,
+          nameEn: choice.relic.nameEn,
+          descriptionCn: choice.relic.descriptionCn || choice.relic.effectCn || '',
+          icon: choice.relic.icon || '🪙',
+          rarity: choice.relic.rarity || 'common',
+        });
+        // Auto-dismiss after 3 seconds, then move to next node
+        setTimeout(async () => {
+          setRelicPopup(null);
+          await moveToNextNode();
+        }, 3000);
+        return;
+      }
+
       // Move to next node or show result
-      const nextRes = await apiFetch('/api/expedition/next-node', { method: 'POST' });
-      if (nextRes.code === 200) {
-        if (nextRes.data.cleared) {
-          setSettlement({ cleared: true, expedition: nextRes.data.expedition });
-          setPhase('settlement');
-        } else {
-          setExpedition(nextRes.data.expedition);
-          setNodeType(nextRes.data.nodeType);
-          setPhase('map');
-        }
+      await moveToNextNode();
+    }
+  }
+
+  async function moveToNextNode() {
+    const nextRes = await apiFetch('/api/expedition/next-node', { method: 'POST' });
+    if (nextRes.code === 200) {
+      if (nextRes.data.cleared) {
+        setSettlement({ cleared: true, expedition: nextRes.data.expedition });
+        setPhase('settlement');
+      } else {
+        setExpedition(nextRes.data.expedition);
+        setNodeType(nextRes.data.nodeType);
+        setPhase('map');
       }
     }
   }
@@ -755,6 +784,33 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               </span>
               <span>❤️{expedition.playerHp}/{expedition.maxHp} 🪙{expedition.gold}</span>
               <button className="expedition-abandon-btn" onClick={handleAbandon}>放弃</button>
+              {/* Relic bar */}
+              {expedition.relics && expedition.relics.length > 0 && (
+                <div className="expedition-relic-bar">
+                  {expedition.relics.map((rel: any, i: number) => (
+                    <div
+                      key={i}
+                      className={`expedition-relic-icon expedition-relic-${rel.rarity || 'common'}`}
+                      onMouseEnter={() => setHoveredRelic(i)}
+                      onMouseLeave={() => setHoveredRelic(null)}
+                    >
+                      <span>{rel.icon || '🪙'}</span>
+                      {/* Tooltip */}
+                      {hoveredRelic === i && (
+                        <div className="expedition-relic-tooltip">
+                          <div className="expedition-relic-tooltip-name">
+                            {rel.icon || ''} {rel.nameCn || ''}
+                          </div>
+                          <div className="expedition-relic-tooltip-rarity">{rel.rarity || ''}</div>
+                          <div className="expedition-relic-tooltip-desc">
+                            {rel.descriptionCn || rel.effectCn || rel.effectType || ''}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -766,6 +822,24 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           {phase === 'shop' && renderShop()}
           {phase === 'reward' && renderReward()}
           {phase === 'settlement' && renderSettlement()}
+
+          {/* Relic acquisition popup */}
+          {relicPopup && (
+            <div className="expedition-result-overlay" onClick={() => setRelicPopup(null)}>
+              <div className="expedition-result-card expedition-relic-popup-card">
+                <div className="expedition-relic-popup-icon">{relicPopup.icon}</div>
+                <div className="expedition-relic-popup-title">获得遗物！</div>
+                <div className="expedition-relic-popup-name">{relicPopup.nameCn}</div>
+                <div className={`expedition-relic-popup-rarity expedition-relic-${relicPopup.rarity}`}>
+                  {relicPopup.rarity === 'legendary' ? '传说' : relicPopup.rarity === 'epic' ? '史诗' : relicPopup.rarity === 'rare' ? '稀有' : '普通'}
+                </div>
+                <div className="expedition-relic-popup-desc">{relicPopup.descriptionCn}</div>
+                <button className="expedition-start-btn" style={{ marginTop: 12 }} onClick={() => setRelicPopup(null)}>
+                  确认
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
