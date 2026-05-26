@@ -20,6 +20,8 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
   const [searching, setSearching] = useState(false);
   const [seasonData, setSeasonData] = useState<any>(null);
   const [seasonReward, setSeasonReward] = useState<any>(null);
+  const [seasonRanking, setSeasonRanking] = useState<any>(null);
+  const [seasonTop100, setSeasonTop100] = useState<any[]>([]);
 
   // 挑战表单
   const [challengeDeckId, setChallengeDeckId] = useState<number | null>(null);
@@ -35,12 +37,16 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
   }, []);
 
   const loadSeason = async () => {
-    const [curRes, rewRes] = await Promise.all([
+    const [curRes, rewRes, rankRes, topRes] = await Promise.all([
       cardApi.getCurrentSeason(),
       cardApi.getSeasonRewards(),
+      cardApi.getSeasonRanking(),
+      cardApi.getSeasonTop100(),
     ]);
     if (curRes.code === 200) setSeasonData(curRes.data);
     if (rewRes.code === 200) setSeasonReward(rewRes.data);
+    if (rankRes.code === 200) setSeasonRanking(rankRes.data);
+    if (topRes.code === 200) setSeasonTop100(topRes.data || []);
   };
 
   const loadAll = async () => {
@@ -531,6 +537,73 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
               <div style={{ fontSize: 20 }}>{['👑', '💎', '🥇', '🥈', '🥉', '🪙'][i]}</div>
             </div>
           ))}
+
+          {/* 三模式综合排行 */}
+          <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8, marginTop: 16, fontWeight: 600 }}>
+            🌙 三模式综合排行
+          </div>
+          {seasonRanking?.hasRanking && (
+            <div style={{
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 12,
+              border: '1px solid #ffd700',
+              boxShadow: '0 4px 20px rgba(255,215,0,0.1)'
+            }}>
+              <div style={{ fontSize: 13, color: '#ffd700', fontWeight: 600, marginBottom: 8 }}>
+                我的排名: #{seasonRanking.rankPosition || '-'}
+                {seasonRanking.title && <span style={{ marginLeft: 8 }}>👑 {seasonRanking.title}</span>}
+              </div>
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'space-around' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700 }}>{seasonRanking.pvpScore}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 11 }}>PVP奖杯</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700 }}>{seasonRanking.expeditionScore}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 11 }}>远征评分</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700 }}>{seasonRanking.guildScore}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 11 }}>公会贡献</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#ffd700', fontSize: 18, fontWeight: 700 }}>{seasonRanking.totalScore}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 11 }}>综合评分</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TOP10 */}
+          {seasonTop100.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>🏆 TOP 10</div>
+              {seasonTop100.slice(0, 10).map((p: any, i: number) => {
+                const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+                return (
+                  <div key={p.userId} className="cc-deck-item" style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    borderLeft: `3px solid ${i < 3 ? '#ffd700' : 'var(--border)'}`,
+                    background: i < 3 ? 'rgba(255,215,0,0.05)' : undefined,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: i < 3 ? '#ffd700' : 'var(--text-secondary)', width: 24 }}>{rankIcon}</span>
+                      <div>
+                        <div style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600 }}>
+                          {p.nickname}
+                          {p.title && <span style={{ fontSize: 11, color: '#ffd700', marginLeft: 6 }}>{p.title}</span>}
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
+                          PVP:{p.pvpScore} 远征:{p.expeditionScore} 公会:{p.guildScore}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ color: '#ffd700', fontWeight: 700, fontSize: 16 }}>{p.totalScore}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* 当前用户赛季奖励状态 */}
           {seasonReward?.seasonReward?.settled && (

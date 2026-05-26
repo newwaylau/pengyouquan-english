@@ -3,10 +3,12 @@ import { cardApi } from './api/cardClient';
 import { gameApi } from './api/client';
 import DeckBuilderPage from './DeckBuilderPage';
 import ChestPanel from './ChestPanel';
+import AchievementPage from './AchievementPage';
 
 const RARITY_ORDER = ['legendary', 'epic', 'rare', 'common'];
 const RARITY_CN: Record<string, string> = { legendary: '传说', epic: '史诗', rare: '稀有', common: '普通' };
 const CRAFT_COSTS: Record<string, number> = { legendary: 3200, epic: 800, rare: 160, common: 40 };
+const GOLDEN_CRAFT_COSTS: Record<string, number> = { legendary: 6400, epic: 1600 };
 const DISENCHANT_VALUES: Record<string, number> = { legendary: 400, epic: 100, rare: 20, common: 5 };
 const RARITY_COLORS: Record<string, string> = {
   legendary: '#ff8c00',
@@ -22,7 +24,8 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 export default function CardCollectionPage({ user, onNavigate }: { user: any; onNavigate: (target: string, data?: any) => void }) {
-  const [tab, setTab] = useState<'cards' | 'decks' | 'arena' | 'craft'>('cards');
+  const [tab, setTab] = useState<'cards' | 'decks' | 'arena' | 'craft' | 'achievements'>('cards');
+  const [craftSubTab, setCraftSubTab] = useState<'normal' | 'golden'>('normal');
   const [myCards, setMyCards] = useState<any[]>([]);
   const [allCards, setAllCards] = useState<any[]>([]);
   const [decks, setDecks] = useState<any[]>([]);
@@ -31,7 +34,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
   const [craftRarityFilter, setCraftRarityFilter] = useState<string | null>(null);
 
-  // Arena data for 战绩 tab
+  // Arena data
   const [prestige, setPrestige] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
 
@@ -39,6 +42,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
   const [stardust, setStardust] = useState(0);
   const [disenchantConfirm, setDisenchantConfirm] = useState<any>(null);
   const [craftConfirm, setCraftConfirm] = useState<any>(null);
+  const [goldenCraftCards, setGoldenCraftCards] = useState<any[]>([]);
   const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
@@ -65,6 +69,11 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
     if (res.code === 200) setStardust(res.data?.stardust || 0);
   };
 
+  const loadGoldenCraftCards = async () => {
+    const res = await cardApi.getCraftableGoldenCards();
+    if (res.code === 200) setGoldenCraftCards(res.data || []);
+  };
+
   const handleDisenchant = async (cardId: number) => {
     setDisenchantConfirm(null);
     const res = await cardApi.disenchantCard(cardId);
@@ -81,12 +90,14 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
 
   const handleCraft = async (cardId: number) => {
     setCraftConfirm(null);
-    const res = await cardApi.craftCard(cardId);
+    const isGolden = craftSubTab === 'golden';
+    const res = isGolden ? await cardApi.craftGoldenCard(cardId) : await cardApi.craftCard(cardId);
     if (res.code === 200) {
-      setToastMsg(`🎉 合成了新卡牌！消耗 ${res.data.stardustCost} 星尘`);
+      setToastMsg(`🎉 ${isGolden ? '合成了金卡' : '合成了新卡牌'}！消耗 ${res.data.stardustCost} 星尘`);
       setTimeout(() => setToastMsg(''), 3000);
       loadData();
       loadStardust();
+      if (isGolden) loadGoldenCraftCards();
     } else {
       setToastMsg(res.message || '合成失败');
       setTimeout(() => setToastMsg(''), 3000);
@@ -105,6 +116,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
   // Stats
   const ownedCount = myCards.reduce((sum, c) => sum + c.quantity, 0);
   const totalCards = allCards.length;
+  const goldenCount = myCards.filter(c => c.golden).length;
   const rarityStats = RARITY_ORDER.map(r => ({
     rarity: r,
     label: RARITY_CN[r],
@@ -118,6 +130,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
   const mergedCards = allCards.map(c => ({
     ...c,
     quantity: cardMap.get(c.id)?.quantity || 0,
+    golden: cardMap.get(c.id)?.golden || false,
   }));
 
   if (showDeckBuilder) {
@@ -133,19 +146,17 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
 
   return (
     <div className="card-collection-page">
-      {/* 宝箱面板 */}
       <ChestPanel user={user} />
 
-      {/* Header */}
       <div className="cc-header">
         <h2 className="cc-title">🎴 我的卡牌</h2>
         <div className="cc-fragments" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <span>✨ 星尘 <span className="cc-frag-count">{stardust}</span></span>
           <span>🧩 碎片 <span className="cc-frag-count">{ownedCount}/{totalCards}</span></span>
+          {goldenCount > 0 && <span>🌟 金卡 <span className="cc-frag-count">{goldenCount}</span></span>}
         </div>
       </div>
 
-      {/* Stats row */}
       <div className="cards-stats">
         {rarityStats.map(s => (
           <div key={s.rarity} className="cs-item" style={{ borderLeftColor: s.color }}>
@@ -155,7 +166,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         ))}
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - include 成就 */}
       <div className="cards-subtabs">
         <button className={`cst-btn ${tab === 'cards' ? 'active' : ''}`} onClick={() => setTab('cards')}>
           📖 卡册
@@ -169,46 +180,53 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         <button className={`cst-btn ${tab === 'craft' ? 'active' : ''}`} onClick={() => { setTab('craft'); loadStardust(); }}>
           ✨ 合成
         </button>
+        <button className={`cst-btn ${tab === 'achievements' ? 'active' : ''}`} onClick={() => setTab('achievements')}>
+          🏆 成就
+        </button>
       </div>
 
-      {/* Tab content */}
       {tab === 'cards' && (
         <div className="cards-grid">
           {mergedCards.map(card => (
             <div
               key={card.id}
-              className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'}`}
+              className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'} ${card.golden ? 'golden-card' : ''}`}
               onClick={() => setSelectedCard(card)}
             >
+              {card.golden && <div className="golden-glow" />}
               <div className="cg-rarity-bar" style={{ background: RARITY_COLORS[card.rarity] }} />
               <div className="cg-type-icon">{TYPE_ICONS[card.cardType] || '🃏'}</div>
               <div className="cg-cost">{card.cost}</div>
+              {card.golden && <div className="cg-golden-star">🌟</div>}
               <div className="cg-rarity-label" style={{ color: RARITY_COLORS[card.rarity] }}>
                 {RARITY_CN[card.rarity] || card.rarity}
               </div>
               <div className="cg-name">{card.nameCn}</div>
               <div className="cg-name-en">{card.nameEn}</div>
               <div className="cg-stats">
-                {card.attack !== null && <span className="cg-atk">⚔️{card.attack}</span>}
-                {card.health !== null && <span className="cg-hp">❤️{card.health}</span>}
+                {card.attack !== null && <span className="cg-atk" style={{ color: card.golden ? '#ffd700' : undefined }}>⚔️{card.attack}</span>}
+                {card.health !== null && <span className="cg-hp" style={{ color: card.golden ? '#ffd700' : undefined }}>❤️{card.health}</span>}
               </div>
-              {card.quantity > 0 ? (
+              {card.golden ? (
+                <div className="cg-owned" style={{ background: 'linear-gradient(90deg, #ffd700, #ffaa00)', color: '#000' }}>🌟 金卡</div>
+              ) : card.quantity > 0 ? (
                 <div className="cg-owned">×{card.quantity}</div>
               ) : (
                 <div className="cg-unowned">未收集</div>
               )}
-              {card.quantity > 0 && (
+              {card.quantity > 0 && !card.golden && (
                 <button className="cg-disenchant-btn"
                   onClick={e => { e.stopPropagation(); setDisenchantConfirm(card); }}
-                  title="分解"
+                  title="分解卡牌"
                   style={{
-                    position: 'absolute', top: 4, left: 4, width: 24, height: 24,
-                    background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%',
-                    color: '#ef4444', fontSize: 12, cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 2,
+                    position: 'absolute', top: 4, right: 4, width: 32, height: 32,
+                    background: 'rgba(220,38,38,0.85)', border: 'none', borderRadius: '50%',
+                    color: '#fff', fontSize: 16, cursor: 'pointer', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(220,38,38,0.5)',
                   }}
                 >
-                  ⛏️
+                  ✦
                 </button>
               )}
             </div>
@@ -304,7 +322,6 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
             </div>
           )}
 
-          {/* History */}
           <div className="cc-section-title">📜 战报</div>
           {history.length === 0 ? (
             <div className="cc-empty" style={{ padding: 16 }}>
@@ -322,55 +339,134 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         </div>
       )}
 
-      {/* ✨ 合成 tab */}
+      {/* 合成 tab */}
       {tab === 'craft' && (
         <div className="cc-craft-tab">
           <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12, textAlign: 'center' }}>
             ✨ 星尘余额: <strong style={{ color: '#fbbf24', fontSize: 18 }}>{stardust}</strong>
           </div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {RARITY_ORDER.map(r => (
-              <button key={r}
-                onClick={() => setCraftRarityFilter(r === craftRarityFilter ? null : r)}
-                style={{
-                  padding: '4px 14px', borderRadius: 'var(--radius-sm)',
-                  border: `1px solid ${craftRarityFilter === r ? RARITY_COLORS[r] : 'var(--border)'}`,
-                  background: craftRarityFilter === r ? `${RARITY_COLORS[r]}22` : 'transparent',
-                  color: craftRarityFilter === r ? RARITY_COLORS[r] : 'var(--text-secondary)',
-                  fontSize: 13, cursor: 'pointer', fontWeight: craftRarityFilter === r ? 600 : 400,
-                }}
-              >
-                {RARITY_CN[r]}
-              </button>
-            ))}
+
+          {/* 子标签: 普通 / 金卡 */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, justifyContent: 'center' }}>
             <button
-              onClick={() => setCraftRarityFilter(null)}
+              onClick={() => setCraftSubTab('normal')}
               style={{
-                padding: '4px 14px', borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)',
-                background: !craftRarityFilter ? 'var(--hover-bg)' : 'transparent',
-                color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer',
+                padding: '6px 20px', borderRadius: 'var(--radius-sm)',
+                border: `1px solid ${craftSubTab === 'normal' ? 'var(--teal)' : 'var(--border)'}`,
+                background: craftSubTab === 'normal' ? 'var(--teal)' : 'transparent',
+                color: craftSubTab === 'normal' ? '#fff' : 'var(--text-secondary)',
+                fontSize: 13, cursor: 'pointer', fontWeight: 600,
               }}
             >
-              全部
+              普通合成
+            </button>
+            <button
+              onClick={() => { setCraftSubTab('golden'); loadGoldenCraftCards(); }}
+              style={{
+                padding: '6px 20px', borderRadius: 'var(--radius-sm)',
+                border: `1px solid ${craftSubTab === 'golden' ? '#ffd700' : 'var(--border)'}`,
+                background: craftSubTab === 'golden' ? 'rgba(255,215,0,0.15)' : 'transparent',
+                color: craftSubTab === 'golden' ? '#ffd700' : 'var(--text-secondary)',
+                fontSize: 13, cursor: 'pointer', fontWeight: 600,
+              }}
+            >
+              🌟 金卡合成
             </button>
           </div>
-          <div className="cards-grid">
-            {mergedCards
-              .filter(c => !craftRarityFilter || c.rarity === craftRarityFilter)
-              .sort((a, b) => {
-                const aHas = a.quantity > 0 ? 1 : 0;
-                const bHas = b.quantity > 0 ? 1 : 0;
-                return aHas - bHas;
-              })
-              .map(card => {
-                const cost = CRAFT_COSTS[card.rarity] || 9999;
-                const canCraft = stardust >= cost;
+
+          {craftSubTab === 'normal' && (
+            <>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {RARITY_ORDER.map(r => (
+                  <button key={r}
+                    onClick={() => setCraftRarityFilter(r === craftRarityFilter ? null : r)}
+                    style={{
+                      padding: '4px 14px', borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${craftRarityFilter === r ? RARITY_COLORS[r] : 'var(--border)'}`,
+                      background: craftRarityFilter === r ? `${RARITY_COLORS[r]}22` : 'transparent',
+                      color: craftRarityFilter === r ? RARITY_COLORS[r] : 'var(--text-secondary)',
+                      fontSize: 13, cursor: 'pointer', fontWeight: craftRarityFilter === r ? 600 : 400,
+                    }}
+                  >
+                    {RARITY_CN[r]}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCraftRarityFilter(null)}
+                  style={{
+                    padding: '4px 14px', borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)',
+                    background: !craftRarityFilter ? 'var(--hover-bg)' : 'transparent',
+                    color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer',
+                  }}
+                >
+                  全部
+                </button>
+              </div>
+              <div className="cards-grid">
+                {mergedCards
+                  .filter(c => !craftRarityFilter || c.rarity === craftRarityFilter)
+                  .sort((a, b) => {
+                    const aHas = a.quantity > 0 ? 1 : 0;
+                    const bHas = b.quantity > 0 ? 1 : 0;
+                    return aHas - bHas;
+                  })
+                  .map(card => {
+                    const cost = CRAFT_COSTS[card.rarity] || 9999;
+                    const canCraft = stardust >= cost;
+                    return (
+                      <div key={card.id} className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'}`}
+                        onClick={() => setSelectedCard(card)}
+                        style={{ position: 'relative' }}
+                      >
+                        <div className="cg-rarity-bar" style={{ background: RARITY_COLORS[card.rarity] }} />
+                        <div className="cg-type-icon">{TYPE_ICONS[card.cardType] || '🃏'}</div>
+                        <div className="cg-cost">{card.cost}</div>
+                        <div className="cg-rarity-label" style={{ color: RARITY_COLORS[card.rarity] }}>
+                          {RARITY_CN[card.rarity] || card.rarity}
+                        </div>
+                        <div className="cg-name">{card.nameCn}</div>
+                        <div className="cg-name-en">{card.nameEn}</div>
+                        {card.quantity > 0 ? (
+                          <div className="cg-owned">拥有 ×{card.quantity}</div>
+                        ) : (
+                          <div className="cg-unowned">未收集</div>
+                        )}
+                        <div style={{ marginTop: 4, color: canCraft ? '#fbbf24' : 'var(--danger)', fontSize: 11 }}>
+                          ✨ {cost}
+                        </div>
+                        <button
+                          className="btn btn-sm"
+                          style={{
+                            marginTop: 6, width: '100%', padding: '4px',
+                            background: canCraft ? 'var(--teal)' : 'rgba(255,255,255,0.08)',
+                            border: 'none', color: canCraft ? '#fff' : 'var(--text-secondary)',
+                            borderRadius: 'var(--radius-sm)', cursor: canCraft ? 'pointer' : 'not-allowed',
+                            fontSize: 12,
+                          }}
+                          disabled={!canCraft}
+                          onClick={e => { e.stopPropagation(); if (canCraft) setCraftConfirm(card); }}
+                        >
+                          {canCraft ? '合成' : '星尘不足'}
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </>
+          )}
+
+          {craftSubTab === 'golden' && (
+            <div className="cards-grid">
+              {goldenCraftCards.map(card => {
+                const cost = GOLDEN_CRAFT_COSTS[card.rarity] || 9999;
+                const canCraft = stardust >= cost && !card.golden;
                 return (
-                  <div key={card.id} className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'}`}
+                  <div key={card.id} className={`cg-card rarity-${card.rarity} golden-card ${card.golden ? 'owned' : 'unowned'}`}
                     onClick={() => setSelectedCard(card)}
                     style={{ position: 'relative' }}
                   >
+                    <div className="golden-glow" />
                     <div className="cg-rarity-bar" style={{ background: RARITY_COLORS[card.rarity] }} />
                     <div className="cg-type-icon">{TYPE_ICONS[card.cardType] || '🃏'}</div>
                     <div className="cg-cost">{card.cost}</div>
@@ -379,46 +475,52 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
                     </div>
                     <div className="cg-name">{card.nameCn}</div>
                     <div className="cg-name-en">{card.nameEn}</div>
-                    {card.quantity > 0 ? (
-                      <div className="cg-owned">拥有 ×{card.quantity}</div>
+                    {card.golden ? (
+                      <div className="cg-owned" style={{ background: 'linear-gradient(90deg, #ffd700, #ffaa00)', color: '#000' }}>🌟 已拥有</div>
                     ) : (
-                      <div className="cg-unowned">未收集</div>
+                      <div className="cg-unowned">未合成</div>
                     )}
-                    <div style={{ marginTop: 4, color: canCraft ? '#fbbf24' : 'var(--danger)', fontSize: 11 }}>
-                      ✨ {cost}
+                    <div style={{ marginTop: 4, color: canCraft ? '#ffd700' : 'var(--danger)', fontSize: 11 }}>
+                      🌟 {cost}
                     </div>
                     <button
                       className="btn btn-sm"
                       style={{
                         marginTop: 6, width: '100%', padding: '4px',
-                        background: canCraft ? 'var(--teal)' : 'rgba(255,255,255,0.08)',
-                        border: 'none', color: canCraft ? '#fff' : 'var(--text-secondary)',
+                        background: canCraft ? 'linear-gradient(90deg, #ffd700, #ffaa00)' : 'rgba(255,255,255,0.08)',
+                        border: 'none', color: canCraft ? '#000' : 'var(--text-secondary)',
                         borderRadius: 'var(--radius-sm)', cursor: canCraft ? 'pointer' : 'not-allowed',
-                        fontSize: 12,
+                        fontSize: 12, fontWeight: 600,
                       }}
                       disabled={!canCraft}
                       onClick={e => { e.stopPropagation(); if (canCraft) setCraftConfirm(card); }}
                     >
-                      {canCraft ? '合成' : '星尘不足'}
+                      {card.golden ? '已拥有' : canCraft ? '合成金卡' : '星尘不足'}
                     </button>
                   </div>
                 );
               })}
-          </div>
-          {mergedCards.filter(c => !craftRarityFilter || c.rarity === craftRarityFilter).length === 0 && (
+              {goldenCraftCards.length === 0 && (
+                <div className="cc-empty"><div className="cc-empty-text">暂无可用金卡</div></div>
+              )}
+            </div>
+          )}
+
+          {craftSubTab === 'normal' && mergedCards.filter(c => !craftRarityFilter || c.rarity === craftRarityFilter).length === 0 && (
             <div className="cc-empty"><div className="cc-empty-text">暂无卡牌</div></div>
           )}
         </div>
       )}
 
-      {/* Match button */}
+      {/* 成就 tab */}
+      {tab === 'achievements' && <AchievementPage />}
+
       <div className="cc-match-btn">
         <button className="btn btn-lg" disabled style={{ width: '100%', opacity: 0.5 }}>
           ⚔️ 匹配对战 · 即将开放
         </button>
       </div>
 
-      {/* 分解确认弹窗 */}
       {disenchantConfirm && (
         <div className="card-detail-overlay" onClick={() => setDisenchantConfirm(null)}>
           <div className="card-detail-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 340 }}>
@@ -445,18 +547,19 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         </div>
       )}
 
-      {/* 合成确认弹窗 */}
       {craftConfirm && (
         <div className="card-detail-overlay" onClick={() => setCraftConfirm(null)}>
           <div className="card-detail-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 340 }}>
             <button className="cd-close" onClick={() => setCraftConfirm(null)}>✕</button>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>✨</div>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>{craftSubTab === 'golden' ? '🌟' : '✨'}</div>
               <div style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
-                合成 {craftConfirm.nameCn}
+                {craftSubTab === 'golden' ? '合成金卡 ' : '合成 '}{craftConfirm.nameCn}
               </div>
               <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 4 }}>
-                消耗 <strong style={{ color: '#fbbf24' }}>{CRAFT_COSTS[craftConfirm.rarity] || 0} 星尘</strong>
+                消耗 <strong style={{ color: craftSubTab === 'golden' ? '#ffd700' : '#fbbf24' }}>
+                  {(craftSubTab === 'golden' ? GOLDEN_CRAFT_COSTS[craftConfirm.rarity] : CRAFT_COSTS[craftConfirm.rarity]) || 0} 星尘
+                </strong>
               </div>
               <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
                 星尘余额: {stardust}
@@ -472,7 +575,6 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         </div>
       )}
 
-      {/* Toast */}
       {toastMsg && (
         <div style={{
           position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
@@ -484,23 +586,24 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
         </div>
       )}
 
-      {/* Card Detail Modal */}
       {selectedCard && (
         <div className="card-detail-overlay" onClick={() => setSelectedCard(null)}>
-          <div className="card-detail-modal" onClick={e => e.stopPropagation()}>
+          <div className={`card-detail-modal ${selectedCard.golden ? 'golden-detail' : ''}`} onClick={e => e.stopPropagation()}>
             <button className="cd-close" onClick={() => setSelectedCard(null)}>✕</button>
-            <div className={`cd-rarity-bar rarity-${selectedCard.rarity}`} style={{ background: RARITY_COLORS[selectedCard.rarity] }} />
+            {selectedCard.golden && <div className="golden-glow" />}
+            <div className={`cd-rarity-bar rarity-${selectedCard.rarity}`} style={{ background: selectedCard.golden ? 'linear-gradient(90deg, #ffd700, #ffaa00)' : RARITY_COLORS[selectedCard.rarity] }} />
             <div className="cd-type-icon">{TYPE_ICONS[selectedCard.cardType] || '🃏'}</div>
             <div className="cd-cost">{selectedCard.cost}</div>
-            <div className="cd-rarity" style={{ color: RARITY_COLORS[selectedCard.rarity] }}>
-              {RARITY_CN[selectedCard.rarity] || selectedCard.rarity}
+            {selectedCard.golden && <div style={{ position: 'absolute', top: 60, right: 20, fontSize: 24 }}>🌟</div>}
+            <div className="cd-rarity" style={{ color: selectedCard.golden ? '#ffd700' : RARITY_COLORS[selectedCard.rarity] }}>
+              {selectedCard.golden ? '金卡 ' : ''}{RARITY_CN[selectedCard.rarity] || selectedCard.rarity}
             </div>
             <div className="cd-name">{selectedCard.nameCn}</div>
             <div className="cd-name-en">{selectedCard.nameEn}</div>
             {selectedCard.attack !== null && (
               <div className="cd-stats-row">
-                <span className="cd-atk">⚔️ 攻击 {selectedCard.attack}</span>
-                <span className="cd-hp">❤️ 生命 {selectedCard.health}</span>
+                <span className="cd-atk" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>⚔️ 攻击 {selectedCard.attack}</span>
+                <span className="cd-hp" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>❤️ 生命 {selectedCard.health}</span>
               </div>
             )}
             {selectedCard.effectJson && (() => {
@@ -520,7 +623,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
               } catch { return null; }
             })()}
             {selectedCard.quoteText && (
-              <div className="cd-quote">“{selectedCard.quoteText}”</div>
+              <div className="cd-quote">"{selectedCard.quoteText}"</div>
             )}
             <div className="cd-faction">{selectedCard.faction || '中立'}</div>
             <div className="cd-owned">拥有 ×{selectedCard.quantity}</div>

@@ -24,6 +24,9 @@ public class UserCard {
     @Column(nullable = false)
     private Integer quantity = 1;
 
+    @Column(name = "is_golden")
+    private Boolean isGolden = false;
+
     @Column(name = "obtained_at", updatable = false)
     private LocalDateTime obtainedAt;
 

@@ -50,6 +50,9 @@ public class Card {
     @Column(name = "quote_text", length = 500)
     private String quoteText;
 
+    @Column(name = "has_golden")
+    private Boolean hasGolden = false;
+
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 

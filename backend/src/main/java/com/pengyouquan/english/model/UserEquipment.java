@@ -20,4 +20,13 @@ public class UserEquipment {
 
     @Column(nullable = false)
     private Integer quantity = 1;
+
+    @Column(nullable = false)
+    private Integer level = 1;
+
+    @Column(name = "bonus_stats", columnDefinition = "JSON")
+    private String bonusStats;
+
+    @Column(name = "reroll_count", nullable = false)
+    private Integer rerollCount = 0;
 }

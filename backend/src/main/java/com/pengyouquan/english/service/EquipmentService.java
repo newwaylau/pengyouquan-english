@@ -15,15 +15,18 @@ public class EquipmentService {
     private final UserEquipmentRepository userEquipmentRepository;
     private final HeroGearRepository heroGearRepository;
     private final UserRepository userRepository;
+    private final EquipmentSetRepository equipmentSetRepository;
 
     public EquipmentService(EquipmentRepository equipmentRepository,
                             UserEquipmentRepository userEquipmentRepository,
                             HeroGearRepository heroGearRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository,
+                            EquipmentSetRepository equipmentSetRepository) {
         this.equipmentRepository = equipmentRepository;
         this.userEquipmentRepository = userEquipmentRepository;
         this.heroGearRepository = heroGearRepository;
         this.userRepository = userRepository;
+        this.equipmentSetRepository = equipmentSetRepository;
     }
 
     private static final Map<String, Integer> RARITY_ORDER = Map.of(
@@ -57,6 +60,10 @@ public class EquipmentService {
                 .collect(Collectors.toMap(UserEquipment::getEquipmentId, UserEquipment::getId,
                         (a, b) -> a));
 
+        // Build user equipment detail map
+        Map<Long, UserEquipment> ueDetailMap = owned.stream()
+                .collect(Collectors.toMap(UserEquipment::getEquipmentId, ue -> ue, (a, b) -> a));
+
         List<Map<String, Object>> equipmentList = allEquipment.stream().map(eq -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", eq.getId());
@@ -70,6 +77,17 @@ public class EquipmentService {
             item.put("unlockCondition", eq.getUnlockCondition());
             item.put("owned", ownedMap.getOrDefault(eq.getId(), 0));
             item.put("userEquipmentId", ueIdMap.get(eq.getId()));
+            // 等级/重铸信息
+            UserEquipment ue = ueDetailMap.get(eq.getId());
+            if (ue != null) {
+                item.put("level", ue.getLevel());
+                item.put("bonusStats", parseJson(ue.getBonusStats()));
+                item.put("rerollCount", ue.getRerollCount());
+            } else {
+                item.put("level", 1);
+                item.put("bonusStats", Map.of());
+                item.put("rerollCount", 0);
+            }
             return item;
         }).collect(Collectors.toList());
 
@@ -141,6 +159,9 @@ public class EquipmentService {
         item.put("rarity", eq.getRarity());
         item.put("statBonus", parseJson(eq.getStatBonus()));
         item.put("effectJson", parseJson(eq.getEffectJson()));
+        item.put("level", ue.getLevel());
+        item.put("bonusStats", parseJson(ue.getBonusStats()));
+        item.put("rerollCount", ue.getRerollCount());
         return item;
     }
 
@@ -271,7 +292,22 @@ public class EquipmentService {
             setInfo.put("setName", entry.getKey());
             setInfo.put("count", entry.getValue().size());
             setInfo.put("total", 5);
-            setInfo.put("active", entry.getValue().size() >= 3); // 3件以上激活套装
+
+            // 从 equipment_sets 获取详细信息
+            EquipmentSet setDetail = equipmentSetRepository.findBySetKey(entry.getKey()).orElse(null);
+            if (setDetail != null) {
+                setInfo.put("nameCn", setDetail.getNameCn());
+                setInfo.put("twoPieceEffect", setDetail.getTwoPieceEffectCn());
+                setInfo.put("fivePieceEffect", setDetail.getFivePieceEffectCn());
+            }
+
+            boolean twoPieceActive = entry.getValue().size() >= 2;
+            boolean fivePieceActive = entry.getValue().size() >= 5;
+
+            setInfo.put("twoPieceActive", twoPieceActive);
+            setInfo.put("fivePieceActive", fivePieceActive);
+            setInfo.put("active", twoPieceActive);
+
             setInfo.put("items", entry.getValue().stream().map(eq -> {
                 Map<String, Object> item = new HashMap<>();
                 item.put("nameCn", eq.getNameCn());
@@ -317,6 +353,17 @@ public class EquipmentService {
         Equipment eq = equipmentRepository.findById(ue.getEquipmentId())
                 .orElseThrow(() -> new IllegalStateException("装备配置不存在"));
 
+        // 检查等级上限
+        int maxLevel = switch (eq.getRarity()) {
+            case "legendary" -> 20;
+            case "epic" -> 15;
+            case "rare" -> 10;
+            default -> 5;
+        };
+        if (ue.getLevel() >= maxLevel) {
+            throw new IllegalStateException("装备已达最高等级(" + maxLevel + ")");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("用户不存在"));
 
@@ -328,13 +375,13 @@ public class EquipmentService {
         user.setStardust(user.getStardust() - cost);
         userRepository.save(user);
 
-        // 升级：增加数量（track 升级次数）
-        ue.setQuantity(ue.getQuantity() + 1);
+        // 升级
+        ue.setLevel(ue.getLevel() + 1);
         userEquipmentRepository.save(ue);
 
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
-        result.put("newLevel", ue.getQuantity());
+        result.put("newLevel", ue.getLevel());
         result.put("stardustRemaining", user.getStardust());
         return result;
     }
@@ -342,6 +389,7 @@ public class EquipmentService {
     /**
      * 重铸属性（消耗星尘）
      */
+    @SuppressWarnings("unchecked")
     @Transactional
     public Map<String, Object> rerollStats(Long userId, Long userEquipmentId) {
         UserEquipment ue = userEquipmentRepository.findById(userEquipmentId)
@@ -352,6 +400,17 @@ public class EquipmentService {
 
         Equipment eq = equipmentRepository.findById(ue.getEquipmentId())
                 .orElseThrow(() -> new IllegalStateException("装备配置不存在"));
+
+        // 检查重铸次数上限
+        int maxRerolls = switch (eq.getRarity()) {
+            case "legendary" -> 30;
+            case "epic" -> 20;
+            case "rare" -> 10;
+            default -> 5;
+        };
+        if (ue.getRerollCount() >= maxRerolls) {
+            throw new IllegalStateException("该装备已达最大重铸次数(" + maxRerolls + ")");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("用户不存在"));
@@ -364,9 +423,30 @@ public class EquipmentService {
         user.setStardust(user.getStardust() - cost);
         userRepository.save(user);
 
+        // 重铸：随机生成新的 bonus_stats
+        Map<String, Object> currentBonus = parseJson(ue.getBonusStats());
+        if (currentBonus == null) currentBonus = new HashMap<>();
+
+        // 从 stat_bonus 中选一条属性随机变化
+        Map<String, Object> baseStats = parseJson(eq.getStatBonus());
+        if (baseStats != null && !baseStats.isEmpty()) {
+            List<String> statKeys = new ArrayList<>(baseStats.keySet());
+            String keyToReroll = statKeys.get(new Random().nextInt(statKeys.size()));
+            Object baseVal = baseStats.get(keyToReroll);
+            int base = baseVal instanceof Number ? ((Number) baseVal).intValue() : 0;
+            int variation = new Random().nextInt(5) - 2; // -2 to +2
+            currentBonus.put(keyToReroll, Math.max(0, base + variation));
+        }
+
+        ue.setBonusStats(toJson(currentBonus));
+        ue.setRerollCount(ue.getRerollCount() + 1);
+        userEquipmentRepository.save(ue);
+
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("stardustRemaining", user.getStardust());
+        result.put("bonusStats", currentBonus);
+        result.put("rerollCount", ue.getRerollCount());
         return result;
     }
 
@@ -435,6 +515,14 @@ public class EquipmentService {
                     .readValue(json, Map.class);
         } catch (Exception e) {
             return new HashMap<>();
+        }
+    }
+
+    private String toJson(Object obj) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            return "{}";
         }
     }
 }

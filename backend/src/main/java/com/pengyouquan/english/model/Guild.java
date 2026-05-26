@@ -37,6 +37,12 @@ public class Guild {
     @Column(name = "rank_points", nullable = false)
     private Integer rankPoints = 0;
 
+    @Column(name = "league_score", nullable = false)
+    private Integer leagueScore = 0;
+
+    @Column(name = "league_rank")
+    private Integer leagueRank = 0;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

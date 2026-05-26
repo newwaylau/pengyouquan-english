@@ -64,4 +64,33 @@ public class SeasonController {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         return ApiResponse.success(seasonService.resetAllRanks());
     }
+
+    // ========== 三模式全服排行 ==========
+
+    @GetMapping("/ranking")
+    public ApiResponse<Map<String, Object>> getCurrentRanking(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(seasonService.getCurrentRanking(userId));
+    }
+
+    @GetMapping("/ranking/top100")
+    public ApiResponse<List<Map<String, Object>>> getTop100() {
+        return ApiResponse.success(seasonService.getTop100());
+    }
+
+    @PostMapping("/admin/calculate-ranking")
+    public ApiResponse<Map<String, Object>> calculateRanking() {
+        var active = seasonService.getCurrentSeason();
+        int seasonNumber = active.containsKey("seasonNumber") ?
+                ((Number) active.get("seasonNumber")).intValue() : 1;
+        return ApiResponse.success(seasonService.calculateSeasonRankings(seasonNumber));
+    }
+
+    @PostMapping("/admin/award-titles")
+    public ApiResponse<Map<String, Object>> awardTitles() {
+        var active = seasonService.getCurrentSeason();
+        int seasonNumber = active.containsKey("seasonNumber") ?
+                ((Number) active.get("seasonNumber")).intValue() : 1;
+        return ApiResponse.success(seasonService.awardSeasonTitles(seasonNumber));
+    }
 }

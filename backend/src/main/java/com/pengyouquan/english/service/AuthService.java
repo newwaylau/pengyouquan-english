@@ -22,17 +22,20 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final SystemSettingRepository systemSettingRepository;
     private final EmailCodeService emailCodeService;
+    private final AchievementService achievementService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil,
                        SystemSettingRepository systemSettingRepository,
-                       EmailCodeService emailCodeService) {
+                       EmailCodeService emailCodeService,
+                       AchievementService achievementService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.systemSettingRepository = systemSettingRepository;
         this.emailCodeService = emailCodeService;
+        this.achievementService = achievementService;
     }
 
     /**
@@ -63,6 +66,9 @@ public class AuthService {
         user.setEnabled(true);
         user.setRole("user");
         user = userRepository.save(user);
+
+        // 初始化成就
+        achievementService.initUserAchievements(user.getId());
 
         // 生成 JWT
         String token = jwtUtil.generateToken(user.getId());

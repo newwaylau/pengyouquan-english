@@ -98,4 +98,24 @@ export const cardApi = {
   settleSeason: async () => request('/api/season/settle', { method: 'POST' }),
   claimSeasonReward: async () => request('/api/season/claim', { method: 'POST' }),
   getSeasonRewards: async () => request('/api/season/rewards'),
+
+  // 金卡系统
+  craftGoldenCard: async (cardId: number) =>
+    request('/api/cards/craft-golden', { method: 'POST', body: JSON.stringify({ cardId }) }),
+  getGoldenCards: async () => request('/api/cards/golden'),
+  getCraftableGoldenCards: async () => request('/api/cards/craftable-golden'),
+
+  // 成就系统
+  getAchievements: async () => request('/api/achievements'),
+  claimAchievement: async (achievementId: number) =>
+    request(`/api/achievements/claim/${achievementId}`, { method: 'POST' }),
+  getAchievementStats: async () => request('/api/achievements/stats'),
+
+  // 赛季排行
+  getSeasonRanking: async () => request('/api/season/ranking'),
+  getSeasonTop100: async () => request('/api/season/ranking/top100'),
+
+  // 公会联赛
+  getGuildLeague: async () => request('/api/guilds/league'),
+  getGuildLeagueInfo: async (guildId: number) => request(`/api/guilds/${guildId}/league`),
 };

@@ -22,19 +22,22 @@ public class GamificationService {
     private final DailyChallengeQuestionRepository dailyChallengeQuestionRepository;
     private final StreakRewardRepository streakRewardRepository;
     private final UserStreakRewardRepository userStreakRewardRepository;
+    private final AchievementService achievementService;
 
     public GamificationService(UserRepository userRepository,
                                SentenceRepository sentenceRepository,
                                DailyChallengeRepository dailyChallengeRepository,
                                DailyChallengeQuestionRepository dailyChallengeQuestionRepository,
                                StreakRewardRepository streakRewardRepository,
-                               UserStreakRewardRepository userStreakRewardRepository) {
+                               UserStreakRewardRepository userStreakRewardRepository,
+                               AchievementService achievementService) {
         this.userRepository = userRepository;
         this.sentenceRepository = sentenceRepository;
         this.dailyChallengeRepository = dailyChallengeRepository;
         this.dailyChallengeQuestionRepository = dailyChallengeQuestionRepository;
         this.streakRewardRepository = streakRewardRepository;
         this.userStreakRewardRepository = userStreakRewardRepository;
+        this.achievementService = achievementService;
     }
 
     public PrestigeResponse getPrestige(Long userId) {
@@ -183,6 +186,10 @@ public class GamificationService {
         }
         user.setLastDailyDate(today);
         userRepository.save(user);
+
+        // 成就检查：登录天数 & 每日挑战连击
+        achievementService.checkByConditionType(userId, "login_streak", user.getConsecutiveDays());
+        achievementService.checkByConditionType(userId, "daily_challenge_streak", user.getConsecutiveDays());
 
         // Check rank tier change
         RankTier oldRank = RankTier.fromTier(oldRankTierVal);

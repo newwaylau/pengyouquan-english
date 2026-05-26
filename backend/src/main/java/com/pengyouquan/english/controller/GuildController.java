@@ -129,4 +129,33 @@ public class GuildController {
         // 仅管理员可调用
         return ApiResponse.success(guildService.settleTerritoryWar());
     }
+
+    // ========== 公会联赛 ==========
+
+    @GetMapping("/league")
+    public ApiResponse<java.util.List<Map<String, Object>>> getLeagueStandings(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(guildService.getLeagueStandings());
+    }
+
+    @GetMapping("/{id}/league")
+    public ApiResponse<Map<String, Object>> getGuildLeagueInfo(
+            @CurrentUserId Long userId,
+            @PathVariable Long id) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(guildService.getGuildLeagueInfo(id));
+    }
+
+    @GetMapping("/league/history")
+    public ApiResponse<Map<String, Object>> getLeagueHistory(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        Map<String, Object> result = Map.of("message", "历史赛季功能即将上线");
+        return ApiResponse.success(result);
+    }
+
+    @PostMapping("/admin/calculate-league")
+    public ApiResponse<Map<String, Object>> calculateLeague(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(guildService.calculateLeagueScores());
+    }
 }

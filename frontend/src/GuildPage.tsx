@@ -31,6 +31,9 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
   // Leaderboard
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
+  // League
+  const [leagueData, setLeagueData] = useState<any[]>([]);
+
   useEffect(() => {
     loadMyGuild();
     loadLeaderboard();
@@ -117,6 +120,11 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
     } else {
       alert(res.message);
     }
+  }
+
+  async function loadLeague() {
+    const res = await apiFetch('/api/guilds/league');
+    if (res.code === 200) setLeagueData(res.data || []);
   }
 
   async function handleClaimTreasure(treasureId: number) {
@@ -408,6 +416,43 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
     );
   }
 
+  function renderLeague() {
+    return (
+      <div>
+        <div className="guild-section-title" style={{ marginBottom: 12 }}>🏆 公会联赛</div>
+        {leagueData.length === 0 ? (
+          <div className="guild-empty">暂无联赛数据</div>
+        ) : (
+          <div className="guild-ranking-list">
+            {leagueData.map((g: any) => {
+              let posClass = '';
+              if (g.rank === 1) posClass = 'top1';
+              else if (g.rank === 2) posClass = 'top2';
+              else if (g.rank === 3) posClass = 'top3';
+              const isMyGuild = inGuild && guildData?.id === g.id;
+              return (
+                <div key={g.id} className={`guild-ranking-item ${isMyGuild ? 'my-guild' : ''}`}
+                  style={isMyGuild ? { borderColor: 'var(--teal)', background: 'rgba(20,184,166,0.08)' } : {}}>
+                  <div className={`guild-ranking-pos ${posClass}`}>
+                    {g.rank <= 3 ? ['🥇', '🥈', '🥉'][g.rank - 1] : g.rank}
+                  </div>
+                  <div className="guild-ranking-name">
+                    🏰 {g.name}
+                    {isMyGuild && <span style={{ color: 'var(--teal)', fontSize: 11, marginLeft: 6 }}>(我的)</span>}
+                  </div>
+                  <div className="guild-ranking-stats">
+                    <div style={{ color: '#ffd700', fontWeight: 600 }}>{g.leagueScore} 分</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{g.memberCount}人 · {g.leaderName}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (loading) {
     return <div className="guild-page"><div className="guild-empty">加载中...</div></div>;
   }
@@ -430,6 +475,9 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
         )}
         <button className={`guild-tab ${tab === 'leaderboard' ? 'active' : ''}`} onClick={() => { setTab('leaderboard'); loadLeaderboard(); }}>
           📊 排行
+        </button>
+        <button className={`guild-tab ${tab === 'league' ? 'active' : ''}`} onClick={() => { setTab('league'); loadLeague(); }}>
+          🏆 联赛
         </button>
       </div>
 
@@ -454,6 +502,7 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
       {tab === 'search' && renderSearch()}
       {tab === 'create' && renderCreate()}
       {tab === 'leaderboard' && renderLeaderboard()}
+      {tab === 'league' && renderLeague()}
     </div>
   );
 }

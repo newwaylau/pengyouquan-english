@@ -22,9 +22,11 @@ public class CardResponse {
     private String faction;
     private String quoteText;
     private int quantity;
+    private boolean hasGolden;
+    private boolean isGolden;
 
     public static CardResponse fromCard(com.pengyouquan.english.model.Card card, int quantity, String showName) {
-        return new CardResponse(
+        CardResponse r = new CardResponse(
             card.getId(),
             card.getShowId(),
             showName,
@@ -39,7 +41,16 @@ public class CardResponse {
             card.getChallengeType(),
             card.getFaction(),
             card.getQuoteText(),
-            quantity
+            quantity,
+            Boolean.TRUE.equals(card.getHasGolden()),
+            false
         );
+        return r;
+    }
+
+    public static CardResponse fromCardWithGolden(com.pengyouquan.english.model.Card card, int quantity, String showName, boolean isGolden) {
+        CardResponse r = fromCard(card, quantity, showName);
+        r.setGolden(isGolden);
+        return r;
     }
 }

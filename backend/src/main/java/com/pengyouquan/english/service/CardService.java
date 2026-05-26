@@ -20,6 +20,7 @@ public class CardService {
     private final ShowRepository showRepository;
     private final UserRepository userRepository;
     private final StardustLogRepository stardustLogRepository;
+    private final AchievementService achievementService;
 
     private static final java.util.Map<String, Integer> DISENCHANT_VALUES = java.util.Map.of(
         "common", 5, "rare", 20, "epic", 100, "legendary", 400
@@ -28,18 +29,24 @@ public class CardService {
         "common", 40, "rare", 160, "epic", 800, "legendary", 3200
     );
 
+    private static final java.util.Map<String, Integer> GOLDEN_CRAFT_COSTS = java.util.Map.of(
+        "epic", 1600, "legendary", 6400
+    );
+
     public CardService(CardRepository cardRepository,
                        UserCardRepository userCardRepository,
                        DeckRepository deckRepository,
                        ShowRepository showRepository,
                        UserRepository userRepository,
-                       StardustLogRepository stardustLogRepository) {
+                       StardustLogRepository stardustLogRepository,
+                       AchievementService achievementService) {
         this.cardRepository = cardRepository;
         this.userCardRepository = userCardRepository;
         this.deckRepository = deckRepository;
         this.showRepository = showRepository;
         this.userRepository = userRepository;
         this.stardustLogRepository = stardustLogRepository;
+        this.achievementService = achievementService;
     }
 
     /**
@@ -76,7 +83,7 @@ public class CardService {
         for (UserCard uc : userCards) {
             Card card = cardRepository.findById(uc.getCardId()).orElse(null);
             if (card != null) {
-                result.add(CardResponse.fromCard(card, uc.getQuantity(), getShowName(card.getShowId())));
+                result.add(CardResponse.fromCardWithGolden(card, uc.getQuantity(), getShowName(card.getShowId()), Boolean.TRUE.equals(uc.getIsGolden())));
             }
         }
         // 按稀有度排序: legendary > epic > rare > common
@@ -168,7 +175,56 @@ public class CardService {
             }
         }
 
+        // 成就检查
+        checkCardAchievements(userId);
+
         return new CardPackResult(responses, packType);
+    }
+
+    /**
+     * 检查卡牌收集相关成就
+     */
+    private void checkCardAchievements(Long userId) {
+        List<UserCard> userCards = userCardRepository.findByUserId(userId);
+
+        // 收集卡牌数（去重）
+        long distinctCount = userCards.stream()
+                .map(UserCard::getCardId)
+                .distinct()
+                .count();
+        achievementService.checkByConditionType(userId, "collect_cards", (int) distinctCount);
+
+        // 金卡数
+        long goldenCount = userCards.stream()
+                .filter(uc -> Boolean.TRUE.equals(uc.getIsGolden()))
+                .count();
+        achievementService.checkByConditionType(userId, "golden_cards", (int) goldenCount);
+
+        // 传说卡数（去重）
+        long legendaryCount = userCards.stream()
+                .map(UserCard::getCardId)
+                .distinct()
+                .filter(cardId -> {
+                    Card c = cardRepository.findById(cardId).orElse(null);
+                    return c != null && "legendary".equals(c.getRarity());
+                })
+                .count();
+        achievementService.checkByConditionType(userId, "legendary_cards", (int) legendaryCount);
+
+        // 剧集收集完成度
+        Set<Long> ownedCardIds = userCards.stream()
+                .map(UserCard::getCardId)
+                .collect(java.util.stream.Collectors.toSet());
+        Map<Long, List<Card>> cardsByShow = cardRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Card::getShowId));
+        for (Map.Entry<Long, List<Card>> entry : cardsByShow.entrySet()) {
+            Long showId = entry.getKey();
+            boolean allCollected = entry.getValue().stream()
+                    .allMatch(c -> ownedCardIds.contains(c.getId()));
+            if (allCollected) {
+                achievementService.checkByConditionType(userId, "show_complete", showId.intValue());
+            }
+        }
     }
 
     /**
@@ -322,6 +378,8 @@ public class CardService {
         result.put("stardustCost", cost);
         result.put("newStardust", user.getStardust());
         result.put("cardName", card.getNameCn());
+        // 成就检查
+        checkCardAchievements(userId);
         return result;
     }
 
@@ -333,6 +391,121 @@ public class CardService {
                 .orElseThrow(() -> new IllegalStateException("用户不存在"));
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("stardust", user.getStardust());
+        return result;
+    }
+
+    // ========== 金卡系统 ==========
+
+    /**
+     * 合成金卡
+     */
+    @Transactional
+    public Map<String, Object> craftGoldenCard(Long userId, Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalStateException("卡牌不存在"));
+
+        if (!Boolean.TRUE.equals(card.getHasGolden())) {
+            throw new IllegalStateException("该卡牌没有金卡版本");
+        }
+        if (!"epic".equals(card.getRarity()) && !"legendary".equals(card.getRarity())) {
+            throw new IllegalStateException("只有史诗和传说卡牌可以合成金卡");
+        }
+
+        int cost = GOLDEN_CRAFT_COSTS.getOrDefault(card.getRarity(), 0);
+        if (cost <= 0) {
+            throw new IllegalStateException("该卡牌无法合成金卡");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("用户不存在"));
+
+        if (user.getStardust() < cost) {
+            throw new IllegalStateException("星尘不足，需要 " + cost + " 星尘合成金卡");
+        }
+
+        // 检查是否已拥有金卡
+        Optional<UserCard> existing = userCardRepository.findByUserIdAndCardId(userId, cardId);
+        if (existing.isPresent() && Boolean.TRUE.equals(existing.get().getIsGolden())) {
+            throw new IllegalStateException("已拥有该卡牌的金卡版本");
+        }
+
+        // 扣除星尘
+        user.setStardust(user.getStardust() - cost);
+        userRepository.save(user);
+
+        if (existing.isPresent()) {
+            UserCard uc = existing.get();
+            uc.setIsGolden(true);
+            uc.setQuantity(uc.getQuantity() + 1);
+            userCardRepository.save(uc);
+        } else {
+            UserCard uc = new UserCard();
+            uc.setUserId(userId);
+            uc.setCardId(cardId);
+            uc.setQuantity(1);
+            uc.setIsGolden(true);
+            userCardRepository.save(uc);
+        }
+
+        StardustLog log = new StardustLog();
+        log.setUserId(userId);
+        log.setCardId(cardId);
+        log.setCardName(card.getNameCn() + "(金卡)");
+        log.setAction("craft_golden");
+        log.setStardustAmount(-cost);
+        stardustLogRepository.save(log);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("stardustCost", cost);
+        result.put("newStardust", user.getStardust());
+        result.put("cardName", card.getNameCn());
+        // 成就检查
+        checkCardAchievements(userId);
+        return result;
+    }
+
+    /**
+     * 用户金卡列表
+     */
+    public List<CardResponse> getGoldenCards(Long userId) {
+        List<UserCard> userCards = userCardRepository.findByUserId(userId);
+        List<CardResponse> result = new ArrayList<>();
+        for (UserCard uc : userCards) {
+            if (Boolean.TRUE.equals(uc.getIsGolden())) {
+                Card card = cardRepository.findById(uc.getCardId()).orElse(null);
+                if (card != null) {
+                    result.add(CardResponse.fromCardWithGolden(card, uc.getQuantity(), getShowName(card.getShowId()), true));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取可合成金卡的卡牌列表（史诗/传说 + has_golden=true）
+     */
+    public List<CardResponse> getCraftableGoldenCards(Long userId) {
+        List<Card> goldenCards = cardRepository.findByHasGoldenTrue();
+        List<UserCard> userCards = userCardRepository.findByUserId(userId);
+        java.util.Set<Long> ownedCardIds = userCards.stream()
+                .map(UserCard::getCardId)
+                .collect(java.util.stream.Collectors.toSet());
+        java.util.Set<Long> goldenOwnedIds = userCards.stream()
+                .filter(uc -> Boolean.TRUE.equals(uc.getIsGolden()))
+                .map(UserCard::getCardId)
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<CardResponse> result = new ArrayList<>();
+        for (Card card : goldenCards) {
+            int qty = userCards.stream()
+                    .filter(uc -> uc.getCardId().equals(card.getId()) && !Boolean.TRUE.equals(uc.getIsGolden()))
+                    .mapToInt(UserCard::getQuantity)
+                    .sum();
+            boolean alreadyGolden = goldenOwnedIds.contains(card.getId());
+            CardResponse r = CardResponse.fromCard(card, qty, getShowName(card.getShowId()));
+            r.setGolden(alreadyGolden);
+            result.add(r);
+        }
         return result;
     }
 

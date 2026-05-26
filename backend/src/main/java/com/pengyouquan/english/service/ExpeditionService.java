@@ -22,6 +22,7 @@ public class ExpeditionService {
     private final UserRepository userRepository;
     private final SentenceRepository sentenceRepository;
     private final ObjectMapper objectMapper;
+    private final AchievementService achievementService;
 
     // 每层节点序列模板
     private static final Map<Integer, List<String>> ACT_NODE_TEMPLATES = new LinkedHashMap<>();
@@ -44,7 +45,8 @@ public class ExpeditionService {
                              UserCardRepository userCardRepository,
                              UserRepository userRepository,
                              SentenceRepository sentenceRepository,
-                             ObjectMapper objectMapper) {
+                             ObjectMapper objectMapper,
+                             AchievementService achievementService) {
         this.expeditionRepository = expeditionRepository;
         this.relicRepository = relicRepository;
         this.expeditionEnemyRepository = expeditionEnemyRepository;
@@ -54,6 +56,7 @@ public class ExpeditionService {
         this.userRepository = userRepository;
         this.sentenceRepository = sentenceRepository;
         this.objectMapper = objectMapper;
+        this.achievementService = achievementService;
     }
 
     // ==================== 1. 启动远征 ====================
@@ -278,6 +281,9 @@ public class ExpeditionService {
                 if (isBoss) {
                     result.put("bossDefeated", true);
                     result.put("rewards", generateBossRewards(exp));
+                    // 成就检查
+                    int totalBossKills = expeditionRepository.sumBossKillsByUserId(userId);
+                    achievementService.checkByConditionType(userId, "boss_kills", totalBossKills);
                 } else {
                     result.put("rewards", generateCombatRewards(exp));
                 }
@@ -608,6 +614,10 @@ public class ExpeditionService {
                 // 结算奖励
                 applyClearRewards(exp);
                 expeditionRepository.save(exp);
+
+                // 成就检查
+                long clearCount = expeditionRepository.countByUserIdAndStatus(userId, "cleared");
+                achievementService.checkByConditionType(userId, "expedition_clear", (int) clearCount);
 
                 Map<String, Object> result = new HashMap<>();
                 result.put("expedition", buildExpeditionData(exp));

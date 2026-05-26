@@ -17,6 +17,9 @@ public class SeasonService {
     private final UserStatsRepository userStatsRepository;
     private final UserRepository userRepository;
     private final TrophyService trophyService;
+    private final SeasonRankingRepository seasonRankingRepository;
+    private final GuildRepository guildRepository;
+    private final GuildMemberRepository guildMemberRepository;
 
     private static final Map<String, String> RANK_DOWNGRADE = new LinkedHashMap<>();
     private static final Map<String, Map<String, Object>> SEASON_REWARDS = new LinkedHashMap<>();
@@ -66,12 +69,18 @@ public class SeasonService {
                          SeasonRewardRepository seasonRewardRepository,
                          UserStatsRepository userStatsRepository,
                          UserRepository userRepository,
-                         TrophyService trophyService) {
+                         TrophyService trophyService,
+                         SeasonRankingRepository seasonRankingRepository,
+                         GuildRepository guildRepository,
+                         GuildMemberRepository guildMemberRepository) {
         this.seasonConfigRepository = seasonConfigRepository;
         this.seasonRewardRepository = seasonRewardRepository;
         this.userStatsRepository = userStatsRepository;
         this.userRepository = userRepository;
         this.trophyService = trophyService;
+        this.seasonRankingRepository = seasonRankingRepository;
+        this.guildRepository = guildRepository;
+        this.guildMemberRepository = guildMemberRepository;
     }
 
     /**
@@ -340,5 +349,158 @@ public class SeasonService {
             case "silver" -> 50;
             default -> 0;
         };
+    }
+
+    // ========== 三模式全服排行 ==========
+
+    /**
+     * 计算全服综合排名（综合评分 = PVP奖杯数×0.5 + 远征最高分×0.3 + 公会贡献×0.2）
+     */
+    @Transactional
+    public Map<String, Object> calculateSeasonRankings(int seasonNumber) {
+        List<User> allUsers = userRepository.findAll();
+        List<SeasonRanking> rankings = new ArrayList<>();
+
+        for (User user : allUsers) {
+            UserStats stats = trophyService.getOrCreateUserStats(user.getId());
+            int pvpScore = stats.getTrophies();
+
+            // 远征最高分：简化处理，用奖杯数/2 作为远征评分
+            int expeditionScore = stats.getTrophies() / 2;
+
+            // 公会贡献
+            int guildScore = 0;
+            var guildMemberOpt = guildMemberRepository.findByUserId(user.getId());
+            if (guildMemberOpt.isPresent()) {
+                guildScore = guildMemberOpt.get().getWeeklyScore();
+            }
+
+            int totalScore = (int)(pvpScore * 0.5 + expeditionScore * 0.3 + guildScore * 0.2);
+
+            SeasonRanking sr = new SeasonRanking();
+            sr.setUserId(user.getId());
+            sr.setSeasonNumber(seasonNumber);
+            sr.setPvpScore(pvpScore);
+            sr.setExpeditionScore(expeditionScore);
+            sr.setGuildScore(guildScore);
+            sr.setTotalScore(totalScore);
+            rankings.add(sr);
+        }
+
+        // 排序并保存
+        rankings.sort((a, b) -> Integer.compare(b.getTotalScore(), a.getTotalScore()));
+        seasonRankingRepository.deleteAll(
+                seasonRankingRepository.findBySeasonNumberOrderByTotalScoreDesc(seasonNumber));
+        seasonRankingRepository.saveAll(rankings);
+
+        return Map.of("success", true, "totalRanked", rankings.size());
+    }
+
+    /**
+     * 发放赛季称号和奖励
+     */
+    @Transactional
+    public Map<String, Object> awardSeasonTitles(int seasonNumber) {
+        List<SeasonRanking> rankings = seasonRankingRepository
+                .findBySeasonNumberOrderByTotalScoreDesc(seasonNumber);
+
+        if (rankings.isEmpty()) {
+            return Map.of("success", false, "message", "赛季排名为空");
+        }
+
+        for (int i = 0; i < rankings.size(); i++) {
+            SeasonRanking sr = rankings.get(i);
+            sr.setRankPosition(i + 1);
+
+            if (i == 0) {
+                sr.setTitle("月之王者");
+            } else if (i <= 2) {
+                sr.setTitle("月之大师");
+            } else if (i <= 9) {
+                sr.setTitle("月之勇士");
+            } else {
+                sr.setTitle("");
+            }
+
+            User user = userRepository.findById(sr.getUserId()).orElse(null);
+            if (user != null) {
+                if (i == 0) {
+                    user.setStardust(user.getStardust() + 1000);
+                } else if (i <= 2) {
+                    user.setStardust(user.getStardust() + 500);
+                } else if (i <= 9) {
+                    user.setStardust(user.getStardust() + 300);
+                } else {
+                    user.setStardust(user.getStardust() + 50);
+                }
+                userRepository.save(user);
+            }
+
+            seasonRankingRepository.save(sr);
+        }
+
+        return Map.of("success", true, "awarded", rankings.size());
+    }
+
+    /**
+     * 获取用户当前排名和综合分
+     */
+    public Map<String, Object> getCurrentRanking(Long userId) {
+        int seasonNumber = getCurrentSeasonNumber();
+        Optional<SeasonRanking> srOpt = seasonRankingRepository
+                .findByUserIdAndSeasonNumber(userId, seasonNumber);
+
+        if (srOpt.isEmpty()) {
+            return Map.of("hasRanking", false, "seasonNumber", seasonNumber);
+        }
+
+        SeasonRanking sr = srOpt.get();
+        User user = userRepository.findById(userId).orElse(null);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("hasRanking", true);
+        result.put("seasonNumber", sr.getSeasonNumber());
+        result.put("pvpScore", sr.getPvpScore());
+        result.put("expeditionScore", sr.getExpeditionScore());
+        result.put("guildScore", sr.getGuildScore());
+        result.put("totalScore", sr.getTotalScore());
+        result.put("rankPosition", sr.getRankPosition());
+        result.put("title", sr.getTitle() != null && !sr.getTitle().isEmpty() ? sr.getTitle() : "");
+        result.put("nickname", user != null ? user.getNickname() : "");
+        return result;
+    }
+
+    /**
+     * TOP100排行
+     */
+    public List<Map<String, Object>> getTop100() {
+        int seasonNumber = getCurrentSeasonNumber();
+        List<SeasonRanking> rankings = seasonRankingRepository
+                .findBySeasonNumberOrderByTotalScoreDesc(seasonNumber);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        int limit = Math.min(100, rankings.size());
+
+        for (int i = 0; i < limit; i++) {
+            SeasonRanking sr = rankings.get(i);
+            User user = userRepository.findById(sr.getUserId()).orElse(null);
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("rank", i + 1);
+            item.put("userId", sr.getUserId());
+            item.put("nickname", user != null ? user.getNickname() : "未知");
+            item.put("totalScore", sr.getTotalScore());
+            item.put("pvpScore", sr.getPvpScore());
+            item.put("expeditionScore", sr.getExpeditionScore());
+            item.put("guildScore", sr.getGuildScore());
+            item.put("title", sr.getTitle() != null && !sr.getTitle().isEmpty() ? sr.getTitle() : "");
+            result.add(item);
+        }
+
+        return result;
+    }
+
+    private int getCurrentSeasonNumber() {
+        var activeOpt = seasonConfigRepository.findByIsActiveTrue();
+        return activeOpt.map(SeasonConfig::getSeasonNumber).orElse(1);
     }
 }

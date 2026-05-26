@@ -26,6 +26,7 @@ public class BattleService {
     private final UserStatsRepository userStatsRepository;
     private final TrophyTierRepository trophyTierRepository;
     private final ChestService chestService;
+    private final AchievementService achievementService;
 
     private static final int TROPHY_GAIN = 30;
     private static final int TROPHY_LOSS = 25;
@@ -38,7 +39,8 @@ public class BattleService {
                          TrophyService trophyService,
                          UserStatsRepository userStatsRepository,
                          TrophyTierRepository trophyTierRepository,
-                         ChestService chestService) {
+                         ChestService chestService,
+                         AchievementService achievementService) {
         this.battleHistoryRepository = battleHistoryRepository;
         this.userRepository = userRepository;
         this.deckRepository = deckRepository;
@@ -48,6 +50,7 @@ public class BattleService {
         this.userStatsRepository = userStatsRepository;
         this.trophyTierRepository = trophyTierRepository;
         this.chestService = chestService;
+        this.achievementService = achievementService;
     }
 
     /** 发起挑战 */
@@ -152,7 +155,22 @@ public class BattleService {
         battle.setCompletedAt(LocalDateTime.now());
         battle = battleHistoryRepository.save(battle);
 
-        // 6. 宝箱发放：防守方（当前用户）获胜发放宝箱
+        // 6. 成就检查
+        if (winnerId != null) {
+            UserStats winnerStats = trophyService.getOrCreateUserStats(winnerId);
+            achievementService.checkByConditionType(winnerId, "win_battles", winnerStats.getWins());
+            achievementService.checkByConditionType(winnerId, "win_streak", winnerStats.getWinStreak());
+
+            // rank_reach: 根据当前段位索引检查
+            List<TrophyTier> allTiers = trophyTierRepository.findAllByOrderByMinTrophiesAsc();
+            int tierIndex = 0;
+            for (TrophyTier t : allTiers) {
+                if (winnerStats.getTrophies() >= t.getMinTrophies()) tierIndex++;
+            }
+            achievementService.checkByConditionType(winnerId, "rank_reach", tierIndex);
+        }
+
+        // 7. 宝箱发放：防守方（当前用户）获胜发放宝箱
         if (winnerId != null && winnerId.equals(battle.getDefenderId())) {
             chestService.grantBattleChest(battle.getDefenderId(), "pvp_battle");
         }

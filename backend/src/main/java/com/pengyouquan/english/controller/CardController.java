@@ -113,6 +113,42 @@ public class CardController {
         }
     }
 
+    // ========== 金卡系统 ==========
+
+    /**
+     * 合成金卡
+     */
+    @PostMapping("/cards/craft-golden")
+    public ApiResponse<Map<String, Object>> craftGoldenCard(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = Long.valueOf(body.get("cardId").toString());
+            return ApiResponse.success(cardService.craftGoldenCard(userId, cardId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    /**
+     * 金卡列表
+     */
+    @GetMapping("/cards/golden")
+    public ApiResponse<List<CardResponse>> getGoldenCards(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(cardService.getGoldenCards(userId));
+    }
+
+    /**
+     * 可合成的金卡列表
+     */
+    @GetMapping("/cards/craftable-golden")
+    public ApiResponse<List<CardResponse>> getCraftableGoldenCards(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(cardService.getCraftableGoldenCards(userId));
+    }
+
     /**
      * 获取用户星尘数量
      */

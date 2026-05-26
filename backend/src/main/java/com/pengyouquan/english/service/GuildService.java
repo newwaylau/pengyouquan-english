@@ -19,6 +19,8 @@ public class GuildService {
     private final GuildTreasureRepository guildTreasureRepository;
     private final GuildTreasureClaimRepository guildTreasureClaimRepository;
     private final UserRepository userRepository;
+    private final GuildLeagueSeasonRepository guildLeagueSeasonRepository;
+    private final AchievementService achievementService;
 
     private static final int CREATE_COST_STARDUST = 500;
     private static final List<String> PRESET_NAMES = List.of(
@@ -30,12 +32,16 @@ public class GuildService {
                         GuildMemberRepository guildMemberRepository,
                         GuildTreasureRepository guildTreasureRepository,
                         GuildTreasureClaimRepository guildTreasureClaimRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        GuildLeagueSeasonRepository guildLeagueSeasonRepository,
+                        AchievementService achievementService) {
         this.guildRepository = guildRepository;
         this.guildMemberRepository = guildMemberRepository;
         this.guildTreasureRepository = guildTreasureRepository;
         this.guildTreasureClaimRepository = guildTreasureClaimRepository;
         this.userRepository = userRepository;
+        this.guildLeagueSeasonRepository = guildLeagueSeasonRepository;
+        this.achievementService = achievementService;
     }
 
     // ==================== 1. 创建公会 ====================
@@ -144,6 +150,9 @@ public class GuildService {
 
         guild.setMemberCount(guild.getMemberCount() + 1);
         guildRepository.save(guild);
+
+        // 成就检查
+        achievementService.checkByConditionType(userId, "join_guild", 1);
 
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -485,6 +494,8 @@ public class GuildService {
                     user.setStardust(user.getStardust() + rewardStardust);
                     userRepository.save(user);
                 }
+                // 成就检查
+                achievementService.checkByConditionType(member.getUserId(), "guild_war_win", 1);
                 // 重置周数据
                 member.setWeeklyCorrect(0);
                 member.setWeeklyScore(0);
@@ -531,6 +542,75 @@ public class GuildService {
                 // 里程碑已达成，无需额外操作
             }
         }
+    }
+
+    // ==================== 14. 公会联赛 ====================
+
+    /**
+     * 计算所有公会联赛积分
+     */
+    @Transactional
+    public Map<String, Object> calculateLeagueScores() {
+        List<Guild> allGuilds = guildRepository.findAll();
+        for (Guild guild : allGuilds) {
+            // 联赛积分基于公会总收集数
+            guild.setLeagueScore(guild.getTotalCardsCollected());
+            guildRepository.save(guild);
+        }
+
+        // 排名
+        List<Guild> ranked = guildRepository.findAllByOrderByRankPointsDesc();
+        int rank = 1;
+        for (Guild g : ranked) {
+            g.setLeagueRank(rank++);
+            guildRepository.save(g);
+        }
+
+        return Map.of("success", true, "totalGuilds", allGuilds.size());
+    }
+
+    /**
+     * 获取联赛排行
+     */
+    public List<Map<String, Object>> getLeagueStandings() {
+        List<Guild> ranked = guildRepository.findAllByOrderByRankPointsDesc();
+        List<Map<String, Object>> standings = new ArrayList<>();
+        int rank = 1;
+        for (Guild g : ranked) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("rank", rank++);
+            item.put("id", g.getId());
+            item.put("name", g.getName());
+            item.put("memberCount", g.getMemberCount());
+            item.put("leagueScore", g.getLeagueScore());
+            item.put("leagueRank", g.getLeagueRank());
+            User leader = userRepository.findById(g.getLeaderId()).orElse(null);
+            item.put("leaderName", leader != null ? leader.getNickname() : "未知");
+            standings.add(item);
+        }
+        return standings;
+    }
+
+    /**
+     * 公会联赛当前排名
+     */
+    public Map<String, Object> getGuildLeagueInfo(Long guildId) {
+        Guild guild = guildRepository.findById(guildId).orElse(null);
+        if (guild == null) return Map.of("inLeague", false);
+
+        var seasonOpt = guildLeagueSeasonRepository.findTopByOrderBySeasonNumberDesc();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("inLeague", true);
+        result.put("guildId", guild.getId());
+        result.put("guildName", guild.getName());
+        result.put("leagueScore", guild.getLeagueScore());
+        result.put("leagueRank", guild.getLeagueRank());
+        if (seasonOpt.isPresent()) {
+            result.put("seasonNumber", seasonOpt.get().getSeasonNumber());
+            result.put("seasonStatus", seasonOpt.get().getStatus());
+        }
+        return result;
     }
 
     private Map<String, Object> buildGuildData(Guild guild, Long userId) {
