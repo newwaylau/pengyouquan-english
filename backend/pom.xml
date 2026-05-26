@@ -96,6 +96,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- WebSocket (STOMP) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- Mail (发送验证码) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡牌对战 · 项目接入设计</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card-border: #334155;
+    --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+    --teal: #14b8a6; --teal-dark: #0d9488; --teal-light: #2dd4bf; --teal-glow: rgba(20,184,166,0.3);
+    --purple: #8b5cf6; --amber: #f59e0b; --red: #ef4444; --green: #22c55e; --blue: #3b82f6;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --border: #334155; --border-light: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  h1 { font-size: 2rem; background: linear-gradient(135deg, #14b8a6, #8b5cf6, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 40px; }
+
+  h2 { font-size: 1.4rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: var(--teal); }
+  h3 { font-size: 1.1rem; margin: 28px 0 12px; color: var(--text); }
+  h4 { font-size: 0.95rem; margin: 20px 0 8px; color: var(--text); }
+  p, li { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+  .muted { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  th { background: var(--card); font-weight: 600; color: var(--text); white-space: nowrap; }
+  td { color: var(--text-secondary); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.68rem; font-weight: 600; margin: 1px;
+  }
+  .tag.teal { background: rgba(20,185,166,0.12); color: #14b8a6; }
+  .tag.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+  .tag.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .tag.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .tag.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .tag.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+  .section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 20px 24px; margin: 20px 0;
+  }
+  .section.insight { border-left: 3px solid var(--teal); background: linear-gradient(135deg, rgba(20,185,166,0.04), rgba(20,185,166,0.01)); }
+  .section.caution { border-left: 3px solid var(--red); background: linear-gradient(135deg, rgba(239,68,68,0.04), rgba(239,68,68,0.01)); }
+  .section.important { border-left: 3px solid var(--amber); background: linear-gradient(135deg, rgba(245,158,11,0.04), rgba(245,158,11,0.01)); }
+
+  .dot-list { list-style: none; padding: 0; }
+  .dot-list li { padding: 4px 0 4px 16px; position: relative; font-size: 0.85rem; }
+  .dot-list li::before { content: ''; position: absolute; left: 0; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* Phone frame for showing navigation */
+  .phone-frame {
+    width: 320px; max-width: 100%; margin: 0 auto;
+    background: #070b15; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-light);
+  }
+  .phone-status { padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); }
+  .phone-content { min-height: 500px; }
+
+  /* Navigation bar mock */
+  .nav-bar { display: flex; border-top: 1px solid var(--border-light); background: #0f172a; }
+  .nav-item { flex: 1; padding: 6px 0; text-align: center; font-size: 0.6rem; color: var(--text-muted); cursor: pointer; }
+  .nav-item.active { color: var(--teal); }
+  .nav-item .ni-icon { font-size: 1.1rem; display: block; }
+  .nav-item .ni-label { margin-top: 1px; }
+  .nav-item .ni-badge { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--red); position: relative; top: -8px; left: -2px; }
+
+  /* Flow diagram */
+  .flow-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 16px; margin: 8px 0;
+    position: relative;
+  }
+  .flow-box .fb-label {
+    position: absolute; top: -9px; left: 14px;
+    background: var(--bg); padding: 0 6px; font-size: 0.65rem; color: var(--teal); font-weight: 600;
+  }
+  .flow-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .flow-btn {
+    padding: 4px 12px; border-radius: 6px; font-size: 0.72rem;
+    background: rgba(20,185,166,0.1); border: 1px solid rgba(20,185,166,0.2);
+    color: var(--teal); white-space: nowrap;
+  }
+  .flow-btn.orange { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--amber); }
+  .flow-btn.gray { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text-secondary); }
+  .flow-arrow { font-size: 1rem; color: var(--text-muted); }
+
+  /* File path */
+  .file-path { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: var(--teal-light); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .verdict {
+    background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(20,185,166,0.06));
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: var(--radius-lg); padding: 24px 28px; margin: 32px 0;
+  }
+
+  /* Entry point card */
+  .entry-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+  @media (max-width: 600px) { .entry-grid { grid-template-columns: 1fr; } }
+  .entry-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 16px;
+  }
+  .entry-card .ec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .entry-card .ec-title { font-weight: 600; font-size: 0.9rem; }
+  .entry-card .ec-phase { padding: 1px 8px; border-radius: 8px; font-size: 0.6rem; font-weight: 600; }
+  .entry-card .ec-desc { font-size: 0.78rem; color: var(--text-secondary); }
+  .entry-card .ec-file { font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; font-family: monospace; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🃏 卡牌对战 · 项目接入设计</h1>
+<p class="subtitle">基于 <code>pengyouquan-english</code> 项目结构的完整接入方案，从 P0 到 P3，每期入口在哪、改哪些文件</p>
+
+<!-- ========== OVERVIEW ========== -->
+<h2>📐 总体架构</h2>
+<p>现有项目结构不变，新增模块全部遵循已有模式：</p>
+
+<div class="two-col">
+  <div class="section">
+    <strong>后端新增（按现有模式）</strong>
+    <ul class="dot-list" style="margin-top:6px;">
+      <li><span class="file-path">model/</span>Card.java, Equipment.java, Deck.java, UserCard.java, UserEquipment.java</li>
+      <li><span class="file-path">repository/</span>CardRepository.java, EquipmentRepository.java, DeckRepository.java</li>
+      <li><span class="file-path">dto/</span>CardResponse.java, PackResultDTO.java, DeckDTO.java</li>
+      <li><span class="file-path">service/</span>CardService.java（参照 GamificationService.java 写法）</li>
+      <li><span class="file-path">controller/</span>CardController.java（参照 GamificationController.java 写法）</li>
+      <li><span class="file-path">db/migration/</span>V18__add_card_game.sql</li>
+    </ul>
+  </div>
+  <div class="section">
+    <strong>前端新增（按现有模式）</strong>
+    <ul class="dot-list" style="margin-top:6px;">
+      <li><span class="file-path">CardCollectionPage.tsx</span> — 卡册页（参照 ArenaPage.tsx 写法）</li>
+      <li><span class="file-path">DeckBuilderPage.tsx</span> — 卡组编辑器</li>
+      <li><span class="file-path">BattlePage.tsx</span> — 战场页（P2）</li>
+      <li><span class="file-path">api/cardClient.ts</span> — API 调用层（参照 gameApi）</li>
+      <li><span class="file-path">App.tsx</span> — 路由和导航入口修改</li>
+      <li><span class="file-path">index.css</span> — 卡牌相关 CSS</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ========== NAVIGATION MAP ========== -->
+<h2>🧭 导航入口总图</h2>
+<p class="muted">当前项目的所有可点击入口，以及新功能加在哪里</p>
+
+<div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+  <!-- Current bottom nav -->
+  <div class="phone-frame">
+    <div class="phone-content" style="padding:16px;">
+      <div style="background:var(--card);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--border);margin-top:40px;">
+        <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px;">当前底部导航</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">来自 App.tsx mobile-bottom-nav</div>
+      </div>
+      <div style="background:var(--card);border-radius:12px;padding:16px;margin-top:24px;">
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:8px;">📄 练习页</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">🔄 复习</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <span class="flow-btn">⚔️ 演武</span>
+          <span class="flow-btn orange">👑 封臣</span>
+        </div>
+      </div>
+      <div style="background:var(--card);border-radius:12px;padding:12px;margin-top:12px;border:1px solid var(--teal-glow);">
+        <div style="font-size:0.72rem;color:var(--teal);font-weight:600;">🎴 新增：卡牌（P0）</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">添加到底部导航的第 3 位</div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-item"><span class="ni-icon">📖</span><span class="ni-label">练习</span></div>
+      <div class="nav-item"><span class="ni-icon">🔄</span><span class="ni-label">复习</span></div>
+      <div class="nav-item active"><span class="ni-icon">🎴</span><span class="ni-label">卡牌</span><span class="ni-badge"></span></div>
+      <div class="nav-item"><span class="ni-icon">👑</span><span class="ni-label">封臣</span></div>
+    </div>
+  </div>
+
+  <!-- Arena page entry -->
+  <div class="phone-frame">
+    <div class="phone-content" style="padding:16px;">
+      <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:8px;">⚔️ 演武页（现有）</div>
+      <div style="font-size:0.7rem;color:var(--text-muted);">
+        ArenaPage.tsx → 新增标签切换
+      </div>
+      <div style="display:flex;gap:6px;margin:12px 0;background:var(--card);border-radius:8px;overflow:hidden;">
+        <div style="flex:1;padding:8px;text-align:center;font-size:0.68rem;color:var(--text-muted);background:var(--card);">📊 战绩</div>
+        <div style="flex:1;padding:8px;text-align:center;font-size:0.68rem;color:var(--teal);font-weight:600;background:rgba(20,185,166,0.08);">🎴 卡册 ← 新增</div>
+        <div style="flex:1;padding:8px;text-align:center;font-size:0.68rem;color:var(--text-muted);">🗃️ 卡组 ← 新增</div>
+      </div>
+      <div style="background:var(--card);border-radius:8px;padding:10px;margin:8px 0;">
+        <div style="font-size:0.7rem;color:var(--text-secondary);">🎴 我的卡册</div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <span style="padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(245,158,11,0.12);color:var(--amber);">传说 1</span>
+          <span style="padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(139,92,246,0.12);color:var(--purple);">史诗 3</span>
+          <span style="padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(20,185,166,0.12);color:var(--teal);">稀有 8</span>
+          <span style="padding:2px 8px;border-radius:4px;font-size:0.62rem;color:var(--text-muted);">普通 20</span>
+        </div>
+      </div>
+      <div style="background:var(--card);border-radius:8px;padding:10px;border:1px dashed var(--border);">
+        <div style="font-size:0.65rem;color:var(--text-muted);">⚔️ 匹配对战（P2 后出现）</div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-item"><span class="ni-icon">📖</span><span class="ni-label">练习</span></div>
+      <div class="nav-item"><span class="ni-icon">🔄</span><span class="ni-label">复习</span></div>
+      <div class="nav-item active"><span class="ni-icon">🎴</span><span class="ni-label">卡牌</span></div>
+      <div class="nav-item"><span class="ni-icon">👑</span><span class="ni-label">封臣</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ========== PHASE 0 ========== -->
+<h2>📦 P0：卡牌收集 + 卡册 + 卡组</h2>
+<p class="muted">改动最小，3 天可上线。玩家体验闭环：听写 → 开包 → 看卡 → 组牌</p>
+
+<h3>入口在哪</h3>
+<div class="entry-grid">
+  <div class="entry-card" style="border-color:rgba(20,185,166,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">📖 听写完成 → 卡包弹窗</span>
+      <span class="ec-phase" style="background:rgba(20,185,166,0.12);color:var(--teal);">P0</span>
+    </div>
+    <div class="ec-desc">
+      在 <b>PracticePage.tsx</b> 听写准确率结算后，弹出一个开包动画弹窗。<br>
+      自动把卡插入 user_cards 表，弹窗显示获得了什么稀有度的卡。
+    </div>
+    <div class="ec-file">修改：PracticePage.tsx（+开包弹窗）<br>新增：api/cardClient.ts（grantCardPack 调用）</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(20,185,166,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🎴 底部导航新增「卡牌」</span>
+      <span class="ec-phase" style="background:rgba(20,185,166,0.12);color:var(--teal);">P0</span>
+    </div>
+    <div class="ec-desc">
+      在 <b>App.tsx</b> 的 mobile-bottom-nav 中，在「演武」位置新增一个「🎴 卡牌」导航项。<br>
+      将原来的「⚔️ 演武」合并进卡牌页作为子标签。
+    </div>
+    <div class="ec-file">修改：App.tsx（navigation）<br>新增：page type 'cards'</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(20,185,166,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🎴 卡牌主页面（含卡册）</span>
+      <span class="ec-phase" style="background:rgba(20,185,166,0.12);color:var(--teal);">P0</span>
+    </div>
+    <div class="ec-desc">
+      <b>CardCollectionPage.tsx</b> — 顶部是等级/声望卡片（复用 ArenaPage 逻辑），下方是卡牌网格。<br>
+      卡牌按剧集筛选（GOT / DA），稀有度排序。点击卡牌弹出详情。<br>
+      底部分三个子标签：战绩 | 卡册 | 卡组
+    </div>
+    <div class="ec-file">新增：CardCollectionPage.tsx<br>新增：CardDetailModal（内联组件）</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(20,185,166,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🗃️ 卡组编辑器</span>
+      <span class="ec-phase" style="background:rgba(20,185,166,0.12);color:var(--teal);">P0</span>
+    </div>
+    <div class="ec-desc">
+      从卡牌页的「卡组」子标签进入。<b>DeckBuilderPage.tsx</b>。<br>
+      左列：可用卡牌池（按剧集/费用筛选）。右列：已选卡组（30 张限制）。<br>
+      费用曲线可视化，保存后写入 decks 表。
+    </div>
+    <div class="ec-file">新增：DeckBuilderPage.tsx<br>新增：POST /api/decks（后端）</div>
+  </div>
+</div>
+
+<h3>修改的文件清单（P0）</h3>
+<table>
+  <tr><th>文件</th><th>操作</th><th>内容</th></tr>
+  <tr><td><span class="file-path">backend/.../db/migration/V18__add_card_game.sql</span></td><td>新建</td><td>5 张表：cards, user_cards, decks, equipment, user_equipment</td></tr>
+  <tr><td><span class="file-path">backend/.../model/Card.java</span></td><td>新建</td><td>Entity，映射 cards 表</td></tr>
+  <tr><td><span class="file-path">backend/.../model/UserCard.java</span></td><td>新建</td><td>Entity</td></tr>
+  <tr><td><span class="file-path">backend/.../model/Deck.java</span></td><td>新建</td><td>Entity，card_ids 用 JSON 列</td></tr>
+  <tr><td><span class="file-path">backend/.../model/Equipment.java</span></td><td>新建</td><td>Entity</td></tr>
+  <tr><td><span class="file-path">backend/.../model/UserEquipment.java</span></td><td>新建</td><td>Entity</td></tr>
+  <tr><td><span class="file-path">backend/.../repository/CardRepository.java</span></td><td>新建</td><td>JPA Repository</td></tr>
+  <tr><td><span class="file-path">backend/.../repository/UserCardRepository.java</span></td><td>新建</td><td>JPA Repository</td></tr>
+  <tr><td><span class="file-path">backend/.../repository/DeckRepository.java</span></td><td>新建</td><td>JPA Repository</td></tr>
+  <tr><td><span class="file-path">backend/.../dto/CardResponse.java</span></td><td>新建</td><td>给前端的卡牌 DTO（含 show 信息）</td></tr>
+  <tr><td><span class="file-path">backend/.../dto/DeckDTO.java</span></td><td>新建</td><td>卡组 DTO</td></tr>
+  <tr><td><span class="file-path">backend/.../service/CardService.java</span></td><td>新建</td><td>3 个方法：grantCardPack, getCollection, saveDeck</td></tr>
+  <tr><td><span class="file-path">backend/.../controller/CardController.java</span></td><td>新建</td><td>5 个端点</td></tr>
+  <tr><td><span class="file-path">frontend/src/CardCollectionPage.tsx</span></td><td>新建</td><td>卡册主页</td></tr>
+  <tr><td><span class="file-path">frontend/src/DeckBuilderPage.tsx</span></td><td>新建</td><td>卡组编辑器</td></tr>
+  <tr><td><span class="file-path">frontend/src/api/cardClient.ts</span></td><td>新建</td><td>API 调用（参照 gameApi 写法）</td></tr>
+  <tr><td><span class="file-path">frontend/src/App.tsx</span></td><td>修改</td><td>导航增加「🎴 卡牌」、page 类型新增 'cards'、路由映射</td></tr>
+  <tr><td><span class="file-path">frontend/src/PracticePage.tsx</span></td><td>修改</td><td>听写完成后调用 grantCardPack 并弹开包动画</td></tr>
+  <tr><td><span class="file-path">frontend/src/index.css</span></td><td>追加</td><td>卡牌网格、卡牌卡片、开包弹窗样式</td></tr>
+</table>
+
+<h3>用户看到的变化（P0）</h3>
+<div class="section insight">
+  <div class="flow-row">
+    <span class="flow-btn">📖 练习</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">完成听写</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn orange">🎊 开包弹窗</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">🎴 查看新卡</span>
+  </div>
+  <div style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary);">
+    同时在底部导航能看到「🎴 卡牌」入口，点进去是完整的卡册和卡组编辑器。
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ========== PHASE 1 ========== -->
+<h2>🔗 P1：好友挑战 + 装备系统</h2>
+<p class="muted">引入社交元素和策略深度，用到已有的封臣/邀请系统</p>
+
+<h3>入口在哪</h3>
+<div class="entry-grid">
+  <div class="entry-card" style="border-color:rgba(139,92,246,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">👫 封臣页 → 好友挑战</span>
+      <span class="ec-phase" style="background:rgba(139,92,246,0.12);color:var(--purple);">P1</span>
+    </div>
+    <div class="ec-desc">
+      在 <b>LeaderboardPage.tsx</b> 的封臣 tab 中，好友列表旁新增「⚔️ 发起对战」按钮。<br>
+      点击后选择对方卡组 → 发起挑战 → 对方离线时 AI 托管防守。<br>
+      对战结果通过通知系统推送给对方。
+    </div>
+    <div class="ec-file">修改：LeaderboardPage.tsx（+挑战按钮）<br>修改：NotificationController.java（+挑战通知）</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(139,92,246,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🛡️ 卡牌详情 → 装备槽</span>
+      <span class="ec-phase" style="background:rgba(139,92,246,0.12);color:var(--purple);">P1</span>
+    </div>
+    <div class="ec-desc">
+      在卡牌详情弹窗中，新增「装备」区域。显示该随从的 3 个装备槽。<br>
+      点击空槽 → 列出可用的装备（按 slot 筛选）。<br>
+      装备通过完成高准确率听写/全收集获得。
+    </div>
+    <div class="ec-file">修改：CardCollectionPage.tsx（装备 UI）<br>新增：POST /api/equipment/equip</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(139,92,246,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">📊 排行榜 → 对战排名</span>
+      <span class="ec-phase" style="background:rgba(139,92,246,0.12);color:var(--purple);">P1</span>
+    </div>
+    <div class="ec-desc">
+      排行榜新增一个「⚔️ 对战」tab（在现有 今日/本周/本月/狼群 旁）。<br>
+      显示好友对战胜率/胜场。这是 P1 阶段的简单统计，不是天梯。
+    </div>
+    <div class="ec-file">修改：LeaderboardPage.tsx（+新 tab）</div>
+  </div>
+</div>
+
+<div class="section important">
+  <strong>⚠️ P1 关键依赖</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    P1 需要一个<strong>简陋的对战引擎</strong>——玩家 A 发起挑战 → 后端模拟对局（不需要实时 UI）→ 返回结果。<br>
+    这个引擎在 P0 就应该以 AI vs AI 的形式存在（AI 对战用）。P1 只是把 AI 换成对手的卡组。<br>
+    引擎可以简单：每回合按费用从高到低出牌，攻击随机目标。不要求聪明。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- ========== PHASE 2 ========== -->
+<h2>⚔️ P2：实时对战 + 天梯</h2>
+<p class="muted">完整竞技体验。这是最大的投入，等 P0/P1 验证后再启动</p>
+
+<h3>入口在哪</h3>
+<div class="entry-grid">
+  <div class="entry-card" style="border-color:rgba(245,158,11,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🎴 卡牌页 → ⚔️ 匹配对战</span>
+      <span class="ec-phase" style="background:rgba(245,158,11,0.12);color:var(--amber);">P2</span>
+    </div>
+    <div class="ec-desc">
+      卡牌主页面底部新增「⚔️ 匹配对战」大按钮。<br>
+      点击进入匹配队列 → 找到对手 → 加载 BattlePage.tsx。<br>
+      战场 UI 使用之前设计的方案 B 布局。
+    </div>
+    <div class="ec-file">新增：BattlePage.tsx<br>新增：WebSocket 服务 /ws/game</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(245,158,11,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🏆 排行榜 → 天梯段位</span>
+      <span class="ec-phase" style="background:rgba(245,158,11,0.12);color:var(--amber);">P2</span>
+    </div>
+    <div class="ec-desc">
+      排行榜新增天梯段位 tab。显示当前段位（青铜→王者）、晋级进度。<br>
+      段位系统完全独立于现有的游戏化封号系统。<br>
+      赛季末根据段位发放奖励卡牌。
+    </div>
+    <div class="ec-file">修改：LeaderboardPage.tsx<br>新增：RankedService.java</div>
+  </div>
+
+  <div class="entry-card" style="border-color:rgba(245,158,11,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">✍️ 出牌考验弹窗</span>
+      <span class="ec-phase" style="background:rgba(245,158,11,0.12);color:var(--amber);">P2</span>
+    </div>
+    <div class="ec-desc">
+      在对战中打出带 ✍️ 标记的卡牌时，弹出听写/拼写弹窗。<br>
+      复用现有 <b>PracticePage.tsx</b> 的听写逻辑——播放音频、输入框、校验。<br>
+      30 秒限时，超时判失败。
+    </div>
+    <div class="ec-file">修改：PracticePage.tsx（提取听写组件）<br>新增：ChallengeModal.tsx（可复用弹窗）</div>
+  </div>
+</div>
+
+<h3>P2 新增的文件</h3>
+<table>
+  <tr><th>分类</th><th>文件</th><th>内容</th></tr>
+  <tr><td>后端</td><td><span class="file-path">service/GameEngineService.java</span></td><td>完整的对局引擎（验证卡牌效果、结算伤害、处理关键词）</td></tr>
+  <tr><td>后端</td><td><span class="file-path">service/MatchmakingService.java</span></td><td>匹配队列（Redis + 段位）</td></tr>
+  <tr><td>后端</td><td><span class="file-path">service/RankedService.java</span></td><td>段位晋级/降级/赛季结算</td></tr>
+  <tr><td>后端</td><td><span class="file-path">websocket/GameWebSocketHandler.java</span></td><td>WebSocket 对战房间</td></tr>
+  <tr><td>前端</td><td><span class="file-path">BattlePage.tsx</span></td><td>完整战场 UI</td></tr>
+  <tr><td>前端</td><td><span class="file-path">ChallengeModal.tsx</span></td><td>出牌考验弹窗</td></tr>
+  <tr><td>前端</td><td><span class="file-path">api/wsClient.ts</span></td><td>WebSocket 连接管理</td></tr>
+</table>
+
+<hr class="divider">
+
+<!-- ========== PHASE 3 ========== -->
+<h2>🏟️ P3：电竞生态</h2>
+<p class="muted">公会战、观战、锦标赛——完善社交竞技体验</p>
+
+<h3>入口在哪</h3>
+<div class="entry-grid">
+  <div class="entry-card" style="border-color:rgba(239,68,68,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">👥 封臣页 → 公会战</span>
+      <span class="ec-phase" style="background:rgba(239,68,68,0.12);color:var(--red);">P3</span>
+    </div>
+    <div class="ec-desc">
+      在封臣页新增「⚔️ 公会战」tab。<br>
+      公会成员组队 vs 其他公会，团队积分制。<br>
+      基于现有的封臣/邀请系统扩展。
+    </div>
+  </div>
+  <div class="entry-card" style="border-color:rgba(239,68,68,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🎬 观战模式</span>
+      <span class="ec-phase" style="background:rgba(239,68,68,0.12);color:var(--red);">P3</span>
+    </div>
+    <div class="ec-desc">
+      排行榜页新增「📺 正在直播」列表。<br>
+      点击进入观战（30 秒延迟防作弊）。<br>
+      实时查看双方手牌/战场。
+    </div>
+  </div>
+  <div class="entry-card" style="border-color:rgba(239,68,68,0.3);">
+    <div class="ec-header">
+      <span class="ec-title">🏆 锦标赛</span>
+      <span class="ec-phase" style="background:rgba(239,68,68,0.12);color:var(--red);">P3</span>
+    </div>
+    <div class="ec-desc">
+      卡牌页新增「🏟️ 锦标赛」按钮。<br>
+      64 人淘汰赛，实时赛程树。<br>
+      限定卡组规则（如「本周仅限 GOT 卡组」）。
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ========== COMPLETE NAVIGATION MAP ========== -->
+<h2>🗺️ 完整导航变更一览</h2>
+<p class="muted">从首页到每个新功能的路径</p>
+
+<div class="section">
+  <h4 style="margin-top:0;">📖 首页（练习页 PracticePage）</h4>
+  <div class="flow-row">
+    <span class="flow-btn">完成听写</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn orange">🎊 开包弹窗</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">🎴 卡牌详情</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P0 起全部可用）</span>
+  </div>
+
+  <h4 style="margin-top:16px;">🎴 底部导航 — 卡牌（新增）</h4>
+  <div class="flow-row">
+    <span class="flow-btn">🎴 卡册</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">卡牌详情弹窗</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn gray">装备槽</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P1）</span>
+  </div>
+  <div class="flow-row" style="margin-top:4px;">
+    <span class="flow-btn">🗃️ 卡组</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">卡组编辑器</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">保存卡组</span>
+  </div>
+  <div class="flow-row" style="margin-top:4px;">
+    <span class="flow-btn">⚔️ 匹配对战</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P2 出现）</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">战场</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn orange">✍️ 出牌考验</span>
+  </div>
+  <div class="flow-row" style="margin-top:4px;">
+    <span class="flow-btn">🏟️ 锦标赛</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P3 出现）</span>
+  </div>
+
+  <h4 style="margin-top:16px;">👑 封臣页（LeaderboardPage）</h4>
+  <div class="flow-row">
+    <span class="flow-btn">🏆 排行榜</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">已有：今日/本周/本月/狼群</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn orange">⚔️ 对战排名</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P1）</span>
+  </div>
+  <div class="flow-row" style="margin-top:4px;">
+    <span class="flow-btn">👥 封臣</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn orange">挑战好友</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P1 好友对战）</span>
+  </div>
+  <div class="flow-row" style="margin-top:4px;">
+    <span class="flow-btn">⚔️ 公会战</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P3）</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-btn">📺 正在直播</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P3 观战）</span>
+  </div>
+
+  <h4 style="margin-top:16px;">⚙️ 设置页（SettingsPanel）</h4>
+  <div class="flow-row">
+    <span class="flow-btn gray">战场皮肤</span>
+    <span style="font-size:0.65rem;color:var(--text-muted);">（P2+ 选择主题背景）</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ========== FILE CHANGE SUMMARY ========== -->
+<h2>📁 文件变更总清单</h2>
+<p class="muted">按操作类型分类</p>
+
+<table>
+  <tr><th>操作</th><th>P0</th><th>P1</th><th>P2</th><th>P3</th></tr>
+  <tr><td><strong>新建后端文件</strong></td><td>12</td><td>2</td><td>6</td><td>3</td></tr>
+  <tr><td><strong>新建前端文件</strong></td><td>4</td><td>0</td><td>4</td><td>1</td></tr>
+  <tr><td><strong>修改现有文件</strong></td><td>4</td><td>4</td><td>3</td><td>3</td></tr>
+  <tr><td><strong>数据库迁移</strong></td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+  <tr><td><strong>代码行数估计</strong></td><td>~950 行</td><td>~400 行</td><td>~1500 行</td><td>~600 行</td></tr>
+  <tr><td><strong>开发周期</strong></td><td><strong>3 天</strong></td><td>2 天</td><td>5 天</td><td>3 天</td></tr>
+</table>
+
+<div class="verdict">
+  <h3 style="margin-top:0;font-size:1.1rem;">📋 总结：点哪里进入什么</h3>
+  <div style="margin-top:8px;">
+
+  <p><strong>P0 上完后，用户会看到：</strong></p>
+  <ol style="padding-left:18px;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">
+    <li>练习完一集 → 自动弹出「🎊 开包动画」→ 查看新获得的卡</li>
+    <li>底部导航新增「🎴 卡牌」→ 点进去看到所有收集的卡</li>
+    <li>卡牌页内有「🗃️ 卡组」标签 → 编辑自己的 30 张卡组</li>
+    <li>卡牌页底部「⚔️ 匹配对战」按钮 → P2 后才可用，P0 先禁用或跳转提示"即将开放"</li>
+  </ol>
+
+  <p style="margin-top:12px;"><strong>P1 上完后，额外：</strong></p>
+  <ol style="padding-left:18px;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">
+    <li>封臣页 → 好友列表 → 点击「⚔️ 发起对战」→ 异步 AI 托管对战</li>
+    <li>卡牌详情 → 看到装备槽 → 可以给随从穿装备</li>
+    <li>排行榜新增「⚔️ 对战」排名</li>
+  </ol>
+
+  <p style="margin-top:12px;"><strong>P2 上完后，额外：</strong></p>
+  <ol style="padding-left:18px;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">
+    <li>卡牌页「⚔️ 匹配对战」→ 变成可用按钮 → 实时匹配真人 → 完整战场</li>
+    <li>排行榜新增「🏆 天梯段位」tab</li>
+    <li>对战中打出 ✍️ 卡 → 弹窗要求听写/拼写</li>
+  </ol>
+
+  <p style="margin-top:12px;"><strong>P3 上完后，额外：</strong></p>
+  <ol style="padding-left:18px;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">
+    <li>封臣页 → ⚔️ 公会战（公会 vs 公会）</li>
+    <li>排行榜 → 📺 正在直播（观战）</li>
+    <li>卡牌页 → 🏟️ 锦标赛（64 人淘汰赛）</li>
+  </ol>
+
+  </div>
+</div>
+
+</div>
+</body>
+</html>

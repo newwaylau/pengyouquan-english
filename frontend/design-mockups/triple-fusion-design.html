@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 三大模式融合设计</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --card: #111a2e;
+  --card-border: rgba(255,255,255,0.06);
+  --text: #eef2f8;
+  --text-secondary: #94a3b8;
+  --text-muted: #5a6a8a;
+  --teal: #14b8a6;
+  --teal-dark: #0d9488;
+  --teal-light: #5eead4;
+  --teal-glow: rgba(20,184,166,0.15);
+  --gold: #fbbf24;
+  --purple: #a335ee;
+  --blue: #0070dd;
+  --orange: #f97316;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 56px 24px 40px;
+  background: linear-gradient(180deg, rgba(20,184,166,0.1) 0%, transparent 80%);
+  border-bottom: 1px solid var(--card-border);
+}
+.hero h1 {
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero .sub { color: var(--text-secondary); margin-top: 10px; font-size: 1rem; }
+.hero .inspiration { margin-top: 16px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+.hero .inspiration span { padding: 6px 16px; border-radius: 999px; font-size: 0.85rem; background: rgba(255,255,255,0.04); border:1px solid var(--card-border); }
+
+/* ── Sections ── */
+.wrapper { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+section { padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+section:last-child { border-bottom: none; }
+h2 { font-size: 1.5rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 1.1rem; margin: 16px 0 10px; color: var(--teal); }
+
+/* ── Meta Banner ── */
+.meta-banner {
+  background: linear-gradient(135deg, rgba(20,184,166,0.08), rgba(245,158,11,0.08));
+  border: 1px solid rgba(20,184,166,0.2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.meta-banner .big { font-size: 1.4rem; font-weight: 700; color: var(--teal); margin-bottom: 8px; }
+.meta-banner p { color: var(--text-secondary); font-size: 0.9rem; max-width: 600px; margin: 0 auto; }
+
+/* ── Mode Cards ── */
+.mode-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.mode-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+.mode-icon {
+  width: 52px; height: 52px; border-radius: var(--radius-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.mode-icon.pvp { background: rgba(251,191,36,0.12); }
+.mode-icon.pve { background: rgba(168,85,247,0.12); }
+.mode-icon.daily { background: rgba(20,184,166,0.12); }
+.mode-name { font-size: 1.2rem; font-weight: 600; }
+.mode-desc { color: var(--text-secondary); font-size: 0.9rem; margin-top: 2px; }
+.mode-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.mode-pills span {
+  padding: 2px 10px; border-radius: 999px; font-size: 0.75rem;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
+}
+
+/* ── Grid ── */
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 14px 0; }
+.feat {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 14px;
+}
+.feat h4 { font-size: 0.82rem; color: var(--teal); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.feat p { font-size: 0.88rem; color: var(--text-secondary); }
+.feat .ref { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ── Flow Steps ── */
+.flow { 
+  background: rgba(255,255,255,0.02); border: 1px solid var(--card-border);
+  border-radius: var(--radius-md); padding: 20px; margin: 14px 0;
+}
+.flow ol { list-style: none; counter-reset: s; }
+.flow li {
+  counter-increment: s; padding: 10px 0 10px 44px; position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary); font-size: 0.9rem;
+}
+.flow li:last-child { border-bottom: none; }
+.flow li::before {
+  content: counter(s); position: absolute; left: 0; top: 8px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(20,184,166,0.12); color: var(--teal);
+  display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 600;
+}
+.flow li strong { color: var(--text); }
+
+/* ── Economy ── */
+.econ-chain {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 16px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); margin: 12px 0;
+}
+.econ-node {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 8px 14px; text-align: center; font-size: 0.85rem;
+  min-width: 80px;
+}
+.econ-arrow { color: var(--text-muted); font-size: 1rem; }
+
+/* ── Card Previews ── */
+.card-strip {
+  display: flex; gap: 10px; overflow-x: auto; padding: 12px 0; margin: 10px 0;
+}
+.card-chip {
+  flex-shrink: 0; width: 110px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+  padding: 8px; text-align: center;
+}
+.card-chip .c { width: 22px; height: 22px; border-radius: 50%; background: var(--teal);
+  color:#000; font-weight:700; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px; }
+.card-chip .n { font-size:0.75rem; font-weight:600; margin-bottom:2px; }
+.card-chip .t { font-size:0.68rem; color:var(--text-muted); }
+.card-chip .s { font-size:0.72rem; color:var(--text-secondary); }
+
+/* ── Table ── */
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.88rem; }
+th { text-align:left; padding:10px 12px; background:rgba(255,255,255,0.04); color:var(--text-secondary); font-weight:500; border-bottom:1px solid var(--card-border); }
+td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary); }
+td:first-child { color:var(--text); font-weight:500; }
+
+/* ── Phase Row ── */
+.phase-row { display:flex; gap:14px; margin-bottom:16px; }
+.phase-card {
+  flex:1; background:var(--card); border:1px solid var(--card-border);
+  border-radius:var(--radius-md); padding:18px;
+}
+.phase-label { font-size:0.75rem; color:var(--teal); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px; }
+.phase-card h3 { font-size:0.95rem; margin:0 0 8px; }
+.phase-card ul { list-style:none; }
+.phase-card li { font-size:0.82rem; color:var(--text-secondary); padding:3px 0 3px 14px; position:relative; }
+.phase-card li::before { content:'·'; position:absolute; left:2px; color:var(--teal); }
+
+@media (max-width: 640px) {
+  .hero h1 { font-size:1.5rem; }
+  .phase-row { flex-direction: column; }
+  .econ-chain { flex-direction: column; }
+  .econ-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>⚔️ 英语剧场 · 三界融合</h1>
+  <p class="sub">皇室战争的异步竞技 × 炉石传说的回合制对战 × 杀戮尖塔的Roguelike爬塔<br>统一在一个英语学习驱动的卡牌世界里</p>
+  <div class="inspiration">
+    <span>🏰 异步攻防</span>
+    <span>🃏 费用出牌</span>
+    <span>🗡️ 爬塔构筑</span>
+    <span>📖 学习驱动</span>
+  </div>
+</div>
+
+<div class="wrapper">
+
+<!-- ════════ 核心循环 ════════ -->
+<section>
+  <div class="meta-banner">
+    <div class="big">📐 核心原则：学习量 = 游戏资源</div>
+    <p>所有游戏行为都由"练英语"驱动——没有体力系统，没有付费加速。你的英语进步就是游戏进度。</p>
+  </div>
+
+  <div class="econ-chain">
+    <div class="econ-node">🎯 练听写<br><span style="font-size:0.75rem;color:var(--text-muted)">核心产出</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">🎴 开卡包<br><span style="font-size:0.75rem;color:var(--text-muted)">卡牌收集</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">📦 组卡组<br><span style="font-size:0.75rem;color:var(--text-muted)">策略构筑</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">⚔️ PVP竞技<br><span style="font-size:0.75rem;color:var(--text-muted)">铁王座</span></div>
+    <div class="econ-arrow" style="color:var(--gold);">↕</div>
+    <div class="econ-node">🗡️ PVE爬塔<br><span style="font-size:0.75rem;color:var(--text-muted)">远征</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">🏆 赛季奖励<br><span style="font-size:0.75rem;color:var(--text-muted)">更多卡包</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">📈 更难句子<br><span style="font-size:0.75rem;color:var(--text-muted)">英语进步</span></div>
+  </div>
+</section>
+
+<!-- ════════ 模式一：铁王座竞技场 ════════ -->
+<section>
+  <div class="mode-card">
+    <div class="mode-header">
+      <div class="mode-icon pvp">👑</div>
+      <div>
+        <div class="mode-name">模式一：铁王座竞技场（PVP）</div>
+        <div class="mode-desc">皇室战争的奖杯系统 + 炉石传说的回合制费用对战</div>
+        <div class="mode-pills">
+          <span>🏆 奖杯段位</span>
+          <span>🔥 实时/异步双模式</span>
+          <span>📦 赛季宝箱</span>
+          <span>🏰 公会领地</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>🎮 两种对战模式</h3>
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>⚡ 实时匹配（炉石式）</h4>
+        <p>双方同时在线，标准炉石回合制。答对出牌，答错送对面费用。5分钟一局。</p>
+        <div class="ref">需要 WebSocket</div>
+      </div>
+      <div class="feat">
+        <h4>📡 异步挑战（皇室战争式）</h4>
+        <p>进攻方布阵 → 对方登录应战 → AI按真实数据模拟。对方离线也可打。</p>
+        <div class="ref">纯 REST，P1 可做</div>
+      </div>
+    </div>
+
+    <h3>⚙️ 回合制对战引擎（炉石核心）</h3>
+    <div class="flow">
+      <ol>
+        <li><strong>起始</strong> — 从30张卡组抽3张。每回合+1费上限（起始3费，最高10费），抽1张</li>
+        <li><strong>出牌</strong> — 选择手牌 → 系统出该卡对应的英语考题 → <strong style="color:var(--teal)">答对=出牌成功</strong>，卡牌上场；<strong style="color:var(--orange)">答错=牌回手，费用不退</strong>，对手抽1张</li>
+        <li><strong>攻击</strong> — 已上场的随从可攻击。攻击时对手需答<strong>防御题</strong>，答对减半伤害</li>
+        <li><strong>法术/效果</strong> — 法术牌答对直接生效。效果如"抽2张牌""全场打3"等</li>
+        <li><strong>胜利</strong> — 击败对手英雄（30血），或10回合后血量高者胜</li>
+      </ol>
+    </div>
+
+    <h3>🏆 奖杯+宝箱系统（皇室战争核心）</h3>
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>🏆 奖杯段位</h4>
+        <p>0杯→青铜→白银→黄金→白金→钻石→传说（1000+杯）。胜+30杯，输-25杯。赛季末结算。</p>
+        <div class="ref">像皇室战争的 trophy road</div>
+      </div>
+      <div class="feat">
+        <h4>📦 宝箱系统</h4>
+        <p>每胜一场获得一个宝箱（青铜/白银/黄金）→ 需要练指定数量的句子才能解锁。</p>
+        <div class="ref">像皇室战争的 unlock timer，但用"学习量"代替"时间"</div>
+      </div>
+      <div class="feat">
+        <h4>🎁 赛季宝箱</h4>
+        <p>每月赛季末按段位发奖：传说=1传说卡包+5随机卡；白金=1史诗卡包+3随机；青铜=3普通卡。</p>
+        <div class="ref">像皇室战争的 season chest</div>
+      </div>
+      <div class="feat">
+        <h4>🏰 公会领地</h4>
+        <p>公会（封臣领地）每周集体贡献比拼。所有成员本周练习总和计入公会战分数。</p>
+        <div class="ref">像皇室战争的 clan wars</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 模式二：维斯特洛远征 ════════ -->
+<section>
+  <div class="mode-card">
+    <div class="mode-header">
+      <div class="mode-icon pve">🗡️</div>
+      <div>
+        <div class="mode-name">模式二：维斯特洛远征（PVE）</div>
+        <div class="mode-desc">杀戮尖塔的Roguelike爬塔 + 英语学习成长</div>
+        <div class="mode-pills">
+          <span>🗺️ 随机地图</span>
+          <span>🎲 事件抉择</span>
+          <span>🪙 遗物系统</span>
+          <span>⭐ 卡牌升级</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>🎮 爬塔流程（每局15-25分钟）</h3>
+    <div class="flow">
+      <ol>
+        <li><strong>选初始卡组</strong> — 从你的收藏选 10 张牌作为"远征牌组"（不是30张，是精简构筑）</li>
+        <li><strong>选择路线</strong> — 像杀戮尖塔一样显示地图节点：<span style="color:var(--teal)">🟢战斗</span> / <span style="color:var(--gold)">🟡事件</span> / <span style="color:var(--blue)">🔵休息</span> / <span style="color:var(--purple)">🟣Boss</span></li>
+        <li><strong>战斗节点</strong> — 出一道英语题 → 答对抽卡 + 对敌人造成伤害 → 答错受伤。击败敌人后三选一奖励（新卡/Buff/回血）</li>
+        <li><strong>事件节点</strong> — 随机剧情抉择。如"发现一本古籍"→ A)花5分钟精读（得稀有卡）B)快速浏览（得普通卡）</li>
+        <li><strong>休息节点</strong> — 回血 30%，或给一张卡牌升级（攻+1/防+1）</li>
+        <li><strong>Boss战</strong> — 段落听写式终极挑战。全屏长句，逐词填空，答对打断Boss技能</li>
+      </ol>
+    </div>
+
+    <h3>🪙 遗物系统（杀戮尖塔核心）</h3>
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>📜 龙鳞护符</h4>
+        <p>本局所有选择题变为听力题（难度↑但奖励×1.5）</p>
+      </div>
+      <div class="feat">
+        <h4>🦅 渡鸦之眼</h4>
+        <p>每场战斗第一次答错不扣血</p>
+      </div>
+      <div class="feat">
+        <h4>🔥 龙焰宝珠</h4>
+        <p>答对时对敌方额外造成 2 点伤害</p>
+      </div>
+      <div class="feat">
+        <h4>🛡️ 铁王座碎片</h4>
+        <p>每通过一个Boss，回满血</p>
+      </div>
+    </div>
+
+    <h3>⭐ 多剧集扩展</h3>
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>🏔️ GOT远征 — 凛冬将至</h4>
+        <p>5关：临冬城→君临→绝境长城→龙石岛→铁王座。Boss：夜王（段落听写）</p>
+      </div>
+      <div class="feat">
+        <h4>🏡 DA远征 — 唐顿庄园</h4>
+        <p>5关：唐顿大宅→仆人间→伦敦→乡间别墅→庄园舞会。Boss：伯爵夫人（词汇挑战）</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 模式三：每日御前挑战 ════════ -->
+<section>
+  <div class="mode-card">
+    <div class="mode-header">
+      <div class="mode-icon daily">⚡</div>
+      <div>
+        <div class="mode-name">模式三：每日御前挑战（单人）</div>
+        <div class="mode-desc">每天一局的轻量Roguelike，碎片时间友好</div>
+        <div class="mode-pills">
+          <span>🎲 随机Boss</span>
+          <span>🔄 三选一Buff</span>
+          <span>🏅 全服排行</span>
+          <span>⏱️ 5分钟</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>🎲 随机Boss</h4>
+        <p>每天一个特殊Boss（如"Walder Frey — 背叛者"）带特殊规则：<br>"本场所有法术牌费用+2""所有随从攻击力减半"</p>
+      </div>
+      <div class="feat">
+        <h4>🔄 三选一Buff</h4>
+        <p>每答对 5 题后，3选1 Buff："下3题减时50%""双倍伤害""免费复活一次"</p>
+      </div>
+      <div class="feat">
+        <h4>🏅 全服排行</h4>
+        <p>按答对率×难度系数×用时 综合排名。前 100 名获额外卡包奖励</p>
+      </div>
+      <div class="feat">
+        <h4>📦 连胜奖励</h4>
+        <p>连续每日挑战 3/7/14/30 天，分别解锁限定卡牌/头像框/称号</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 三模式打通 ════════ -->
+<section>
+  <h2>🔗 三模式如何打通</h2>
+  <div class="feature-grid">
+    <div class="feat" style="border-color: rgba(251,191,36,0.3);">
+      <h4 style="color:var(--gold);">👑 PVP → PVE</h4>
+      <p>爬塔中获得的限定卡牌<strong>可以用于PVP</strong>。远征通关奖励是竞技场新牌。</p>
+    </div>
+    <div class="feat" style="border-color: rgba(168,85,247,0.3);">
+      <h4 style="color:var(--purple);">🗡️ PVE → 学习</h4>
+      <p>爬塔遇到的生词会被加入"错词本"，下次练习优先复习。远征也是复习。</p>
+    </div>
+    <div class="feat" style="border-color: rgba(20,184,166,0.3);">
+      <h4 style="color:var(--teal);">📚 学习 → PVP+PVE</h4>
+      <p>练听写产出卡包，卡牌组卡组。练得越多，牌越多，对战胜率越高。</p>
+    </div>
+    <div class="feat" style="border-color: rgba(245,158,11,0.3);">
+      <h4 style="color:var(--orange);">🏆 赛季大满贯</h4>
+      <p>每月：PVP天梯排位 + 远征最高层数 + 每日挑战高分 → 三项综合评选"月之王者"</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 卡牌示例（三模式通用） ════════ -->
+<section>
+  <h2>🃏 卡牌体系（三模式通用）</h2>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:12px;">所有卡牌在PVP和PVE中效果一致。卡牌数据统一，引擎不同。</p>
+
+  <div class="card-strip">
+    <div class="card-chip" style="border-color:var(--gold);">
+      <div class="c">5</div><div class="n">龙母·丹妮</div>
+      <div class="t">传说·随从</div>
+      <div class="s">⚔️8 ❤️8</div>
+      <div style="font-size:0.65rem;color:var(--gold);margin-top:4px;">战吼：全场打3</div>
+    </div>
+    <div class="card-chip" style="border-color:var(--purple);">
+      <div class="c">3</div><div class="n">守夜人誓言</div>
+      <div class="t">史诗·法术</div>
+      <div class="s">回血 5</div>
+      <div style="font-size:0.65rem;color:var(--purple);margin-top:4px;">抽取2张牌</div>
+    </div>
+    <div class="card-chip" style="border-color:var(--blue);">
+      <div class="c">2</div><div class="n">冰原狼</div>
+      <div class="t">稀有·随从</div>
+      <div class="s">⚔️3 ❤️3</div>
+      <div style="font-size:0.65rem;color:var(--blue);margin-top:4px;">无效果</div>
+    </div>
+    <div class="card-chip" style="border-color:var(--gold);">
+      <div class="c">7</div><div class="n">血色婚礼</div>
+      <div class="t">传说·事件</div>
+      <div class="s">消灭所有敌随</div>
+      <div style="font-size:0.65rem;color:var(--gold);margin-top:4px;">你的英雄受3伤</div>
+    </div>
+    <div class="card-chip">
+      <div class="c">1</div><div class="n">学士乌鸦</div>
+      <div class="t">普通·法术</div>
+      <div class="s">抽1张牌</div>
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">很简单</div>
+    </div>
+  </div>
+
+  <h3>考题难度与费用的关系</h3>
+  <table>
+    <tr><th>卡牌费用</th><th>出题类型</th><th>示例题目</th><th>学习价值</th></tr>
+    <tr><td>1-2费</td><td>🎧 听力选词</td><td>听音频 → 选出你听到的单词</td><td>基础听力</td></tr>
+    <tr><td>3-4费</td><td>✍️ 拼写填空</td><td>显示中文 → 拼出英文单词</td><td>词汇拼写</td></tr>
+    <tr><td>5-6费</td><td>📝 句子听写</td><td>播放句子 → 逐词填写</td><td>完整听写</td></tr>
+    <tr><td>7-8费</td><td>📖 排序理解</td><td>打乱单词 → 排成正确语序</td><td>语法+语序</td></tr>
+    <tr><td>9-10费</td><td>🎯 段落理解</td><td>播放段落 → 回答理解题</td><td>综合理解</td></tr>
+  </table>
+</section>
+
+<!-- ════════ 路线图 ════════ -->
+<section>
+  <h2>🗺️ 分阶段实现路线图</h2>
+
+  <div class="phase-row">
+    <div class="phase-card" style="border-color:rgba(20,184,166,0.3);">
+      <div class="phase-label">P1 · 异步竞技场 + 宝箱</div>
+      <h3 style="color:var(--teal);">🤝 好友异步挑战</h3>
+      <ul>
+        <li>好友系统（加好友、在线状态）</li>
+        <li>异步对战：布阵→AI模拟→出结果</li>
+        <li>奖杯系统（+30/-25）</li>
+        <li>宝箱系统（胜场得宝箱，练句解锁）</li>
+        <li>赛季结算+基础天梯</li>
+        <li>战报（胜负统计+答对率）</li>
+        <li>⚡ 数据表：friends、battle_history、rank_tiers</li>
+      </ul>
+    </div>
+    <div class="phase-card" style="border-color:rgba(251,191,36,0.3);">
+      <div class="phase-label">P2 · 实时对战 + 爬塔</div>
+      <h3 style="color:var(--gold);">⚔️ 炉石式实时+杀戮尖塔</h3>
+      <ul>
+        <li>WebSocket实时匹配对战</li>
+        <li>答题出牌+防御题完整回合流</li>
+        <li>公会系统（创建/加入/领地战）</li>
+        <li>PvE远征爬塔（5关剧本地图）</li>
+        <li>事件节点+Roguelike Buff</li>
+        <li>遗物系统（临时/永久）</li>
+        <li>每日御前挑战</li>
+      </ul>
+    </div>
+    <div class="phase-card" style="border-color:rgba(168,85,247,0.3);">
+      <div class="phase-label">P3 · 赛季生态</div>
+      <h3 style="color:var(--purple);">🌍 完整赛季+内容扩展</h3>
+      <ul>
+        <li>多剧集远征包（GOT/DA/更多）</li>
+        <li>三模式全服排行榜</li>
+        <li>"月之王者"综合评选</li>
+        <li>限定卡牌+赛季皮肤</li>
+        <li>公会联赛（团战）</li>
+        <li>成就系统+称号</li>
+        <li>新剧集上线带动内容消费</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:20px; padding:16px; background:rgba(20,184,166,0.06); border-radius:var(--radius-md); border:1px solid rgba(20,184,166,0.15);">
+    <h3 style="margin:0 0 8px; color:var(--teal);">📊 当前与P1的差距</h3>
+    <table>
+      <tr><th>已有</th><th>P1需要做</th></tr>
+      <tr><td>✅ 卡牌系统（28张牌）</td><td>新增 friends 表、battle_history 表、rank_tiers 表</td></tr>
+      <tr><td>✅ 卡组构筑（30张/组）</td><td>新增后端：FriendController、ChallengeService、RankService</td></tr>
+      <tr><td>✅ 开包结算（整集发放）</td><td>新增前端：FriendPage、ChallengePage、RankPage</td></tr>
+      <tr><td>✅ 底部导航（🎴卡牌）</td><td>底部导航增加"对战"页签</td></tr>
+      <tr><td>✅ 用户系统+JWT</td><td>异步对战AI逻辑（按卡组费用曲线出牌+历史答对率）</td></tr>
+      <tr><td colspan="2" style="color:var(--teal);font-size:0.85rem;">⚡ 全部P1功能纯REST，不需要WebSocket。现有架构完全支持。</td></tr>
+    </table>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

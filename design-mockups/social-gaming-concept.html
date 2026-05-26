@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>七国争霸 · 权游社交系统概念设计</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070b15;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:1200px;margin:0 auto}
+
+h1{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#14b8a6,#2dd4bf);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#64748b;font-size:clamp(0.85rem,1.2vw,1rem);margin-bottom:32px}
+.subtitle span{color:#14b8a6}
+
+/* 三栏布局 */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-bottom:40px}
+
+.feature-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;border:1px solid rgba(20,184,166,0.12);overflow:hidden;transition:border-color .3s}
+.feature-card:hover{border-color:rgba(20,184,166,0.35)}
+.feature-card-header{padding:20px 20px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.feature-card-header .icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.feature-card-header h2{font-size:1.1rem;font-weight:700;color:#f1f5f9}
+.feature-card-header p{font-size:.8rem;color:#64748b;margin-top:2px}
+.feature-card-body{padding:20px}
+
+/* 装备系统卡片 */
+.icon-equip{background:linear-gradient(135deg,#1e3a3a,#0f2a2a);border:1px solid rgba(20,184,166,0.2)}
+.icon-pvp{background:linear-gradient(135deg,#3a1e2a,#2a0f1a);border:1px solid rgba(244,63,94,0.2)}
+.icon-tavern{background:linear-gradient(135deg,#2a1e3a,#1a0f2a);border:1px solid rgba(167,139,250,0.2)}
+
+/* 装备格子 */
+.equip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.equip-slot{aspect-ratio:1;background:rgba(255,255,255,0.04);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#64748b;position:relative;cursor:pointer;transition:all .2s}
+.equip-slot.filled{border-style:solid;background:rgba(20,184,166,0.06);border-color:rgba(20,184,166,0.2)}
+.equip-slot .slot-icon{font-size:20px;line-height:1}
+.equip-slot .slot-label{font-size:10px}
+.equip-slot .rarity{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%}
+.rarity-common{background:#94a3b8}
+.rarity-rare{background:#3b82f6}
+.rarity-epic{background:#a78bfa}
+.rarity-legendary{background:#f59e0b;box-shadow:0 0 6px #f59e0b}
+
+/* 掉落物列表 */
+.drop-list{margin-bottom:16px}
+.drop-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,0.02);font-size:13px}
+.drop-item .drop-icon{font-size:16px;width:24px;text-align:center}
+.drop-item .drop-name{flex:1;color:#e2e8f0}
+.drop-item .drop-source{color:#64748b;font-size:11px}
+
+/* PVP 模式 */
+.duel-card{background:rgba(255,255,255,0.03);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(244,63,94,0.1)}
+
+.duel-players{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.duel-player{text-align:center;flex:1}
+.duel-player .avatar{width:52px;height:52px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;position:relative}
+.duel-player .avatar.p1{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+.duel-player .avatar.p2{background:linear-gradient(135deg,#f43f5e,#e11d48)}
+.duel-player .name{font-size:14px;font-weight:600;color:#e2e8f0}
+.duel-player .title{font-size:11px;color:#64748b}
+.duel-vs{font-size:18px;font-weight:800;color:#14b8a6;padding:0 8px}
+
+.duel-sentence{background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center}
+.duel-sentence .eng{font-size:14px;font-weight:500;color:#e2e8f0;margin-bottom:4px}
+.duel-sentence .hint{font-size:11px;color:#64748b}
+.duel-sentence .audio-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 12px;border-radius:6px;border:1px solid rgba(20,184,166,0.2);background:rgba(20,184,166,0.06);color:#14b8a6;font-size:12px;cursor:pointer}
+
+.duel-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.duel-input-wrap{position:relative}
+.duel-input-wrap input{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#e2e8f0;font-size:13px;outline:none;transition:border-color .2s}
+.duel-input-wrap input:focus{border-color:#14b8a6}
+.duel-progress{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:8px}
+.duel-progress-bar{height:100%;border-radius:2px;transition:width .3s}
+.duel-progress-bar.p1{background:linear-gradient(90deg,#14b8a6,#2dd4bf)}
+.duel-progress-bar.p2{background:linear-gradient(90deg,#f43f5e,#fb7185)}
+
+/* 排行榜 */
+.rank-list{margin-bottom:16px}
+.rank-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,0.02);cursor:pointer;transition:background .2s}
+.rank-item:hover{background:rgba(255,255,255,0.04)}
+.rank-item .rank-num{width:24px;text-align:center;font-weight:700;font-size:14px}
+.rank-item .rank-num.one{color:#fbbf24}
+.rank-item .rank-num.two{color:#94a3b8}
+.rank-item .rank-num.three{color:#d97706}
+.rank-item .rank-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;background:linear-gradient(135deg,#14b8a6,#0d9488);flex-shrink:0}
+.rank-item .rank-info{flex:1;min-width:0}
+.rank-item .rank-name{font-size:13px;font-weight:500;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-item .rank-detail{font-size:11px;color:#64748b}
+.rank-item .rank-score{font-size:14px;font-weight:600;color:#14b8a6}
+
+/* Battle Pass 风格奖励进度 */
+.battle-pass{background:rgba(255,255,255,0.03);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(251,191,36,0.1)}
+.battle-pass-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.battle-pass-header h3{font-size:14px;font-weight:700;color:#fbbf24}
+.battle-pass-header span{font-size:11px;color:#64748b}
+.reward-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0}
+.reward-node{flex-shrink:0;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);position:relative;margin:0 2px}
+.reward-node.unlocked{background:rgba(251,191,36,0.12);border-color:#fbbf24}
+.reward-node.current{background:rgba(20,184,166,0.12);border-color:#14b8a6;box-shadow:0 0 12px rgba(20,184,166,0.2)}
+.reward-node.locked{opacity:.35}
+.reward-node .node-day{position:absolute;bottom:-14px;font-size:9px;color:#64748b;white-space:nowrap}
+.reward-connector{flex-shrink:0;width:20px;height:2px;background:rgba(255,255,255,0.06)}
+.reward-connector.unlocked{background:#fbbf24}
+
+/* 聊天室 */
+.chat-room{background:rgba(255,255,255,0.03);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.chat-header .title{font-size:14px;font-weight:700;color:#e2e8f0}
+.chat-header .online{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b}
+.chat-header .online-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+.chat-messages{max-height:260px;overflow-y:auto;padding:12px 16px}
+.chat-message{display:flex;gap:8px;margin-bottom:10px}
+.chat-msg-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.chat-msg-avatar.c1{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+.chat-msg-avatar.c2{background:linear-gradient(135deg,#a78bfa,#8b5cf6)}
+.chat-msg-avatar.c3{background:linear-gradient(135deg,#f43f5e,#e11d48)}
+.chat-msg-content{flex:1;min-width:0}
+.chat-msg-user{font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:2px}
+.chat-msg-user .badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;margin-left:4px;background:rgba(20,184,166,0.12);color:#14b8a6;font-weight:500}
+.chat-msg-text{font-size:13px;color:#e2e8f0;line-height:1.4}
+.chat-msg-text .action{color:#a78bfa;font-weight:600}
+.chat-msg-text .highlight{color:#fbbf24}
+.chat-msg-text .slash{color:#14b8a6;font-weight:600}
+.chat-msg-time{font-size:10px;color:#475569;margin-top:2px}
+.chat-join{text-align:center;font-size:11px;color:#64748b;padding:8px 0}
+
+.chat-super-msg{background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.12);border-radius:8px;padding:10px 14px;margin-bottom:10px;text-align:center}
+.chat-super-msg .effect{font-size:22px;margin-bottom:4px}
+.chat-super-msg .text{font-size:12px;color:#e2e8f0}
+.chat-super-msg .text .highlight{color:#a78bfa;font-weight:600}
+
+.chat-input{display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.04)}
+.chat-input input{flex:1;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#e2e8f0;font-size:13px;outline:none}
+.chat-input input::placeholder{color:#475569}
+.chat-input button{padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+
+/* 流程图 */
+.flow-section{margin-top:32px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;border:1px solid rgba(20,184,166,0.12);padding:32px}
+.flow-section h2{font-size:1.3rem;font-weight:700;color:#f1f5f9;margin-bottom:24px;text-align:center}
+.flow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.flow-step{text-align:center;padding:20px 12px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+
+.flow-step .step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin:0 auto 12px}
+.flow-step .step-icon{font-size:28px;margin-bottom:8px}
+.flow-step h3{font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
+.flow-step p{font-size:11px;color:#64748b;line-height:1.5}
+.flow-arrow{display:flex;align-items:center;justify-content:center;font-size:20px;color:#14b8a6}
+
+/* 游戏化循环卡片 */
+.loop-section{margin-top:32px}
+.loop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.loop-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.04);transition:all .3s}
+.loop-card:hover{border-color:rgba(20,184,166,0.2);transform:translateY(-2px)}
+.loop-card .lc-icon{font-size:28px;margin-bottom:10px}
+.loop-card h3{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:6px}
+.loop-card .lc-body{font-size:12px;color:#94a3b8;line-height:1.6}
+.loop-card .lc-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:8px;font-weight:500}
+.lc-tag.p0{background:rgba(20,184,166,0.12);color:#14b8a6}
+.lc-tag.p1{background:rgba(167,139,250,0.12);color:#a78bfa}
+.lc-tag.p2{background:rgba(251,191,36,0.12);color:#fbbf24}
+
+/* 响应式 */
+@media(max-width:768px){
+  .features{grid-template-columns:1fr}
+  .duel-inputs{grid-template-columns:1fr}
+  .flow-grid{grid-template-columns:1fr 1fr}
+  .reward-track{padding-bottom:16px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🏰 七国争霸 · 游戏化社交系统</h1>
+<p class="subtitle">在英语听写中打怪升级 · 与好友决斗 · 在君临酒馆把酒言欢 — <span>概念设计</span></p>
+
+<!-- 三大功能卡牌 -->
+<div class="features">
+
+  <!-- 1. 装备系统 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-equip">⚔️</div>
+      <div>
+        <h2>学城宝库 · 装备系统</h2>
+        <p>答题掉落碎片 → 合成装备 → 属性加成</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+      <div class="equip-grid">
+        <div class="equip-slot filled">
+          <span class="rarity rarity-legendary"></span>
+          <span class="slot-icon">🗡️</span>
+          <span class="slot-label">武器</span>
+        </div>
+        <div class="equip-slot filled">
+          <span class="rarity rarity-epic"></span>
+          <span class="slot-icon">🛡️</span>
+          <span class="slot-label">防具</span>
+        </div>
+        <div class="equip-slot filled">
+          <span class="rarity rarity-rare"></span>
+          <span class="slot-icon">👑</span>
+          <span class="slot-label">头盔</span>
+        </div>
+        <div class="equip-slot">
+          <span class="slot-icon">❓</span>
+          <span class="slot-label">空位</span>
+        </div>
+        <div class="equip-slot">
+          <span class="slot-icon">❓</span>
+          <span class="slot-label">空位</span>
+        </div>
+        <div class="equip-slot filled">
+          <span class="rarity rarity-common"></span>
+          <span class="slot-icon">💍</span>
+          <span class="slot-label">戒指</span>
+        </div>
+        <div class="equip-slot filled">
+          <span class="rarity rarity-rare"></span>
+          <span class="slot-icon">📿</span>
+          <span class="slot-label">项链</span>
+        </div>
+        <div class="equip-slot">
+          <span class="slot-icon">❓</span>
+          <span class="slot-label">空位</span>
+        </div>
+      </div>
+      
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px">📦 新掉落:</div>
+      <div class="drop-list">
+        <div class="drop-item">
+          <span class="drop-icon">🗡️</span>
+          <span class="drop-name">瓦雷利亚钢碎片</span>
+          <span class="drop-source">史诗 · 10连击掉落</span>
+        </div>
+        <div class="drop-item">
+          <span class="drop-icon">🛡️</span>
+          <span class="drop-name">龙鳞护肩</span>
+          <span class="drop-source">稀有 · 御前挑战宝箱</span>
+        </div>
+        <div class="drop-item">
+          <span class="drop-icon">💍</span>
+          <span class="drop-name">守夜人指环</span>
+          <span class="drop-source">普通 · 答对5题</span>
+        </div>
+      </div>
+
+      <div style="background:rgba(20,184,166,0.06);border-radius:8px;padding:10px 12px;font-size:12px">
+        <strong style="color:#14b8a6">套装加成:</strong>
+        <span style="color:#94a3b8"> 铁王座之怒 (2件) 🗡️🛡️ → 答题威望 +20% · 收集4件解锁隐藏技能</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PVP 模式 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-pvp">⚡</div>
+      <div>
+        <h2>御前决斗 · PVP模式</h2>
+        <p>实时竞速听写 · 异步约战 · 天梯排行</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+      <div class="duel-card">
+        <div class="duel-players">
+          <div class="duel-player">
+            <div class="avatar p1">H</div>
+            <div class="name">Heaton</div>
+            <div class="title">🏆 骑士 · 1250分</div>
+          </div>
+          <div class="duel-vs">⚡</div>
+          <div class="duel-player">
+            <div class="avatar p2">T</div>
+            <div class="name">Tester</div>
+            <div class="title">🏆 领主 · 1380分</div>
+          </div>
+        </div>
+
+        <div class="duel-sentence">
+          <div class="eng">"Winter is coming."</div>
+          <div class="hint">— Game of Thrones S01E01 | 💡 冬天来了</div>
+          <button class="audio-btn">🔊 听原音</button>
+        </div>
+
+        <div class="duel-inputs">
+          <div class="duel-input-wrap">
+            <div style="font-size:10px;color:#14b8a6;margin-bottom:4px">Heaton · 已输入 8/14 字符</div>
+            <input type="text" value="Winter is com" placeholder="输入..." readonly style="border-color:rgba(20,184,166,0.3)">
+            <div class="duel-progress"><div class="duel-progress-bar p1" style="width:57%"></div></div>
+          </div>
+          <div class="duel-input-wrap">
+            <div style="font-size:10px;color:#f43f5e;margin-bottom:4px">Tester · 已输入 12/14 字符</div>
+            <input type="text" value="Winter is comi" placeholder="输入..." readonly style="border-color:rgba(244,63,94,0.3)">
+            <div class="duel-progress"><div class="duel-progress-bar p2" style="width:86%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 异步约战 -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">📩 待应战:</div>
+        <div class="rank-item" style="background:rgba(244,63,94,0.04)">
+          <div class="rank-avatar" style="background:linear-gradient(135deg,#f43f5e,#e11d48)">T</div>
+          <div class="rank-info">
+            <div class="rank-name">Tester2 <span style="color:#64748b;font-weight:400;font-size:11px">向你发起御前决斗</span></div>
+            <div class="rank-detail">10道题 · 唐顿庄园 S01 · 2小时前</div>
+          </div>
+          <button style="padding:6px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;font-size:12px;font-weight:600;cursor:pointer">应战</button>
+        </div>
+      </div>
+
+      <!-- 天梯 -->
+      <div style="font-size:12px;color:#64748b;margin-bottom:8px">🏅 天梯榜 TOP3:</div>
+      <div class="rank-list">
+        <div class="rank-item">
+          <div class="rank-num one">👑</div>
+          <div class="rank-avatar" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">K</div>
+          <div class="rank-info">
+            <div class="rank-name">KingSlayer</div>
+            <div class="rank-detail">龙之母 · 98%胜率</div>
+          </div>
+          <div class="rank-score">2180</div>
+        </div>
+        <div class="rank-item">
+          <div class="rank-num two">🥈</div>
+          <div class="rank-avatar">S</div>
+          <div class="rank-info">
+            <div class="rank-name">Snow_Walker</div>
+            <div class="rank-detail">领主 · 85%胜率</div>
+          </div>
+          <div class="rank-score">1950</div>
+        </div>
+        <div class="rank-item">
+          <div class="rank-num three">🥉</div>
+          <div class="rank-avatar" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6)">D</div>
+          <div class="rank-info">
+            <div class="rank-name">DragonQueen</div>
+            <div class="rank-detail">国王之手 · 92%胜率</div>
+          </div>
+          <div class="rank-score">1820</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 江湖聊天室 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-tavern">🍺</div>
+      <div>
+        <h2>君临酒馆 · 江湖聊天室</h2>
+        <p>聊天交友 · 互相比拼 · 江湖声望</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+      <div class="chat-room">
+        <div class="chat-header">
+          <div class="title">🍺 君临酒馆</div>
+          <div class="online"><span class="online-dot"></span> 17人在线</div>
+        </div>
+        <div class="chat-messages">
+          <div class="chat-message">
+            <div class="chat-msg-avatar c1">H</div>
+            <div class="chat-msg-content">
+              <div class="chat-msg-user">Heaton <span class="badge">骑士</span></div>
+              <div class="chat-msg-text"><span class="slash">/duel</span> <span class="highlight">@Tester</span> 敢不敢比唐顿S01E01？</div>
+              <div class="chat-msg-time">刚刚</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-msg-avatar c2">T</div>
+            <div class="chat-msg-content">
+              <div class="chat-msg-user">Tester <span class="badge">领主</span></div>
+              <div class="chat-msg-text">来！我刚凑齐一套瓦雷利亚装，+20%速度</div>
+              <div class="chat-msg-time">刚刚</div>
+            </div>
+          </div>
+          <div class="chat-super-msg">
+            <div class="effect">⚔️</div>
+            <div class="text"><span class="highlight">KingSlayer</span> 对 <span class="highlight">Snow_Walker</span> 发起御前决斗！压上 🗡️ 王者之剑（传说级）</div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-msg-avatar c3">K</div>
+            <div class="chat-msg-content">
+              <div class="chat-msg-user">KingSlayer <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24">铁王座</span></div>
+              <div class="chat-msg-text"><span class="slash">/slap</span> <span class="highlight">@Snow_Walker</span> <span class="action">🖐️ 用「寒冬将至」打了雪诺一巴掌，造成53点伤害！</span></div>
+              <div class="chat-msg-time">2分钟前</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-msg-avatar c2">S</div>
+            <div class="chat-msg-content">
+              <div class="chat-msg-user">Snow_Walker <span class="badge">领主</span></div>
+              <div class="chat-msg-text"><span class="slash">/check</span> <span class="highlight">@KingSlayer</span><br>🔍 查看: 45连胜 · 镇北王 · 🗡️ 2件传说 · 📊 近期战绩 98/100 正确</div>
+              <div class="chat-msg-time">3分钟前</div>
+            </div>
+          </div>
+          <div style="text-align:center;padding:4px 0;font-size:11px;color:#475569">更多消息 ↓</div>
+        </div>
+        <div class="chat-input">
+          <input type="text" placeholder="说点什么... /duel @xxx 约战 /slap @xxx 切磋 /check @xxx 查看">
+          <button>发送</button>
+        </div>
+      </div>
+
+      <div style="background:rgba(167,139,250,0.04);border-radius:8px;padding:12px;font-size:12px">
+        <div style="color:#a78bfa;font-weight:600;margin-bottom:6px">💬 酒馆指令</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/duel @user</code> 约战</div>
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/slap @user</code> 切磋</div>
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/check @user</code> 查看</div>
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/roll</code> 投骰子</div>
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/gift @user</code> 送礼</div>
+          <div style="color:#94a3b8"><code style="color:#14b8a6;font-size:11px">/brag</code> 晒战绩</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 完整游戏化循环 -->
+<div class="flow-section">
+  <h2>🔄 完整游戏化循环</h2>
+  <div class="flow-grid">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-icon">📖</div>
+      <h3>听写练习</h3>
+      <p>每日御前挑战 + 自由练习，赚取威望和掉落碎片</p>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-icon">⚔️</div>
+      <h3>PVP决斗</h3>
+      <p>实时/异步对战，赢了抢对方装备碎片，输了扣分但不掉装</p>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-icon">🛡️</div>
+      <h3>合成装备</h3>
+      <p>3合1升品质 · 套装加成 · 装备影响答题倍率和PVP属性</p>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-icon">🍺</div>
+      <h3>酒馆社交</h3>
+      <p>聊天、晒装、约战、切磋、组狼群，赚酒馆声望兑换限定外观</p>
+    </div>
+  </div>
+</div>
+
+<!-- 开发路线 -->
+<div class="loop-section">
+  <h2 style="font-size:1.2rem;font-weight:700;color:#f1f5f9;margin-bottom:16px">📋 开发路线</h2>
+  <div class="loop-grid">
+    <div class="loop-card">
+      <div class="lc-icon">🗡️</div>
+      <h3>装备掉落系统</h3>
+      <div class="lc-body">
+        连击触发稀有掉落 · 每日宝箱 · 装备背包界面<br>
+        3合1合成公式 · 装备属性影响威望倍率
+      </div>
+      <span class="lc-tag p2">P2-B</span>
+    </div>
+    <div class="loop-card">
+      <div class="lc-icon">⚡</div>
+      <h3>实时PVP匹配</h3>
+      <div class="lc-body">
+        同一句子实时竞速 · WebSocket同步输入进度<br>
+        ELO天梯分 · 赛季奖励 · 装备影响对决属性
+      </div>
+      <span class="lc-tag p2">P2-B</span>
+    </div>
+    <div class="loop-card">
+      <div class="lc-icon">📩</div>
+      <h3>异步约战系统</h3>
+      <div class="lc-body">
+        选剧集+句子数 → 发挑战 → 对方上线后答题<br>
+        战绩对比 · 自动判定胜负 · 赌装备模式
+      </div>
+      <span class="lc-tag p2">P2-B</span>
+    </div>
+    <div class="loop-card">
+      <div class="lc-icon">🍺</div>
+      <h3>君临酒馆聊天室</h3>
+      <div class="lc-body">
+        WebSocket实时聊天 · 身份徽章 · 江湖指令<br>
+        酒馆声望系统 · 每日主题 · 限定表情和称号
+      </div>
+      <span class="lc-tag p2">P2-B</span>
+    </div>
+    <div class="loop-card">
+      <div class="lc-icon">🏆</div>
+      <h3>赛季系统</h3>
+      <div class="lc-body">
+        月度/季度天梯重置 · 赛季限定装备 · 排名奖励<br>
+        铁王座赛季皮肤 · 赛季末结算动画
+      </div>
+      <span class="lc-tag p2">P2-C</span>
+    </div>
+    <div class="loop-card">
+      <div class="lc-icon">🐺</div>
+      <h3>狼群公会</h3>
+      <div class="lc-body">
+        组队副本 · 公会战 · 狼群排行榜<br>
+        共享装备仓库 · 公会御前挑战
+      </div>
+      <span class="lc-tag p2">P2-C</span>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

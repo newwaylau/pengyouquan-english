@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>导航结构调整</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--border:#334155;--border-light:rgba(255,255,255,0.06);--text:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--teal:#14b8a6;--radius:12px;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:32px 16px 80px;}
+  .container{max-width:900px;margin:0 auto;}
+  h1{font-size:1.5rem;margin-bottom:24px;}
+  h2{font-size:1.1rem;margin:32px 0 12px;color:var(--teal);}
+  p{color:var(--text-secondary);font-size:0.85rem;line-height:1.6;}
+
+  .old-new{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0;}
+  @media(max-width:600px){.old-new{grid-template-columns:1fr;}}
+
+  .phone{width:280px;max-width:100%;margin:0 auto;background:#070b15;border-radius:20px;overflow:hidden;border:1px solid var(--border-light);box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+  .phone-status{padding:6px 14px;display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text-muted);}
+  .phone-content{min-height:400px;padding:16px;}
+  .phone-content .demo-page{background:var(--card);border-radius:10px;padding:20px;text-align:center;margin-top:20px;border:1px solid var(--border);}
+  .phone-content .demo-page .dp-label{font-size:0.7rem;color:var(--text-muted);}
+  .phone-content .demo-page .dp-title{font-size:0.85rem;font-weight:600;margin-top:4px;}
+  .phone-content .demo-page .dp-desc{font-size:0.7rem;color:var(--text-muted);margin-top:4px;}
+
+  .nav-bar{display:flex;border-top:1px solid var(--border-light);background:#0f172a;}
+  .nav-item{flex:1;padding:6px 0;text-align:center;font-size:0.6rem;color:var(--text-muted);}
+  .nav-item.active{color:var(--teal);}
+  .nav-item .ni-icon{font-size:1.2rem;display:block;margin-bottom:1px;}
+  .nav-item .ni-badge{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--teal);position:relative;top:-7px;left:-1px;}
+
+  .old{opacity:0.6;}
+  .old .nav-item{color:var(--text-muted)!important;}
+  .old .nav-item.active{color:var(--text-muted)!important;}
+  .strikelabel{text-align:center;font-size:0.7rem;color:var(--red);margin-top:8px;}
+
+  .badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.6rem;font-weight:600;margin-left:3px;}
+  .badge.p0{background:rgba(20,185,166,0.12);color:var(--teal);}
+  .badge.p2{background:rgba(245,158,11,0.12);color:#f59e0b;}
+
+  .table{width:100%;border-collapse:collapse;margin:12px 0;}
+  .table td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-secondary);}
+  .table td:first-child{font-weight:600;color:var(--text);white-space:nowrap;}
+
+  .section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin:16px 0;}
+  .note{color:var(--text-muted);font-size:0.78rem;margin-top:8px;line-height:1.5;}
+</style>
+</head><body>
+<div class="container">
+
+<h1>🔄 导航结构简化</h1>
+<p>把「练习+复习」合并为「学习」，导航从 4 项减为 3 项（P0），P2 再加「对战」</p>
+
+<div class="old-new">
+
+  <!-- OLD -->
+  <div>
+    <h2 style="text-align:center;color:var(--text-muted);">❌ 现在（别扭）</h2>
+    <div class="phone old">
+      <div class="phone-status"><span>9:41</span><span>📶</span></div>
+      <div class="phone-content">
+        <div class="demo-page">
+          <div class="dp-label">当前页面</div>
+          <div class="dp-title">⚔️ 演武</div>
+          <div class="dp-desc">等级·挑战·战报</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><span class="ni-icon">📖</span>练习</div>
+        <div class="nav-item"><span class="ni-icon">🔄</span>复习</div>
+        <div class="nav-item active"><span class="ni-icon">⚔️</span>演武</div>
+        <div class="nav-item"><span class="ni-icon">👑</span>封臣</div>
+      </div>
+    </div>
+    <div class="strikelabel">← 练习和复习功能相似，占两个位很浪费</div>
+  </div>
+
+  <!-- NEW -->
+  <div>
+    <h2 style="text-align:center;color:var(--teal);">✅ 新方案</h2>
+    <div class="phone">
+      <div class="phone-status"><span>9:41</span><span>📶</span></div>
+      <div class="phone-content">
+        <div class="demo-page">
+          <div class="dp-label">当前页面</div>
+          <div class="dp-title">🎴 卡牌</div>
+          <div class="dp-desc">卡册 · 卡组 · 对战入口</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><span class="ni-icon">📖</span>学习<span class="badge p0">练习+复习</span></div>
+        <div class="nav-item active"><span class="ni-icon">🎴</span>卡牌<span class="badge p0">NEW</span></div>
+        <div class="nav-item"><span class="ni-icon">👑</span>封臣</div>
+        <div class="nav-item" style="opacity:0.4;"><span class="ni-icon">⚔️</span>对战<span class="badge p2">P2</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:0.7rem;color:var(--teal);margin-top:8px;">← 3+1 结构：P0 三项，P2 第四项激活</div>
+  </div>
+
+</div>
+
+<div class="section">
+  <strong style="font-size:0.9rem;">📖「学习」页里有什么</strong>
+  <p style="margin-top:6px;font-size:0.82rem;">
+    合并后的「学习」页 = 今天的 PracticePage + 错题本 + 御前挑战入口。<br>
+    页面顶部放三个子标签：<b>听写</b> | <b>错题</b> | <b>挑战</b>
+  </p>
+</div>
+
+<h2>导航变更明细</h2>
+<table class="table">
+  <tr><td>📖 学习</td><td>合并原来的「练习」+「复习」。进入后默认是听写页，顶部可切到错题本</td></tr>
+  <tr><td>🎴 卡牌</td><td>新增入口（P0）。卡册 + 卡组编辑器。P2 后底部加「⚔️ 匹配对战」按钮</td></tr>
+  <tr><td>👑 封臣</td><td>不变。排行榜 + 封臣系统 + 好友挑战（P1）</td></tr>
+  <tr><td style="opacity:0.5;">⚔️ 对战</td><td style="opacity:0.5;">P2 才激活。实时天梯匹配、段位系统</td></tr>
+</table>
+
+<h2>文件更改</h2>
+<table class="table">
+  <tr><td><span style="font-family:monospace;font-size:0.78rem;color:var(--teal);">App.tsx</span></td><td>修改 bottom-nav items：三个导航项（学习/卡牌/封臣），第四个对战 P2 激活</td></tr>
+  <tr><td><span style="font-family:monospace;font-size:0.78rem;color:var(--teal);">PracticePage.tsx</span></td><td>变成「学习」页的基础，顶部加标签切换（听写/错题/挑战）</td></tr>
+  <tr><td><span style="font-family:monospace;font-size:0.78rem;color:var(--teal);">WrongPage.tsx</span></td><td>废除此独立页面，错题本作为「学习」页的子标签嵌入</td></tr>
+  <tr><td><span style="font-family:monospace;font-size:0.78rem;color:var(--teal);">ArenaPage.tsx</span></td><td>独立页面保留，不走底部导航；卡牌页内开子标签「战绩」可访问</td></tr>
+  <tr><td>其余</td><td>不变</td></tr>
+</table>
+
+<p class="note">
+  <strong>总结</strong>：P0 底部导航 = 📖学习 · 🎴卡牌 · 👑封臣。<br>
+  P2 时加入第 4 个「⚔️ 对战」。<br>
+  练习和复习不割裂，卡牌作为新核心有独立入口，整个导航更平衡。
+</p>
+
+</div></body></html>

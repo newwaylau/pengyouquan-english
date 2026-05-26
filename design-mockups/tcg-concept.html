@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>七国卡牌 · 权游TCG概念设计</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070b15;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:1100px;margin:0 auto}
+
+h1{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#14b8a6,#2dd4bf);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#64748b;font-size:clamp(0.85rem,1.2vw,1rem);margin-bottom:32px}
+.subtitle span{color:#14b8a6}
+
+/* ---- 三栏布局 ---- */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:40px}
+
+.feature-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;border:1px solid rgba(20,184,166,0.12);overflow:hidden}
+.feature-card-header{padding:20px 20px 12px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.feature-card-header .icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.icon-collect{background:linear-gradient(135deg,#1e3a3a,#0f2a2a);border:1px solid rgba(20,184,166,0.2)}
+.icon-battle{background:linear-gradient(135deg,#3a1e2a,#2a0f1a);border:1px solid rgba(244,63,94,0.2)}
+.icon-tavern{background:linear-gradient(135deg,#2a1e3a,#1a0f2a);border:1px solid rgba(167,139,250,0.2)}
+.feature-card-header h2{font-size:1.05rem;font-weight:700;color:#f1f5f9}
+.feature-card-header p{font-size:.78rem;color:#64748b;margin-top:2px}
+.feature-card-body{padding:20px}
+
+/* ---- 卡牌展示 ---- */
+.collection-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.collection-header h3{font-size:14px;font-weight:700;color:#e2e8f0}
+.collection-header .count{font-size:12px;color:#64748b}
+
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+
+.card{aspect-ratio:3/4;border-radius:10px;padding:10px;display:flex;flex-direction:column;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.card::before{content:'';position:absolute;inset:0;border-radius:10px;padding:2px;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.card-common{background:linear-gradient(180deg,#1e293b,#0f172a)}
+.card-common::before{background:linear-gradient(135deg,#64748b,#475569)}
+.card-rare{background:linear-gradient(180deg,#1e2a3f,#0f172a)}
+.card-rare::before{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.card-epic{background:linear-gradient(180deg,#2a1e3f,#0f172a)}
+.card-epic::before{background:linear-gradient(135deg,#a78bfa,#7c3aed)}
+.card-legendary{background:linear-gradient(180deg,#2a2a1a,#0f172a)}
+.card-legendary::before{background:linear-gradient(135deg,#fbbf24,#d97706)}
+
+.card .rarity-badge{position:absolute;top:6px;right:6px;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600;z-index:1}
+.rarity-c{background:rgba(100,116,139,0.3);color:#94a3b8}
+.rarity-r{background:rgba(59,130,246,0.3);color:#60a5fa}
+.rarity-e{background:rgba(167,139,250,0.3);color:#a78bfa}
+.rarity-l{background:rgba(251,191,36,0.3);color:#fbbf24}
+
+.card .card-show{font-size:9px;color:rgba(255,255,255,0.5);margin-bottom:auto;z-index:1}
+.card .card-text{font-size:11px;font-weight:600;color:#e2e8f0;line-height:1.3;z-index:1;flex:1}
+.card .card-stats{display:flex;gap:6px;margin-top:4px;z-index:1}
+.card .card-stat{background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 5px;font-size:8px;color:#94a3b8}
+
+.card-new{animation:fadeSlide .3s ease}
+
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* 收集进度 */
+.collection-progress{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;margin-bottom:16px}
+.collection-progress .cp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.collection-progress .cp-row:last-child{margin-bottom:0}
+.collection-progress .cp-label{font-size:12px;color:#94a3b8}
+.collection-progress .cp-val{font-size:12px;font-weight:600;color:#e2e8f0}
+.collection-progress .cp-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.collection-progress .cp-fill{height:100%;border-radius:2px;transition:width .5s}
+.cp-got{background:linear-gradient(90deg,#14b8a6,#2dd4bf)}
+.cp-da{background:linear-gradient(90deg,#a78bfa,#8b5cf6)}
+
+.sets-row{display:flex;gap:8px;margin-bottom:12px}
+.set-badge{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:11px;cursor:pointer;transition:all .2s}
+.set-badge:hover{border-color:rgba(20,184,166,0.2)}
+.set-badge .set-icon{font-size:14px}
+.set-badge .set-name{color:#94a3b8}
+.set-badge .set-progress{color:#64748b;font-size:10px}
+.set-badge.complete{border-color:rgba(251,191,36,0.2);background:rgba(251,191,36,0.04)}
+.set-badge.complete .set-name{color:#fbbf24}
+
+/* ---- PVP 对战 ---- */
+.battle-arena{background:rgba(255,255,255,0.02);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(244,63,94,0.08)}
+
+.battle-players{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.battle-side{text-align:center;flex:1}
+.battle-side .avatar{width:44px;height:44px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;position:relative}
+.battle-side .avatar.a1{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+.battle-side .avatar.a2{background:linear-gradient(135deg,#f43f5e,#e11d48)}
+.battle-side .hp-bar{width:80px;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin:4px auto 0;overflow:hidden}
+.battle-side .hp-fill{height:100%;border-radius:2px;transition:width .4s}
+.battle-side .hp-fill.a1{background:linear-gradient(90deg,#14b8a6,#2dd4bf)}
+.battle-side .hp-fill.a2{background:linear-gradient(90deg,#f43f5e,#fb7185)}
+.battle-side .name{font-size:13px;font-weight:600;color:#e2e8f0}
+.battle-side .hp-text{font-size:10px;color:#64748b}
+
+.battle-field{text-align:center;margin:12px 0}
+.battle-field .turn-indicator{font-size:11px;color:#64748b;margin-bottom:8px}
+.battle-field .turn-indicator .active{color:#14b8a6;font-weight:600}
+.battle-field .card-played{display:inline-block;width:120px;padding:12px 10px;border-radius:10px;text-align:center;margin-bottom:8px}
+.card-played.attacking{background:linear-gradient(180deg,rgba(244,63,94,0.12),rgba(244,63,94,0.04));border:1px solid rgba(244,63,94,0.2)}
+.card-played.defending{background:linear-gradient(180deg,rgba(20,184,166,0.12),rgba(20,184,166,0.04));border:1px solid rgba(20,184,166,0.2)}
+.battle-field .card-played .cp-eng{font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:2px}
+.battle-field .card-played .cp-cn{font-size:11px;color:#64748b;margin-bottom:6px}
+.battle-field .card-played .cp-result{font-size:20px}
+.battle-field .battle-input{margin-top:8px}
+.battle-field .battle-input input{width:100%;max-width:300px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(20,184,166,0.2);border-radius:8px;color:#e2e8f0;font-size:13px;outline:none;text-align:center}
+.battle-field .battle-input .btns{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.battle-field .battle-input button{padding:8px 20px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-submit{background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff}
+.btn-pass{background:rgba(255,255,255,0.06);color:#64748b}
+
+.battle-log{margin-top:12px}
+.log-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.log-item .log-icon{font-size:14px;width:20px;text-align:center}
+.log-item .log-text{color:#94a3b8}
+.log-item .log-text strong{color:#e2e8f0}
+
+/* ---- 酒馆指令 ---- */
+.chat-room{background:rgba(255,255,255,0.03);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.chat-header .title{font-size:14px;font-weight:700;color:#e2e8f0}
+.chat-header .online{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b}
+.chat-header .online-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+.chat-msgs{max-height:220px;overflow-y:auto;padding:12px 16px}
+.msg{display:flex;gap:8px;margin-bottom:10px}
+.msg-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.msg-av.c1{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+.msg-av.c2{background:linear-gradient(135deg,#a78bfa,#8b5cf6)}
+.msg-av.c3{background:linear-gradient(135deg,#f43f5e,#e11d48)}
+.msg-av.c4{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+.msg-bd{flex:1;min-width:0}
+.msg-user{font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:2px}
+.msg-user .tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;margin-left:4px;font-weight:500}
+.tag-card{background:rgba(20,184,166,0.12);color:#14b8a6}
+.tag-iron{background:rgba(251,191,36,0.12);color:#fbbf24}
+.tag-lord{background:rgba(167,139,250,0.12);color:#a78bfa}
+.msg-text{font-size:12px;color:#e2e8f0;line-height:1.4}
+.msg-text .cmd{color:#14b8a6;font-weight:600}
+.msg-text .hl{color:#fbbf24}
+.msg-text .action{color:#a78bfa;font-weight:600}
+.msg-text .card-name{color:#14b8a6;font-weight:500}
+.msg-time{font-size:10px;color:#475569;margin-top:1px}
+.msg-special{background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.12);border-radius:8px;padding:8px 12px;margin-bottom:10px;text-align:center}
+.msg-special .sp-effect{font-size:18px;margin-bottom:2px}
+.msg-special .sp-text{font-size:11px;color:#e2e8f0}
+
+.chat-input{display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.04)}
+.chat-input input{flex:1;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#e2e8f0;font-size:12px;outline:none}
+.chat-input input::placeholder{color:#475569}
+.chat-input button{padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+
+/* ---- 卡牌详情popover ---- */
+.card-detail{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:16px;display:flex;gap:14px;border:1px solid rgba(20,184,166,0.15);align-items:center}
+.card-detail .cd-card{width:80px;aspect-ratio:3/4;border-radius:8px;padding:8px;flex-shrink:0;display:flex;flex-direction:column}
+.card-detail .cd-info{flex:1}
+.card-detail .cd-title{font-size:15px;font-weight:700;color:#e2e8f0;margin-bottom:2px}
+.card-detail .cd-source{font-size:11px;color:#64748b;margin-bottom:6px}
+.card-detail .cd-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:11px;color:#94a3b8}
+.card-detail .cd-stats span{display:flex;justify-content:space-between}
+.card-detail .cd-stats .val{color:#e2e8f0;font-weight:500}
+
+/* ---- 流程与路线 ---- */
+.section-title{font-size:1.2rem;font-weight:700;color:#f1f5f9;margin-bottom:20px;text-align:center}
+
+.flow-section{margin-top:32px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;border:1px solid rgba(20,184,166,0.12);padding:32px}
+.flow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.flow-step{text-align:center;padding:18px 10px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+.flow-step .sn{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin:0 auto 10px}
+.flow-step .si{font-size:24px;margin-bottom:6px}
+.flow-step h3{font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
+.flow-step p{font-size:11px;color:#64748b;line-height:1.5}
+
+.roadmap{margin-top:24px}
+.roadmap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.rm-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,0.04)}
+.rm-card .rm-icon{font-size:22px;margin-bottom:8px}
+.rm-card .rm-title{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
+.rm-card .rm-body{font-size:11px;color:#94a3b8;line-height:1.5}
+.rm-card .rm-tag{display:inline-block;font-size:9px;padding:2px 6px;border-radius:4px;margin-top:6px;font-weight:500}
+.rm-tag.p2a{background:rgba(20,184,166,0.12);color:#14b8a6}
+.rm-tag.p2b{background:rgba(167,139,250,0.12);color:#a78bfa}
+.rm-tag.p2c{background:rgba(251,191,36,0.12);color:#fbbf24}
+
+@media(max-width:768px){
+  .features{grid-template-columns:1fr}
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+  .battle-players{flex-direction:column;gap:12px}
+  .flow-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🃏 七国卡牌 · 英语听写 TCG</h1>
+<p class="subtitle">每句学会的台词都是一张卡 — 收集 · 对战 · 炫耀 — <span>概念设计</span></p>
+
+<!-- 三大模块 -->
+<div class="features">
+
+  <!-- 1. 卡牌收集 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-collect">🃏</div>
+      <div>
+        <h2>学城藏书 · 卡牌收集</h2>
+        <p>答对句子即获得对应卡牌 · 按剧集分组</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+
+      <!-- 剧集筛选 -->
+      <div class="sets-row">
+        <div class="set-badge complete">
+          <span class="set-icon">🐺</span>
+          <span class="set-name">权游 S01</span>
+          <span class="set-progress">382/382 ✓</span>
+        </div>
+        <div class="set-badge">
+          <span class="set-icon">🏰</span>
+          <span class="set-name">唐顿 S01</span>
+          <span class="set-progress">267/1097</span>
+        </div>
+        <div class="set-badge">
+          <span class="set-icon">🐉</span>
+          <span class="set-name">权游 S02</span>
+          <span class="set-progress">0/428</span>
+        </div>
+      </div>
+
+      <!-- 卡片网格 -->
+      <div class="card-grid">
+        <div class="card card-legendary card-new">
+          <span class="rarity-badge rarity-l">传说</span>
+          <div class="card-show">GOT S01E01</div>
+          <div class="card-text">"Winter is coming."</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 85</span>
+            <span class="card-stat">🛡️ HP 70</span>
+          </div>
+        </div>
+        <div class="card card-epic">
+          <span class="rarity-badge rarity-e">史诗</span>
+          <div class="card-show">DA S01E01</div>
+          <div class="card-text">"What is a weekend?"</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 72</span>
+            <span class="card-stat">🛡️ HP 65</span>
+          </div>
+        </div>
+        <div class="card card-rare">
+          <span class="rarity-badge rarity-r">稀有</span>
+          <div class="card-show">GOT S01E03</div>
+          <div class="card-text">"You know nothing, Jon Snow."</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 58</span>
+            <span class="card-stat">🛡️ HP 44</span>
+          </div>
+        </div>
+        <div class="card card-common">
+          <span class="rarity-badge rarity-c">普通</span>
+          <div class="card-show">GOT S01E02</div>
+          <div class="card-text">"The king's road."</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 25</span>
+            <span class="card-stat">🛡️ HP 20</span>
+          </div>
+        </div>
+        <div class="card card-common">
+          <span class="rarity-badge rarity-c">普通</span>
+          <div class="card-show">DA S01E02</div>
+          <div class="card-text">"I am a lady."</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 18</span>
+            <span class="card-stat">🛡️ HP 22</span>
+          </div>
+        </div>
+        <div class="card card-rare">
+          <span class="rarity-badge rarity-r">稀有</span>
+          <div class="card-show">GOT S01E01</div>
+          <div class="card-text">"The man who passes the sentence..."</div>
+          <div class="card-stats">
+            <span class="card-stat">⚔️ ATK 62</span>
+            <span class="card-stat">🛡️ HP 50</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 收集进度 -->
+      <div class="collection-progress">
+        <div class="cp-row">
+          <span class="cp-label">📊 总收集进度</span>
+          <span class="cp-val">649 / 6,405</span>
+        </div>
+        <div class="cp-bar"><div class="cp-fill cp-got" style="width:10%"></div></div>
+      </div>
+
+      <!-- 卡牌详情 -->
+      <div class="card-detail">
+        <div class="cd-card card-legendary" style="width:70px;aspect-ratio:3/4;padding:6px">
+          <span class="rarity-badge rarity-l" style="font-size:7px">传说</span>
+          <div style="font-size:8px;color:rgba(255,255,255,0.5);margin-bottom:auto">GOT E01</div>
+          <div style="font-size:9px;font-weight:600;color:#e2e8f0;line-height:1.2;flex:1">"Winter is coming."</div>
+        </div>
+        <div class="cd-info">
+          <div class="cd-title">🏆 凛冬将至</div>
+          <div class="cd-source">Game of Thrones S01E01 · 首次连线获得</div>
+          <div class="cd-stats">
+            <span>品质 <span class="val">⭐ 传说</span></span>
+            <span>攻击 <span class="val">⚔️ 85</span></span>
+            <span>生命 <span class="val">🛡️ 70</span></span>
+            <span>连击 <span class="val">🔥 12连击时获得</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 卡牌对战 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-battle">⚡</div>
+      <div>
+        <h2>御前比武 · 卡牌对战</h2>
+        <p>组卡组 → 匹配 → 看中文打英文 → 扣血</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+
+      <div class="battle-arena">
+        <!-- 对战双方 -->
+        <div class="battle-players">
+          <div class="battle-side">
+            <div class="avatar a1">H</div>
+            <div class="name">Heaton</div>
+            <div class="hp-text">❤️ 100/100</div>
+            <div class="hp-bar"><div class="hp-fill a1" style="width:100%"></div></div>
+            <div style="font-size:10px;color:#64748b;margin-top:2px">🃏 手牌 5</div>
+          </div>
+          <div style="font-size:16px;font-weight:800;color:#64748b">⚡</div>
+          <div class="battle-side">
+            <div class="avatar a2">K</div>
+            <div class="name">KingSlayer</div>
+            <div class="hp-text">❤️ 82/100</div>
+            <div class="hp-bar"><div class="hp-fill a2" style="width:82%"></div></div>
+            <div style="font-size:10px;color:#64748b;margin-top:2px">🃏 手牌 3</div>
+          </div>
+        </div>
+
+        <!-- 对战区 -->
+        <div class="battle-field">
+          <div class="turn-indicator">
+            <span class="active">⚔️ 你的回合</span> · 对手打出了:
+          </div>
+          <div class="card-played attacking">
+            <div class="cp-cn">💡 "你什么都不懂，囧·雪诺"</div>
+            <div class="cp-eng">______________</div>
+            <div class="cp-result" style="margin-top:4px;font-size:12px;color:#a78bfa">打出 · 等待回答...</div>
+          </div>
+
+          <!-- 输入区 -->
+          <div class="battle-input">
+            <input type="text" placeholder="输入英文原文..." value="You know not">
+            <div class="btns">
+              <button class="btn-submit">⚔️ 出招</button>
+              <button class="btn-pass">放弃</button>
+            </div>
+          </div>
+
+          <!-- 战报 -->
+          <div class="battle-log">
+            <div class="log-item">
+              <span class="log-icon">✅</span>
+              <span class="log-text"><strong>你</strong> 答对「Winter is coming」 → 造成 <strong style="color:#ef4444">85</strong> 点伤害</span>
+            </div>
+            <div class="log-item">
+              <span class="log-icon">❌</span>
+              <span class="log-text"><strong>KingSlayer</strong> 答错「The king's road」 → 0 伤害</span>
+            </div>
+            <div class="log-item">
+              <span class="log-icon">🃏</span>
+              <span class="log-text">你抽到 <strong class="card-name">「You know nothing」</strong> 史诗卡</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 编卡组 -->
+      <div style="background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:13px;font-weight:600;color:#e2e8f0">🎴 出战卡组 (5/5)</span>
+          <span style="font-size:11px;color:#64748b">总攻击力 299 · 总生命 251</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <div class="card card-legendary" style="width:56px;aspect-ratio:3/4;padding:4px;flex-shrink:0">
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);margin-bottom:auto">GOT</div>
+            <div style="font-size:7px;font-weight:600;color:#e2e8f0;line-height:1.1;flex:1">Winter is coming.</div>
+          </div>
+          <div class="card card-epic" style="width:56px;aspect-ratio:3/4;padding:4px;flex-shrink:0">
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);margin-bottom:auto">DA</div>
+            <div style="font-size:7px;font-weight:600;color:#e2e8f0;line-height:1.1;flex:1">What is a weekend?</div>
+          </div>
+          <div class="card card-rare" style="width:56px;aspect-ratio:3/4;padding:4px;flex-shrink:0">
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);margin-bottom:auto">GOT</div>
+            <div style="font-size:7px;font-weight:600;color:#e2e8f0;line-height:1.1;flex:1">You know nothing</div>
+          </div>
+          <div class="card card-rare" style="width:56px;aspect-ratio:3/4;padding:4px;flex-shrink:0">
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);margin-bottom:auto">GOT</div>
+            <div style="font-size:7px;font-weight:600;color:#e2e8f0;line-height:1.1;flex:1">The man who passes</div>
+          </div>
+          <div class="card card-common" style="width:56px;aspect-ratio:3/4;padding:4px;flex-shrink:0">
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);margin-bottom:auto">GOT</div>
+            <div style="font-size:7px;font-weight:600;color:#e2e8f0;line-height:1.1;flex:1">The king's road</div>
+          </div>
+        </div>
+        <button style="margin-top:8px;width:100%;padding:8px;border:1px dashed rgba(20,184,166,0.2);border-radius:8px;background:transparent;color:#14b8a6;font-size:12px;cursor:pointer">+ 编辑卡组</button>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;font-size:12px">
+        <div style="color:#a78bfa;font-weight:600;margin-bottom:6px">⚔️ 对战规则</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;color:#94a3b8;font-size:11px">
+          <span>卡牌 = 你收集的句子</span>
+          <span>品质决定 ATK/HP</span>
+          <span>对手出卡 → 你看中文打英文</span>
+          <span>答对 = 造成 ATK 伤害</span>
+          <span>答错 = 0 伤害，换对手</span>
+          <span>HP归零 = 输，输随机掉一张卡</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 酒馆社交 -->
+  <div class="feature-card">
+    <div class="feature-card-header">
+      <div class="icon icon-tavern">🍺</div>
+      <div>
+        <h2>君临酒馆 · 卡牌社交</h2>
+        <p>晒卡 · 约战 · 交易 · 切磋</p>
+      </div>
+    </div>
+    <div class="feature-card-body">
+      <div class="chat-room">
+        <div class="chat-header">
+          <div class="title">🍺 君临酒馆</div>
+          <div class="online"><span class="online-dot"></span> 23人在线</div>
+        </div>
+        <div class="chat-msgs">
+          <div class="msg">
+            <div class="msg-av c1">H</div>
+            <div class="msg-bd">
+              <div class="msg-user">Heaton <span class="tag tag-card">领主</span></div>
+              <div class="msg-text"><span class="cmd">/show</span> 🔥刚抽到传说卡 <span class="card-name">「Winter is coming」</span> ⚔️85 🛡️70</div>
+              <div class="msg-time">刚刚</div>
+            </div>
+          </div>
+          <div class="msg">
+            <div class="msg-av c2">K</div>
+            <div class="msg-bd">
+              <div class="msg-user">KingSlayer <span class="tag tag-iron">铁王座</span></div>
+              <div class="msg-text"><span class="cmd">/duel</span> <span class="hl">@Heaton</span> 敢不敢押上你的传说卡？</div>
+              <div class="msg-time">30秒前</div>
+            </div>
+          </div>
+          <div class="msg-special">
+            <div class="sp-effect">⚡</div>
+            <div class="sp-text"><span class="hl">Snow_Walker</span> 在御前比武中战胜 <span class="hl">DragonQueen</span>，赢得 🃏 <span class="card-name">「What is a weekend?」</span>史诗卡！</div>
+          </div>
+          <div class="msg">
+            <div class="msg-av c3">S</div>
+            <div class="msg-bd">
+              <div class="msg-user">Snow_Walker <span class="tag tag-lord">骑士</span></div>
+              <div class="msg-text"><span class="cmd">/deck</span> 🃏 我的卡组：传说2 · 史诗4 · 稀有7 · 共86张</div>
+              <div class="msg-time">5分钟前</div>
+            </div>
+          </div>
+          <div class="msg">
+            <div class="msg-av c4">D</div>
+            <div class="msg-bd">
+              <div class="msg-user">DragonQueen <span class="tag tag-iron">国王之手</span></div>
+              <div class="msg-text"><span class="cmd">/trade</span> 出 <span class="card-name">「The king's road」</span>🔁 收权游S01E03稀有</div>
+              <div class="msg-time">8分钟前</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" placeholder="聊天 /show晒卡 /duel@xxx约战 /trade交易">
+          <button>发送</button>
+        </div>
+      </div>
+
+      <div style="background:rgba(167,139,250,0.04);border-radius:8px;padding:12px;font-size:11px">
+        <div style="color:#a78bfa;font-weight:600;margin-bottom:6px">💬 酒馆指令大全</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px 8px;color:#94a3b8">
+          <div><span class="cmd">/show</span> 晒最近抽到的卡</div>
+          <div><span class="cmd">/duel @xx</span> 约战</div>
+          <div><span class="cmd">/deck</span> 展示卡组</div>
+          <div><span class="cmd">/trade</span> 发起交易</div>
+          <div><span class="cmd">/check @xx</span> 查对方牌库</div>
+          <div><span class="cmd">/brag</span> 晒战绩</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏循环 -->
+<div class="flow-section">
+  <h2 class="section-title">🔄 卡牌游戏循环</h2>
+  <div class="flow-grid">
+    <div class="flow-step">
+      <div class="sn">1</div>
+      <div class="si">📖</div>
+      <h3>听写收集</h3>
+      <p>答对句子 → 获得对应卡牌<br>连击/全对 → 高品质掉落</p>
+    </div>
+    <div class="flow-step">
+      <div class="sn">2</div>
+      <div class="si">🎴</div>
+      <h3>组卡组</h3>
+      <p>从收藏中选5-10张组出战卡组<br>平衡攻击力与生命值</p>
+    </div>
+    <div class="flow-step">
+      <div class="sn">3</div>
+      <div class="si">⚔️</div>
+      <h3>卡牌对战</h3>
+      <p>看中文打英文 → 正确=攻击<br>回合制 → HP归零输</p>
+    </div>
+    <div class="flow-step">
+      <div class="sn">4</div>
+      <div class="si">🏆</div>
+      <h3>奖惩循环</h3>
+      <p>赢 = 对手随机掉卡+威望<br>输 = 自己随机掉卡</p>
+    </div>
+  </div>
+</div>
+
+<!-- 开发路线 -->
+<div class="roadmap">
+  <h2 class="section-title" style="margin-top:32px">📋 开发路线</h2>
+  <div class="roadmap-grid">
+    <div class="rm-card">
+      <div class="rm-icon">🃏</div>
+      <div class="rm-title">卡牌引擎（核心）</div>
+      <div class="rm-body">每句台词自动生成卡牌 · 品质算法（基于连击/首答正确率） · 卡牌收藏数据库 · 卡牌详情页</div>
+      <span class="rm-tag p2a">P2-A 核心</span>
+    </div>
+    <div class="rm-card">
+      <div class="rm-icon">⚔️</div>
+      <div class="rm-title">PvP 对战</div>
+      <div class="rm-body">回合制 · 出卡→看中文→打英文判定 · 伤害计算 · HP系统 · 天梯ELO · 匹配队列</div>
+      <span class="rm-tag p2a">P2-A 核心</span>
+    </div>
+    <div class="rm-card">
+      <div class="rm-icon">🎴</div>
+      <div class="rm-title">卡组系统</div>
+      <div class="rm-body">编辑卡组 · 保存多套 · 卡牌过滤/搜索 · 套牌战斗力评估</div>
+      <span class="rm-tag p2a">P2-A</span>
+    </div>
+    <div class="rm-card">
+      <div class="rm-icon">📊</div>
+      <div class="rm-title">收集进度</div>
+      <div class="rm-body">按剧集分组 · 集齐奖励 · 全收集成就 · 稀有卡统计</div>
+      <span class="rm-tag p2a">P2-A</span>
+    </div>
+    <div class="rm-card">
+      <div class="rm-icon">🏪</div>
+      <div class="rm-title">卡牌交易</div>
+      <div class="rm-body">玩家间交易 · 碎片合成 · 分解多余卡 · 市场行情</div>
+      <span class="rm-tag p2b">P2-B</span>
+    </div>
+    <div class="rm-card">
+      <div class="rm-icon">🍺</div>
+      <div class="rm-title">君临酒馆</div>
+      <div class="rm-body">WebSocket聊天 · 晒卡/约战/交易指令 · 全服战报广播</div>
+      <span class="rm-tag p2b">P2-B</span>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

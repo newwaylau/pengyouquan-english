@@ -35,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** 按邀请者查找封臣 */
     List<User> findByInvitedBy(String invitedBy);
+
+    /** 搜索用户（按昵称或邮箱模糊匹配） */
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.nickname LIKE %:q% OR u.email LIKE %:q%")
+    List<User> searchByKeyword(@org.springframework.data.repository.query.Param("q") String q);
 }

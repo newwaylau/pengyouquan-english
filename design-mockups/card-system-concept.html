@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡牌系统概念探索</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #f59e0b;
+    --accent2: #8b5cf6;
+    --accent3: #10b981;
+    --accent4: #ef4444;
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(0,0,0,.4);
+    --transition: .3s cubic-bezier(.4,0,.2,1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'SF Pro Display', 'Inter', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px 80px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* Tab navigation */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 10px 24px;
+    border: 1px solid var(--surface2);
+    border-radius: 100px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+  }
+
+  /* Direction panels */
+  .direction { display: none; max-width: 420px; margin: 0 auto; }
+  .direction.active { display: block; animation: fadeIn .4s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .dir-header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 24px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--surface2);
+  }
+
+  .dir-header h2 { font-size: 20px; margin-bottom: 8px; }
+  .dir-header p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .dir-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .dir-tag.verse { background: rgba(245,158,11,.15); color: var(--accent); }
+  .dir-tag.rpg { background: rgba(139,92,246,.15); color: var(--accent2); }
+  .dir-tag.social { background: rgba(16,185,129,.15); color: var(--accent3); }
+
+  /* Card grid */
+  .card-grid { display: grid; gap: 16px; margin-bottom: 24px; }
+
+  /* Card styles */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--surface2);
+    padding: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: rgba(245,158,11,.3);
+  }
+
+  .card .rarity {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    text-transform: uppercase;
+  }
+
+  .rarity.common { background: rgba(148,163,184,.2); color: #94a3b8; }
+  .rarity.rare { background: rgba(59,130,246,.2); color: #3b82f6; }
+  .rarity.epic { background: rgba(139,92,246,.2); color: #8b5cf6; }
+  .rarity.legendary { background: rgba(245,158,11,.2); color: #f59e0b; }
+
+  .card .card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .card .sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+  .card .stat-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .card .stat-bar .bar {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .card .stat-bar .bar .fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width .6s ease;
+  }
+
+  .card .action-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+
+  .action-badge.equip { background: rgba(16,185,129,.15); color: #10b981; }
+  .action-badge.craft { background: rgba(139,92,246,.15); color: #8b5cf6; }
+  .action-badge.claim { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .action-badge.lock { background: rgba(239,68,68,.15); color: #ef4444; }
+
+  /* Card with gradient border accent - RPG */
+  .card.rpg-card { border-left: 3px solid var(--accent2); }
+  .card.rpg-card.attack { border-left-color: #ef4444; }
+  .card.rpg-card.defense { border-left-color: #3b82f6; }
+  .card.rpg-card.special { border-left-color: #10b981; }
+
+  .card .stats-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .card .stats-row .stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .card .stats-row .stat strong { color: var(--text); }
+
+  /* Social cards */
+  .card.social-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+
+  .card.social-card .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .card .trade-info {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .card .trade-info .count { color: var(--accent); font-weight: 600; }
+
+  /* Section label */
+  .section-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin: 24px 0 12px;
+  }
+
+  /* Callout box */
+  .callout {
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.2);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .callout strong { color: var(--accent); }
+
+  /* Floating nav bar */
+  .nav-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 100px;
+    padding: 8px 16px;
+    display: flex;
+    gap: 16px;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .nav-bar button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 100px;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .nav-bar button.active { color: var(--accent); background: rgba(245,158,11,.1); }
+  .nav-bar button:hover { color: var(--text); }
+
+  @media (max-width: 480px) {
+    body { padding: 20px 12px 80px; }
+    h1 { font-size: 22px; }
+    .tab-btn { padding: 8px 16px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🃏 卡牌系统概念探索</h1>
+<p class="subtitle">三个设计方向 · 带你看看每种玩法的思路</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchDir('verse')">📖 收藏集卡流</button>
+  <button class="tab-btn" onclick="switchDir('rpg')">⚔️ RPG养成流</button>
+  <button class="tab-btn" onclick="switchDir('social')">🤝 社交对战流</button>
+</div>
+
+<!-- ===== 方向一：收藏集卡流 ===== -->
+<div id="dir-verse" class="direction active">
+  <div class="dir-header">
+    <span class="dir-tag verse">📖 方向一</span>
+    <h2>收藏集卡流</h2>
+    <p>以剧中经典句子为卡牌核心，像集邮一样收集。<br>每句台词 = 一张卡，有不同的稀有度、主题、版本。</p>
+  </div>
+
+  <div class="callout">
+    <strong>核心理念：</strong>「刷句子 → 掉卡 → 集齐图鉴」<br>
+    每次练习都可能掉落新卡。稀有卡有特殊边框和效果。
+  </div>
+
+  <div class="section-label">卡牌示例</div>
+  <div class="card-grid">
+    <div class="card">
+      <span class="rarity legendary">传奇</span>
+      <span class="card-icon">👑</span>
+      <h3>Winter is Coming</h3>
+      <div class="sub">S01E01 · Ned Stark · 集齐率 3.2%</div>
+      <div class="stat-bar">
+        <span>熟练度</span>
+        <div class="bar"><div class="fill" style="width:78%;background:var(--accent)"></div></div>
+        <span>78%</span>
+      </div>
+      <div class="action-badge equip">✅ 已装备</div>
+    </div>
+
+    <div class="card">
+      <span class="rarity rare">稀有</span>
+      <span class="card-icon">🫖</span>
+      <h3>What is a weekend?</h3>
+      <div class="sub">S01E07 · Lord Grantham · 集齐率 15.6%</div>
+      <div class="stat-bar">
+        <span>熟练度</span>
+        <div class="bar"><div class="fill" style="width:45%;background:var(--accent3)"></div></div>
+        <span>45%</span>
+      </div>
+      <div class="action-badge claim">🃏 掉落中</div>
+    </div>
+
+    <div class="card">
+      <span class="rarity epic">史诗</span>
+      <span class="card-icon">🔥</span>
+      <h3>Dracarys</h3>
+      <div class="sub">S03E04 · Daenerys Targaryen · 集齐率 0.8%</div>
+      <div class="action-badge lock">🔒 未解锁</div>
+    </div>
+  </div>
+
+  <div class="section-label">玩法系统</div>
+  <div class="card-grid">
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">📚 图鉴系统</h3>
+      <div class="sub" style="margin-bottom:8px">每部剧一个图鉴册，集齐有终极奖励</div>
+      <div style="display:flex;gap:8px;font-size:12px">
+        <span style="padding:2px 8px;border-radius:6px;background:var(--surface2)">权游 2/54</span>
+        <span style="padding:2px 8px;border-radius:6px;background:var(--surface2)">唐顿 1/42</span>
+        <span style="padding:2px 8px;border-radius:6px;background:rgba(245,158,11,.15);color:var(--accent)">🔥 连击加成 x2</span>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">✨ 装备效果</h3>
+      <div class="sub" style="margin-bottom:8px">将卡牌装备到当前练习，获得加成</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)">
+        <span>· 普通卡：+5% 经验</span>
+        <span>· 稀有卡：+15% 经验</span>
+        <span>· 史诗卡：+30% 经验，双倍掉落率</span>
+        <span>· 传奇卡：解锁隐藏句子变体</span>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">🔁 卡牌交换</h3>
+      <div class="sub" style="margin-bottom:8px">重复卡可拆解为碎片，合成缺的卡</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span>碎片：<strong style="color:var(--accent)">128</strong></span>
+        <span style="color:var(--muted)">下一张合成需要 200</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 方向二：RPG养成流 ===== -->
+<div id="dir-rpg" class="direction">
+  <div class="dir-header">
+    <span class="dir-tag rpg">⚔️ 方向二</span>
+    <h2>RPG养成流</h2>
+    <p>把你的英语学习变成角色养成冒险。<br>每张卡不只是收藏，它有属性、能升级、能进化。</p>
+  </div>
+
+  <div class="callout">
+    <strong>核心理念：</strong>「练英语 = 战斗 · 积累 = 升级 · 精通 = 进化」<br>
+    卡牌有经验值和属性面板，养成感更强。
+  </div>
+
+  <div class="section-label">角色卡（可养成）</div>
+  <div class="card-grid">
+    <div class="card rpg-card attack">
+      <span class="rarity epic">史诗</span>
+      <span class="card-icon">⚡</span>
+      <h3>Ned Stark · Lv.7</h3>
+      <div class="sub">正义·北境·誓言</div>
+      <div class="stats-row">
+        <div class="stat"><span>❤️</span><strong>42</strong></div>
+        <div class="stat"><span>⚔️</span><strong>78</strong></div>
+        <div class="stat"><span>🛡️</span><strong>35</strong></div>
+        <div class="stat"><span>💎</span><strong>16</strong></div>
+      </div>
+      <div class="stat-bar">
+        <span>升级进度</span>
+        <div class="bar"><div class="fill" style="width:62%;background:var(--accent2)"></div></div>
+        <span>62%</span>
+      </div>
+    </div>
+
+    <div class="card rpg-card special">
+      <span class="rarity rare">稀有</span>
+      <span class="card-icon">🎩</span>
+      <h3>Lord Grantham · Lv.4</h3>
+      <div class="sub">贵族·传统·责任</div>
+      <div class="stats-row">
+        <div class="stat"><span>❤️</span><strong>68</strong></div>
+        <div class="stat"><span>⚔️</span><strong>22</strong></div>
+        <div class="stat"><span>🛡️</span><strong>55</strong></div>
+        <div class="stat"><span>💎</span><strong>41</strong></div>
+      </div>
+      <div class="stat-bar">
+        <span>升级进度</span>
+        <div class="bar"><div class="fill" style="width:28%;background:var(--accent2)"></div></div>
+        <span>28%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">战斗系统（练习模式）</div>
+  <div class="card-grid">
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">⏳ 每日副本</h3>
+      <div class="sub">每天一个关卡，完成获得大量经验+素材</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+        <span style="padding:4px 10px;border-radius:100px;background:var(--surface2);font-size:12px">精准试炼</span>
+        <span style="padding:4px 10px;border-radius:100px;background:var(--surface2);font-size:12px">速度挑战</span>
+        <span style="padding:4px 10px;border-radius:100px;background:var(--surface2);font-size:12px">听力BOSS</span>
+        <span style="padding:4px 10px;border-radius:100px;background:rgba(245,158,11,.15);color:var(--accent);font-size:12px">🔥 连击加成 3x</span>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">💊 道具/进化系统</h3>
+      <div class="sub">素材卡可以融合进化，普通→稀有→史诗→传奇</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px">
+        <span style="padding:4px 8px;border-radius:100px;background:var(--surface2)">🟦 普通x3</span>
+        <span style="color:var(--muted)">→</span>
+        <span style="padding:4px 8px;border-radius:100px;background:rgba(59,130,246,.2);color:#3b82f6">🟦 稀有</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12px">
+        <span style="padding:4px 8px;border-radius:100px;background:var(--surface2)">🟪 稀有x3</span>
+        <span style="color:var(--muted)">→</span>
+        <span style="padding:4px 8px;border-radius:100px;background:rgba(139,92,246,.2);color:#8b5cf6">🟪 史诗</span>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">🏆 赛季排位</h3>
+      <div class="sub">每月一个赛季，根据卡牌总战力排名</div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:12px">
+        <span style="color:var(--accent)">🥇 当前 S2 · 剩余 12天</span>
+        <span style="color:var(--muted)">你的战力：12,450 · 排名 #38</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 方向三：社交对战流 ===== -->
+<div id="dir-social" class="direction">
+  <div class="dir-header">
+    <span class="dir-tag social">🤝 方向三</span>
+    <h2>社交对战流</h2>
+    <p>卡牌是你英语实力的证明。和人比赛、交换、组队。<br>学英语也能有圈子。</p>
+  </div>
+
+  <div class="callout">
+    <strong>核心理念：</strong>「独学不如众学」<br>
+    卡牌是有形的荣誉徽章，也用来和他人互动。
+  </div>
+
+  <div class="section-label">对战匹配</div>
+  <div class="card-grid">
+    <div class="card" style="cursor:default">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="font-size:13px;font-weight:600">实时排位</span>
+        <span style="font-size:11px;color:var(--muted)">ELO 1250</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="text-align:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:16px">你</div>
+          <div style="font-size:11px;color:var(--muted)">Lv.7</div>
+        </div>
+        <div style="font-size:24px;font-weight:700;color:var(--accent)">VS</div>
+        <div style="text-align:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:16px">🐉</div>
+          <div style="font-size:11px;color:var(--muted)">Lv.9</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:12px">
+        <span style="padding:6px 20px;border-radius:100px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:600;cursor:pointer">开始对战</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">交换市场</div>
+  <div class="card-grid">
+    <div class="card social-card">
+      <div class="avatar">✨</div>
+      <div style="flex:1">
+        <h3 style="font-size:14px">Chaos is a Ladder</h3>
+        <div class="trade-info">小指头 · 传奇 · 需求量 ⭐⭐⭐</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <span style="padding:2px 8px;border-radius:6px;background:var(--surface2);font-size:11px">想要 x3</span>
+          <span style="padding:2px 8px;border-radius:6px;background:var(--accent3);color:#fff;font-size:11px">交换</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card social-card">
+      <div class="avatar">🎪</div>
+      <div style="flex:1">
+        <h3 style="font-size:14px">I Drink and I Know Things</h3>
+        <div class="trade-info">Tyrion · 史诗 · 需求中 ⭐⭐</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <span style="padding:2px 8px;border-radius:6px;background:var(--surface2);font-size:11px">想要 x1</span>
+          <span style="padding:2px 8px;border-radius:6px;background:var(--surface2);font-size:11px">议价</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">组队系统</div>
+  <div class="card-grid">
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">👥 公会 · 北境之友</h3>
+      <div class="sub" style="margin-bottom:12px">12人 · 等级4 · 活跃度 87%</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between">
+          <span>🔥 公会战本周排名</span>
+          <span style="color:var(--accent3)">#7</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>📊 本周贡献</span>
+          <span style="color:var(--accent)">2,540 / 5,000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:default">
+      <h3 style="margin-bottom:8px">🏅 成就展示墙</h3>
+      <div class="sub">可以向公会成员展示你的稀有卡和成就</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <span style="font-size:24px">🏆</span>
+        <span style="font-size:24px">⚔️</span>
+        <span style="font-size:24px">🎯</span>
+        <span style="font-size:24px;opacity:.3">🔒</span>
+        <span style="font-size:24px;opacity:.3">🔒</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom navigation -->
+<div class="nav-bar">
+  <button onclick="switchDir('verse')" class="active">📖</button>
+  <button onclick="switchDir('rpg')">⚔️</button>
+  <button onclick="switchDir('social')">🤝</button>
+</div>
+
+<script>
+  function switchDir(dir) {
+    document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
+    document.getElementById('dir-' + dir).classList.add('active');
+    document.querySelectorAll(`.tab-btn`).forEach((b,i) => {
+      if ((i===0 && dir==='verse') || (i===1 && dir==='rpg') || (i===2 && dir==='social')) b.classList.add('active');
+    });
+    document.querySelectorAll('.nav-bar button').forEach((b,i) => {
+      if ((i===0 && dir==='verse') || (i===1 && dir==='rpg') || (i===2 && dir==='social')) b.classList.add('active');
+    });
+  }
+</script>
+
+</body>
+</html>

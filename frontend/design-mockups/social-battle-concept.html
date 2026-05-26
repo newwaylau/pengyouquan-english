@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社交对战系统 · 概念设计</title>
+<style>
+/* ── Project Theme Tokens ── */
+:root {
+  --bg: #0f172a;
+  --card: #111a2e;
+  --card-border: rgba(255,255,255,0.06);
+  --text: #eef2f8;
+  --text-secondary: #94a3b8;
+  --text-muted: #5a6a8a;
+  --teal: #14b8a6;
+  --teal-dark: #0d9488;
+  --teal-light: #5eead4;
+  --teal-glow: rgba(20,184,166,0.15);
+  --gold: #fbbf24;
+  --purple: #a335ee;
+  --blue: #0070dd;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --rarity-border: #9d9d9d;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 64px 24px 48px;
+  background: linear-gradient(180deg, rgba(20,184,166,0.08) 0%, transparent 100%);
+  border-bottom: 1px solid var(--card-border);
+}
+.hero h1 {
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.hero p {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Variant Cards ── */
+.variants { padding: 48px 24px; max-width: 1100px; margin: 0 auto; }
+
+.variant-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  margin-bottom: 40px;
+  transition: border-color 0.2s;
+}
+.variant-card:hover { border-color: rgba(20,184,166,0.3); }
+
+.variant-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.variant-badge {
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.variant-badge.conservative { background: rgba(79,70,229,0.15); color: #818cf8; }
+.variant-badge.core { background: rgba(20,184,166,0.15); color: var(--teal); }
+.variant-badge.divergent { background: rgba(245,158,11,0.15); color: var(--gold); }
+
+.variant-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.variant-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+/* ── Mechanics Grid ── */
+.mechanics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.mechanic-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.mechanic-item h4 {
+  font-size: 0.85rem;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.mechanic-item p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+
+/* ── Battle Flow ── */
+.battle-flow {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--card-border);
+}
+.battle-flow h4 {
+  font-size: 0.9rem;
+  color: var(--teal);
+  margin-bottom: 12px;
+}
+.flow-steps {
+  list-style: none;
+  counter-reset: step;
+}
+.flow-steps li {
+  counter-increment: step;
+  padding: 10px 0 10px 44px;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+.flow-steps li:last-child { border-bottom: none; }
+.flow-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 8px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(20,184,166,0.12);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.flow-steps li strong { color: var(--text); }
+
+/* ── Card Previews ── */
+.card-previews {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 0;
+  margin: 12px 0;
+}
+.card-preview {
+  flex-shrink: 0;
+  width: 120px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+.card-preview .cost {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.card-preview .name { font-size: 0.78rem; font-weight: 600; margin-bottom: 2px; }
+.card-preview .type { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 4px; }
+.card-preview .stats { font-size: 0.75rem; color: var(--text-secondary); }
+
+/* ── Features Table ── */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.9rem;
+}
+.comp-table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--card-border);
+}
+.comp-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+}
+.comp-table td:first-child {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Roadmap ── */
+.roadmap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+.roadmap h2 {
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.phase-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.phase-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+.phase-card h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.phase-card .phase-label {
+  font-size: 0.78rem;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.phase-card ul {
+  list-style: none;
+}
+.phase-card li {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+.phase-card li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--teal);
+}
+
+/* ── Section Dividers ── */
+.section-title {
+  font-size: 1.1rem;
+  color: var(--teal);
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(20,184,166,0.15);
+}
+
+/* ── Tag Pills ── */
+.tag-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+}
+.tag.learning { border-color: var(--teal); color: var(--teal); background: rgba(20,184,166,0.08); }
+.tag.social { border-color: #818cf8; color: #818cf8; background: rgba(129,140,248,0.08); }
+.tag.competition { border-color: var(--gold); color: var(--gold); background: rgba(251,191,36,0.08); }
+.tag.coop { border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.08); }
+
+/* ── Economy Flow ── */
+.economy-flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  margin: 12px 0;
+}
+.econ-node {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+.econ-arrow {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .hero h1 { font-size: 1.6rem; }
+  .hero { padding: 40px 16px 32px; }
+  .variants { padding: 32px 16px; }
+  .mechanics-grid { grid-template-columns: 1fr; }
+  .phase-row { flex-direction: column; }
+  .variant-header { flex-direction: column; }
+  .economy-flow { flex-direction: column; }
+  .econ-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <h1>⚔️ 英语剧场 · 社交对战</h1>
+  <p>将英语学习融入卡牌对战——通过听写获得卡牌、用答题支付费用、与好友一决高下。<br>三个设计方案，从轻竞技到重社交，逐步拓展。</p>
+</div>
+
+<!-- ─── VARIANT 1: 保守 ─── -->
+<div class="variants">
+
+<div class="variant-card">
+  <div class="variant-header">
+    <div class="variant-badge conservative">🛡</div>
+    <div>
+      <div class="variant-title">方案A：守夜人之约</div>
+      <div class="variant-subtitle">异步挑战 · 策略构筑 · 轻竞技重收藏</div>
+    </div>
+  </div>
+
+  <div class="tag-pills">
+    <span class="tag learning">🎓 学习驱动</span>
+    <span class="tag social">🤝 异步社交</span>
+    <span class="tag coop">📦 收藏为核心</span>
+  </div>
+
+  <p style="color:var(--text-secondary); margin-bottom:16px; font-size:0.92rem;">
+    类似《皇室战争》部落战+《杀戮尖塔》爬塔。你不需要实时盯着屏幕——布好牌组、发起挑战，对手在下次登录时收到并应战。
+  </p>
+
+  <h4 class="section-title">核心循环</h4>
+  <div class="economy-flow">
+    <div class="econ-node">🎯 练听写<br><span style="font-size:0.75rem;color:var(--text-muted)">学英语</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">🎴 开卡包<br><span style="font-size:0.75rem;color:var(--text-muted)">收集卡牌</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">📦 组卡组<br><span style="font-size:0.75rem;color:var(--text-muted)">策略构筑</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">⚔️ 异步挑战<br><span style="font-size:0.75rem;color:var(--text-muted)">AI模拟对手</span></div>
+    <div class="econ-arrow">→</div>
+    <div class="econ-node">🏆 排名提升<br><span style="font-size:0.75rem;color:var(--text-muted)">奖励循环</span></div>
+  </div>
+
+  <h4 class="section-title">对战流程</h4>
+  <div class="battle-flow">
+    <ol class="flow-steps">
+      <li><strong>布阵阶段</strong> — 从卡组选择 6 张卡上阵（费用链要求：3费+4费+5费各2）</li>
+      <li><strong>出题阶段</strong> — 每回合随机抽一张卡，出示该卡对应的英语题目（听写/选择题）</li>
+      <li><strong>答题出牌</strong> — 答对 = 卡牌可出战（攻击对手）；答错 = 该卡本回合沉默（无法攻击）</li>
+      <li><strong>攻防结算</strong> — 攻方答对自己的题发动攻击，守方答对防御题减免伤害</li>
+      <li><strong>胜利条件</strong> — 击破对手 3 张卡牌，或 10 回合后生命值高者胜</li>
+    </ol>
+  </div>
+
+  <h4 class="section-title">为什么异步</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>🎯 无压力</h4>
+      <p>不要求两人同时在线。发起挑战 → 对手下次登录收到 → AI 模拟对手的牌组打一套。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>📱 碎片时间</h4>
+      <p>一场挑战只需 2-3 分钟（答 3-5 道题），通勤/排队随时可打。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🌍 全球化</h4>
+      <p>不需要匹配，朋友在任何时区都可以互相挑战。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🔄 学习量可控</h4>
+      <p>每次挑战生成的题目来自双方已练过的句子，答对率决定胜负。</p>
+    </div>
+  </div>
+
+  <h4 class="section-title">社交功能</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>👥 好友挑战</h4>
+      <p>通过用户名/ID加好友，发起异步挑战。每天免费挑战 3 次。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>📊 赛季天梯</h4>
+      <p>每月重置的积分榜。胜场积累积分，赛季末按排名发卡包奖励。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🏅 成就系统</h4>
+      <p>连胜纪录、收集进度、答对率排行。解锁称号挂在个人主页。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VARIANT 2: 核心 ─── -->
+<div class="variant-card">
+  <div class="variant-header">
+    <div class="variant-badge core">⚔️</div>
+    <div>
+      <div class="variant-title">方案B：铁王座之争</div>
+      <div class="variant-subtitle">实时对战 · 答题即出牌 · 深层策略</div>
+    </div>
+  </div>
+
+  <div class="tag-pills">
+    <span class="tag learning">🎓 学习即战斗</span>
+    <span class="tag competition">⚡ 实时竞技</span>
+    <span class="tag social">🎮 深度社交</span>
+  </div>
+
+  <p style="color:var(--text-secondary); margin-bottom:16px; font-size:0.92rem;">
+    真正的实时匹配对战。像炉石传说一样出牌，但"费用"变成了你的英语能力——答对出牌，答错白送对面机会。输赢不只是卡组强度，更是英语实力的直接较量。
+  </p>
+
+  <h4 class="section-title">核心机制：费用 = 正确率</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>⛽ 英文费（Mana）</h4>
+      <p>每回合自动恢复5点"英文费"。出牌消耗费，但每张牌的费不是固定数字，而是<strong>英文难度等级</strong>。<br>
+      <span style="color:var(--teal);font-size:0.85rem;">1费听力→拼写简单句 → 5费阅读理解→长难句</span></p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🎯 出题出牌</h4>
+      <p>选择手牌 → 系统出示该牌对应的英语考题 → 你答对了，牌打出手；答错了，牌回手+对面抽一张牌。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🛡 防御作答</h4>
+      <p>对手攻击你的卡牌时，系统会给你出一道"防御题"（看中文选英文/排序）。答对减免 50% 伤害。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🔥 连击奖励</h4>
+      <p>连续答对 3 题 → 下一张牌免费打出。连续答错 2 题 → 下回合费用-1。</p>
+    </div>
+  </div>
+
+  <h4 class="section-title">完整回合流程</h4>
+  <div class="battle-flow">
+    <ol class="flow-steps">
+      <li><strong>起始手牌</strong> — 从 30 张卡组抽 3 张卡，系统判定双方卡组"剧集标签"校验通过</li>
+      <li><strong>回合开始</strong> — 获得 5 点英文费 + 抽 1 张牌（牌库上限 30）</li>
+      <li><strong>出牌阶段</strong> — 点击一张牌 → 系统弹出考题（听力/拼写/填空，难度取决于卡牌费用）→ 60秒限时作答</li>
+      <li><strong>答对：</strong>卡牌上阵，攻击对手生命值或对手的卡牌</li>
+      <li><strong>答错：</strong>卡牌回手，费用不退，对手抽 1 张并回复 2 点生命</li>
+      <li><strong>攻击阶段</strong> — 已出场的卡牌可以攻击。对手需答一道防御题，答对减半伤害</li>
+      <li><strong>结束回合</strong> — 弃掉多余手牌（上限 8 张），轮到对手</li>
+    </ol>
+  </div>
+
+  <h4 class="section-title">卡牌效果示例</h4>
+  <div class="card-previews">
+    <div class="card-preview">
+      <div class="cost">1</div>
+      <div class="name">冰原狼</div>
+      <div class="type">⚔️ 随从</div>
+      <div class="stats">⚔️2 ❤️2</div>
+      <div style="font-size:0.68rem;color:var(--text-muted);margin-top:4px;">效：无</div>
+      <div style="font-size:0.65rem;color:var(--blue);margin-top:2px;">听力题·单词拼写</div>
+    </div>
+    <div class="card-preview">
+      <div class="cost">3</div>
+      <div class="name">守夜人誓言</div>
+      <div class="type">✨ 法术</div>
+      <div class="stats">回复 3 点</div>
+      <div style="font-size:0.68rem;color:var(--text-muted);margin-top:4px;">效：回血</div>
+      <div style="font-size:0.65rem;color:var(--blue);margin-top:2px;">填空题·完整句子</div>
+    </div>
+    <div class="card-preview">
+      <div class="cost">5</div>
+      <div class="name">血色婚礼</div>
+      <div class="type">🏰 事件</div>
+      <div class="stats">消灭敌随从×2</div>
+      <div style="font-size:0.68rem;color:var(--text-muted);margin-top:4px;">效：清场</div>
+      <div style="font-size:0.65rem;color:var(--gold);margin-top:2px;">阅读理解·长难句</div>
+    </div>
+  </div>
+
+  <h4 class="section-title">评分+社交系统</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>🏆 天梯段位</h4>
+      <p>青铜→白银→黄金→白金→钻石→王者。每个段位 5 颗星，连胜加星。<br>
+      赛季末按段位发卡包（王者：1传说+5随机）</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>👥 封臣公会</h4>
+      <p>加入/创建公会（"临冬城""君临"等）。公会成员可互相借牌、公会战奖励。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>📊 英语实力分</h4>
+      <p>独立于卡组强度的"英语等级"——基于对战中的答对率、句子难度、连续正确数。这是真正无法氪金的东西。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🎮 观战模式</h4>
+      <p>观看巅峰对决，实时看到双方"答题出牌"的过程——不仅是看谁牌好，更是看谁英语强。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VARIANT 3: 大胆 ─── -->
+<div class="variant-card">
+  <div class="variant-header">
+    <div class="variant-badge divergent">🔥</div>
+    <div>
+      <div class="variant-title">方案C：长城守卫</div>
+      <div class="variant-subtitle">合作公会战 · Roguelike远征 · 轻PVP重PVE</div>
+    </div>
+  </div>
+
+  <div class="tag-pills">
+    <span class="tag coop">🤝 合作核心</span>
+    <span class="tag learning">📖 沉浸学习</span>
+    <span class="tag social">👪 公会是家</span>
+  </div>
+
+  <p style="color:var(--text-secondary); margin-bottom:16px; font-size:0.92rem;">
+    这不是竞技——这是一场远征。你和好友一起组队，在剧情驱动的副本中一路答题闯关，对抗"Boss句子"。装备靠打，牌靠学，公会就是你的旅店。
+  </p>
+
+  <h4 class="section-title">模式一：远征副本（合作PVE）</h4>
+  <div class="battle-flow">
+    <ol class="flow-steps">
+      <li><strong>组建队伍</strong> — 2-3 人组队，每人从牌库选 10 张卡组成"远征牌组"</li>
+      <li><strong>剧情地图</strong> — 如"临冬城保卫战"5关：每关是一个英语主题（食物词汇、战争用语、家族格言）</li>
+      <li><strong>关卡战斗</strong> — 全队轮流抽卡 → 答对=卡牌出场进攻Boss → 答错=Boss反击全队</li>
+      <li><strong>Boss战</strong> — 每关末尾Boss是超长难句/段落听写，全队合作补全，每人贡献一部分</li>
+      <li><strong>战利品</strong> — 通关奖励限定卡牌/装备/皮肤</li>
+    </ol>
+  </div>
+
+  <h4 class="section-title">模式二：公会联赛（轻PVP）</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>🏰 公会领地</h4>
+      <p>每个公会拥有虚拟领地（如"鹰巢城""多恩"）。每周公会任务（全公会集体答对 X 题）</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>⚔️ 领地战</h4>
+      <p>每周六公会vs公会。不是实时对战——是<strong>集体总答对率比拼</strong>。所有成员在这一天的练习都计入公会总分。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🎖 贡献排行</h4>
+      <p>公会有"话事人"排名——本周答对最多的人，头像在公会页面"坐铁王座"。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>📦 公会宝库</h4>
+      <p>公会总收集超过一定卡牌数解锁宝库，所有成员每周可领一次免费卡包。</p>
+    </div>
+  </div>
+
+  <h4 class="section-title">模式三：每日挑战（单人）</h4>
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>🎲 随机Boss</h4>
+      <p>每天一个随机Boss（如"Walder Frey"），带特殊规则（"本场所有随从费+1"）。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🏅 排名奖励</h4>
+      <p>全服排行榜看谁打Boss分数最高（正确率×难度系数×用时）。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🔄 三选一 Buff</h4>
+      <p>每关过后从3个Buff选1（"下关听力题减时50%""本场分数×1.5"）</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Comparison Table ─── -->
+<div style="max-width:1100px; margin:0 auto; padding:0 24px;">
+  <h2 class="section-title" style="font-size:1.4rem; text-align:center; border-bottom:none; margin-bottom:20px;">📋 三方案对比</h2>
+  <table class="comp-table">
+    <tr><th></th><th>方案A · 守夜人</th><th>方案B · 铁王座</th><th>方案C · 长城</th></tr>
+    <tr><td>核心玩法</td><td>异步挑战</td><td>实时匹配</td><td>合作副本+公会</td></tr>
+    <tr><td>社交深度</td><td>轻（好友+排名）</td><td>中（天梯+公会）</td><td>重（组队+公会）</td></tr>
+    <tr><td>学习融合</td><td>答对出牌</td><td>答对出牌+防御题</td><td>合作答题+剧情Boss</td></tr>
+    <tr><td>每局时间</td><td>2-3分钟</td><td>5-8分钟</td><td>10-15分钟（组队）</td></tr>
+    <tr><td>开发难度</td><td>低（纯后端逻辑）</td><td>高（WebSocket实时）</td><td>中（房间同步）</td></tr>
+    <tr><td>投入产出比</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+    <tr><td>适合先做</td><td>✅ 推荐先行</td><td>P2阶段</td><td>P3阶段</td></tr>
+  </table>
+</div>
+
+<!-- ─── ROADMAP ─── -->
+<div class="roadmap">
+  <h2 style="margin-top:48px;">🗺️ 分阶段路线图</h2>
+  <p style="text-align:center;color:var(--text-secondary);margin-bottom:24px;">推荐从方案A起步，逐步叠加方案B和C的元素</p>
+
+  <div class="phase-row">
+    <div class="phase-card" style="border-color:rgba(20,184,166,0.3);">
+      <div class="phase-label">P1 · 基础对战</div>
+      <h3 style="color:var(--teal);">🤝 好友异步挑战</h3>
+      <ul>
+        <li>好友系统（加好友/在线状态）</li>
+        <li>异步挑战：布阵 → 对方登录应战</li>
+        <li>AI模拟对手（基于卡组+历史答对率）</li>
+        <li>基础天梯（青铜→钻石，月结算）</li>
+        <li>战报系统（谁赢了、答对多少）</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-label">P2 · 深度竞技</div>
+      <h3 style="color:var(--gold);">⚔️ 实时对战+公会</h3>
+      <ul>
+        <li>WebSocket实时匹配（匹配耗时≤10秒）</li>
+        <li>答题出牌+防御题完整回合制</li>
+        <li>公会系统（创建/加入/公会聊天）</li>
+        <li>公会领地战（总答对率比拼）</li>
+        <li>观战模式（实时转播）</li>
+        <li>赛季特殊规则（如"本周所有卡费用+1"）</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-label">P3 · 沉浸世界</div>
+      <h3 style="color:var(--purple);">🏰 合作副本+远征</h3>
+      <ul>
+        <li>2-3人组队副本（剧情向多关卡）</li>
+        <li>Boss战（段落听写全队合作）</li>
+        <li>每日挑战（Roguelike Buff选择）</li>
+        <li>限定卡牌（副本掉落，不可直接开包）</li>
+        <li>远征徽章收藏系统</li>
+        <li>全服排行榜+传说段位特殊框</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Technique Notes ─── -->
+<div style="max-width:1100px; margin:0 auto; padding:0 24px 60px;">
+
+  <h2 class="section-title" style="font-size:1.4rem;">🔧 技术实现要点</h2>
+
+  <div class="mechanics-grid">
+    <div class="mechanic-item">
+      <h4>📡 异步够用</h4>
+      <p>P1阶段不需要WebSocket。挑战发起时记录快照（对手卡组ID、天梯分），对方登录后用REST拉取待处理挑战。简单可靠。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🧠 AI对手</h4>
+      <p>异步挑战的"AI"不是AI，是逻辑规则：按卡组费用曲线最优出牌，答对率基于对手的历史练习平均分。没有ML开销。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>📊 题目生成</h4>
+      <p>每张卡绑定的题目来自该卡的 `challenge_sentence_id` 或随机从该剧集已练句子中抽取。卡牌cost=1→简单听力，cost=5→句子听写。</p>
+    </div>
+    <div class="mechanic-item">
+      <h4>🗃 数据模型</h4>
+      <p>现有表结构已支撑（cards/user_cards/decks/equipment）。P1新增：friends表、battle_history表、rank_tiers表。无需大改。</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

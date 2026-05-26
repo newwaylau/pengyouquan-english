@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英灵对决 · 完整游戏设计文档</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card-border: #334155;
+    --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+    --teal: #14b8a6; --teal-light: #2dd4bf; --teal-dark: #0d9488;
+    --teal-glow: rgba(20,184,166,0.3);
+    --purple: #8b5cf6; --amber: #f59e0b; --red: #ef4444; --green: #22c55e; --blue: #3b82f6;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --border: #334155; --border-light: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  h1 { font-size: 2rem; background: linear-gradient(135deg, #14b8a6, #8b5cf6, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 40px; }
+
+  h2 { font-size: 1.4rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: var(--teal); }
+  h3 { font-size: 1.1rem; margin: 28px 0 12px; color: var(--text); }
+  h4 { font-size: 0.95rem; margin: 20px 0 8px; color: var(--text); }
+  p, li { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+  .muted { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  th { background: var(--card); font-weight: 600; color: var(--text); white-space: nowrap; }
+  td { color: var(--text-secondary); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.68rem; font-weight: 600; margin: 1px;
+  }
+  .tag.teal { background: rgba(20,185,166,0.12); color: #14b8a6; }
+  .tag.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+  .tag.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .tag.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .tag.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .tag.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+  .section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 20px 24px; margin: 20px 0;
+  }
+  .section.insight {
+    border-left: 3px solid var(--teal);
+    background: linear-gradient(135deg, rgba(20,185,166,0.04), rgba(20,185,166,0.01));
+  }
+  .section.important {
+    border-left: 3px solid var(--amber);
+    background: linear-gradient(135deg, rgba(245,158,11,0.04), rgba(245,158,11,0.01));
+  }
+  .section.caution {
+    border-left: 3px solid var(--red);
+    background: linear-gradient(135deg, rgba(239,68,68,0.04), rgba(239,68,68,0.01));
+  }
+
+  .flow { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .flow-item { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.82rem; background: var(--card); border: 1px solid var(--border); flex: 1; min-width: 120px; text-align: center; }
+  .flow-item .fi-num { display: block; font-weight: 700; color: var(--teal); font-size: 0.75rem; margin-bottom: 2px; }
+  .flow-arrow { display: flex; align-items: center; color: var(--text-muted); font-size: 1rem; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .card-demo {
+    background: linear-gradient(145deg, #141e33, #1a2645);
+    border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+    padding: 12px; max-width: 260px;
+  }
+  .card-demo .cd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .card-demo .cd-cost { width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .card-demo .cd-rarity { font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .card-demo .cd-name { font-weight: 700; font-size: 0.9rem; }
+  .card-demo .cd-type { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; }
+  .card-demo .cd-effect { font-size: 0.75rem; color: var(--text-secondary); padding: 6px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+  .card-demo .cd-stats { display: flex; gap: 8px; margin-top: 6px; font-size: 0.75rem; }
+  .card-demo .cd-keywords { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+
+  .shield-box {
+    background: rgba(255,255,255,0.02); border: 1px dashed var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px; margin: 8px 0;
+    font-size: 0.82rem; color: var(--text-secondary);
+  }
+  .shield-box strong { color: var(--text); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  .verdict {
+    background: linear-gradient(135deg, rgba(20,185,166,0.06), rgba(139,92,246,0.06));
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: var(--radius-lg); padding: 24px 28px; margin: 32px 0;
+  }
+
+  .list-compact { list-style: none; padding: 0; }
+  .list-compact li { padding: 4px 0; font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 8px; }
+  .list-compact li::before { flex-shrink: 0; }
+  .dot-list { list-style: none; padding: 0; }
+  .dot-list li { padding: 3px 0 3px 16px; position: relative; font-size: 0.82rem; }
+  .dot-list li::before { content: ''; position: absolute; left: 0; top: 10px; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚔️ 英灵对决 · 完整游戏设计</h1>
+<p class="subtitle">从学习到卡牌对战的全链路机制设计 · 炉石级别深度</p>
+
+<!-- =========== TOC =========== -->
+<div class="section" style="border-color: rgba(139,92,246,0.2);">
+<h3 style="margin-top:0;">📋 目录</h3>
+<ol style="padding-left: 18px; color: var(--text-secondary); font-size: 0.88rem; line-height: 2;">
+  <li><strong style="color:var(--text);">核心战斗流程</strong> — 每回合每一阶段的完整机制</li>
+  <li><strong style="color:var(--text);">卡牌系统深度</strong> — 所有卡牌类型、关键词效果、稀有度体系</li>
+  <li><strong style="color:var(--text);">装备系统细节</strong> — 武器/护甲/宝物全列表及制造条件</li>
+  <li><strong style="color:var(--text);">出牌考验系统</strong> — 英语 × 战斗的融合机制</li>
+  <li><strong style="color:var(--text);">奖励与经济循环</strong> — 碎片、声望、卡包、每日约束</li>
+  <li><strong style="color:var(--text);">玩家路径（Day 1 → Season 1）</strong> — 完整体验流程</li>
+  <li><strong style="color:var(--text);">分阶段实现路线</strong> — P0→P3 每期做什么、不做</li>
+</ol>
+</div>
+
+<!-- =========== 1. CORE BATTLE FLOW =========== -->
+<h2>1. 核心战斗流程</h2>
+<p class="muted">每个回合的 7 个阶段，精确到每步的判定逻辑</p>
+
+<div class="flow">
+  <div class="flow-item"><span class="fi-num">① 开始阶段</span>开始效果触发</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">② 抽牌阶段</span>牌库→手牌</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">③ 法力阶段</span>获得本回合法力</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">④ 出牌阶段</span>打出手牌</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">⑤ 攻击阶段</span>随从攻击</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">⑥ 结算阶段</span>亡语/连锁</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-item"><span class="fi-num">⑦ 结束阶段</span>结束效果→换边</div>
+</div>
+
+<h3>① 开始阶段</h3>
+<p>每回合开始时按以下顺序处理：</p>
+<ul class="dot-list">
+  <li>先手玩家第一回合<strong>跳过</strong>开始阶段（防止先手优势过大）</li>
+  <li>触发「每回合开始」类效果（如宝物「古老预言」的抽牌减费）</li>
+  <li>检查冰冻、眩晕等状态是否到期</li>
+  <li>检查游戏是否因特殊条件结束（如「Iron Throne」条件胜利）</li>
+</ul>
+
+<h3>② 抽牌阶段</h3>
+<ul class="dot-list">
+  <li>从牌库顶抽 1 张牌加入手牌</li>
+  <li><strong>先手第一回合不抽牌</strong>（共 3 张起手），后手第一回合抽 1 张（共 4 张）</li>
+  <li><strong>牌库为空</strong> → 进入疲劳状态：每抽 1 张扣 1 点 HP（首疲劳 1，后续每次 +1）</li>
+  <li>手牌上限 10 张，超出则新抽的牌自动销毁</li>
+  <li>触发「抽牌时」效果（如某些法术卡的 bonus）</li>
+</ul>
+
+<h3>③ 法力阶段</h3>
+<ul class="dot-list">
+  <li>获得 <strong>（当前回合数）</strong> 颗法力水晶</li>
+  <li>法力水晶上限 <strong>10</strong> 颗</li>
+  <li><strong>已消耗的法力水晶</strong>在回合开始时全部恢复（不保留上一回合的剩余法力）</li>
+  <li>法力水晶分「满」和「空」两种视觉状态</li>
+  <li>铁王座（Lv.10）玩家获得 1 费起步，即第一回合即有 1 颗可用水晶</li>
+</ul>
+
+<h3>④ 出牌阶段</h3>
+<ul class="dot-list">
+  <li>玩家可以从手牌中选择卡牌打出，消耗对应的法力费用</li>
+  <li>出牌没有次数限制，只要法力足够</li>
+  <li>每种卡牌打出时的行为：</li>
+</ul>
+
+<div class="two-col" style="margin: 8px 0;">
+  <div class="section">
+    <strong style="color:var(--teal);">🎴 随从卡</strong>
+    <p style="font-size:0.78rem;margin-top:4px;">
+      放置在战场上 → 触发 <span class="tag teal">战吼</span> 效果 → 进入休眠状态（当回合不能攻击）<br>
+      <span class="tag amber">冲锋</span> 随从可立即攻击<br>
+      战场空位：最多 6 个。满场时不能打出随从
+    </p>
+  </div>
+  <div class="section">
+    <strong style="color:var(--purple);">✨ 法术卡</strong>
+    <p style="font-size:0.78rem;margin-top:4px;">
+      立即结算效果 → 进入墓地 → 触发相关联动<br>
+      法术可指向：敌方英雄/随从、我方英雄/随从、全场<br>
+      无目标法术（如抽牌）直接生效
+    </p>
+  </div>
+  <div class="section">
+    <strong style="color:var(--amber);">⚔️ 装备卡</strong>
+    <p style="font-size:0.78rem;margin-top:4px;">
+      选择己方战场上一个随从作为目标 → 安装在对应装备槽<br>
+      如无随从则不能使用装备卡<br>
+      装备后立即生效，效果持续到随从离场或装备被摧毁
+    </p>
+  </div>
+  <div class="section">
+    <strong style="color:var(--green);">🏰 场地卡</strong>
+    <p style="font-size:0.78rem;margin-top:4px;">
+      双方共享一个场地槽。打出新场地时，旧场地被替换→触发亡语<br>
+      场地效果对双方都生效（可能需要权衡利弊）<br>
+      每个战场同时只能存在 1 张场地
+    </p>
+  </div>
+</div>
+
+<p><strong>出牌考验（✍️）</strong>：带此关键词的卡牌在出牌阶段触发弹窗，用户需完成英语听写/拼写，根据正确率决定卡牌效果——详见第4章。</p>
+
+<h3>⑤ 攻击阶段</h3>
+<ul class="dot-list">
+  <li>玩家选择己方一个<strong>非休眠</strong>的随从 → 选择攻击目标（敌方随从或英雄）</li>
+  <li>敌方有 <span class="tag amber">嘲讽</span> 随从在场时，<strong>必须</strong>优先攻击嘲讽随从</li>
+  <li><strong>攻击结算规则</strong>：攻击方 ATK → 防御方受到伤害。防御方如果是随从，<strong>同时以自身 ATK 反击攻击方</strong></li>
+  <li>如果防御方有 <span class="tag green">圣盾</span>，本次伤害被抵挡，圣盾消失</li>
+  <li>伤害致死（HP ≤ 0）→ 触发 <span class="tag red">亡语</span> → 随从进入墓地</li>
+  <li>英雄 HP ≤ 0 → 对战结束，对方获胜</li>
+  <li>英雄装备了武器时，自身也可攻击（消耗 1 点武器耐久）</li>
+  <li>每个随从每回合只能攻击 1 次</li>
+</ul>
+
+<h3>⑥ 结算阶段</h3>
+<ul class="dot-list">
+  <li>处理链式触发：某个随从死亡触发的亡语可能导致更多死亡</li>
+  <li>批量死亡结算在同一时点处理（如 AOE 清场 → 所有亡语按打出顺序触发）</li>
+  <li>检查游戏结束条件（英雄死亡）</li>
+  <li>检查法力溢出、状态刷新等</li>
+</ul>
+
+<h3>⑦ 结束阶段</h3>
+<ul class="dot-list">
+  <li>触发「回合结束时」效果（如装备「铁王座碎片」恢复 HP）</li>
+  <li>所有休眠随从变为可攻击状态（跨回合标记）</li>
+  <li>传递回合控制权给对手</li>
+  <li><strong>P2 以后</strong>：30 秒倒计时，超时自动跳过出牌和攻击阶段</li>
+</ul>
+
+<div class="section important">
+  <strong>⚖️ 先手/后手平衡</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    先手玩家 3 张起手，第一回合不抽牌。后手玩家 4 张起手并获得一张「幸运币」（0 费法术，获得 1 点临时法力）。这是炉石的经典平衡设计，我们同样采用。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== 2. CARD SYSTEM =========== -->
+<h2>2. 卡牌系统深度</h2>
+<p class="muted">四种卡牌类型 + 11 个关键词 + 4 级稀有度 + 派系系统</p>
+
+<div class="two-col">
+  <div class="card-demo">
+    <div class="cd-header"><span class="cd-cost">3</span><span class="cd-rarity" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">史诗</span></div>
+    <div class="cd-name">⚔️ 詹姆·兰尼斯特</div>
+    <div class="cd-type">随从 · 兰尼斯特 · 王者</div>
+    <div class="cd-effect"><span class="tag teal">战吼</span> 摧毁对手一个装备。<br>友方其他兰尼斯特随从 +1 ATK</div>
+    <div class="cd-stats"><span style="color:var(--red);">⚔4</span><span style="color:var(--green);">❤️4</span></div>
+    <div class="cd-keywords"><span class="tag green">圣盾</span></div>
+  </div>
+  <div class="card-demo">
+    <div class="cd-header"><span class="cd-cost">5</span><span class="cd-rarity" style="background:radial-gradient(#ffbf00,#d4a017);color:#1a1a2e;">传说</span></div>
+    <div class="cd-name">❄️ 凛冬将至</div>
+    <div class="cd-type">法术 · 史塔克 · 台词</div>
+    <div class="cd-effect"><span class="tag red">✍️ 考验</span><br>对敌方全体造成 4 点伤害。如果已通过考验，额外冻结对手 1 回合</div>
+    <div class="cd-stats"></div>
+    <div class="cd-keywords"><span class="tag red" style="background:rgba(239,68,68,0.12);color:#ef4444;">✍️ 考验</span></div>
+  </div>
+  <div class="card-demo">
+    <div class="cd-header"><span class="cd-cost">2</span><span class="cd-rarity" style="background:rgba(20,185,166,0.12);color:#14b8a6;">稀有</span></div>
+    <div class="cd-name">🗡️ 瓦雷利亚钢剑</div>
+    <div class="cd-type">装备 · 武器</div>
+    <div class="cd-effect">装备随从 +3 ATK，<strong>2 耐久</strong><br>每攻击一次消耗 1 耐久<br><span class="tag teal">史塔克</span> 随从额外 +1 ATK</div>
+    <div class="cd-stats"></div>
+    <div class="cd-keywords"><span class="tag amber">耐久 2</span></div>
+  </div>
+  <div class="card-demo">
+    <div class="cd-header"><span class="cd-cost">3</span><span class="cd-rarity" style="background:rgba(245,158,11,0.12);color:#f59e0b;">稀有</span></div>
+    <div class="cd-name">🏰 君临城</div>
+    <div class="cd-type">场地</div>
+    <div class="cd-effect">所有随从 +1/+1。<br>每回合结束时，双方英雄各恢复 2 HP。<br><span class="tag amber">亡语</span> 抽 1 张牌</div>
+    <div class="cd-stats"></div>
+    <div class="cd-keywords"><span class="tag amber">亡语</span></div>
+  </div>
+</div>
+
+<h3>关键词词典（11 个）</h3>
+<table>
+  <tr><th>关键词</th><th>分类</th><th>效果</th><th>出现频率</th></tr>
+  <tr><td><span class="tag teal">战吼</span></td><td>入场</td><td>从手牌打出时触发一次效果</td><td>常见</td></tr>
+  <tr><td><span class="tag red">亡语</span></td><td>离场</td><td>随从被消灭时触发一次效果</td><td>常见</td></tr>
+  <tr><td><span class="tag amber">嘲讽</span></td><td>防御</td><td>对方必须优先攻击此随从</td><td>常见</td></tr>
+  <tr><td><span class="tag green">圣盾</span></td><td>防御</td><td>抵挡第一次受到的伤害（包括法术），护盾消失</td><td>中等</td></tr>
+  <tr><td><span class="tag amber">冲锋</span></td><td>攻击</td><td>出场的当回合即可攻击</td><td>稀有</td></tr>
+  <tr><td><span class="tag blue">潜行</span></td><td>隐蔽</td><td>不能被敌方随从选中为攻击目标（可被 AOE 命中）</td><td>稀有</td></tr>
+  <tr><td><span class="tag purple">法强 +N</span></td><td>增幅</td><td>你的法术卡伤害 +N</td><td>中等</td></tr>
+  <tr><td><span class="tag teal">抽牌</span></td><td>资源</td><td>满足条件时从牌库抽牌</td><td>中等</td></tr>
+  <tr><td><span class="tag amber">耐久 N</span></td><td>装备</td><td>装备可使用 N 次，每次消耗 1 耐久。归零时装备损坏</td><td>装备专属</td></tr>
+  <tr><td><span class="tag red">✍️ 考验</span></td><td>英语</td><td>打出前需要完成英语听写/拼写挑战</td><td>高费/强力卡</td></tr>
+  <tr><td><span class="tag">派系关联</span></td><td>阵营</td><td>卡牌属于某个派系（史塔克/兰尼斯特/坦格利安/守夜人/唐顿），同派系卡有联动</td><td>基础规则</td></tr>
+</table>
+
+<div class="section insight">
+  <strong>💡 派系联动机制</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    这是策略深度的关键来源。例：如果你的卡组以「史塔克」为主，派系内卡牌的联动效果会更强——如「雪诺」在场时，所有史塔克随从 +1/+1。但混搭派系可以获得不同体系的优势（比如兰尼斯特的装备 + 坦格利安的 AOE）。<br>
+    <strong>决策点</strong>：纯派系 vs 混搭？每局对战前根据对手卡组调整？
+  </p>
+</div>
+
+<h3>稀有度 × 获取方式</h3>
+<table>
+  <tr><th>稀有度</th><th>获取条件</th><th>同卡上限</th><th>分解得碎片</th><th>合成所需</th></tr>
+  <tr><td><span class="tag" style="background:rgba(148,163,184,0.12);color:#cbd5e1;">⚪ 普通</span></td><td>完成任意听写即得</td><td>2 张</td><td>1 碎片</td><td>5 碎片</td></tr>
+  <tr><td><span class="tag green">🔵 稀有</span></td><td>单集准确 ≥80%</td><td>2 张</td><td>5 碎片</td><td>20 碎片</td></tr>
+  <tr><td><span class="tag purple">🟣 史诗</span></td><td>单集准确 ≥95% / 赛季奖励</td><td>2 张</td><td>15 碎片</td><td>60 碎片</td></tr>
+  <tr><td><span class="tag amber" style="background:rgba(255,191,0,0.12);color:#ffbf00;">🟠 传说</span></td><td>全剧卡册完成 / 天梯段位奖励</td><td><strong>1 张</strong></td><td>50 碎片</td><td>200 碎片（不可直接合成）</td></tr>
+</table>
+
+<div class="section important">
+  <strong>⚠️ 经济系统设计原则：不可直接买卡</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    卡牌的唯一来源是 <strong>学习（听写）</strong>。没有内购开包。碎片系统允许针对性合成，但传说卡只能通过全收集/天梯段位获得。这意味着「学习进度 = 游戏进度」，彻底对齐产品核心价值。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== 3. EQUIPMENT =========== -->
+<h2>3. 装备系统细节</h2>
+<p class="muted">三槽体系：武器（耐久系统）+ 护甲（护盾系统）+ 宝物（被动效果）</p>
+
+<h3>3.1 装备槽规则</h3>
+<table>
+  <tr><th>槽位</th><th>图标</th><th>效果类型</th><th>守护规则</th><th>数量上限</th></tr>
+  <tr><td>武器</td><td>🗡️</td><td>+ATK，有耐久度</td><td>被<span class="tag teal">战吼</span>摧毁、被拆除法术</td><td>1</td></tr>
+  <tr><td>护甲</td><td>🛡️</td><td>+HP / 护盾 / 减伤</td><td>先于 HP 受到伤害（护甲条）</td><td>1</td></tr>
+  <tr><td>宝物</td><td>💎</td><td>被动效果（抽牌、减费、光环）</td><td>仅随从死亡时失效</td><td>1（P0 先开放 0 个，随等级解锁）</td></tr>
+</table>
+
+<h3>3.2 武器列表（首批 6 件）</h3>
+<table>
+  <tr><th>武器</th><th>稀有度</th><th>ATK</th><th>耐久</th><th>额外效果</th><th>获取方式</th></tr>
+  <tr><td>🗡️ 守夜人短剑</td><td>普通</td><td>+1</td><td>3</td><td>—</td><td>初始赠送</td></tr>
+  <tr><td>🗡️ 骑士长剑</td><td>稀有</td><td>+2</td><td>2</td><td>—</td><td>准确率 ≥80% 集掉落</td></tr>
+  <tr><td>🗡️ 瓦雷利亚钢剑</td><td>稀有</td><td>+3</td><td>2</td><td>史塔克随从额外 +1 ATK</td><td>GOT S01 全收集</td></tr>
+  <tr><td>🗡️ 龙晶匕首</td><td>史诗</td><td>+2</td><td>4</td><td>每次攻击抽 1 张牌</td><td>准确率 ≥95% 集</td></tr>
+  <tr><td>🗡️ 缝衣针</td><td>传说</td><td>+4</td><td>2</td><td><span class="tag blue">潜行</span> 装备随从获得潜行</td><td>全剧卡册完成</td></tr>
+  <tr><td>🗡️ 长爪</td><td>传说</td><td>+3</td><td>3</td><td>攻击后在本回合潜行。守夜人随从 +1/+1</td><td>天梯段位「国王之手」+</td></tr>
+</table>
+
+<h3>3.3 护甲列表（首批 6 件）</h3>
+<table>
+  <tr><th>护甲</th><th>稀有度</th><th>HP</th><th>护盾</th><th>额外效果</th><th>获取方式</th></tr>
+  <tr><td>🛡️ 皮甲</td><td>普通</td><td>+1</td><td>0</td><td>—</td><td>初始赠送</td></tr>
+  <tr><td>🛡️ 锁子甲</td><td>稀有</td><td>+2</td><td>0</td><td>—</td><td>准确率 ≥80% 集</td></tr>
+  <tr><td>🛡️ 龙鳞甲</td><td>稀有</td><td>+2</td><td>1</td><td>受到的火焰伤害 -1</td><td>DA S01 全收集</td></tr>
+  <tr><td>🛡️ 守夜人黑衣</td><td>史诗</td><td>+1</td><td>0</td><td><span class="tag amber">嘲讽</span> <span class="tag red">亡语</span>：英雄恢复 3 HP</td><td>准确率 ≥95% 集</td></tr>
+  <tr><td>🛡️ 兰尼斯特金甲</td><td>史诗</td><td>+3</td><td>0</td><td>装备随从每回合恢复 1 HP</td><td>赛季奖励</td></tr>
+  <tr><td>🛡️ 异鬼冰甲</td><td>传说</td><td>+2</td><td>2</td><td>受到的伤害 -1。寒冰法术 +1 伤害</td><td>天梯段位「王子」+</td></tr>
+</table>
+
+<h3>3.4 宝物列表（首批 4 件）</h3>
+<table>
+  <tr><th>宝物</th><th>稀有度</th><th>效果</th><th>获取条件</th></tr>
+  <tr><td>📜 古老预言</td><td>史诗</td><td>每回合开始，下一张抽到的牌费用 -1</td><td>准确率 ≥95% 集 ×3</td></tr>
+  <tr><td>🔥 龙石碎片</td><td>史诗</td><td>法强 +1。你的龙族随从 +1 ATK</td><td>坦格利安排名 前 100</td></tr>
+  <tr><td>👑 铁王座碎片</td><td>传说</td><td>回合结束时，英雄恢复 3 HP</td><td>天梯段位「国王之手」+</td></tr>
+  <tr><td>❄️ 冬之心</td><td>传说</td><td>每回合第一次受到伤害时，冻结攻击方</td><td>全剧全收集 + 天梯王者</td></tr>
+</table>
+
+<div class="section insight">
+  <strong>💡 装备的策略意义</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    装备是让卡组产生多样性的核心。同样的「艾莉亚·史塔克」随从（基础 3/2）：<br>
+    → 配「缝衣针」= 潜行刺客，打一波爆发<br>
+    → 配「龙鳞甲」= 站场稳健，反复消耗<br>
+    → 配「古老预言」= 过牌引擎<br>
+    三件装备槽的组合 ≈ <strong>每个随从有 数百种配置可能</strong>。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== 4. ENGLISH CHALLENGE =========== -->
+<h2>4. 出牌考验系统</h2>
+<p class="muted">这是区别所有其他卡牌游戏的核心机制——英语能力决定战斗力</p>
+
+<h3>4.1 触发条件</h3>
+<ul class="dot-list">
+  <li>只有带 <span class="tag red">✍️ 考验</span> 关键词的卡牌才会触发</li>
+  <li>通常出现在高费用/高稀有度卡牌上（传说卡 100% 带考验，史诗 50%，稀有 20%）</li>
+  <li>玩家出牌时，弹出挑战窗口，暂停游戏（PvP 中对方案觉不到内容）</li>
+</ul>
+
+<h3>4.2 挑战类型（3 种）</h3>
+<table>
+  <tr><th>类型</th><th>形式</th><th>难度范围</th><th>适合场景</th></tr>
+  <tr><td><strong>听写</strong></td><td>播放剧中原音音频 → 用户打字输入听到的英文</td><td>初级：3-5 词短句<br>高级：12-15 词复合句</td><td>核心玩法，与现有听写体验一致</td></tr>
+  <tr><td><strong>拼写填空</strong></td><td>显示句中挖空的英文 → 用户补全</td><td>全部难度</td><td>快速轻量，减少打断感</td></tr>
+  <tr><td><strong>翻译选择</strong></td><td>显示中文译文 → 从 4 个英文选项中选正确的一个</td><td>初级</td><td>新手友好，减少挫败感</td></tr>
+</table>
+
+<h3>4.3 正确率 → 卡牌效果映射（非/即/即）</h3>
+<p>不是简单的「答对/答错」二分，而是<strong>梯度效果</strong>：</p>
+<table>
+  <tr><th>正确率</th><th>判定</th><th>卡牌效果</th><th>惩罚/奖励</th></tr>
+  <tr><td>100%</td><td><span style="color:var(--green);font-weight:600;">完美</span></td><td>卡牌效果 <strong>100% 生效</strong></td><td>额外获得「学识点数」= 卡牌费用</td></tr>
+  <tr><td>80-99%</td><td><span style="color:var(--teal);font-weight:600;">优秀</span></td><td>卡牌效果 <strong>100% 生效</strong></td><td>—</td></tr>
+  <tr><td>50-79%</td><td><span style="color:var(--amber);font-weight:600;">勉强</span></td><td>卡牌效果 <strong>减半</strong>（伤害减半、持续时间减半等）</td><td>—</td></tr>
+  <tr><td>&lt;50%</td><td><span style="color:var(--red);font-weight:600;">失败</span></td><td>卡牌 <strong>无效</strong>，进入墓地</td><td>法力已消耗，资源损失</td></tr>
+  <tr><td><strong>超时（30s）</strong></td><td><span style="color:var(--red);font-weight:600;">放弃</span></td><td>卡牌无效</td><td>法力已消耗，且额外扣 2 HP（精神打击）</td></tr>
+</table>
+
+<div class="section insight">
+  <strong>💡 设计意图</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    答对 80% 和 100% 在游戏效果上没有区别，但 100% 会额外奖励「学识点数」—— 学识点数累积用于兑换特殊外观/头像/称号，不直接影响战斗力。<br><br>
+    这确保：<strong>英语能力不够的玩家也能正常游戏</strong>（只要答对 80%），但<strong>英语能力强的玩家能获得炫耀资本</strong>（称号、头像框、专属背板）。<br><br>
+    梯度效果（50-79% 减半）给了「半会不会」的玩家一个缓冲带，不会一次答错就彻底崩盘。
+  </p>
+</div>
+
+<h3>4.4 考验内容来源</h3>
+<ul class="dot-list">
+  <li>每张卡牌的考验内容 = 该卡对应角色的经典台词</li>
+  <li>例：「凛冬将至」传说卡的考验 = 听写 "Winter is coming"（简单但经典）</li>
+  <li>例：「龙之吐息」史诗卡的考验 = 听写 "Dracarys"（短、生僻、有辨识度）</li>
+  <li>例：「兰尼斯特家族」稀有卡的考验 = 填空 "A lion does not concern himself with the ____ of sheep"（opinions）</li>
+  <li>内容自动从已导入的 SRT 台词库中提取，每张卡绑定一句台词</li>
+</ul>
+
+<div class="section caution">
+  <strong>⚠️ PvP 公平性</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    出牌考验时，对手只能看到「对方正在思考...」的加载动画，看不到具体题目和答案。考验结果的最终动画（成功/失败）双方都可见。<br>
+    挑战限时 30 秒（P2 后），超时视为放弃。防止玩家通过故意拖延来消耗对手耐心。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== 5. REWARDS =========== -->
+<h2>5. 奖励与经济循环</h2>
+<p class="muted">让玩家每天想回来学习的完整激励体系</p>
+
+<h3>5.1 经济资源体系</h3>
+<table>
+  <tr><th>资源</th><th>图标</th><th>用途</th><th>获取途径</th></tr>
+  <tr><td>卡牌碎片</td><td>🧩</td><td>合成特定卡牌（5/20/60/200）</td><td>分解重复卡、对战奖励、日常任务</td></tr>
+  <tr><td>学识点数</td><td>📖</td><td>兑换外观：头像框、卡背、称号、表情</td><td>出牌考验 100% 获得、御前挑战全对</td></tr>
+  <tr><td>卡包钥匙</td><td>🗝️</td><td>打开特定剧集卡包（每包 5 张）</td><td>完成一集听写 = 1 把钥匙</td></tr>
+  <tr><td>声望</td><td>⚡</td><td>提升封号等级（已有系统）</td><td>御前挑战、每日/周任务、对战胜利</td></tr>
+</table>
+
+<h3>5.2 每日循环（Day 1 体验）</h3>
+<div class="section">
+  <ol style="padding-left: 18px; color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+    <li><strong>每日登录</strong> → 领取连胜奖励（已有 streak 系统）</li>
+    <li><strong>做 1 集听写</strong> → 1 把卡包钥匙 + 根据准确率解锁稀有度</li>
+    <li><strong>开 1 包</strong> → 5 张随机卡 + 1 张保底稀有</li>
+    <li><strong>打 1 场御前挑战</strong> → 声望 + 碎片（已有系统）</li>
+    <li><strong>打 3 场 AI 对战</strong> → 每日首胜碎片 bonus + 经验</li>
+    <li><strong>检查卡册进度</strong> → 设定下一张要合成的目标卡</li>
+  </ol>
+  <p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;">
+    总时长约 25-35 分钟。如果想多玩，可以无限打 AI 对战（无额外奖励）、自由组卡、挑战更高准确率。
+  </p>
+</div>
+
+<h3>5.3 每周循环</h3>
+<table>
+  <tr><th>内容</th><th>频率</th><th>奖励</th></tr>
+  <tr><td>周任务（3 个）</td><td>每周一刷新</td><td>各 1 个史诗碎片箱 + 声望</td></tr>
+  <tr><td>周战胜场目标</td><td>每周累计</td><td>10 胜：稀有碎片箱 / 25 胜：史诗碎片箱</td></tr>
+  <tr><td>好友切磋</td><td>每周 5 次</td><td>每次 5 碎片 + 声望</td></tr>
+  <tr><td>周卡包</td><td>每周一</td><td>5 张随机卡（按活跃度给 1-3 包）</td></tr>
+</table>
+
+<h3>5.4 赛季循环</h3>
+<table>
+  <tr><th>段位</th><th>段位图标</th><th>赛季末奖励</th><th>晋级条件</th></tr>
+  <tr><td>🥉 青铜</td><td>青铜头盔</td><td>普通卡包 ×2</td><td>初始</td></tr>
+  <tr><td>🥈 白银</td><td>白银盾</td><td>稀有卡包 ×1 + 碎片 ×20</td><td>10 胜</td></tr>
+  <tr><td>🥇 黄金</td><td>金狮子</td><td>稀有卡包 ×2 + 赛季稀有卡</td><td>30 胜</td></tr>
+  <tr><td>💎 铂金</td><td>紫水晶</td><td>史诗卡包 ×1 + 赛季史诗卡</td><td>70 胜</td></tr>
+  <tr><td>👑 钻石</td><td>白钻石</td><td>史诗卡包 ×2 + 赛季史诗装备</td><td>150 胜</td></tr>
+  <tr><td>🏆 王者</td><td>金王冠</td><td>传说卡包 ×1 + 赛季传说卡 + 专属背板</td><td>前 500 名</td></tr>
+</table>
+
+<div class="section insight">
+  <strong>💡 设计要点</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    赛季持续 <strong>1 个月</strong>，与学习节奏一致。赛季末奖励基于「最高段位」而非「当前段位」，鼓励冲刺。<br>
+    段位只升不降（青铜→白银→...→钻石），但王者需要每月重置，只有真正的活跃玩家能保住。<br>
+    赛季奖励不可重复获取（每赛季不同卡牌设计），促进每个月的活跃度。
+  </p>
+</div>
+
+<h3>5.5 全收集奖励</h3>
+<table>
+  <tr><th>收集目标</th><th>奖励</th></tr>
+  <tr><td>一部剧集全部普通+稀有卡</td><td>该剧传奇卡 ×1（随机）</td></tr>
+  <tr><td>一部剧集全部史诗+传说卡</td><td>该剧专属头像框 + 卡背</td></tr>
+  <tr><td>全剧全卡收集</td><td>专属称号「收藏家」+ 传说卡「全知之眼」（效果：开局抽 3 张牌）</td></tr>
+</table>
+
+<hr class="divider">
+
+<!-- =========== 6. PLAYER JOURNEY =========== -->
+<h2>6. 玩家路径（Day 1 → Season 1）</h2>
+<p class="muted">从注册到成为竞技玩家的完整体验</p>
+
+<h3>Day 1：入门</h3>
+<ul class="dot-list">
+  <li>注册账号 → 自动获得初始牌组（10 张：6 随从 + 2 法术 + 2 装备，均为普通稀有度）</li>
+  <li>新手教学：指引完成第 1 集听写 → 获得第 1 个卡包 → 组卡 → 打 AI 首战</li>
+  <li>AI 首战对手是弱化版（卡组随机、无装备、HP 20）</li>
+  <li>首战必胜 → 解锁竞技场入口</li>
+  <li>Day 1 结束时：约 15-20 张卡、封号 自由民 Lv.1、完成 1 场 AI 对战</li>
+</ul>
+
+<h3>Week 1：沉淀</h3>
+<ul class="dot-list">
+  <li>完成 3-5 集听写 → 卡组扩展到 25-30 张</li>
+  <li>解锁第一个稀有装备（通过 80%+ 准确率集）</li>
+  <li>尝试好友挑战功能 → 发现 AI 和真人对战的差异</li>
+  <li>升到封号「守夜人」Lv.2 → HP 从 25→26</li>
+  <li>Week 1 结束时：约 40 张卡、有 1-2 个核心牌组、可稳定战胜 AI</li>
+</ul>
+
+<h3>Month 1：投入</h3>
+<ul class="dot-list">
+  <li>完成 1 部剧集（GOT S01 或 DA S01）→ 解锁全收集奖励传说卡</li>
+  <li>升到封号「骑士」Lv.3+ → 解锁装备槽</li>
+  <li>天梯开放（P2 后）→ 尝试匹配真实玩家</li>
+  <li>参与第一个赛季 → 了解赛季奖励机制</li>
+  <li>加入/创建封臣 → 可以互相对练</li>
+  <li>Month 1 结束时：约 80-100 张卡、3+ 套不同卡组、天梯白银/黄金段位</li>
+</ul>
+
+<h3>Season 1+：竞技</h3>
+<ul class="dot-list">
+  <li>多剧集全收集 → 卡池丰富，可以构建纯派系卡组或混搭</li>
+  <li>天梯达到钻石/王者 → 获得赛季限定传说卡</li>
+  <li>参与公会战（P3）→ 团队策略配合</li>
+  <li>锦标赛（P3）→ 64 人淘汰赛，实时排名</li>
+  <li>不断调整卡组针对 meta → 深度竞技体验</li>
+</ul>
+
+<div class="section important">
+  <strong>⚖️ 留存设计总结</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    <strong>Day 1 留存</strong>：新手保护 + 首战必胜 + 初始牌组，「我今天有了自己的卡」<br>
+    <strong>Week 1 留存</strong>：每日开包期待 + 好友挑战，「我想看看朋友的牌」<br>
+    <strong>Month 1 留存</strong>：赛季目标 + 全收集奖励 + 天梯排名，「这赛季我要上王者」<br>
+    <strong>长期留存</strong>：新剧集更新 + 新卡牌 + 赛季皮肤 + 公会归属，「新剧出了我得学」
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== 7. IMPLEMENTATION ROADMAP =========== -->
+<h2>7. 分阶段实现路线</h2>
+<p class="muted">P0→P3，每期做什么、不做什么、后端需要什么</p>
+
+<h3>P0：卡牌收集 + AI 对战</h3>
+<table>
+  <tr><th>模块</th><th>内容</th><th>后端需求</th><th>技术难度</th></tr>
+  <tr><td>卡牌数据库</td><td>卡牌表、稀有度、效果、派系</td><td>新表 + Flyway</td><td>低</td></tr>
+  <tr><td>学习产卡</td><td>听写完成后根据准确率发放卡包</td><td>修改现有 service</td><td>低</td></tr>
+  <tr><td>卡册 UI</td><td>卡牌网格、稀有度筛选、卡组编辑</td><td>纯前端</td><td>中</td></tr>
+  <tr><td>卡组构筑</td><td>30 格卡组编辑器、费用曲线</td><td>纯前端</td><td>中</td></tr>
+  <tr><td>AI 对战</td><td>简单规则引擎、AI 自动出牌</td><td>后端逻辑引擎</td><td>中高</td></tr>
+  <tr><td>装备系统 V1</td><td>武器 + 护甲，无宝物</td><td>装备表 + 效果实现</td><td>中</td></tr>
+</table>
+
+<p><strong>P0 不做</strong>：实时匹配、WebSocket、天梯、赛季、公会、出牌考验动画</p>
+<p><strong>P0 最简 AI 规则</strong>：AI 每回合按费用从高到低出牌，优先攻击低血量随从。不要求 AI 聪明，能打就行。</p>
+
+<h3>P1：异步好友对战</h3>
+<table>
+  <tr><th>模块</th><th>内容</th><th>技术</th></tr>
+  <tr><td>好友系统</td><td>加友、删友、列表</td><td>现有 users 表扩展</td></tr>
+  <tr><td>挑战系统</td><td>A 向 B 发起挑战 → B 离线时 AI 托管防守</td><td>对战状态表 + 队列</td></tr>
+  <tr><td>出牌考验</td><td>后端校验 + 前端弹窗</td><td>已有听写接口可复用</td></tr>
+  <tr><td>排行榜</td><td>胜场/胜率/连胜</td><td>简单 SQL 聚合</td></tr>
+  <tr><td>装备系统 V2</td><td>加入宝物槽 + 获取途径</td><td>升级现有装备表</td></tr>
+</table>
+
+<p><strong>P1 不做</strong>：实时通信、30 秒计时器、匹配队列、段位系统</p>
+
+<h3>P2：半实时对战 + 天梯</h3>
+<table>
+  <tr><th>模块</th><th>内容</th><th>技术</th></tr>
+  <tr><td>WebSocket</td><td>对战房间、实时状态同步</td><td>Spring Boot WebSocket + STOMP</td></tr>
+  <tr><td>匹配队列</td><td>按段位/胜率匹配</td><td>Redis 队列</td></tr>
+  <tr><td>回合计时器</td><td>30 秒出牌，超时自动跳过</td><td>前端倒计时 + 后端验证</td></tr>
+  <tr><td>完整战场 UI</td><td>随从动画、攻击特效、法力水晶动画</td><td>纯前端（CSS animation）</td></tr>
+  <tr><td>出牌考验弹窗</td><td>暂停游戏、弹窗、恢复</td><td>纯前端 + 后端校验</td></tr>
+  <tr><td>段位系统</td><td>青铜→王者 6 段</td><td>段位表 + 匹配分</td></tr>
+  <tr><td>战报回放</td><td>保存完整行动记录</td><td>JSON 记录表</td></tr>
+  <tr><td>断线重连</td><td>WebSocket 断开后恢复</td><td>Redis 缓存对战状态</td></tr>
+</table>
+
+<p><strong>P2 不做</strong>：公会战、锦标赛、观战、精彩回放分享</p>
+
+<h3>P3：电竞生态</h3>
+<table>
+  <tr><th>模块</th><th>内容</th><th>技术</th></tr>
+  <tr><td>公会战</td><td>封臣对战、团队积分、公会等级</td><td>现有封臣表扩展</td></tr>
+  <tr><td>观战模式</td><td>实时旁观、延迟 30 秒</td><td>WebSocket 广播</td></tr>
+  <tr><td>锦标赛</td><td>64 人淘汰赛、赛程管理</td><td>新模块</td></tr>
+  <tr><td>精彩回放</td><td>复盘、分享到社交平台</td><td>回放导出</td></tr>
+  <tr><td>赛季赛季限定</td><td>每赛季新卡牌/装备/皮肤</td><td>运维流程</td></tr>
+</table>
+
+<hr class="divider">
+
+<!-- =========== VERDICT =========== -->
+<div class="verdict">
+<h3 style="margin-top:0;">📐 完整蓝图总结</h3>
+<p style="margin-top:8px;">
+  这个设计把「英语学习」和「卡牌对战」在<strong>机制层面</strong>绑在一起，不是表面贴皮：<br><br>
+  <strong>1. 学习 = 卡牌获取的唯一来源</strong> — 没有内购、没有代币兑换。想变强？去听写。<br><br>
+  <strong>2. 出牌考验 = 英语能力直接参与战斗</strong> — 带 ✍️ 的卡牌决定了胜负天平，但梯度效果保护了英语能力不足的玩家<br><br>
+  <strong>3. 装备系统 = 策略深度的放大器</strong> — 每个随从 3 个装备槽 × 多种装备选择 = 数百种配置可能<br><br>
+  <strong>4. 经济系统 = 驱动每日学习的燃料</strong> — 碎片合成、每日卡包、赛季奖励，每一个都在说「再去听写一集吧」<br><br>
+  <strong>5. 渐进式实现 = 从静态收集到实时竞技的完整路径</strong> — P0 做卡册+AI，P2 才做实时对战，每期可独立上线验证
+</p>
+<p style="margin-top:12px; color: var(--teal); font-weight: 600;">
+  这不再是「学英语顺便打牌」或「打牌顺便学英语」——这就是一套以英语学习为燃料的卡牌竞技游戏。
+</p>
+</div>
+
+</div>
+</body>
+</html>

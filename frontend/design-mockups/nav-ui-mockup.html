@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航UI · 视觉方案</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card-border: #334155;
+    --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+    --teal: #14b8a6; --teal-dark: #0d9488; --teal-light: #2dd4bf; --teal-glow: rgba(20,184,166,0.3);
+    --purple: #8b5cf6; --amber: #f59e0b; --red: #ef4444; --green: #22c55e;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --border: #334155; --border-light: rgba(255,255,255,0.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body {
+    background: #0a0e1a; color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 32px; }
+
+  /* Tab bar for switching between pages */
+  .page-tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .page-tab {
+    padding: 7px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text-secondary); cursor: pointer;
+    font-size: 0.78rem; font-weight: 500; transition: all 0.15s;
+  }
+  .page-tab:hover { border-color: var(--teal); }
+  .page-tab.active { border-color: var(--teal); color: var(--teal); background: rgba(20,185,166,0.08); }
+  .page-tab.disabled { opacity: 0.4; cursor: default; }
+
+  /* Phone frame */
+  .phones { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .phone {
+    width: 320px; max-width: 100%;
+    background: #070b15; border-radius: 24px; overflow: hidden;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+    border: 1px solid var(--border-light);
+  }
+  .phone-status {
+    padding: 8px 16px; display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--text-muted); background: #070b15;
+  }
+
+  /* ====== Content Areas ====== */
+  .page-content { display: none; min-height: 580px; position: relative; }
+  .page-content.show { display: block; }
+
+  /* ---- Learn Page ---- */
+  .learn-header { padding: 12px 16px 0; }
+  .learn-header h2 { font-size: 1.1rem; margin-bottom: 8px; }
+  .learn-tabs {
+    display: flex; gap: 0; background: var(--card);
+    border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
+  }
+  .learn-tab { flex: 1; padding: 8px; text-align: center; font-size: 0.72rem; color: var(--text-muted); cursor: pointer; transition: all 0.12s; }
+  .learn-tab.active { background: var(--teal); color: #fff; font-weight: 600; }
+  .learn-tab:not(.active):hover { background: rgba(255,255,255,0.04); }
+
+  .learn-body { padding: 12px 16px; }
+  .sentence-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px; margin-bottom: 8px;
+  }
+  .sentence-card .sc-en { font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; }
+  .sentence-card .sc-cn { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px; }
+  .sentence-card .sc-input {
+    width: 100%; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid var(--border); background: rgba(0,0,0,0.2);
+    color: var(--text); font-size: 0.8rem; outline: none;
+  }
+  .sentence-card .sc-input:focus { border-color: var(--teal); }
+
+  .learn-practice-btn {
+    width: 100%; padding: 10px; margin-top: 8px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; border-radius: var(--radius-sm); color: #fff;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center;
+  }
+
+  /* ---- Cards Page ---- */
+  .cards-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .cards-header h2 { font-size: 1.1rem; }
+  .cards-header .coins { font-size: 0.72rem; color: var(--amber); font-weight: 600; }
+
+  .cards-stats {
+    display: flex; gap: 6px; padding: 0 16px; margin-bottom: 10px;
+  }
+  .cards-stats .cs-item {
+    flex: 1; background: var(--card); border-radius: var(--radius-sm);
+    border: 1px solid var(--border); padding: 8px; text-align: center;
+  }
+  .cards-stats .cs-item .cs-num { font-size: 1rem; font-weight: 700; }
+  .cards-stats .cs-item .cs-label { font-size: 0.6rem; color: var(--text-muted); }
+
+  .cards-subtabs {
+    display: flex; gap: 0; margin: 0 16px;
+    background: var(--card); border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .cards-subtab { flex: 1; padding: 7px; text-align: center; font-size: 0.68rem; color: var(--text-muted); cursor: pointer; }
+  .cards-subtab.active { background: var(--teal); color: #fff; font-weight: 600; }
+
+  .cards-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    padding: 10px 16px;
+  }
+  .cg-card {
+    background: linear-gradient(145deg, #141e33, #1a2645);
+    border: 1px solid var(--border-light); border-radius: 8px;
+    padding: 8px 6px; text-align: center; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .cg-card:hover { transform: translateY(-3px); border-color: var(--teal-glow); }
+  .cg-card .cg-rarity {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 0.5rem; font-weight: 600; margin-bottom: 4px;
+  }
+  .cg-card .cg-icon { font-size: 1.3rem; }
+  .cg-card .cg-name { font-size: 0.55rem; font-weight: 600; margin: 2px 0; }
+  .cg-card .cg-stats { display: flex; justify-content: center; gap: 6px; font-size: 0.5rem; }
+  .cg-card .cg-atk { color: var(--red); }
+  .cg-card .cg-hp { color: var(--green); }
+
+  .cards-battle-btn {
+    margin: 8px 16px 12px; padding: 10px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; border-radius: var(--radius-sm); color: #fff;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center;
+  }
+  .cards-battle-btn.disabled {
+    background: rgba(255,255,255,0.04); color: var(--text-muted);
+    cursor: default; border: 1px solid var(--border);
+  }
+
+  /* ---- Clan Page ---- */
+  .clan-header { padding: 12px 16px 0; }
+  .clan-header h2 { font-size: 1.1rem; margin-bottom: 8px; }
+
+  .clan-tabs {
+    display: flex; gap: 0; background: var(--card);
+    border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
+  }
+  .clan-tab { flex: 1; padding: 8px; text-align: center; font-size: 0.72rem; color: var(--text-muted); cursor: pointer; }
+  .clan-tab.active { background: var(--teal); color: #fff; font-weight: 600; }
+
+  .clan-body { padding: 12px 16px; }
+  .rank-list { }
+  .rank-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .rank-item .ri-num { width: 24px; text-align: center; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+  .rank-item .ri-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .rank-item .ri-info { flex: 1; }
+  .rank-item .ri-name { font-size: 0.78rem; font-weight: 500; }
+  .rank-item .ri-tier { font-size: 0.6rem; color: var(--text-muted); }
+  .rank-item .ri-score { font-size: 0.72rem; color: var(--teal); font-weight: 600; }
+  .rank-item .ri-medal { font-size: 1rem; }
+
+  .invite-box {
+    background: var(--card); border: 1px dashed var(--teal-glow);
+    border-radius: var(--radius-sm); padding: 12px; margin-top: 8px;
+    text-align: center;
+  }
+  .invite-box .ib-code {
+    font-family: monospace; font-size: 1.1rem; font-weight: 700;
+    color: var(--teal); letter-spacing: 2px; margin: 4px 0;
+  }
+  .invite-box .ib-btn {
+    display: inline-block; padding: 5px 14px; margin-top: 4px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; border-radius: 6px; color: #fff; font-size: 0.7rem;
+    font-weight: 600; cursor: pointer;
+  }
+
+  /* Bottom Nav */
+  .nav-bar {
+    display: flex; border-top: 1px solid var(--border-light);
+    background: #0f172a; padding: 2px 0;
+  }
+  .nav-item {
+    flex: 1; padding: 5px 0 4px; text-align: center;
+    font-size: 0.6rem; color: var(--text-muted); cursor: pointer;
+    transition: color 0.12s; position: relative;
+  }
+  .nav-item:hover { color: var(--text-secondary); }
+  .nav-item .ni-icon { font-size: 1.2rem; display: block; margin-bottom: 1px; }
+  .nav-item.active { color: var(--teal); }
+  .nav-item.active::after {
+    content: ''; position: absolute; top: -1px; left: 25%; right: 25%;
+    height: 2px; background: var(--teal); border-radius: 0 0 2px 2px;
+  }
+  .nav-item .ni-badge {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--red);
+    position: absolute; top: 2px;
+  }
+  .nav-item.disabled { opacity: 0.35; cursor: default; }
+
+  /* Label */
+  .phone-label { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; letter-spacing: 0.3px; }
+
+  /* Page selector buttons */
+  .demo-controls { text-align: center; margin-top: 24px; }
+  .demo-controls button {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text-secondary); cursor: pointer;
+    font-size: 0.72rem; margin: 3px;
+  }
+  .demo-controls button.active { border-color: var(--teal); color: var(--teal); background: rgba(20,185,166,0.08); }
+
+  .note {
+    margin-top: 24px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 18px;
+  }
+  .note h4 { font-size: 0.85rem; margin-bottom: 4px; color: var(--teal); }
+  .note p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎴 新导航 · 视觉Mockup</h1>
+  <p class="subtitle">P0 三栏导航 + 三个页面的完整视觉预览，点击按钮切换页面</p>
+
+  <!-- Phone mockup -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="phone">
+      <div class="phone-status"><span>9:41</span><span>🔋 82%</span></div>
+
+      <!-- Page: Learn -->
+      <div id="page-learn" class="page-content show">
+        <div class="learn-header">
+          <h2>📖 学习</h2>
+          <div class="learn-tabs">
+            <div class="learn-tab active">听写</div>
+            <div class="learn-tab">错题</div>
+            <div class="learn-tab">挑战</div>
+          </div>
+        </div>
+        <div class="learn-body">
+          <div class="sentence-card">
+            <div class="sc-en">Winter is coming.</div>
+            <div class="sc-cn">凛冬将至。</div>
+            <input class="sc-input" placeholder="输入英文..." disabled>
+          </div>
+          <div class="sentence-card">
+            <div class="sc-en">A lion does not concern himself with the opinions of sheep.</div>
+            <div class="sc-cn">狮子不会在意绵羊的看法。</div>
+            <input class="sc-input" placeholder="输入英文..." disabled>
+          </div>
+          <div class="learn-practice-btn">▶ 继续听写（S01E03）</div>
+        </div>
+      </div>
+
+      <!-- Page: Cards -->
+      <div id="page-cards" class="page-content">
+        <div class="cards-header">
+          <h2>🎴 我的卡牌</h2>
+          <span class="coins">🪙 1,240</span>
+        </div>
+        <div class="cards-stats">
+          <div class="cs-item"><div class="cs-num" style="color:#cbd5e1;">18</div><div class="cs-label">普通</div></div>
+          <div class="cs-item"><div class="cs-num" style="color:var(--teal);">8</div><div class="cs-label">稀有</div></div>
+          <div class="cs-item"><div class="cs-num" style="color:var(--purple);">3</div><div class="cs-label">史诗</div></div>
+          <div class="cs-item"><div class="cs-num" style="color:#ffbf00;">1</div><div class="cs-label">传说</div></div>
+        </div>
+        <div class="cards-subtabs">
+          <div class="cards-subtab active">卡册</div>
+          <div class="cards-subtab">卡组</div>
+        </div>
+        <div class="cards-grid">
+          <div class="cg-card">
+            <span class="cg-rarity" style="background:rgba(20,185,166,0.12);color:var(--teal);">稀有</span>
+            <div class="cg-icon">🐺</div>
+            <div class="cg-name">史塔克家族</div>
+            <div class="cg-stats"><span class="cg-atk">⚔2</span><span class="cg-hp">❤️2</span></div>
+          </div>
+          <div class="cg-card">
+            <span class="cg-rarity" style="background:rgba(139,92,246,0.12);color:var(--purple);">史诗</span>
+            <div class="cg-icon">🐉</div>
+            <div class="cg-name">龙之母</div>
+            <div class="cg-stats"><span class="cg-atk">⚔5</span><span class="cg-hp">❤️4</span></div>
+          </div>
+          <div class="cg-card">
+            <span class="cg-rarity" style="background:rgba(255,191,0,0.12);color:#ffbf00;">传说</span>
+            <div class="cg-icon">🗡️</div>
+            <div class="cg-name">守夜人誓言</div>
+            <div class="cg-stats"><span class="cg-atk">⚔1</span><span class="cg-hp">❤️3</span></div>
+          </div>
+          <div class="cg-card">
+            <span class="cg-rarity" style="color:var(--text-muted);">普通</span>
+            <div class="cg-icon">🛡️</div>
+            <div class="cg-name">铁盾兵</div>
+            <div class="cg-stats"><span class="cg-atk">⚔1</span><span class="cg-hp">❤️4</span></div>
+          </div>
+          <div class="cg-card">
+            <span class="cg-rarity" style="background:rgba(20,185,166,0.12);color:var(--teal);">稀有</span>
+            <div class="cg-icon">🎩</div>
+            <div class="cg-name">卡劳利公馆</div>
+            <div class="cg-stats"><span class="cg-atk">⚔0</span><span class="cg-hp">❤️5</span></div>
+          </div>
+          <div class="cg-card">
+            <span class="cg-rarity" style="background:rgba(20,185,166,0.12);color:var(--teal);">稀有</span>
+            <div class="cg-icon">⚔️</div>
+            <div class="cg-name">瓦雷利亚钢剑</div>
+            <div class="cg-stats"><span class="cg-atk">⚔+3</span></div>
+          </div>
+        </div>
+        <div class="cards-battle-btn disabled">⚔️ 匹配对战 · 即将开放</div>
+      </div>
+
+      <!-- Page: Clan -->
+      <div id="page-clan" class="page-content">
+        <div class="clan-header">
+          <h2>👑 封臣</h2>
+          <div class="clan-tabs">
+            <div class="clan-tab active">今日</div>
+            <div class="clan-tab">本周</div>
+            <div class="clan-tab">狼群</div>
+          </div>
+        </div>
+        <div class="clan-body">
+          <div class="rank-list">
+            <div class="rank-item">
+              <span class="ri-medal">👑</span>
+              <div class="ri-avatar">🐉</div>
+              <div class="ri-info"><div class="ri-name">伊耿</div><div class="ri-tier">铁王座 Lv.10</div></div>
+              <span class="ri-score">5500</span>
+            </div>
+            <div class="rank-item">
+              <span class="ri-medal">🥈</span>
+              <div class="ri-avatar">🦁</div>
+              <div class="ri-info"><div class="ri-name">泰温</div><div class="ri-tier">国王之手 Lv.8</div></div>
+              <span class="ri-score">3200</span>
+            </div>
+            <div class="rank-item">
+              <span class="ri-medal">🥉</span>
+              <div class="ri-avatar">🐺</div>
+              <div class="ri-info"><div class="ri-name">艾莉亚</div><div class="ri-tier">王子 Lv.6</div></div>
+              <span class="ri-score">1800</span>
+            </div>
+            <div class="rank-item">
+              <span class="ri-num"><span style="color:var(--teal);font-weight:700;">4</span></span>
+              <div class="ri-avatar" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark));">🟢</div>
+              <div class="ri-info"><div class="ri-name">你</div><div class="ri-tier">国王 Lv.7</div></div>
+              <span class="ri-score" style="color:var(--text);">1670</span>
+            </div>
+            <div class="rank-item">
+              <span class="ri-num">5</span>
+              <div class="ri-avatar" style="background:rgba(100,116,139,0.3);">🎩</div>
+              <div class="ri-info"><div class="ri-name">罗伯特</div><div class="ri-tier">领主 Lv.4</div></div>
+              <span class="ri-score">980</span>
+            </div>
+          </div>
+          <div class="invite-box">
+            <div style="font-size:0.7rem;color:var(--text-muted);">你的邀请码</div>
+            <div class="ib-code">HEATON-7X9K</div>
+            <span class="ib-btn">📋 复制</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="nav-bar">
+        <div class="nav-item active" onclick="switchPage('learn',this)" id="nav-learn">
+          <span class="ni-icon">📖</span>学习
+        </div>
+        <div class="nav-item" onclick="switchPage('cards',this)" id="nav-cards">
+          <span class="ni-icon">🎴</span>卡牌
+        </div>
+        <div class="nav-item" onclick="switchPage('clan',this)" id="nav-clan">
+          <span class="ni-icon">👑</span>封臣
+        </div>
+        <div class="nav-item disabled" id="nav-battle">
+          <span class="ni-icon" style="opacity:0.4;">⚔️</span>
+          <span style="opacity:0.4;">对战</span>
+          <span style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+            font-size:0.45rem;color:var(--text-muted);white-space:nowrap;">
+            P2 开放
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive controls -->
+  <div class="demo-controls">
+    <button class="active" onclick="switchPage('learn',document.getElementById('nav-learn'))">📖 学习</button>
+    <button onclick="switchPage('cards',document.getElementById('nav-cards'))">🎴 卡牌</button>
+    <button onclick="switchPage('clan',document.getElementById('nav-clan'))">👑 封臣</button>
+    <button style="opacity:0.4;cursor:default;">⚔️ 对战 (P2)</button>
+  </div>
+
+  <div class="note">
+    <h4>✅ 三个变化一目了然</h4>
+    <p>
+      ① 底部导航从 4 项缩为 <strong>3 项</strong>（+1 个灰色禁用的「对战」占位）<br>
+      ② 「学习」页合并了听写 + 错题 + 御前挑战，顶部标签切换<br>
+      ③ 「卡牌」页是新核心入口，展示卡册统计和卡牌网格，底部「匹配对战」灰色禁用<br>
+    </p>
+  </div>
+
+</div>
+
+<script>
+function switchPage(id, el) {
+  // pages
+  document.querySelectorAll('.page-content').forEach(p => p.classList.remove('show'));
+  document.getElementById('page-' + id).classList.add('show');
+  // nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // buttons
+  document.querySelectorAll('.demo-controls button').forEach(b => b.classList.remove('active'));
+  const btn = Array.from(document.querySelectorAll('.demo-controls button')).find(b => b.textContent.includes(
+    id === 'learn' ? '学习' : id === 'cards' ? '卡牌' : '封臣'
+  ));
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>

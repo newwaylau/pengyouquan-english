@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语剧场 · 完整游戏系统设计书</title>
+<style>
+:root {
+  --bg: #0a0e1a; --card: #0f172a; --card-border: rgba(255,255,255,0.06);
+  --text: #eef2f8; --text-secondary: #94a3b8; --text-muted: #5a6a8a;
+  --teal: #14b8a6; --teal-dark: #0d9488; --teal-light: #5eead4; --gold: #fbbf24;
+  --purple: #a335ee; --blue: #0070dd; --orange: #f97316; --red: #ef4444;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+
+.cover{text-align:center;padding:80px 24px 60px;background:linear-gradient(180deg,rgba(20,184,166,0.08) 0%,transparent 100%);border-bottom:1px solid var(--card-border)}
+.cover h1{font-size:2.8rem;background:linear-gradient(135deg,var(--teal),var(--teal-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.cover .sub{color:var(--text-secondary);font-size:1.05rem;max-width:700px;margin:0 auto}
+.cover .inspo{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.cover .inspo span{padding:8px 20px;border-radius:999px;font-size:0.85rem;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);color:var(--text-secondary)}
+.cover .meta{margin-top:24px;color:var(--text-muted);font-size:0.8rem}
+
+section{padding:48px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+h2{font-size:1.6rem;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+h2 .tag{font-size:0.7rem;padding:2px 10px;border-radius:999px;background:rgba(20,184,166,0.1);color:var(--teal);border:1px solid rgba(20,184,166,0.2);font-weight:400}
+h3{font-size:1.15rem;margin:20px 0 12px;color:var(--teal)}
+h4{font-size:0.95rem;margin:14px 0 8px;color:var(--text)}
+
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}
+.principles .p{background:rgba(255,255,255,0.02);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:16px}
+.principles .p h4{font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--teal);margin:0 0 6px}
+.principles .p p{font-size:0.9rem;color:var(--text-secondary)}
+
+.sys{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:28px;margin-bottom:28px}
+.sys-header{display:flex;gap:14px;margin-bottom:16px}
+.sys-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sys-icon.pvp{background:rgba(251,191,36,0.12)}
+.sys-icon.pve{background:rgba(168,85,247,0.12)}
+.sys-icon.equip{background:rgba(245,158,11,0.12)}
+.sys-icon.learn{background:rgba(20,184,166,0.12)}
+.sys-icon.content{background:rgba(59,130,246,0.12)}
+.sys-name{font-size:1.15rem;font-weight:600}
+.sys-source{font-size:0.85rem;color:var(--text-muted)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:12px 0}
+.grid .f{background:rgba(255,255,255,0.02);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:16px}
+.grid .f h4{font-size:0.82rem;color:var(--teal);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 6px}
+.grid .f p{font-size:0.88rem;color:var(--text-secondary)}
+.grid .f .footnote{font-size:0.72rem;color:var(--text-muted);margin-top:4px}
+
+.flow-box{background:rgba(255,255,255,0.02);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:20px;margin:12px 0}
+.flow-box ol{list-style:none;counter-reset:s}
+.flow-box li{counter-increment:s;padding:10px 0 10px 44px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-secondary);font-size:0.9rem}
+.flow-box li:last-child{border-bottom:none}
+.flow-box li::before{content:counter(s);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:50%;background:rgba(20,184,166,0.12);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:600}
+.flow-box li strong{color:var(--text)}
+.flow-box li .hl{color:var(--teal);font-weight:500}
+
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:0.88rem}
+th{text-align:left;padding:10px 12px;background:rgba(255,255,255,0.04);color:var(--text-secondary);font-weight:500;border-bottom:1px solid var(--card-border)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-secondary)}
+td:first-child{color:var(--text);font-weight:500;white-space:nowrap}
+
+.blueprint{background:rgba(20,184,166,0.04);border:1px solid rgba(20,184,166,0.15);border-radius:var(--radius-md);padding:20px;margin:12px 0}
+.blueprint h4{color:var(--teal);margin:0 0 8px}
+
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tag{padding:3px 10px;border-radius:999px;font-size:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);color:var(--text-secondary)}
+
+.phase-row{display:flex;gap:14px;margin-bottom:16px}
+.phase-card{flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:18px}
+.phase-label{font-size:0.72rem;color:var(--teal);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+.phase-card h3{font-size:0.92rem;margin:0 0 8px}
+.phase-card ul{list-style:none}
+.phase-card li{font-size:0.82rem;color:var(--text-secondary);padding:3px 0 3px 14px;position:relative}
+.phase-card li::before{content:'·';position:absolute;left:2px;color:var(--teal)}
+
+.retention-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:12px 0}
+.retention-grid .r{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:20px;text-align:center}
+.retention-grid .r .icon{font-size:2rem;margin-bottom:8px}
+.retention-grid .r .title{font-size:1rem;font-weight:600;margin-bottom:4px}
+.retention-grid .r .desc{font-size:0.82rem;color:var(--text-secondary)}
+
+@media(max-width:640px){
+  .cover h1{font-size:1.8rem}
+  .phase-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>⚔️ 英语剧场 · 完整游戏系统设计书</h1>
+  <p class="sub">融合皇室战争（异步竞技+宝箱）、炉石传说（回合制费用对战）、杀戮尖塔（Roguelike爬塔+遗物）<br>所有子系统围绕同一核心：<strong style="color:var(--teal)">英语学习量 = 一切游戏资源</strong></p>
+  <div class="inspo">
+    <span>🏰 异步+实时双模式PVP</span>
+    <span>🗡️ Roguelike远征爬塔</span>
+    <span>🛡️ 装备系统（5槽位+套装）</span>
+    <span>📦 剧集=扩展包</span>
+    <span>🏆 赛季大满贯</span>
+  </div>
+  <div class="meta">设计版本 1.0 · 目标：用户留存 + 学习动机 + 长期可扩展 · 适配多剧集</div>
+</div>
+
+<div class="wrap">
+
+<!-- ════════════════════ 第一章：设计哲学 ════════════════════ -->
+<section>
+  <h2>Ⅰ. 设计哲学 <span class="tag">核心原则</span></h2>
+  <div class="principles">
+    <div class="p"><h4>📐 学习即进度</h4><p>每一个游戏行为对应一个学习行为。没有体力系统、没有付费加速——你的英语进步就是你的游戏进度。</p></div>
+    <div class="p"><h4>🃏 三模式互通</h4><p>PVP、PVE、装备三个子系统的资源完全互通。爬塔获得的卡可用于PVP，PVP奖励可升级装备。</p></div>
+    <div class="p"><h4>📦 剧集即扩展包</h4><p>每部电视剧 = 独立扩展包。GOT基础包、DA第二包，后续每部剧=新卡牌+新远征+新装备+新英雄。</p></div>
+    <div class="p"><h4>🎯 留存设计优先</h4><p>每一个系统都从"用户为什么明天还会来"出发。每日宝箱、赛季目标、公会归属、收集进度——多层动机叠加。</p></div>
+  </div>
+  <h3>🎮 用户的一天</h3>
+  <div class="flow-box">
+    <ol>
+      <li><strong>🔔 登录通知</strong> — "你的黄金宝箱还有3句就解锁了！""好友张三在远征中超过你了！"</li>
+      <li><strong>⚡ 每日御前挑战</strong> — 3分钟一局Roguelike，蹭个全服排行</li>
+      <li><strong>📦 解锁宝箱</strong> — 练几句就把昨晚对战赢的宝箱打开了，获得新卡</li>
+      <li><strong>🗡️ 爬一会塔</strong> — 走一趟远征副本，看看今天能打到哪里</li>
+      <li><strong>⚔️ 打几场对战</strong> — 实时匹配/异步挑战，冲一下段位</li>
+      <li><strong>🏰 公会签到</strong> — 看看公会今天总答对率多少了，贡献一下</li>
+      <li><strong>🏁 完成每日任务</strong> — "答对30题""打3场对战""爬塔过1关" → 领日活跃奖励</li>
+    </ol>
+  </div>
+  <p style="color:var(--text-muted);font-size:0.85rem;margin-top:8px;">以上全部加起来约 20-30 分钟，碎片时间友好，覆盖多种动机（成就感/社交/收集/竞技）。</p>
+</section>
+
+<!-- ════════════════════ 第二章：核心资源系统 ════════════════════ -->
+<section>
+  <h2>Ⅱ. 核心资源系统 <span class="tag">经济引擎</span></h2>
+  <div class="blueprint">
+    <h4>📊 唯一产出入口：练听写</h4>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">所有游戏资源的起点只有一个——完成英语听写练习。没有其他获取途径。这就保证了"学习"永远是核心行为。</p>
+  </div>
+
+  <table>
+    <tr><th>资源名称</th><th>获取方式</th><th>用途</th><th>稀有度</th></tr>
+    <tr><td>🎴 卡牌</td><td>开卡包（每集结算）</td><td>组卡组、对战、爬塔</td><td>普通→传说</td></tr>
+    <tr><td>🛡️ 装备</td><td>每日挑战/PVP赛季奖励/远征掉落</td><td>装备槽位、被动加成</td><td>普通→史诗</td></tr>
+    <tr><td>✨ 星尘</td><td>分解多余卡牌获得</td><td>合成特定卡牌、升级装备</td><td>-</td></tr>
+    <tr><td>🏆 奖杯</td><td>PVP胜利</td><td>段位排名（赛季重置）</td><td>-</td></tr>
+    <tr><td>⚡ 威望</td><td>每日挑战、远征通关</td><td>封臣等级、解锁功能</td><td>-</td></tr>
+    <tr><td>📖 句子进度</td><td>逐句练完</td><td>解锁新剧集内容、解锁远征关卡</td><td>-</td></tr>
+  </table>
+
+  <h3>🔮 星尘经济系统（类似炉石奥术之尘）</h3>
+  <div class="grid">
+    <div class="f"><h4>🔨 分解</h4><p>1张普通→5星尘，稀有→20，史诗→100，传说→400</p></div>
+    <div class="f"><h4>🔧 合成</h4><p>普通卡40尘，稀有160，史诗800，传说3200。可以指定合成任意卡牌。</p></div>
+    <div class="f"><h4>⚡ 升级装备</h4><p>消耗星尘+卡牌碎片，提升装备等级和效果</p></div>
+    <div class="f"><h4>📦 金卡</h4><p>稀有度之上还有"金色"版本（动画边框+额外效果），仅通过合成获得</p></div>
+  </div>
+</section>
+
+<!-- ════════════════════ 第三章：PVP对战系统 ════════════════════ -->
+<section>
+  <h2>Ⅲ. PVP对战系统 <span class="tag">皇室战争 + 炉石传说</span></h2>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">这是游戏的核心竞技模块。分两个子模式：<strong>异步挑战</strong>（P1可做）和<strong>实时匹配</strong>（P2做）。两套共享同一个对战引擎。</p>
+
+  <!-- 3.1 对战引擎 -->
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pvp">⚡</div>
+      <div>
+        <div class="sys-name">3.1 对战引擎 — 答题出牌回合制</div>
+        <div class="sys-source">灵感：炉石传说 · 回合制费用系统</div>
+      </div>
+    </div>
+    <h4>⚙️ 基础规则</h4>
+    <div class="grid">
+      <div class="f"><h4>🃏 卡组</h4><p>30张/组。同名传说限1，非传说限2，装备卡≤6</p></div>
+      <div class="f"><h4>⛽ 费用</h4><p>起始3费，每回合+1，上限10费。费用=题目难度</p></div>
+      <div class="f"><h4>❤️ 英雄</h4><p>每个英雄30血。英雄可带一个"技能"（每3回合可用一次）</p></div>
+      <div class="f"><h4>🖐️ 手牌</h4><p>起始3张，每回合抽1张，上限8张</p></div>
+    </div>
+
+    <h4>📋 完整回合流程</h4>
+    <div class="flow-box">
+      <ol>
+        <li><strong>回合开始</strong> — 费用恢复至上限 + 抽 1 张牌</li>
+        <li><strong>出牌阶段</strong> — 点击一张手牌 → 界面弹出该卡对应的英语考题 → <span class="hl">限时60秒作答</span></li>
+        <li><strong>答对 ✅</strong> — 卡牌成功打出，消耗费用，随从上场/法术生效</li>
+        <li><strong>答错 ❌</strong> — 卡牌回手，费用不退，<span class="hl">对手抽1张牌 + 回复2血</span>（惩罚机制——答错的代价不仅仅是卡没出去）</li>
+        <li><strong>攻击阶段</strong> — 已上场的随从可以攻击。攻击时对手需答<span class="hl">防御题</span>（限时30秒，题型同但难度-1级）。答对→伤害减半，答错→全额伤害</li>
+        <li><strong>结束回合</strong> — 弃到上限8张，点击"结束回合"</li>
+      </ol>
+    </div>
+
+    <h4>🎯 考题难度与费用的映射（这是学习进度的核心设计）</h4>
+    <table>
+      <tr><th>费用</th><th>出题类型</th><th>示例</th><th>答题时间</th><th>对应的CEFR等级</th></tr>
+      <tr><td>1-2费</td><td>🎧 听力选词</td><td>播放"winter"→选你听到的单词</td><td>30秒</td><td>A1-A2</td></tr>
+      <tr><td>3-4费</td><td>✍️ 拼写填空</td><td>显示"冬天"→拼出 winter</td><td>45秒</td><td>A2-B1</td></tr>
+      <tr><td>5-6费</td><td>📝 句子听写</td><td>播 "Winter is coming." → 逐词填</td><td>60秒</td><td>B1</td></tr>
+      <tr><td>7-8费</td><td>📖 排序理解</td><td>打乱单词排成正确句子</td><td>60秒</td><td>B1-B2</td></tr>
+      <tr><td>9-10费</td><td>🎯 段落理解</td><td>播一段→回答理解题</td><td>90秒</td><td>B2-C1</td></tr>
+    </table>
+
+    <h4>🔥 连击与惩罚系统（刺激多巴胺的核心机制）</h4>
+    <div class="grid">
+      <div class="f"><h4>🔥 3连正确</h4><p>下一张牌 <span class="hl">免费打出</span>（不消耗费用）——正向激励，鼓励集中注意力</p></div>
+      <div class="f"><h4>❌ 2连错误</h4><p>下回合费用上限-1（惩罚但不致命）——给压力但不过度</p></div>
+      <div class="f"><h4>⚡ 完美防御</h4><p>连续答对3次防御题 → 回复 3 血——防守也有回报</p></div>
+      <div class="f"><h4>💥 斩杀</h4><p>对手血量≤5时，你的攻击卡自动获得"斩杀"效果（必中，不可防御）——加速收尾</p></div>
+    </div>
+  </div>
+
+  <!-- 3.2 异步挑战 -->
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pvp">📡</div>
+      <div>
+        <div class="sys-name">3.2 异步挑战模式（P1优先实现）</div>
+        <div class="sys-source">灵感：皇室战争 · 异步攻防 + 宝箱解锁机制</div>
+      </div>
+    </div>
+    <h4>🎮 工作方式</h4>
+    <div class="flow-box">
+      <ol>
+        <li><strong>发起挑战</strong> — 选择好友/陌生人（同段位），派出一套卡组作为"防守布阵"</li>
+        <li><strong>对手离线应战</strong> — 对方登录后看到待处理挑战，用自己的卡组进攻</li>
+        <li><strong>AI辅助攻防</strong> — 防守方用AI代替（基于防守方卡组+历史答对率智能出牌），进攻方真人作答</li>
+        <li><strong>结果判定</strong> — 进攻方打完一组对战，系统模拟AI防守方的应对。胜负+战报</li>
+        <li><strong>胜利奖励</strong> — 胜方获得 <span class="hl">宝箱</span>（青铜/白银/黄金，取决于胜场连击）</li>
+      </ol>
+    </div>
+
+    <h4>📦 宝箱系统（皇室战争核心机制改编——把"等待"变成"学习"）</h4>
+    <div class="grid">
+      <div class="f"><h4>🥉 青铜宝箱</h4><p>胜1场开启。解锁条件：练10句。奖励：1稀有+2普通卡</p><div class="footnote">约3-5分钟解锁</div></div>
+      <div class="f"><h4>🥈 白银宝箱</h4><p>胜2场开启。解锁条件：练25句。奖励：1史诗+3随机卡</p><div class="footnote">约8-12分钟解锁</div></div>
+      <div class="f"><h4>🥇 黄金宝箱</h4><p>胜3场开启（连胜奖励）。解锁条件：练50句。奖励：1传说（概率30%）+5随机卡</p><div class="footnote">约15-20分钟解锁</div></div>
+      <div class="f"><h4>🏆 赛季宝箱</h4><p>每月1日按段位发放。传说段位=1传说卡包+5随机。青铜=3普通</p><div class="footnote">大保底奖励</div></div>
+    </div>
+    <div class="blueprint">
+      <h4>🎯 核心留存设计</h4>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">宝箱的解锁条件是"练句子"，不是"等时间"。皇室战争的宝箱要等3-8小时，这里你练得越多解锁越快——<strong>把"等待"变成"学习"</strong>。这是整个游戏的核心留存密码：用户想开宝箱→必须练听写→练完开新卡→新卡组更强→打更多对战→赢更多宝箱→继续练。完美闭环。</p>
+    </div>
+  </div>
+
+  <!-- 3.3 实时匹配 -->
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pvp">🤝</div>
+      <div>
+        <div class="sys-name">3.3 实时匹配模式（P2实现）</div>
+        <div class="sys-source">灵感：炉石传说 · 天梯实时对战</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>🔍 匹配规则</h4><p>同段位优先，±200奖杯。匹配等待≤15秒（超时扩到±400）</p></div>
+      <div class="f"><h4>🏆 奖杯机制</h4><p>胜 +30杯，同段位连胜额外+5。负 -25杯（青铜保底不扣分）</p></div>
+      <div class="f"><h4>🎖️ 段位体系</h4><p>0→青铜(0-200)→白银(201-500)→黄金(501-900)→白金(901-1500)→钻石(1501-2500)→传说(>2500)</p></div>
+      <div class="f"><h4>📊 实力分</h4><p>独立于卡组强度的隐藏分。基于对战中的答对率+句子难度+连续正确数。用于公平匹配，不受卡组影响。</p></div>
+    </div>
+
+    <h4>🎭 英雄系统（每部剧一个特色英雄）</h4>
+    <table>
+      <tr><th>英雄</th><th>来源</th><th>技能（每3回合可用一次）</th><th>解锁条件</th></tr>
+      <tr><td>👑 各家族领主</td><td>GOT包</td><td>"临冬之护"：本回合所有随从+2血</td><td>初始解锁</td></tr>
+      <tr><td>👸 伯爵/夫人</td><td>DA包</td><td>"贵族风范"：下一张法术牌免费</td><td>DA练完50句</td></tr>
+      <tr><td>🦸 后续剧集英雄</td><td>扩展包</td><td>按剧集特色设计</td><td>扩展包句子进度</td></tr>
+    </table>
+  </div>
+
+  <!-- 3.4 公会系统 -->
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pvp">🏰</div>
+      <div>
+        <div class="sys-name">3.4 公会系统（封臣领地）</div>
+        <div class="sys-source">灵感：皇室战争 · 部落/Clan Wars</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>🏰 创建/加入</h4><p>消耗星尘创建（龙石岛/君临/临冬城等预设名）。最多30人。</p></div>
+      <div class="f"><h4>⚔️ 领地战（周常）</h4><p>每周六公会vs公会。<span class="hl">不是实时对战</span>——是所有成员当天的练习答对率总和比拼。不用同时在线。</p></div>
+      <div class="f"><h4>📦 公会宝库</h4><p>公会总收集卡牌数达到里程碑时解锁。每周所有成员可领一次免费卡包。</p></div>
+      <div class="f"><h4>🎖️ 贡献排行</h4><p>本周练习答对最多的3人，头像挂在公会页面"圆桌"上。下任"话事人"。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ 第四章：PVE远征系统 ════════════════════ -->
+<section>
+  <h2>Ⅳ. PVE远征系统 <span class="tag">杀戮尖塔Roguelike</span></h2>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">这是游戏的"剧情+成长"模块。每局是独立的Roguelike体验，卡牌和遗物只在当前远征内生效，但通关奖励带回全局。</p>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pve">🗡️</div>
+      <div>
+        <div class="sys-name">4.1 远征基础规则</div>
+        <div class="sys-source">灵感：杀戮尖塔 · 卡牌构筑Roguelike</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>📦 起始牌组</h4><p>从你的收藏选 <strong>10张</strong> 牌作为"远征牌组"（不是30张，是精简构筑）</p></div>
+      <div class="f"><h4>🗺️ 地图结构</h4><p>共 3 层（Act），每层 5-7 个节点。层末是Boss</p></div>
+      <div class="f"><h4>🔄 牌组在远征中变化</h4><p>击败敌人后三选一奖励（加入新牌/升级现有牌/移除一张牌）</p></div>
+      <div class="f"><h4>💀 永久死亡</h4><p>血条归零 → 远征结束。已获得的卡牌和星尘保留带回全局，遗物和临时Buff清空。</p></div>
+    </div>
+
+    <h4>🗺️ 节点类型</h4>
+    <div class="grid">
+      <div class="f"><h4>🟢 战斗（~60%）</h4><p>出题对战。答对→对敌人造成伤害。击败→三选一奖励（新卡/Buff/回血）</p></div>
+      <div class="f"><h4>🟡 事件（~20%）</h4><p>随机剧情抉择。如"发现古籍残页"→A)研读（练5句得稀有卡）B)跳过（得50星尘）</p></div>
+      <div class="f"><h4>🔵 休息（~10%）</h4><p>回血30%，或给一张牌升级（攻击+1/生命+1/费用-1）</p></div>
+      <div class="f"><h4>🟣 Boss（每层1个）</h4><p>段落听写式终极挑战。全屏长句逐词填，答对打断Boss技能。击败得限定卡牌或遗物。</p></div>
+    </div>
+
+    <h4>🪙 遗物系统（杀戮尖塔核心——改变规则的永久Buff）</h4>
+    <table>
+      <tr><th>遗物</th><th>效果</th><th>稀有度</th><th>来源</th></tr>
+      <tr><td>📜 龙鳞护符</td><td>本局所有选择题变为听力题（难度↑但奖励×1.5）</td><td>稀有</td><td>Boss掉落</td></tr>
+      <tr><td>🦅 渡鸦之眼</td><td>每场战斗第一次答错不扣血</td><td>史诗</td><td>事件选择</td></tr>
+      <tr><td>🔥 龙焰宝珠</td><td>答对时对敌方额外造成2点伤害</td><td>稀有</td><td>战斗掉落</td></tr>
+      <tr><td>🛡️ 铁王座碎片</td><td>每通过一个Boss，回满血</td><td>传说</td><td>Act3 Boss专属</td></tr>
+      <tr><td>📚 学士典籍</td><td>每场战斗首题自动答对（免费出牌）</td><td>史诗</td><td>商店购买</td></tr>
+      <tr><td>🎭 无面者面具</td><td>每答错一次，下题答对时伤害×2</td><td>稀有</td><td>事件选择</td></tr>
+      <tr><td>🍺 蜂蜜酒</td><td>休息节点回血量从30%→60%</td><td>普通</td><td>商店/战斗</td></tr>
+    </table>
+
+    <h4>🗺️ 远征地图示例：GOT"凛冬将至"</h4>
+    <div class="flow-box">
+      <ol>
+        <li><strong>Act 1: 绝境长城</strong> — 野人突袭：3个战斗+1个事件（遇到山姆→学新词）+休息+<span class="hl">Boss: 巨人Wun Wun</span>（听力题速答战）</li>
+        <li><strong>Act 2: 君临城</strong> — 宫廷斗争：2战斗+2事件（帮小指头收集情报/加入御前会议）+休息+<span class="hl">Boss: 瑟曦·兰尼斯特</span>（拼写耐力战）</li>
+        <li><strong>Act 3: 龙石岛</strong> — 最终决战：3战斗+1事件（驯龙/烧船）+休息+<span class="hl">Boss: 夜王</span>（段落听写+全场AoE）</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon pve">⚡</div>
+      <div>
+        <div class="sys-name">4.2 每日御前挑战（轻量版Roguelike）</div>
+        <div class="sys-source">每天5分钟 · 碎片时间友好</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>🎲 每日Boss</h4><p>每天不同Boss带特殊规则。如"背叛者Walder"：本场法术费+2。"小指头"：手牌上限-2</p></div>
+      <div class="f"><h4>🔄 三选一Buff</h4><p>每答对3题后，3选1临时Buff："下3题减时50%""双倍伤害""免费复活一次"</p></div>
+      <div class="f"><h4>🏅 全服排行</h4><p>按(答对率×难度系数×答题速度) 综合评分。前100名获额外星尘奖励</p></div>
+      <div class="f"><h4>📦 连胜奖励</h4><p>连续3/7/14/30天参与 → 限定卡牌/头像框/称号"不灭的守夜人"</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ 第五章：装备系统 ════════════════════ -->
+<section>
+  <h2>Ⅴ. 装备系统 <span class="tag">被动成长 · 差异化策略</span></h2>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">装备是<strong>独立于卡牌的被动加成系统</strong>。卡牌决定你能做什么，装备决定你做得有多好。装备在PVP和PVE中同时生效。装备系统和卡牌系统一起构成完整的策略深度。</p>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon equip">🛡️</div>
+      <div>
+        <div class="sys-name">5.1 装备槽位与类型</div>
+      </div>
+    </div>
+    <h4>🎒 英雄装备槽（共5个）</h4>
+    <table>
+      <tr><th>槽位</th><th>可用装备类型</th><th>效果示例</th><th>影响维度</th></tr>
+      <tr><td>⚔️ 武器</td><td>剑、杖、匕首、弓</td><td>攻击卡牌额外+1伤害</td><td>进攻强度</td></tr>
+      <tr><td>🛡️ 护甲</td><td>铠甲、长袍、皮甲</td><td>英雄护甲+5（相当于额外血量）</td><td>生存能力</td></tr>
+      <tr><td>💍 饰品</td><td>戒指、项链、徽章</td><td>每回合多抽1张牌</td><td>资源获取</td></tr>
+      <tr><td>📖 典籍</td><td>古卷、手札、地图</td><td>答题时间+10秒</td><td>操作容错</td></tr>
+      <tr><td>👑 头冠</td><td>王冠、面罩、头盔</td><td>英雄技能冷却-1回合</td><td>策略频率</td></tr>
+    </table>
+
+    <h4>📊 装备稀有度与属性范围</h4>
+    <table>
+      <tr><th>稀有度</th><th>颜色</th><th>基础属性</th><th>附加属性</th><th>升级上限</th></tr>
+      <tr><td>普通</td><td>白色</td><td>1条</td><td>无</td><td>5级</td></tr>
+      <tr><td>稀有</td><td>蓝色</td><td>1条（数值更高）</td><td>1条随机</td><td>10级</td></tr>
+      <tr><td>史诗</td><td>紫色</td><td>1条（高数值）</td><td>1-2条随机</td><td>15级</td></tr>
+      <tr><td>传说</td><td>金色</td><td>1条（最高）</td><td>2条随机+1条套装标记</td><td>20级</td></tr>
+    </table>
+  </div>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon equip">🔨</div>
+      <div>
+        <div class="sys-name">5.2 装备获取与升级</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>🎯 获取途径</h4><p>① 每日御前挑战概率掉落（保底：每3天必出一件）<br>② PVP赛季宝箱附带<br>③ 远征通关概率掉落（层数越深品质越高）<br>④ 星尘合成（直接制作指定装备）</p></div>
+      <div class="f"><h4>🔧 升级系统</h4><p>消耗星尘+同星级装备（或卡牌碎片）。每升5级解锁新属性词条。<br>升级100%成功，不掉级。</p></div>
+      <div class="f"><h4>🎨 套装系统</h4><p>集齐2件同名套装→激活2件套效果。集齐5件→激活5件套效果。<br>例：<strong>"守夜人套装"</strong> 2件=防御题时间+5秒，5件=开场抽牌+2</p></div>
+      <div class="f"><h4>🔄 重铸系统</h4><p>消耗星尘重铸装备的附加属性（随机替换一条）。给追求完美的玩家一个消耗资源的出口。</p></div>
+    </div>
+
+    <h4>🏅 套装效果示例（每部剧一套）</h4>
+    <table>
+      <tr><th>套装名</th><th>2件套</th><th>5件套</th><th>获取</th></tr>
+      <tr><td>❄️ 守夜人（GOT）</td><td>防御题+5秒</td><td>开场抽牌+2</td><td>远征GOT掉落</td></tr>
+      <tr><td>🐺 史塔克（GOT）</td><td>冰系卡费用-1</td><td>每回合首张卡免费</td><td>PVP段位奖励</td></tr>
+      <tr><td>🐉 坦格利安（GOT）</td><td>传说卡费用-1</td><td>答对大招+3伤害</td><td>赛季奖励</td></tr>
+      <tr><td>🏡 唐顿（DA）</td><td>休息节点回血+20%</td><td>事件节点额外选项</td><td>DA远征掉落</td></tr>
+    </table>
+  </div>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon equip">⚙️</div>
+      <div>
+        <div class="sys-name">5.3 装备策略深度——同一卡组，不同打法</div>
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">装备不是"战力堆砌"——每个装备选择都是策略取舍。同一个卡组搭配不同装备会产生完全不同的打法风格。</p>
+    <div class="grid" style="margin-top:10px;">
+      <div class="f"><h4>⚔️ 快攻流</h4><p>武器+攻击饰品+减费符文。主打低费速攻，靠连续答题压制对手，追求3-5回合解决战斗。</p></div>
+      <div class="f"><h4>🛡️ 控制流</h4><p>护甲+回血典籍+冷却头冠。拖延回合，答对率优先，靠高费传说卡终结比赛。</p></div>
+      <div class="f"><h4>🎯 精准流</h4><p>加时典籍+防错饰品+增伤武器。追求极高答对率，一题不错碾压对手。</p></div>
+      <div class="f"><h4>🎲 赌狗流</h4><p>随机奖励饰品+高风险高回报套装。答对奖励翻倍，答错惩罚加重，有来有回才刺激。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ 第六章：剧集扩展包 ════════════════════ -->
+<section>
+  <h2>Ⅵ. 剧集扩展包系统 <span class="tag">可扩展性 · 内容工厂</span></h2>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">每部电视剧 = 一个独立内容包，像《炉石传说》的"扩展包"一样。新剧集上线 = 全服新内容推送，老用户回流 + 新用户进场的天然触发点。</p>
+
+  <div class="sys">
+    <div class="sys-header">
+      <div class="sys-icon content">📦</div>
+      <div>
+        <div class="sys-name">6.1 一个扩展包包含什么</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><h4>🃏 新卡牌（15-30张）</h4><p>随从、法术、事件、装备。每张卡绑定剧中对应场景的英语考题</p></div>
+      <div class="f"><h4>🗺️ 新远征副本</h4><p>3层Act + Boss。剧情原创，融入该剧的经典场景和名场面</p></div>
+      <div class="f"><h4>👑 新英雄（1-2个）</h4><p>带专属技能，可在PVP中使用</p></div>
+      <div class="f"><h4>🛡️ 新装备套装</h4><p>1套主题装备（5个槽位），来自该剧世界观</p></div>
+      <div class="f"><h4>🎨 新台词+考题</h4><p>来自该剧完整台词库。每张卡牌的考题来自剧中对应场景的句子</p></div>
+      <div class="f"><h4>🏆 扩展限定卡牌</h4><p>仅在该剧的远征/宝箱中产出，不能从其他途径获得——创造收集FOMO</p></div>
+    </div>
+
+    <h4>📊 当前已有 vs 未来扩展</h4>
+    <table>
+      <tr><th>扩展包</th><th>状态</th><th>卡牌数</th><th>远征</th><th>英雄</th><th>装备套装</th></tr>
+      <tr><td>🏔️ GOT·凛冬将至</td><td>✅ 基础包（已实装16张）</td><td>16张</td><td>⏳ P2</td><td>1个</td><td>守夜人/史塔克/坦格利安</td></tr>
+      <tr><td>🏡 DA·唐顿庄园</td><td>✅ 第二包（已实装12张）</td><td>12张</td><td>⏳ P2</td><td>1个</td><td>唐顿套装</td></tr>
+      <tr><td>🌊 第三部剧</td><td>⏳ 筹备中</td><td>20-30张</td><td>新地图</td><td>新英雄</td><td>新套装</td></tr>
+    </table>
+
+    <div class="blueprint">
+      <h4>🎯 为什么这套系统让用户持续留存</h4>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">① 新剧集=新内容推送，老用户回流的天然触发点。<br>② 扩展限定卡牌创造"错过就没了"的FOMO。<br>③ 每张新卡对应剧中经典台词→学英语+追剧双重动机。<br>④ 远征副本的剧情让"学英语"变成了"探索维斯特洛/唐顿庄园"。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ 第七章：留存引擎 ════════════════════ -->
+<section>
+  <h2>Ⅶ. 留存引擎 <span class="tag">为什么用户明天还会来</span></h2>
+  <div class="retention-grid">
+    <div class="r"><div class="icon">📦</div><div class="title">待解锁宝箱</div><div class="desc">PVP赢的宝箱还差几句就解锁了。练完才能开，开完才有新卡打天梯——完美闭环。</div></div>
+    <div class="r"><div class="icon">⚡</div><div class="title">每日挑战刷新</div><div class="desc">每天凌晨新Boss+新Buff组合。排行榜每天换人，总有新的目标。</div></div>
+    <div class="r"><div class="icon">🏆</div><div class="title">赛季目标</div><div class="desc">月底段位结算。差50杯上传说了？今天必须冲一下。</div></div>
+    <div class="r"><div class="icon">🏰</div><div class="title">公会归属</div><div class="desc">公会领地战周六开打。今天不练公会就输了。圆桌排名也想要。</div></div>
+    <div class="r"><div class="icon">📖</div><div class="title">进度驱动</div><div class="desc">新剧集上线→新卡牌→新远征。永远有下一个内容等着探索。</div></div>
+    <div class="r"><div class="icon">🃏</div><div class="title">收集欲</div><div class="desc">全卡收集（还差5张传说了！）+全装备+全遗物。强迫症福音。</div></div>
+    <div class="r"><div class="icon">🤝</div><div class="title">社交压力</div><div class="desc">好友排位超过你。收到3个异步挑战战书。不回应？排名往下掉。</div></div>
+    <div class="r"><div class="icon">🔥</div><div class="title">每日连胜</div><div class="desc">连续登录3/7/14/30天送限定奖励。断签Day 29？明天必须上。</div></div>
+  </div>
+
+  <h3>📊 用户分层与对应动机</h3>
+  <table>
+    <tr><th>用户类型</th><th>核心动机</th><th>粘性系统</th><th>预期频次</th></tr>
+    <tr><td>🆕 新用户（0-7天）</td><td>上手+收集</td><td>每日宝箱、新手远征、开包爽感</td><td>每天1-2次</td></tr>
+    <tr><td>🎮 日常玩家</td><td>习惯+进度</td><td>每日挑战、公会、宝箱解锁</td><td>每天1次</td></tr>
+    <tr><td>⚔️ 竞技玩家</td><td>排名+成就</td><td>天梯、赛季奖励、全服排行</td><td>每天2-3次</td></tr>
+    <tr><td>🗡️ 收集玩家</td><td>全收集+成就</td><td>全卡收集、装备套装、遗物全解锁</td><td>每天1-2次</td></tr>
+    <tr><td>🏰 社交玩家</td><td>公会+好友</td><td>公会领地战、好友挑战、贡献排行</td><td>每周3-4次</td></tr>
+    <tr><td>📚 学习型用户</td><td>英语进步</td><td>句子进度、生词本、远征剧情</td><td>每天1次</td></tr>
+  </table>
+</section>
+
+<!-- ════════════════════ 第八章：分阶段路线图 ════════════════════ -->
+<section>
+  <h2>Ⅷ. 分阶段实现路线图 <span class="tag">从P1到P3</span></h2>
+  <div class="phase-row">
+    <div class="phase-card" style="border-color:rgba(20,184,166,0.3);">
+      <div class="phase-label">P1 · 异步竞技场</div>
+      <h3 style="color:var(--teal);">🤝 好友异步挑战 + 宝箱系统</h3>
+      <ul>
+        <li>好友系统（加好友/在线状态）</li>
+        <li>异步挑战：布阵→AI应战→出结果</li>
+        <li>宝箱系统：胜场得宝箱，练句解锁</li>
+        <li>基础奖杯段位（青铜→王者，月重置）</li>
+        <li>战报系统（胜负+答对率统计）</li>
+        <li>装备系统基础框架（5槽位+属性）</li>
+        <li>数据表：friends、battle_history、rank_tiers</li>
+      </ul>
+    </div>
+    <div class="phase-card" style="border-color:rgba(251,191,36,0.3);">
+      <div class="phase-label">P2 · 实时+爬塔</div>
+      <h3 style="color:var(--gold);">⚔️ 实时匹配 + PVE远征</h3>
+      <ul>
+        <li>WebSocket实时匹配（≤10秒匹配）</li>
+        <li>答题出牌+防御题完整回合流</li>
+        <li>公会系统（创建/加入/领地战）</li>
+        <li>PvE远征：GOT"凛冬将至"+DA"唐顿庄园"</li>
+        <li>事件节点+Roguelike遗物系统</li>
+        <li>每日御前挑战</li>
+        <li>赛季特殊规则</li>
+      </ul>
+    </div>
+    <div class="phase-card" style="border-color:rgba(168,85,247,0.3);">
+      <div class="phase-label">P3 · 赛季生态</div>
+      <h3 style="color:var(--purple);">🌍 完整赛季+扩展内容</h3>
+      <ul>
+        <li>多剧集扩展包（第三部剧上线）</li>
+        <li>三模式全服排行"月之王者"评选</li>
+        <li>限定卡牌+赛季皮肤+称号</li>
+        <li>公会联赛（团战系统）</li>
+        <li>装备重铸+套装系统完善</li>
+        <li>星尘经济体系完善</li>
+        <li>成就系统+全收集统计</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="blueprint" style="margin-top:20px;">
+    <h4>📊 当前代码状态 → P1起点</h4>
+    <table>
+      <tr><th>已就绪（可直接复用）</th><th>P1新增内容</th></tr>
+      <tr><td>✅ 卡牌系统（28张牌，cards/user_cards表）</td><td>新增 friends / battle_history / rank_tiers 表</td></tr>
+      <tr><td>✅ 卡组构筑（30张/组，decks表）</td><td>新增后端：FriendController / ChallengeService / RankService</td></tr>
+      <tr><td>✅ 开包结算（整集发放，grantPack API）</td><td>新增前端：FriendPage / ChallengePage / RankPage</td></tr>
+      <tr><td>✅ 底部导航+用户系统+JWT</td><td>底部导航增加"⚔️对战"页签</td></tr>
+      <tr><td>✅ 装备表（equipment/user_equipment已建）</td><td>异步AI逻辑（按卡组费用曲线出牌+历史答对率）</td></tr>
+      <tr><td colspan="2">⚡ P1全部功能纯REST API，不需要WebSocket。现有架构完全支持。</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════ 第九章：总结 ════════════════════ -->
+<section style="border-bottom:none;">
+  <h2>Ⅸ. 总结 <span class="tag">为什么这套设计能留住用户</span></h2>
+  <div class="principles">
+    <div class="p"><h4>🎯 学习=一切</h4><p>没有体力槽，没有付费墙。你的英语进步直接换算成游戏资源。学习本身就是"肝"。</p></div>
+    <div class="p"><h4>🧩 多动机叠加</h4><p>一个用户可能同时被收集欲+公会归属+天梯排名+每日奖励 4种动机驱动。任何一个动机衰减，还有其他动机兜底。</p></div>
+    <div class="p"><h4>📦 内容可扩展</h4><p>每部新剧=一个新扩展包，天然带来老用户回流+新用户入口。游戏不会"做完"。</p></div>
+    <div class="p"><h4>⚡ 渐进式开发</h4><p>P1从异步挑战起步（纯REST，无需WebSocket），每阶段都有可交付的完整功能，不是画饼。</p></div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+</body>
+</html>

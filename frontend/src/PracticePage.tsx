@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
+import { cardApi } from './api/cardClient';
 import { getAudioUrl, getTtsUrl } from './audioBase';
 import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconEdit, IconPen, IconFilm, IconMic, IconEye, IconEyeOff, IconFlag, IconCheck, IconCheckCircle, IconMeditation, IconNext, IconSkipNext, IconRefresh, IconConstruction, IconPhone, IconCheckPlain, IconCelebration, IconBookClosed, IconCalendar, IconSpeaker, IconRocket, IconKey } from './Icons';
 
@@ -144,6 +145,15 @@ export default function PracticePage({
   const [wrongCount, setWrongCount] = useState(0);
   // 本次错题复习的正确统计
   const [wrongReviewStats, setWrongReviewStats] = useState({ correct: 0, total: 0 });
+
+  // 整集结算追踪（每集完成后统一发卡）
+  const [episodePracticedIds, setEpisodePracticedIds] = useState<Set<number>>(new Set());
+  const [episodeAccuracySum, setEpisodeAccuracySum] = useState(0);
+  const [episodeAccuracyCount, setEpisodeAccuracyCount] = useState(0);
+  const [currentEpisodeShowId, setCurrentEpisodeShowId] = useState<number | null>(null);
+  const prevShowIdsParamRef = useRef<string>('');
+  const [packResult, setPackResult] = useState<any>(null);
+  const [packLoading, setPackLoading] = useState(false);
 
   // 刷新统计
   const refreshStats = () => {
@@ -321,6 +331,11 @@ export default function PracticePage({
   // showIdsParam变化时加载句子（初始''不加载，避免随机）
   useEffect(() => {
     if (showIdsParam) {
+      // 切换剧集时检查上一集是否完成结算
+      if (prevShowIdsParamRef.current && prevShowIdsParamRef.current !== showIdsParam) {
+        checkEpisodeCompletion();
+      }
+      prevShowIdsParamRef.current = showIdsParam;
       setHistoryIds([]);
       loadSentence(undefined, true);
     }
@@ -531,12 +546,28 @@ export default function PracticePage({
         } else {
           refreshStats();
         }
+        // 整集结算：追踪已练习的句子准确率（听写模式答对）
+        if (sentence?.showId && mode === 'dictation') {
+          const sentenceAccuracy = userInputCount > 0 ? Math.round((userCorrectCount / userInputCount) * 100) : 0;
+          setEpisodePracticedIds(prev => new Set(prev).add(sentence.id));
+          setEpisodeAccuracySum(prev => prev + sentenceAccuracy);
+          setEpisodeAccuracyCount(prev => prev + 1);
+          setCurrentEpisodeShowId(sentence.showId);
+        }
       });
     } else if (retryCount >= 1) {
       setAnswered(true);
       setShowEn(true);
       setShowCn(true);
       api.logPractice({ sentenceId: sentence.id, correct: false, correctCount: userCorrectCount, totalWords: userInputCount, mode });
+      // 整集结算：追踪已练习的句子准确率
+      if (sentence?.showId && mode === 'dictation') {
+        const sentenceAccuracy = userInputCount > 0 ? Math.round((userCorrectCount / userInputCount) * 100) : 0;
+        setEpisodePracticedIds(prev => new Set(prev).add(sentence.id));
+        setEpisodeAccuracySum(prev => prev + sentenceAccuracy);
+        setEpisodeAccuracyCount(prev => prev + 1);
+        setCurrentEpisodeShowId(sentence.showId);
+      }
       // 错题模式下答错：重置间隔复习
       if (mode === 'wrong') {
         api.updateWrongReview({ sentenceId: sentence.id, correct: false });
@@ -583,6 +614,29 @@ export default function PracticePage({
     goNext();
   };
 
+  // 整集完成检查：触发结算发卡（用 function 声明，hoisted 到 useEffect 之前可用）
+  function checkEpisodeCompletion() {
+    const showId = currentEpisodeShowId;
+    if (!showId || episodeAccuracyCount < 1 || !user) return;
+    if (packLoading || packResult) return;
+
+    const avgAccuracy = Math.round(episodeAccuracySum / episodeAccuracyCount);
+    setPackLoading(true);
+    cardApi.grantPack(showId, avgAccuracy).then((res: any) => {
+      setPackLoading(false);
+      if (res.code === 200 && res.data?.cards?.length > 0) {
+        setPackResult(res.data);
+      }
+    }).catch(() => {
+      setPackLoading(false);
+    });
+    // 重置追踪
+    setEpisodePracticedIds(new Set());
+    setEpisodeAccuracySum(0);
+    setEpisodeAccuracyCount(0);
+    setCurrentEpisodeShowId(null);
+  }
+
   // 下一句
   const goNext = () => {
     if (mode === 'wrong') {
@@ -617,6 +671,7 @@ export default function PracticePage({
     // 队列用完，加载新一批
     hiddenInputRef.current?.focus({ preventScroll: true });
     setHistoryIds(h => [...h, sentence.id]);
+    checkEpisodeCompletion();
     loadSentence();
   };
 
@@ -1148,6 +1203,74 @@ export default function PracticePage({
                   <><IconSkipNext /> 跳过</>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 开包弹窗 */}
+      {packResult && (
+        <div className="settings-overlay" onClick={() => setPackResult(null)}>
+          <div className="pack-open-modal" onClick={e => e.stopPropagation()}>
+            <div className="pack-open-header">
+              <div className="pack-open-icon">🎊</div>
+              <div className="pack-open-title">获得新卡牌！</div>
+              <div className="pack-open-subtitle">
+                整集练习完成，获得 {packResult.cards?.length || 0} 张卡牌
+              </div>
+              <div className="pack-open-type">
+                {packResult.packType === 'golden' ? '🌟 黄金卡包' :
+                 packResult.packType === 'silver' ? '🥈 白银卡包' :
+                 packResult.packType === 'bronze' ? '🥉 青铜卡包' : '📦 基础卡包'}
+              </div>
+            </div>
+            <div className="pack-open-cards">
+              {packResult.cards?.map((card: any, idx: number) => {
+                const rarityColors: Record<string, string> = {
+                  legendary: '#ff8c00',
+                  epic: '#a335ee',
+                  rare: '#0070dd',
+                  common: '#9d9d9d',
+                };
+                const rarityCn: Record<string, string> = {
+                  legendary: '传说',
+                  epic: '史诗',
+                  rare: '稀有',
+                  common: '普通',
+                };
+                const typeIcons: Record<string, string> = {
+                  minion: '⚔️',
+                  spell: '✨',
+                  equipment: '🛡️',
+                  location: '🏰',
+                };
+                return (
+                  <div key={idx} className="pack-card-item" style={{ borderColor: rarityColors[card.rarity] || '#9d9d9d' }}>
+                    <div className="pack-card-type">{typeIcons[card.cardType] || '🃏'}</div>
+                    <div className="pack-card-cost">{card.cost}</div>
+                    <div className="pack-card-rarity" style={{ color: rarityColors[card.rarity] || '#9d9d9d' }}>
+                      {rarityCn[card.rarity] || card.rarity}
+                    </div>
+                    <div className="pack-card-name">{card.nameCn}</div>
+                    <div className="pack-card-name-en">{card.nameEn}</div>
+                    {card.attack !== null && (
+                      <div className="pack-card-stats">
+                        <span>⚔️{card.attack}</span>
+                        <span>❤️{card.health}</span>
+                      </div>
+                    )}
+                    <div className="pack-card-owned">×{card.quantity}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="pack-open-actions">
+              <button className="btn btn-primary" onClick={() => setPackResult(null)}>
+                确认
+              </button>
+              <button className="btn btn-secondary" onClick={() => { setPackResult(null); onNavigate?.('cards'); }}>
+                📖 前往查看
+              </button>
             </div>
           </div>
         </div>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>对战系统 · 完整设计</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --surface: #16162a;
+    --card: #1e1e3a;
+    --border: rgba(255,255,255,0.06);
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent1: #14b8a6;
+    --accent2: #8b5cf6;
+    --accent3: #f59e0b;
+    --red: #ef4444;
+    --green: #22c55e;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  h1 { font-size: 2.2rem; font-weight: 700; background: linear-gradient(135deg, #14b8a6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 1.5rem; margin: 48px 0 16px; color: var(--text); }
+  h3 { font-size: 1.1rem; margin: 24px 0 10px; color: var(--text); }
+  p, li { color: var(--text-muted); font-size: 0.9rem; }
+  .muted { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+  /* Phase Roadmap */
+  .roadmap { display: flex; flex-direction: column; gap: 4px; margin: 24px 0; position: relative; }
+  .roadmap::before {
+    content: ''; position: absolute; left: 19px; top: 28px; bottom: 28px;
+    width: 2px; background: linear-gradient(to bottom, #14b8a6, #8b5cf6, #f59e0b);
+  }
+  .phase {
+    display: flex; gap: 16px; padding: 16px 0; position: relative;
+  }
+  .phase-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+    z-index: 1; border: 2px solid var(--bg);
+  }
+  .phase.p0 .phase-num { background: #14b8a6; color: #fff; }
+  .phase.p1 .phase-num { background: #8b5cf6; color: #fff; }
+  .phase.p2 .phase-num { background: #f59e0b; color: #fff; }
+  .phase.p3 .phase-num { background: #ef4444; color: #fff; }
+
+  .phase-body { flex: 1; }
+  .phase-title { font-weight: 700; font-size: 1.05rem; }
+  .phase-desc { font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 6px; }
+  .phase-items { display: flex; flex-wrap: wrap; gap: 4px; }
+  .phase-items span {
+    padding: 2px 8px; border-radius: 6px; font-size: 0.72rem;
+    background: var(--card); border: 1px solid var(--border);
+  }
+
+  /* Core Battle Display */
+  .battlefield-mock {
+    background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 40%, #0d0d1a 100%);
+    border-radius: 16px; border: 1px solid var(--border); overflow: hidden;
+    margin: 16px 0; max-width: 480px;
+  }
+
+  /* Opponent area */
+  .opponent-area {
+    padding: 16px; border-bottom: 2px dashed rgba(255,255,255,0.05);
+  }
+  .hero-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .hero-info { display: flex; align-items: center; gap: 8px; }
+  .hero-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+  .hero-name { font-weight: 600; font-size: 0.85rem; }
+  .hero-hp { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; }
+  .hp-bar { width: 100px; height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; }
+  .hp-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 3px; width: 70%; }
+  .hp-fill.low { background: linear-gradient(90deg, #ef4444, #dc2626); width: 25%; }
+
+  .opponent-minions {
+    display: flex; gap: 8px; justify-content: center; min-height: 100px;
+    padding: 8px 0;
+  }
+
+  /* Battle minion card */
+  .minion-card {
+    width: 80px; background: linear-gradient(145deg, #1a1a3a, #22225a);
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+    padding: 6px; text-align: center;
+    position: relative;
+  }
+  .minion-card .mc-cost {
+    position: absolute; top: -6px; left: -6px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #8b5cf6; color: #fff; font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .minion-card .mc-art { font-size: 1.5rem; margin: 4px 0; }
+  .minion-card .mc-name { font-size: 0.6rem; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .minion-card .mc-stats { display: flex; justify-content: space-between; font-size: 0.7rem; }
+  .minion-card .mc-atk { color: #ef4444; font-weight: 700; }
+  .minion-card .mc-hp { color: #22c55e; font-weight: 700; }
+  .minion-card .mc-shield { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #f59e0b; color: #000; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  .minion-card.equipped { border-color: rgba(245,158,11,0.4); }
+  .minion-card .mc-equip-badge {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; background: rgba(245,158,11,0.3);
+  }
+
+  /* Center divider */
+  .battle-center { text-align: center; padding: 8px; color: var(--text-muted); font-size: 0.72rem; letter-spacing: 2px; border-bottom: 2px dashed rgba(255,255,255,0.05); }
+
+  /* Player area */
+  .player-area { padding: 16px; }
+  .player-hero { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+  .player-field { display: flex; gap: 8px; justify-content: center; min-height: 100px; padding: 8px 0; }
+
+  /* Hand */
+  .hand-area { display: flex; justify-content: center; gap: 6px; margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+  .hand-card {
+    width: 64px; height: 88px; border-radius: 6px; border: 1px solid var(--border);
+    background: linear-gradient(145deg, #1a1a3a, #22225a);
+    padding: 4px; text-align: center; cursor: pointer;
+    transition: transform 0.15s; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .hand-card:hover { transform: translateY(-8px); }
+  .hand-card .hc-cost { width: 20px; height: 20px; border-radius: 50%; background: #8b5cf6; color: #fff; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 4px; }
+  .hand-card .hc-icon { font-size: 1.2rem; }
+  .hand-card .hc-name { font-size: 0.5rem; font-weight: 600; margin-top: 2px; }
+  .hand-card .hc-type { font-size: 0.45rem; color: var(--text-muted); }
+  .hand-card.spell .hc-cost { background: #6366f1; }
+  .hand-card .hc-challenge-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: #fff; font-size: 0.45rem; padding: 1px 4px; border-radius: 4px; }
+
+  /* Mana */
+  .mana-bar { display: flex; gap: 3px; margin: 4px 0 8px; }
+  .mana-crystal { width: 14px; height: 14px; border-radius: 3px; }
+  .mana-crystal.full { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .mana-crystal.empty { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.2); }
+
+  .mana-row { display: flex; justify-content: space-between; align-items: center; }
+  .mana-label { font-size: 0.72rem; color: var(--text-muted); }
+
+  /* English Challenge Modal */
+  .challenge-modal {
+    background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1));
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 12px; padding: 16px; margin: 12px 0;
+    max-width: 360px;
+  }
+  .challenge-modal .cm-header { font-size: 0.72rem; font-weight: 600; color: #f59e0b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .challenge-modal .cm-quote { font-size: 0.95rem; font-style: italic; color: var(--text); margin-bottom: 8px; }
+  .challenge-modal .cm-input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text); font-size: 0.85rem; margin-bottom: 8px; outline: none; }
+  .challenge-modal .cm-input:focus { border-color: #f59e0b; }
+  .challenge-modal .cm-buttons { display: flex; gap: 8px; }
+  .cm-btn { padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: none; }
+  .cm-btn.submit { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+  .cm-btn.skip { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+  /* Equipment Display */
+  .equip-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px; margin: 12px 0;
+  }
+  .equip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .equip-slot {
+    background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 8px; text-align: center; min-height: 64px;
+  }
+  .equip-slot.filled { border-style: solid; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+  .equip-slot .eq-icon { font-size: 1.2rem; }
+  .equip-slot .eq-name { font-size: 0.68rem; font-weight: 600; margin: 2px 0; }
+  .equip-slot .eq-stat { font-size: 0.6rem; color: var(--text-muted); }
+  .equip-slot .eq-label { font-size: 0.6rem; color: var(--text-muted); }
+
+  .eq-detail { background: var(--card); border-radius: 8px; padding: 10px 12px; margin-top: 6px; }
+  .eq-detail .eqd-header { display: flex; justify-content: space-between; align-items: center; }
+  .eq-detail .eqd-name { font-weight: 600; font-size: 0.85rem; }
+  .eq-detail .eqd-type { font-size: 0.7rem; color: var(--text-muted); }
+  .eq-detail .eqd-effect { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; padding: 4px 6px; background: rgba(0,0,0,0.2); border-radius: 4px; }
+
+  /* Card types */
+  .card-types { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ct-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; display: flex; gap: 10px;
+  }
+  .ct-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .ct-info { flex: 1; }
+  .ct-name { font-weight: 600; font-size: 0.85rem; }
+  .ct-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* Battle Flow */
+  .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .flow-grid { grid-template-columns: 1fr; } }
+  .flow-step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; display: flex; gap: 10px;
+  }
+  .flow-step .fs-num { width: 28px; height: 28px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+  .flow-step .fs-text { font-size: 0.82rem; color: var(--text-muted); }
+  .flow-step .fs-text strong { color: var(--text); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  th { background: var(--surface); font-weight: 600; color: var(--text); }
+  td { color: var(--text-muted); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .highlight-cell { color: #14b8a6; font-weight: 600; }
+
+  .section-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px; margin: 24px 0;
+  }
+
+  /* Tags */
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.65rem; font-weight: 600; margin: 1px;
+  }
+  .tag.green { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .tag.purple { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+  .tag.amber { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .tag.red { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .tag.blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .tag.teal { background: rgba(20,185,166,0.15); color: #14b8a6; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* Summary box */
+  .summary-box {
+    background: linear-gradient(135deg, rgba(20,185,166,0.06), rgba(139,92,246,0.06));
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: var(--radius); padding: 20px 24px; margin: 24px 0;
+  }
+  .summary-box h3 { margin-top: 0; }
+  .summary-box li { margin-bottom: 4px; }
+
+  .phase-detail {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 20px; margin: 12px 0;
+  }
+  .phase-detail .pd-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .phase-detail .pd-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .pd-item { padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; background: var(--card); border: 1px solid var(--border); }
+  .pd-item.done { border-color: rgba(34,197,94,0.3); color: #22c55e; }
+  .pd-item.active { border-color: rgba(245,158,11,0.3); color: #f59e0b; }
+  .pd-item.future { opacity: 0.5; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚔️ 学识铸卡 → 天梯对决 · 完整路线设计</h1>
+<p class="muted">从卡牌收集到实时对战，所有对战机制的设计思路</p>
+
+<!-- ==================== PHASE ROADMAP ==================== -->
+<h2>📈 分段路线图</h2>
+<p class="muted">4个阶段，逐步从单机收集延伸到实时天梯</p>
+
+<div class="roadmap">
+  <div class="phase p0">
+    <div class="phase-num">P0</div>
+    <div class="phase-body">
+      <div class="phase-title">学识铸卡 · 基础</div>
+      <div class="phase-desc">现有 P0-P2 系统上延伸，实现卡牌收集 + 简单 AI 对战</div>
+      <div class="phase-items">
+        <span>🎴 学习产卡系统</span>
+        <span>📦 开包 & 合成</span>
+        <span>📕 卡册收集</span>
+        <span>🤖 AI 首领战</span>
+        <span>🗃️ 牌库管理</span>
+        <span>🖍️ 卡牌设计</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase p1">
+    <div class="phase-num">P1</div>
+    <div class="phase-body">
+      <div class="phase-title">异步对战 · 社交验证</div>
+      <div class="phase-desc">好友挑战 + AI 托管防守，验证攻防系统</div>
+      <div class="phase-items">
+        <span>👫 好友挑战</span>
+        <span>🤖 AI 托管防守</span>
+        <span>📊 战绩统计</span>
+        <span>🏆 简单排行榜</span>
+        <span>🛡️ 装备系统V1</span>
+        <span>⚡ 出牌挑战</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase p2">
+    <div class="phase-num">P2</div>
+    <div class="phase-body">
+      <div class="phase-title">半实时匹配 · 完整对战</div>
+      <div class="phase-desc">30秒回合制，完整战棋体验，匹配系统</div>
+      <div class="phase-items">
+        <span>⏱️ 回合计时器</span>
+        <span>🔄 实时匹配</span>
+        <span>🎨 战场渲染</span>
+        <span>📜 战报回放</span>
+        <span>🔧 装备系统V2</span>
+        <span>🎭 卡牌动画</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase p3">
+    <div class="phase-num">P3</div>
+    <div class="phase-body">
+      <div class="phase-title">完整天梯 · 电竞生态</div>
+      <div class="phase-desc">赛季天梯、观战、公会战</div>
+      <div class="phase-items">
+        <span>🏅 赛季段位</span>
+        <span>👑 限定奖励</span>
+        <span>👀 观战模式</span>
+        <span>🏘️ 公会/封臣战</span>
+        <span>🏟️ 锦标赛</span>
+        <span>📺 精彩回放</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ==================== BATTLE MECHANICS ==================== -->
+<h2>⚙️ 完整对战机制（P2 完整形态）</h2>
+<p class="muted">设计原则：简化炉石，保留策略深度，加入英语学习核心差异</p>
+
+<!-- Battlefield Mockup -->
+<div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; margin-bottom:24px;">
+  <div class="battlefield-mock">
+
+    <!-- Opponent -->
+    <div class="opponent-area">
+      <div class="hero-row">
+        <div class="hero-info">
+          <div class="hero-avatar">🏰</div>
+          <div>
+            <div class="hero-name">伊耿·坦格利安</div>
+            <div style="font-size:0.65rem;color:var(--text-muted);">铁王座 Lv.10</div>
+          </div>
+        </div>
+        <div class="hero-hp">
+          <span>❤️ 18</span>
+          <div class="hp-bar"><div class="hp-fill low" style="width:60%"></div></div>
+        </div>
+      </div>
+      <div style="display:flex; gap:4px;font-size:0.65rem;color:var(--text-muted);margin-bottom:4px;">
+        <span>Mana: 5/8</span>
+        <span>牌库: 12</span>
+      </div>
+      <div class="opponent-minions">
+        <div class="minion-card equipped">
+          <div class="mc-cost">3</div>
+          <div class="mc-shield">🛡</div>
+          <div class="mc-art">⚔️</div>
+          <div class="mc-name">詹姆·兰尼斯特</div>
+          <div class="mc-stats"><span class="mc-atk">⚔4</span><span class="mc-hp">❤️3</span></div>
+          <div class="mc-equip-badge">+</div>
+        </div>
+        <div class="minion-card">
+          <div class="mc-cost">2</div>
+          <div class="mc-art">🐺</div>
+          <div class="mc-name">冰原狼</div>
+          <div class="mc-stats"><span class="mc-atk">⚔2</span><span class="mc-hp">❤️2</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center -->
+    <div class="battle-center">⚡ TURN 6 · 你的回合 ⚡</div>
+
+    <!-- Player -->
+    <div class="player-area">
+      <div class="player-hero">
+        <div class="hero-info">
+          <div class="hero-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">🟢</div>
+          <div>
+            <div class="hero-name">Heaton</div>
+            <div style="font-size:0.65rem;color:var(--text-muted);">国王 Lv.7 | ❤️ 24</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mana -->
+      <div class="mana-row">
+        <div class="mana-bar">
+          <div class="mana-crystal full"></div><div class="mana-crystal full"></div>
+          <div class="mana-crystal full"></div><div class="mana-crystal full"></div>
+          <div class="mana-crystal full"></div><div class="mana-crystal full"></div>
+          <div class="mana-crystal empty"></div><div class="mana-crystal empty"></div>
+          <div class="mana-crystal empty"></div><div class="mana-crystal empty"></div>
+        </div>
+        <span class="mana-label">6/10 mana</span>
+      </div>
+
+      <!-- Player minions -->
+      <div class="player-field">
+        <div class="minion-card">
+          <div class="mc-cost">4</div>
+          <div class="mc-art">🐉</div>
+          <div class="mc-name">卓耿</div>
+          <div class="mc-stats"><span class="mc-atk">⚔6</span><span class="mc-hp">❤️4</span></div>
+        </div>
+        <div class="minion-card equipped">
+          <div class="mc-cost">3</div>
+          <div class="mc-art">🗡️</div>
+          <div class="mc-name">艾莉亚·史塔克</div>
+          <div class="mc-stats"><span class="mc-atk">⚔3</span><span class="mc-hp">❤️2</span></div>
+          <div class="mc-equip-badge">+</div>
+        </div>
+        <div class="minion-card">
+          <div class="mc-cost">1</div>
+          <div class="mc-shield">🛡</div>
+          <div class="mc-art">🛡️</div>
+          <div class="mc-name">守夜人</div>
+          <div class="mc-stats"><span class="mc-atk">⚔1</span><span class="mc-hp">❤️3</span></div>
+        </div>
+      </div>
+
+      <!-- Hand -->
+      <div class="hand-area">
+        <div class="hand-card">
+          <div class="hc-cost">2</div>
+          <div class="hc-icon">🔥</div>
+          <div class="hc-name">龙之吐息</div>
+          <div class="hc-type">法术</div>
+          <div class="hc-challenge-badge">✍️</div>
+        </div>
+        <div class="hand-card spell">
+          <div class="hc-cost">5</div>
+          <div class="hc-icon">❄️</div>
+          <div class="hc-name">凛冬将至</div>
+          <div class="hc-type">法术</div>
+        </div>
+        <div class="hand-card">
+          <div class="hc-cost">3</div>
+          <div class="hc-icon">🦁</div>
+          <div class="hc-name">泰温</div>
+          <div class="hc-type">随从</div>
+        </div>
+        <div class="hand-card">
+          <div class="hc-cost">1</div>
+          <div class="hc-icon">🛡️</div>
+          <div class="hc-name">盾牌</div>
+          <div class="hc-type">装备</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Battle Flow -->
+<h3>🔄 每回合流程</h3>
+<div class="flow-grid">
+  <div class="flow-step">
+    <div class="fs-num">1</div>
+    <div class="fs-text"><strong>抽牌阶段</strong> — 从牌库抽 1 张牌。先手第一回合不抽</div>
+  </div>
+  <div class="flow-step">
+    <div class="fs-num">2</div>
+    <div class="fs-text"><strong>法力阶段</strong> — 获得 (回合数) 颗法力水晶。上限 10 颗</div>
+  </div>
+  <div class="flow-step">
+    <div class="fs-num">3</div>
+    <div class="fs-text"><strong>出牌阶段</strong> — 从手牌打出随从/法术/装备/场地卡，消耗对应法力</div>
+  </div>
+  <div class="flow-step">
+    <div class="fs-num">4</div>
+    <div class="fs-text"><strong>攻击阶段</strong> — 选择己方随从 → 选择敌方随从或英雄攻击</div>
+  </div>
+  <div class="flow-step">
+    <div class="fs-num">5</div>
+    <div class="fs-text"><strong>结算阶段</strong> — 处理战吼、亡语、装备效果、持续效果</div>
+  </div>
+  <div class="flow-step">
+    <div class="fs-num">6</div>
+    <div class="fs-text"><strong>结束回合</strong> — 10 秒倒计时后自动结束，若超时跳过出牌阶段</div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:10px;">
+  <strong style="color:#f59e0b;font-size:0.85rem;">⏱️ 回合限制</strong>
+  <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+    P2 以前无计时（异步），P2 开始每回合 30 秒思考时间。超时则自动结束回合。<br>
+    连续 2 回合超时 → 判负。总计每局 15 分钟限制。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- ==================== CARD SYSTEM ==================== -->
+<h2>🃏 卡牌系统</h2>
+
+<h3>四种卡牌类型</h3>
+<div class="card-types">
+  <div class="ct-item">
+    <div class="ct-icon" style="background:rgba(59,130,246,0.15);">👤</div>
+    <div class="ct-info">
+      <div class="ct-name">随从卡 (Character)</div>
+      <div class="ct-desc">放置在战场上，有<b>攻击力 (ATK)</b> 和 <b>生命值 (HP)</b>。每回合可攻击一次。可被装备卡强化。</div>
+    </div>
+  </div>
+  <div class="ct-item">
+    <div class="ct-icon" style="background:rgba(99,102,241,0.15);">✨</div>
+    <div class="ct-info">
+      <div class="ct-name">法术卡 (Spell / 台词卡)</div>
+      <div class="ct-desc">一次性效果 — 伤害、治疗、抽牌、buff。核心来源：剧中经典台词。效果与台词含义绑定（如"Fire and Blood" = 全场AOE）。</div>
+    </div>
+  </div>
+  <div class="ct-item">
+    <div class="ct-icon" style="background:rgba(245,158,11,0.15);">⚔️</div>
+    <div class="ct-info">
+      <div class="ct-name">装备卡 (Equipment)</div>
+      <div class="ct-desc">绑定到己方随从，提供属性加成或特殊能力。分武器（+ATK）、护甲（+HP/护盾）、宝物（特殊效果）。每随从限 1 武器 + 1 护甲 + 1 宝物。</div>
+    </div>
+  </div>
+  <div class="ct-item">
+    <div class="ct-icon" style="background:rgba(20,185,166,0.15);">🏰</div>
+    <div class="ct-info">
+      <div class="ct-name">场地卡 (Location)</div>
+      <div class="ct-desc">持续全场效果。双方都受其影响。例："君临城" = 所有随从 +1/+1。"绝境长城" = 防守方英雄每回合恢复 2 HP。</div>
+    </div>
+  </div>
+</div>
+
+<h3>卡牌稀有度与获取条件</h3>
+<table>
+  <tr><th>稀有度</th><th>边框色</th><th>获取条件</th><th>合成所需碎片</th></tr>
+  <tr><td>⚪ 普通 (Common)</td><td>白</td><td>完成任意听写</td><td>5</td></tr>
+  <tr><td>🔵 稀有 (Rare)</td><td>蓝</td><td>单集准确率 ≥80%</td><td>20</td></tr>
+  <tr><td>🟣 史诗 (Epic)</td><td>紫</td><td>单集准确率 ≥95% 或赛季奖励</td><td>60</td></tr>
+  <tr><td>🟠 传说 (Legendary)</td><td>橙</td><td>全剧卡册收集完成/天梯高段位</td><td>200（不可直接合成）</td></tr>
+</table>
+
+<h3>卡牌效果关键词</h3>
+<table>
+  <tr><th>关键词</th><th>效果</th></tr>
+  <tr><td><span class="tag green">战吼</span></td><td>打出时立即触发一次效果</td></tr>
+  <tr><td><span class="tag red">亡语</span></td><td>从战场被消灭时触发</td></tr>
+  <tr><td><span class="tag amber">冲锋</span></td><td>出场的当回合即可攻击（通常需等一回合）</td></tr>
+  <tr><td><span class="tag purple">圣盾</span></td><td>抵挡第一次受到的伤害，护盾消失</td></tr>
+  <tr><td><span class="tag blue">嘲讽</span></td><td>对方必须优先攻击有嘲讽的随从</td></tr>
+  <tr><td><span class="tag teal">装备槽</span></td><td>该随从可额外装备 1 件装备</td></tr>
+  <tr><td><span class="tag red" style="background:rgba(239,68,68,0.2);color:#ef4444;">✍️ 考验</span></td><td><strong>出牌挑战</strong> — 打出此卡前需正确拼写/翻译英文，失败则无效</td></tr>
+</table>
+
+<hr class="divider">
+
+<!-- ==================== EQUIPMENT SYSTEM ==================== -->
+<h2>🛡️ 装备系统</h2>
+<p class="muted">装备卡是让卡组产生深度的核心——同样的随从，不同的装备 = 完全不同的打法</p>
+
+<div class="equip-panel">
+  <div style="font-weight:600;font-size:0.9rem;">装备卡预览</div>
+  <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">每张随从卡有 <b>3 个装备槽</b>：武器、护甲、宝物。装备后永久生效直至随从被消灭。</div>
+
+  <div class="equip-grid">
+    <div class="equip-slot filled">
+      <div class="eq-icon">🗡️</div>
+      <div class="eq-name">瓦雷利亚钢剑</div>
+      <div class="eq-stat">+3 ATK</div>
+      <div class="eq-label">武器</div>
+    </div>
+    <div class="equip-slot filled">
+      <div class="eq-icon">🛡️</div>
+      <div class="eq-name">龙鳞甲</div>
+      <div class="eq-stat">+2 HP · 火焰抗性</div>
+      <div class="eq-label">护甲</div>
+    </div>
+    <div class="equip-slot">
+      <div class="eq-label" style="color:var(--text-muted);line-height:40px;">空宝物槽</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+    <div class="eq-detail">
+      <div class="eqd-header">
+        <span class="eqd-name">🗡️ 瓦雷利亚钢剑</span>
+        <span class="eqd-type">武器 · 稀有</span>
+      </div>
+      <div class="eqd-effect">装备随从 <b>+3 ATK</b>。<br>战吼：如果装备随从来自「史塔克」家族，额外 +1 ATK</div>
+    </div>
+    <div class="eq-detail">
+      <div class="eqd-header">
+        <span class="eqd-name">🛡️ 龙鳞甲</span>
+        <span class="eqd-type">护甲 · 稀有</span>
+      </div>
+      <div class="eqd-effect">装备随从 <b>+2 HP</b>。<br>受到的火焰伤害 -1（对「龙」系效果翻倍）</div>
+    </div>
+    <div class="eq-detail">
+      <div class="eqd-header">
+        <span class="eqd-name">📜 古老预言</span>
+        <span class="eqd-type">宝物 · 史诗</span>
+      </div>
+      <div class="eqd-effect">每回合开始，抽到的第一张卡费用 -1。<br>装备随从获得「战吼：抽 1 张牌」</div>
+    </div>
+    <div class="eq-detail">
+      <div class="eqd-header">
+        <span class="eqd-name">👑 铁王座碎片</span>
+        <span class="eqd-type">宝物 · 传说</span>
+      </div>
+      <div class="eqd-effect">装备随从变为「传说」品质。<br>回合结束时，恢复 3 点生命。<br><span style="color:#f59e0b;">获取：天梯段位≥国王之手</span></div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top: 20px;">装备获取途径</h3>
+<table>
+  <tr><th>来源</th><th>产出</th><th>频率</th></tr>
+  <tr><td>单集准确率 ≥95%</td><td>稀有装备碎片 ×1</td><td>每集一次</td></tr>
+  <tr><td>全季收集完成</td><td>史诗装备 ×1</td><td>每季一次</td></tr>
+  <tr><td>连续 30 天登录</td><td>自选稀有装备</td><td>每月</td></tr>
+  <tr><td>天梯赛季结算</td><td>段位对应装备</td><td>每赛季</td></tr>
+  <tr><td>传说卡册</td><td>专属传说装备</td><td>一次性</td></tr>
+</table>
+
+<hr class="divider">
+
+<!-- ==================== ENGLISH INTEGRATION ==================== -->
+<h2>✍️ 英语学习 × 对战融合</h2>
+<p class="muted">这是设计的核心差异点 — 不是"玩游戏顺便学英语"，而是"学英语决定游戏实力"</p>
+
+<div class="section-box">
+  <h3 style="margin-top:0;">1️⃣ 出牌考验（核心机制）</h3>
+  <p>带「<span class="tag red">✍️ 考验</span>」关键词的卡牌，打<strong>之前</strong>必须完成一个英语挑战。</p>
+
+  <div class="challenge-modal">
+    <div class="cm-header">⚡ 出牌考验 — 正确输入以释放</div>
+    <div class="cm-quote">"A lion does not concern himself with the opinions of sheep."</div>
+    <input class="cm-input" placeholder="输入这句英文..." disabled>
+    <div class="cm-buttons">
+      <button class="cm-btn submit" disabled>提交验证</button>
+      <button class="cm-btn skip" disabled>放弃此牌</button>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">
+      ✅ 正确：卡牌正常生效 | ❌ 错误：卡牌失效，法力不返还
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+    <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:10px;">
+      <strong style="color:#22c55e;font-size:0.8rem;">✅ 答对</strong>
+      <p style="font-size:0.78rem;margin-top:2px;">卡牌按原效果释放。<br>额外奖励：获得「学识点数」= 卡牌费用</p>
+    </div>
+    <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:10px;">
+      <strong style="color:#ef4444;font-size:0.8rem;">❌ 答错</strong>
+      <p style="font-size:0.78rem;margin-top:2px;">卡牌被「反制」，进入墓地。<br>法力已消耗，资源损失 = 策略惩罚</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-box">
+  <h3>2️⃣ 卡牌获取 = 学习进度</h3>
+  <table>
+    <tr><th>学习行为</th><th>游戏奖励</th></tr>
+    <tr><td>完成一集听写</td><td>该集主题卡包 ×1（含 3 张随机卡 + 1 张保底稀有）</td></tr>
+    <tr><td>准确率 ≥90%</td><td>额外 1 张稀有卡</td></tr>
+    <tr><td>全季完成</td><td>该季专属传说卡 ×1</td></tr>
+    <tr><td>连续 7 天签到</td><td>史诗装备碎片箱</td></tr>
+    <tr><td>御前挑战全对</td><td>卡牌碎片 ×10（自选系列）</td></tr>
+  </table>
+</div>
+
+<div class="section-box">
+  <h3>3️⃣ 封号系统提供战场优势</h3>
+  <table>
+    <tr><th>封号等级</th><th>战场加成</th><th>解锁功能</th></tr>
+    <tr><td>自由民 → 守夜人 (1-2)</td><td>起始 HP 25</td><td>基础匹配、AI 对战</td></tr>
+    <tr><td>骑士 → 领主 (3-4)</td><td>起始 HP 28</td><td>好友挑战、装备槽×1</td></tr>
+    <tr><td>军阀 → 王子 (5-6)</td><td>起始 HP 30</td><td>天梯匹配、卡组 30 张满额</td></tr>
+    <tr><td>国王 → 国王之手 (7-8)</td><td>起始 HP 32</td><td>全装备槽解封、赛季奖励</td></tr>
+    <tr><td>龙之母 → 铁王座 (9-10)</td><td>起始 HP 35 + 1 费起步</td><td>专属传说卡、锦标赛资格</td></tr>
+  </table>
+  <p style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">
+    ⚠️ 平衡设计：高段位玩家有优势而非碾压。1 级玩家 vs 10 级玩家 = 25 HP vs 35 HP + 1 mana，但胜负主要取决于卡组质量和操作。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- ===================== P0 DETAILS ==================== -->
+<h2>🔍 分阶段设计细节</h2>
+
+<div class="phase-detail">
+  <div class="pd-label">P0 · 学识铸卡</div>
+  <p style="font-size:0.82rem;margin-bottom:8px;">
+    基于现有 P0-P2 系统，新增卡牌收集子模块。不需要新 server 或实时通信。
+  </p>
+  <div class="pd-list">
+    <span class="pd-item done">学习产卡（准确率→稀有度）</span>
+    <span class="pd-item done">卡牌数据库设计</span>
+    <span class="pd-item done">卡册收集系统</span>
+    <span class="pd-item done">AI 首领战（简单规则引擎）</span>
+    <span class="pd-item done">牌库/卡组 UI</span>
+    <span class="pd-item">开包动画</span>
+    <span class="pd-item">合成系统</span>
+    <span class="pd-item">传说卡全收集奖励</span>
+  </div>
+  <div class="pd-list" style="margin-top: 8px;">
+    <span class="pd-item" style="background:rgba(20,185,166,0.1);border-color:rgba(20,185,166,0.3);">
+      🎯 目标：用户能听写→收卡→打AI，验证"学习=收集"核心体验
+    </span>
+  </div>
+</div>
+
+<div class="phase-detail">
+  <div class="pd-label">P1 · 异步对战</div>
+  <p style="font-size:0.82rem;margin-bottom:8px;">
+    新增好友系统和异步对战后端。不需要实时 WebSocket，用 MySQL 存储对局状态。
+  </p>
+  <div class="pd-list">
+    <span class="pd-item">好友系统（加友/删友/列表）</span>
+    <span class="pd-item">挑战 → 指派进攻方+防守方AI托管</span>
+    <span class="pd-item">对局状态引擎（后端纯逻辑）</span>
+    <span class="pd-item">出牌考验（拼写验证）</span>
+    <span class="pd-item">装备系统 V1（数据库+效果）</span>
+    <span class="pd-item">战绩统计</span>
+    <span class="pd-item">排行榜（胜利数/连胜）</span>
+  </div>
+  <div class="pd-list" style="margin-top: 8px;">
+    <span class="pd-item" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);">
+      🎯 目标：好友间可对战，验证攻防平衡性和装备系统
+    </span>
+  </div>
+</div>
+
+<div class="phase-detail">
+  <div class="pd-label">P2 · 半实时对战</div>
+  <p style="font-size:0.82rem;margin-bottom:8px;">
+    引入 WebSocket 实时通信、回合计时器、完整战场 UI 动画。
+  </p>
+  <div class="pd-list">
+    <span class="pd-item">WebSocket 对局服务</span>
+    <span class="pd-item">回合计时器（30s）</span>
+    <span class="pd-item">实时战场渲染（前端动画）</span>
+    <span class="pd-item">匹配队列（段位+邻近）</span>
+    <span class="pd-item">装备系统 V2（更多装备+效果）</span>
+    <span class="pd-item">战报回放（保存完整行动记录）</span>
+    <span class="pd-item">投降/平局判定</span>
+    <span class="pd-item">断线重连机制</span>
+  </div>
+  <div class="pd-list" style="margin-top: 8px;">
+    <span class="pd-item" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);">
+      🎯 目标：完整炉石体验，实时匹配真人，天梯雏形
+    </span>
+  </div>
+</div>
+
+<div class="phase-detail">
+  <div class="pd-label">P3 · 完整天梯</div>
+  <p style="font-size:0.82rem;margin-bottom:8px;">
+    电竞化：赛季系统、公会战、观战模式、锦标赛。
+  </p>
+  <div class="pd-list">
+    <span class="pd-item">赛季段位系统（青铜→王者）</span>
+    <span class="pd-item">赛季限定卡牌/装备</span>
+    <span class="pd-item">观战模式</span>
+    <span class="pd-item">公会/封臣战（组队攻防）</span>
+    <span class="pd-item">锦标赛（64人淘汰赛）</span>
+    <span class="pd-item">精彩回放/分享</span>
+    <span class="pd-item">防作弊（出牌考验反脚本）</span>
+  </div>
+  <div class="pd-list" style="margin-top: 8px;">
+    <span class="pd-item" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);">
+      🎯 目标：完整的英语学习+卡牌电竞生态
+    </span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ===================== DECK BUILDING ==================== -->
+<h2>🗃️ 卡组构筑规则</h2>
+
+<div class="section-box">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <strong style="font-size:0.9rem;">📐 构筑约束</strong>
+      <ul style="margin-top:8px;list-style:none;padding:0;">
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);">✓ 卡组 <b>30 张</b>（P0 阶段可降为 20 张）</li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);">✓ 同名传说卡 <b>限 1 张</b></li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);">✓ 同名非传说卡 <b>限 2 张</b></li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);">✓ 装备卡总数 ≤ 6 张</li>
+      </ul>
+    </div>
+    <div>
+      <strong style="font-size:0.9rem;">🎯 策略维度</strong>
+      <ul style="margin-top:8px;list-style:none;padding:0;">
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);"><b>费用曲线</b> — 低费多还是高费多决定节奏快慢</li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);"><b>派系主题</b> — 全史塔克？全龙？混搭？不同搭配有派系联动</li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);"><b>考验比例</b> — 带太多「✍️考验」牌，英语不够好=卡手</li>
+        <li style="padding:4px 0;font-size:0.82rem;color:var(--text-muted);"><b>装备厚度</b> — 多装备=后期强但前期弱</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ===================== SUMMARY ==================== -->
+<div class="summary-box">
+  <h3>💡 设计总结</h3>
+  <p>回到你的核心问题——这条路线怎么走：</p>
+  <ol style="margin-top:8px;padding-left:20px;">
+    <li><strong>P0 先落地卡牌收集</strong> — 基于已有内容（GOT/DA 台词、角色），设计第一批卡牌，实现"听写 → 开包 → 组牌 → AI对战"闭环。改动最小，最快让用户玩到。</li>
+    <li style="margin-top:4px;"><strong>核心玩法差异是</strong> — 出牌考验（✍️）把英语能力直接变成对战操作的一部分。不学习就放不出大招，这是这个游戏区别于普通卡牌游戏的灵魂。</li>
+    <li style="margin-top:4px;"><strong>装备系统是策略深度来源</strong> — 同样的随从，瓦雷利亚钢剑和龙鳞甲是两种打法。装备也是学习进度的象征（高准确率才出好装备）。</li>
+    <li style="margin-top:4px;"><strong>封号系统天然做战力平衡</strong> — 等级越高 HP 和资源越多，但新手也能通过操作和卡组质量弥补差距（25 HP vs 35 HP 不是碾压）。</li>
+    <li style="margin-top:4px;"><strong>技术栈上</strong> — P0-P1 不需要新基础设施（MySQL + 现有 Spring Boot 即可）。P2 才需要 WebSocket。每个阶段可独立发布，用户验证后才继续推进。</li>
+  </ol>
+  <p style="margin-top:12px;color:var(--accent1);font-weight:600;">
+    这相当于 Hearthstone 的底子 + 以学习进度驱动收集 + 英语能力决定战斗上限。你想继续深挖哪个部分？我可以出更细节的卡牌列表、数值平衡表，或者直接做视觉 mockup。
+  </p>
+</div>
+
+</div>
+</body>
+</html>

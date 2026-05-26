@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡牌对战 · 视觉方案探索</title>
+<style>
+  /* ── Tokens (matching project) ── */
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card-border: #334155;
+    --text: #f1f5f9; --text-secondary: #94a3b8; --text-tertiary: #64748b;
+    --teal: #14b8a6; --teal-light: #2dd4bf; --teal-dark: #0d9488;
+    --teal-glow: rgba(20,184,166,0.3); --teal-subtle: rgba(20,184,166,0.08);
+    --purple: #8b5cf6; --purple-glow: rgba(139,92,246,0.2);
+    --amber: #f59e0b; --red: #ef4444; --green: #22c55e; --blue: #3b82f6;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --border: #334155; --border-light: rgba(255,255,255,0.06);
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.3);
+    --cd-bg-deep: #070b15;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text); padding: 32px 16px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  h1 { font-size: 1.8rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 32px; }
+
+  .variant-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .vt { padding: 8px 18px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; font-size: 0.82rem; font-weight: 500; }
+  .vt.active { border-color: var(--teal); color: var(--teal); background: var(--teal-subtle); }
+
+  .variant { display: none; }
+  .variant.active { display: block; }
+
+  /* Phone frame */
+  .phone-frame {
+    width: 360px; max-width: 100%; margin: 0 auto 24px;
+    background: var(--cd-bg-deep);
+    border-radius: 24px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-light);
+  }
+  .phone-status { padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-tertiary); background: var(--cd-bg-deep); }
+  .phone-content { padding: 0; min-height: 640px; }
+
+  /* ── Variant A: Card Collection Focus ── */
+  .va-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .va-header h2 { font-size: 1rem; color: var(--text); }
+  .va-header .va-coins { display: flex; align-items: center; gap: 4px; color: var(--amber); font-size: 0.78rem; font-weight: 600; }
+
+  .va-rank-card { margin: 8px 16px; padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--teal-glow); background: linear-gradient(135deg, #0d1f1e, #09141a); }
+  .va-rank-top { display: flex; align-items: center; gap: 12px; }
+  .va-rank-badge { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 12px var(--teal-glow); }
+  .va-rank-info { flex: 1; }
+  .va-rank-title { font-size: 0.82rem; font-weight: 600; color: var(--teal); }
+  .va-rank-sub { font-size: 0.68rem; color: var(--text-tertiary); }
+
+  .va-tabs { display: flex; gap: 0; margin: 16px; background: var(--card); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+  .va-tab { flex: 1; padding: 8px; text-align: center; font-size: 0.72rem; color: var(--text-tertiary); cursor: pointer; }
+  .va-tab.active { background: var(--teal); color: #fff; font-weight: 600; }
+
+  /* Card grid */
+  .va-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 16px; }
+  .va-grid-card { background: linear-gradient(145deg, #141e33, #1a2645); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 10px 8px 8px; text-align: center; position: relative; overflow: hidden; transition: transform 0.2s; }
+  .va-grid-card:hover { transform: translateY(-4px); border-color: var(--teal-glow); }
+  .va-grid-card .gc-rarity { position: absolute; top: 4px; left: 4px; font-size: 0.5rem; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+  .va-grid-card .gc-rarity.legendary { background: radial-gradient(#ffbf00, #d4a017); color: #1a1a2e; }
+  .va-grid-card .gc-rarity.epic { background: radial-gradient(#8b5cf6, #6d28d9); color: #fff; }
+  .va-grid-card .gc-rarity.rare { background: radial-gradient(#14b8a6, #0d9488); color: #fff; }
+  .va-grid-card .gc-icon { font-size: 1.5rem; margin: 4px 0; }
+  .va-grid-card .gc-name { font-size: 0.6rem; font-weight: 600; color: var(--text); }
+  .va-grid-card .gc-stats { display: flex; justify-content: center; gap: 6px; font-size: 0.55rem; margin-top: 2px; }
+  .va-grid-card .gc-atk { color: var(--red); }
+  .va-grid-card .gc-hp { color: var(--green); }
+  .va-grid-card .gc-count { position: absolute; top: 4px; right: 4px; background: var(--card); border-radius: 8px; padding: 0 5px; font-size: 0.5rem; color: var(--text-secondary); }
+  .va-grid-card .gc-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(7,11,21,0.7); border-radius: var(--radius-sm); font-size: 0.8rem; }
+
+  /* Progress pack */
+  .va-pack-progress { margin: 8px 16px; background: var(--card); border-radius: var(--radius-sm); padding: 12px; border: 1px solid var(--border); }
+  .va-pack-progress .pp-header { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 6px; }
+  .va-pack-progress .pp-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .va-pack-progress .pp-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal-light)); border-radius: 2px; transition: width 0.3s; }
+
+  .va-battle-btn { margin: 8px 16px 16px; padding: 12px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  /* ── Variant B: Battle Arena Focus ── */
+  .vb-battle-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); }
+  .vb-battle-header .vb-back { font-size: 0.78rem; color: var(--text-secondary); }
+  .vb-battle-header .vb-title { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .vb-battle-header .vb-mana { display: flex; align-items: center; gap: 3px; font-size: 0.72rem; color: var(--blue); }
+
+  .vb-board { padding: 12px 16px 0; }
+
+  .vb-opponent { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .vb-opponent .vbo-left { display: flex; align-items: center; gap: 6px; }
+  .vb-opponent .vbo-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), #6d28d9); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
+  .vb-opponent .vbo-name { font-size: 0.72rem; font-weight: 500; }
+  .vb-opponent .vbo-hp { font-size: 0.72rem; display: flex; align-items: center; gap: 4px; }
+  .vb-opponent .vbo-hp-bar { width: 60px; height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; }
+  .vb-opponent .vbo-hp-fill { height: 100%; background: linear-gradient(90deg, var(--green), #16a34a); width: 75%; }
+
+  .vb-field { display: flex; gap: 6px; min-height: 80px; margin: 6px 0 10px; justify-content: center; }
+  .vb-field .f-card { width: 72px; background: linear-gradient(145deg, #141e33, #1a2645); border: 1px solid var(--border-light); border-radius: 8px; padding: 6px 4px; text-align: center; position: relative; }
+  .vb-field .f-card .fc-cost { position: absolute; top: -5px; left: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .vb-field .f-card .fc-icon { font-size: 1.3rem; }
+  .vb-field .f-card .fc-name { font-size: 0.5rem; font-weight: 600; margin: 2px 0; }
+  .vb-field .f-card .fc-stats { display: flex; justify-content: space-between; font-size: 0.6rem; }
+  .vb-field .f-card .fc-atk { color: var(--red); font-weight: 700; }
+  .vb-field .f-card .fc-hp { color: var(--green); font-weight: 700; }
+  .vb-field .f-card .fc-shield { position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%; background: var(--amber); color: #000; font-size: 0.45rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  .vb-center { text-align: center; font-size: 0.65rem; color: var(--text-tertiary); padding: 4px 0; border-top: 1px dashed var(--border-light); border-bottom: 1px dashed var(--border-light); margin: 4px 0; }
+
+  .vb-player { margin-top: 4px; }
+
+  .vb-hand { display: flex; gap: 4px; justify-content: center; padding: 8px 0; }
+  .vb-hand .h-card { width: 58px; height: 80px; background: linear-gradient(145deg, #141e33, #1a2645); border: 1px solid var(--border-light); border-radius: 6px; padding: 4px; text-align: center; cursor: pointer; transition: transform 0.15s; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .vb-hand .h-card:hover { transform: translateY(-6px); }
+  .vb-hand .h-card .hc-cost { width: 18px; height: 18px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 3px; }
+  .vb-hand .h-card .hc-icon { font-size: 1rem; }
+  .vb-hand .h-card .hc-name { font-size: 0.45rem; font-weight: 600; }
+  .vb-hand .h-card .hc-challenge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 0.4rem; padding: 1px 4px; border-radius: 3px; }
+  .vb-hand .h-card .hc-epic { border: 1px solid var(--purple-glow); }
+
+  .vb-mana-bar { display: flex; gap: 2px; margin: 4px 12px; justify-content: center; }
+  .vb-mana-bar .mana { width: 10px; height: 10px; border-radius: 2px; }
+  .vb-mana-bar .mana.full { background: linear-gradient(135deg, var(--blue), #1d4ed8); }
+  .vb-mana-bar .mana.empty { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.15); }
+
+  .vb-actions { display: flex; gap: 6px; padding: 8px 12px; }
+  .vb-actions button { flex: 1; padding: 8px; border: none; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+  .vb-actions .end-turn { background: var(--teal); color: #fff; }
+  .vb-actions .surrender { background: var(--card); color: var(--text-secondary); border: 1px solid var(--border); }
+
+  /* ── Variant C: Deck Builder Focus ── */
+  .vc-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); }
+  .vc-header .vc-title { font-size: 1rem; font-weight: 600; }
+  .vc-header .vc-count { font-size: 0.72rem; color: var(--text-secondary); }
+
+  .vc-deck-stats { display: flex; gap: 0; margin: 8px 16px; background: var(--card); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+  .vc-deck-stats .ds-item { flex: 1; padding: 8px; text-align: center; font-size: 0.65rem; color: var(--text-secondary); border-right: 1px solid var(--border); }
+  .vc-deck-stats .ds-item:last-child { border-right: none; }
+  .vc-deck-stats .ds-item .ds-val { color: var(--text); font-weight: 600; font-size: 0.85rem; }
+
+  .vc-curve { display: flex; gap: 3px; padding: 0 16px; margin: 8px 0; align-items: flex-end; height: 40px; }
+  .vc-curve .curve-bar { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--teal), var(--teal-dark)); min-height: 4px; }
+
+  .vc-card-list { padding: 0 16px; }
+  .vc-card-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: border-color 0.15s; }
+  .vc-card-row:hover { border-color: var(--teal-glow); }
+  .vc-card-row .cr-cost { width: 22px; height: 22px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .vc-card-row .cr-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .vc-card-row .cr-info { flex: 1; }
+  .vc-card-row .cr-name { font-size: 0.78rem; font-weight: 500; }
+  .vc-card-row .cr-type { font-size: 0.6rem; color: var(--text-tertiary); }
+  .vc-card-row .cr-count { font-size: 0.65rem; color: var(--text-secondary); background: rgba(255,255,255,0.04); padding: 2px 8px; border-radius: 6px; }
+  .vc-card-row .cr-stats { font-size: 0.6rem; color: var(--text-secondary); display: flex; gap: 6px; }
+  .vc-card-row.selected { border-color: var(--teal); background: var(--teal-subtle); }
+
+  .vc-bottom-bar { position: sticky; bottom: 0; padding: 12px 16px; background: var(--cd-bg-deep); border-top: 1px solid var(--border-light); display: flex; gap: 8px; }
+  .vc-bottom-bar button { flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+  .vc-bottom-bar .save-btn { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; }
+  .vc-bottom-bar .cancel-btn { background: var(--card); color: var(--text-secondary); border: 1px solid var(--border); }
+
+  /* Label */
+  .variant-label { text-align: center; margin-top: 16px; font-size: 0.72rem; color: var(--text-tertiary); letter-spacing: 0.5px; }
+  .variant-label strong { color: var(--teal); }
+
+  /* Light mode for mockup toggles */
+  [data-theme="light"] {
+    --bg: #f8fafc; --card: #ffffff; --card-border: #e2e8f0;
+    --text: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+    --border: #e2e8f0; --border-light: rgba(0,0,0,0.06);
+    --shadow-card: 0 4px 16px rgba(0,0,0,0.08);
+    --teal-glow: rgba(20,184,166,0.15);
+    --cd-bg-deep: #f1f5f9;
+  }
+
+  .theme-toggle {
+    text-align: center; margin-bottom: 24px;
+  }
+  .theme-toggle button {
+    padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text-secondary); font-size: 0.78rem; cursor: pointer;
+  }
+
+  .design-note {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 16px; margin-top: 20px;
+  }
+  .design-note h4 { font-size: 0.82rem; margin-bottom: 6px; color: var(--teal); }
+  .design-note p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+  .design-note .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; margin: 0 1px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🃏 卡牌对战 · 视觉方案</h1>
+<div class="subtitle">三个设计姿态，全部融入现有项目的视觉体系</div>
+
+<div class="theme-toggle">
+  <button onclick="document.documentElement.toggleAttribute('data-theme')">☀️ / 🌙 切换主题预览</button>
+</div>
+
+<div class="variant-tabs">
+  <button class="vt active" onclick="switchVariant('a', this)">🧩 方案 A · 卡册收集</button>
+  <button class="vt" onclick="switchVariant('b', this)">⚔️ 方案 B · 战场对决</button>
+  <button class="vt" onclick="switchVariant('c', this)">🗃️ 方案 C · 卡组构筑</button>
+</div>
+
+<!-- ────────────────── VARIANT A: Collection ────────────────── -->
+<div id="variant-a" class="variant active">
+  <div class="phone-frame">
+    <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+
+      <div class="va-header">
+        <h2>📚 我的卡册</h2>
+        <div class="va-coins">🪙 1,240</div>
+      </div>
+
+      <!-- Rank card -->
+      <div class="va-rank-card">
+        <div class="va-rank-top">
+          <div class="va-rank-badge">👑</div>
+          <div class="va-rank-info">
+            <div class="va-rank-title">国王 · King</div>
+            <div class="va-rank-sub">等级 7/10 · ⚡ 2,350 威望</div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-secondary);text-align:right;">
+            <div style="color:var(--teal);font-weight:600;">32/50</div>
+            <div>卡牌</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+            <div style="width:67%;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:2px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab row -->
+      <div class="va-tabs">
+        <div class="va-tab active">所有卡牌</div>
+        <div class="va-tab">随从</div>
+        <div class="va-tab">法术</div>
+        <div class="va-tab">装备</div>
+      </div>
+
+      <!-- Pack progress -->
+      <div class="va-pack-progress">
+        <div class="pp-header">
+          <span>📦 GOT S01 卡包</span>
+          <span style="color:var(--teal);">85%</span>
+        </div>
+        <div class="pp-bar"><div class="pp-fill" style="width:85%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text-tertiary);margin-top:4px;">
+          <span>完成 8/10 集</span>
+          <span>奖励：传说卡「艾德·史塔克」</span>
+        </div>
+      </div>
+
+      <!-- Card grid -->
+      <div class="va-grid">
+        <div class="va-grid-card">
+          <span class="gc-rarity rare">稀有</span>
+          <div class="gc-icon">🐺</div>
+          <div class="gc-name">史塔克家族</div>
+          <div class="gc-stats"><span class="gc-atk">⚔2</span><span class="gc-hp">❤️2</span></div>
+          <div class="gc-count">×2</div>
+        </div>
+        <div class="va-grid-card">
+          <span class="gc-rarity epic">史诗</span>
+          <div class="gc-icon">🐉</div>
+          <div class="gc-name">龙之母</div>
+          <div class="gc-stats"><span class="gc-atk">⚔5</span><span class="gc-hp">❤️4</span></div>
+          <div class="gc-count">×1</div>
+        </div>
+        <div class="va-grid-card">
+          <span class="gc-rarity legendary">传说</span>
+          <div class="gc-icon">🗡️</div>
+          <div class="gc-name">守夜人誓言</div>
+          <div class="gc-stats"><span class="gc-atk">⚔1</span><span class="gc-hp">❤️3</span></div>
+          <div class="gc-count">×1</div>
+        </div>
+        <div class="va-grid-card">
+          <span class="gc-rarity" style="background:var(--card);color:var(--text-secondary);">普通</span>
+          <div class="gc-icon">🛡️</div>
+          <div class="gc-name">铁盾兵</div>
+          <div class="gc-stats"><span class="gc-atk">⚔1</span><span class="gc-hp">❤️4</span></div>
+          <div class="gc-count">×2</div>
+        </div>
+        <div class="va-grid-card">
+          <span class="gc-rarity rare">稀有</span>
+          <div class="gc-icon">🎩</div>
+          <div class="gc-name">卡劳利公馆</div>
+          <div class="gc-stats"><span class="gc-atk">⚔0</span><span class="gc-hp">❤️5</span></div>
+          <div class="gc-count">×2</div>
+        </div>
+        <div class="va-grid-card">
+          <div class="gc-lock">🔒</div>
+          <span class="gc-rarity legendary">传说</span>
+          <div class="gc-icon">❄️</div>
+          <div class="gc-name">凛冬将至</div>
+          <div class="gc-stats" style="opacity:0.3;"><span class="gc-atk">⚔8</span><span class="gc-hp">❤️8</span></div>
+          <div class="gc-count">—</div>
+        </div>
+      </div>
+
+      <button class="va-battle-btn">⚔️ 匹配对战</button>
+    </div>
+  </div>
+
+  <div class="design-note">
+    <h4>🧩 方案 A · 卡册收集</h4>
+    <p><strong>姿态：保守延伸</strong> — 最小幅度改动现有 ArenaPage 布局。<br>
+    在原有等级/挑战系统上，把「卡牌收集」作为核心页面。卡牌用角色的所属剧集/派系/稀有度决定。听写准确率决定稀有度。<br>
+    <span class="tag" style="background:var(--teal-subtle);color:var(--teal);">✅ 和现有页面风格一致</span>
+    <span class="tag" style="background:rgba(139,92,246,0.1);color:var(--purple);">✅ 改动最小，P0 就能上线</span>
+    <span class="tag" style="background:rgba(245,158,11,0.1);color:var(--amber);">⚠️ 战斗需要额外页面</span></p>
+  </div>
+</div>
+
+<!-- ────────────────── VARIANT B: Battle Arena ────────────────── -->
+<div id="variant-b" class="variant">
+  <div class="phone-frame">
+    <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+
+      <!-- Battle header -->
+      <div class="vb-battle-header">
+        <span class="vb-back">← 返回</span>
+        <span class="vb-title">⚔️ 对决中</span>
+        <span class="vb-mana">💎 6/10</span>
+      </div>
+
+      <!-- Opponent -->
+      <div class="vb-board">
+        <div class="vb-opponent">
+          <div class="vbo-left">
+            <div class="vbo-avatar">🏰</div>
+            <span class="vbo-name">伊耿</span>
+          </div>
+          <div class="vbo-hp">
+            <span>❤️ 18</span>
+            <div class="vbo-hp-bar"><div class="vbo-hp-fill"></div></div>
+          </div>
+        </div>
+
+        <div class="vb-field">
+          <div class="f-card">
+            <div class="fc-cost">3</div>
+            <div class="fc-shield">🛡</div>
+            <div class="fc-icon">⚔️</div>
+            <div class="fc-name">詹姆</div>
+            <div class="fc-stats"><span class="fc-atk">⚔4</span><span class="fc-hp">❤️3</span></div>
+          </div>
+          <div class="f-card">
+            <div class="fc-cost">2</div>
+            <div class="fc-icon">🐺</div>
+            <div class="fc-name">冰原狼</div>
+            <div class="fc-stats"><span class="fc-atk">⚔2</span><span class="fc-hp">❤️2</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vb-center">⚡ 你的回合 · Turn 6</div>
+
+      <!-- Player -->
+      <div class="vb-board">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-size:0.65rem;">🟢</div>
+            <span style="font-size:0.72rem;font-weight:500;">Heaton</span>
+          </div>
+          <div style="font-size:0.72rem;display:flex;align-items:center;gap:4px;">
+            <span>❤️ 24</span>
+            <div style="width:60px;height:4px;background:rgba(0,0,0,0.3);border-radius:2px;overflow:hidden;">
+              <div style="height:100%;background:linear-gradient(90deg,var(--green),#16a34a);width:80%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vb-field">
+          <div class="f-card">
+            <div class="fc-cost">4</div>
+            <div class="fc-icon">🐉</div>
+            <div class="fc-name">卓耿</div>
+            <div class="fc-stats"><span class="fc-atk">⚔6</span><span class="fc-hp">❤️4</span></div>
+          </div>
+          <div class="f-card" style="border-color:rgba(245,158,11,0.4);">
+            <div class="fc-cost">3</div>
+            <div class="fc-icon">🗡️</div>
+            <div class="fc-name">艾莉亚</div>
+            <div class="fc-stats"><span class="fc-atk">⚔3</span><span class="fc-hp">❤️2</span></div>
+          </div>
+          <div class="f-card">
+            <div class="fc-cost">1</div>
+            <div class="fc-shield">🛡</div>
+            <div class="fc-icon">🛡️</div>
+            <div class="fc-name">守夜人</div>
+            <div class="fc-stats"><span class="fc-atk">⚔1</span><span class="fc-hp">❤️3</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hand -->
+      <div style="padding:0 12px;">
+        <div class="vb-mana-bar">
+          <div class="mana full"></div><div class="mana full"></div><div class="mana full"></div><div class="mana full"></div>
+          <div class="mana full"></div><div class="mana full"></div><div class="mana empty"></div><div class="mana empty"></div>
+          <div class="mana empty"></div><div class="mana empty"></div>
+        </div>
+        <div class="vb-hand">
+          <div class="h-card">
+            <div class="hc-cost">2</div>
+            <div class="hc-icon">🔥</div>
+            <div class="hc-name">龙之吐息</div>
+            <div class="hc-challenge">✍️</div>
+          </div>
+          <div class="h-card">
+            <div class="hc-cost" style="background:var(--purple);">5</div>
+            <div class="hc-icon">❄️</div>
+            <div class="hc-name">凛冬将至</div>
+          </div>
+          <div class="h-card">
+            <div class="hc-cost">3</div>
+            <div class="hc-icon">🦁</div>
+            <div class="hc-name">泰温</div>
+          </div>
+          <div class="h-card">
+            <div class="hc-cost">1</div>
+            <div class="hc-icon">🛡️</div>
+            <div class="hc-name">盾牌</div>
+          </div>
+          <div class="h-card">
+            <div class="hc-cost" style="background:var(--amber);">4</div>
+            <div class="hc-icon">👑</div>
+            <div class="hc-name">铁王座</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="vb-actions">
+        <button class="end-turn">⏎ 结束回合</button>
+        <button class="surrender">🏳️ 投降</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="design-note">
+    <h4>⚔️ 方案 B · 战场对决</h4>
+    <p><strong>姿态：强力匹配</strong> — 这是最终的完整对战体验。<br>
+    仿炉石的战场 UI，适配手机竖屏：上方对手（英雄 + HP + 随从区）→ 中场分隔线 → 下方玩家（英雄 + 随从区 + 手牌区 + 法力条）。底部操作栏。<br>
+    标记 <span class="tag" style="background:rgba(239,68,68,0.15);color:var(--red);">✍️</span> 的卡牌打出前需完成英语听写挑战。<br>
+    <span class="tag" style="background:rgba(34,197,94,0.1);color:var(--green);">✅ 完整竞技体验</span>
+    <span class="tag" style="background:rgba(245,158,11,0.1);color:var(--amber);">⚠️ P2 阶段实现，需 WebSocket</span></p>
+  </div>
+</div>
+
+<!-- ────────────────── VARIANT C: Deck Builder ────────────────── -->
+<div id="variant-c" class="variant">
+  <div class="phone-frame">
+    <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="phone-content">
+
+      <!-- Header -->
+      <div class="vc-header">
+        <span class="vc-title">🗃️ 我的卡组</span>
+        <span class="vc-count"><span style="color:var(--teal);font-weight:600;">28</span>/30 张</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="vc-deck-stats">
+        <div class="ds-item"><div class="ds-val">28</div>卡牌</div>
+        <div class="ds-item"><div class="ds-val">6</div>随从</div>
+        <div class="ds-item"><div class="ds-val">4</div>法术</div>
+        <div class="ds-item"><div class="ds-val">3</div>装备</div>
+        <div class="ds-item"><div class="ds-val">3.2</div>平均费</div>
+      </div>
+
+      <!-- Curve -->
+      <div class="vc-curve">
+        <div class="curve-bar" style="height:12px;"></div>
+        <div class="curve-bar" style="height:24px;"></div>
+        <div class="curve-bar" style="height:36px;"></div>
+        <div class="curve-bar" style="height:24px;"></div>
+        <div class="curve-bar" style="height:16px;"></div>
+        <div class="curve-bar" style="height:8px;"></div>
+        <div class="curve-bar" style="height:4px;"></div>
+      </div>
+
+      <!-- Card list -->
+      <div class="vc-card-list">
+        <!-- 1费 -->
+        <div class="vc-card-row">
+          <div class="cr-cost">1</div>
+          <span class="cr-icon">🛡️</span>
+          <div class="cr-info">
+            <div class="cr-name">守夜人</div>
+            <div class="cr-type">随从 · 北境</div>
+          </div>
+          <div class="cr-stats"><span class="gc-atk">⚔1</span><span class="gc-hp">❤️3</span></div>
+          <div class="cr-count">×2</div>
+        </div>
+        <div class="vc-card-row">
+          <div class="cr-cost">1</div>
+          <span class="cr-icon">📜</span>
+          <div class="cr-info">
+            <div class="cr-name">誓言</div>
+            <div class="cr-type">法术 · 基础</div>
+          </div>
+          <div class="cr-stats">对敌人造成 2 点伤害</div>
+          <div class="cr-count">×2</div>
+        </div>
+
+        <!-- 2费 -->
+        <div class="vc-card-row">
+          <div class="cr-cost">2</div>
+          <span class="cr-icon">🐺</span>
+          <div class="cr-info">
+            <div class="cr-name">冰原狼</div>
+            <div class="cr-type">随从 · 史塔克</div>
+          </div>
+          <div class="cr-stats"><span class="gc-atk">⚔2</span><span class="gc-hp">❤️2</span></div>
+          <div class="cr-count">×2</div>
+        </div>
+        <div class="vc-card-row">
+          <div class="cr-cost">2</div>
+          <span class="cr-icon">🎩</span>
+          <div class="cr-info">
+            <div class="cr-name">卡劳利公馆</div>
+            <div class="cr-type">场地 · 唐顿</div>
+          </div>
+          <div class="cr-stats">回合结束恢复 2 HP</div>
+          <div class="cr-count">×1</div>
+        </div>
+
+        <!-- 3费 -->
+        <div class="vc-card-row">
+          <div class="cr-cost">3</div>
+          <span class="cr-icon">⚔️</span>
+          <div class="cr-info">
+            <div class="cr-name">詹姆·兰尼斯特</div>
+            <div class="cr-type">随从 · 兰尼斯特</div>
+          </div>
+          <div class="cr-stats"><span class="gc-atk">⚔4</span><span class="gc-hp">❤️3</span></div>
+          <div class="cr-count">×1</div>
+        </div>
+        <div class="vc-card-row">
+          <div class="cr-cost">3</div>
+          <span class="cr-icon">🗡️</span>
+          <div class="cr-info">
+            <div class="cr-name">瓦雷利亚钢剑</div>
+            <div class="cr-type">装备 · 武器</div>
+          </div>
+          <div class="cr-stats">+3 ATK · 史塔克额外+1</div>
+          <div class="cr-count">×2</div>
+        </div>
+
+        <!-- 4费 -->
+        <div class="vc-card-row">
+          <div class="cr-cost">4</div>
+          <span class="cr-icon">🐉</span>
+          <div class="cr-info">
+            <div class="cr-name">卓耿</div>
+            <div class="cr-type">随从 · 坦格利安</div>
+          </div>
+          <div class="cr-stats"><span class="gc-atk">⚔6</span><span class="gc-hp">❤️4</span></div>
+          <div class="cr-count">×1</div>
+        </div>
+        <div class="vc-card-row">
+          <div class="cr-cost">4</div>
+          <span class="cr-icon">👑</span>
+          <div class="cr-info">
+            <div class="cr-name">铁王座</div>
+            <div class="cr-type">装备 · 宝物 · 传说</div>
+          </div>
+          <div class="cr-stats">回合结束恢复 3 HP</div>
+          <div class="cr-count">×1</div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="vc-bottom-bar">
+        <button class="cancel-btn">取消</button>
+        <button class="save-btn">💾 保存卡组</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="design-note">
+    <h4>🗃️ 方案 C · 卡组构筑</h4>
+    <p><strong>姿态：发散</strong> — 把卡组编辑器做成独立沉浸式页面。<br>
+    费用曲线可视化、卡牌类型筛选、实时计数。和现有「设置面板」弹窗类似，但全屏展示。<br>
+    核心交互：拖拽/点击添加 → 从牌库选卡 → 费用曲线实时更新。卡组名可自定义。<br>
+    <span class="tag" style="background:var(--teal-subtle);color:var(--teal);">✅ 策略深度可视化</span>
+    <span class="tag" style="background:rgba(245,158,11,0.1);color:var(--amber);">⚠️ 纯前端 P0 可做</span></p>
+  </div>
+</div>
+
+<script>
+function switchVariant(id, btn) {
+  document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.vt').forEach(t => t.classList.remove('active'));
+  document.getElementById('variant-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</div>
+</body>
+</html>

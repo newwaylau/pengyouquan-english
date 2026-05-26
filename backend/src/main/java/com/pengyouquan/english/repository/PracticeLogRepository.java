@@ -59,4 +59,9 @@ public interface PracticeLogRepository extends JpaRepository<PracticeLog, Long> 
            "FROM practice_logs p JOIN sentences s ON p.sentence_id = s.id " +
            "WHERE p.user_id = :userId ORDER BY p.practiced_at DESC", nativeQuery = true)
     List<Object[]> findPracticeRecordsForExport(@Param("userId") Long userId);
+
+    /** 获取用户近30天平均正确率（用于AI对手模拟） */
+    @Query(value = "SELECT AVG(CAST(correct AS DECIMAL(5,2))) FROM practice_logs " +
+           "WHERE user_id = :userId AND practiced_at > DATE_SUB(NOW(), INTERVAL 30 DAY)", nativeQuery = true)
+    Double findAvgAccuracyLast30Days(@Param("userId") Long userId);
 }

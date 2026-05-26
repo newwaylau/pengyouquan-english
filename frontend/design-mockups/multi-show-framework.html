@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多剧集卡牌对战框架 · 设计</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card-border: #334155;
+    --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+    --teal: #14b8a6; --teal-light: #2dd4bf; --teal-dark: #0d9488;
+    --teal-glow: rgba(20,184,166,0.3);
+    --purple: #8b5cf6; --amber: #f59e0b; --red: #ef4444; --green: #22c55e; --blue: #3b82f6;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --border: #334155; --border-light: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  h1 { font-size: 2rem; background: linear-gradient(135deg, #14b8a6, #8b5cf6, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 40px; }
+
+  h2 { font-size: 1.4rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: var(--teal); }
+  h3 { font-size: 1.1rem; margin: 28px 0 12px; color: var(--text); }
+  h4 { font-size: 0.95rem; margin: 20px 0 8px; color: var(--text); }
+
+  p, li { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+  .muted { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  th { background: var(--card); font-weight: 600; color: var(--text); white-space: nowrap; }
+  td { color: var(--text-secondary); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.68rem; font-weight: 600; margin: 1px;
+  }
+  .tag.teal { background: rgba(20,185,166,0.12); color: #14b8a6; }
+  .tag.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+  .tag.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .tag.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .tag.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .tag.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+  .section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 20px 24px; margin: 20px 0;
+  }
+
+  .show-block {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;
+  }
+  @media (max-width: 700px) { .show-block { grid-template-columns: 1fr; } }
+
+  .show-card {
+    background: linear-gradient(145deg, #141e33, #1a2645);
+    border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    padding: 16px; overflow: hidden; position: relative;
+  }
+  .show-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(139,92,246,0.06), transparent 60%);
+    pointer-events: none;
+  }
+  .show-card .sc-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; margin-bottom: 8px; }
+  .show-card .sc-title { font-weight: 700; font-size: 1.05rem; }
+  .show-card .sc-type { font-size: 0.75rem; color: var(--text-muted); }
+  .show-card .sc-effect { font-size: 0.78rem; color: var(--text-secondary); margin-top: 6px; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+  .show-card .sc-stats { display: flex; gap: 8px; margin-top: 6px; font-size: 0.75rem; }
+
+  .dot-list { list-style: none; padding: 0; }
+  .dot-list li { padding: 4px 0 4px 16px; position: relative; font-size: 0.85rem; }
+  .dot-list li::before { content: ''; position: absolute; left: 0; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+
+  .verdict {
+    background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(20,185,166,0.06));
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: var(--radius-lg); padding: 24px 28px; margin: 32px 0;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .arch-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 16px 20px; margin: 12px 0;
+    position: relative;
+  }
+  .arch-box .ab-label {
+    position: absolute; top: -10px; left: 16px;
+    background: var(--bg); padding: 0 8px;
+    font-size: 0.7rem; color: var(--text-muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🎭 多剧集卡牌对战框架</h1>
+<p class="subtitle">不绑死任何一部剧——每部剧都是一个可插拔的扩展包，核心框架通用</p>
+
+<!-- =========== PROBLEM =========== -->
+<h2>0. 问题分析</h2>
+<p>目前的设计把游戏绑死在 GOT 上：</p>
+<table>
+  <tr><th>层面</th><th>当前设计（GOT 绑定）</th><th>问题</th></tr>
+  <tr><td>派系</td><td>史塔克、兰尼斯特、坦格利安</td><td>新剧（如《老友记》）没有这些派系</td></tr>
+  <tr><td>卡牌角色</td><td>艾德·史塔克、詹姆、卓耿</td><td>DA 有卡劳利家族，老友记有瑞秋莫妮卡，不是同一个宇宙</td></tr>
+  <tr><td>装备</td><td>瓦雷利亚钢剑、龙鳞甲</td><td>DA 没有龙，老友记没有剑</td></tr>
+  <tr><td>场地</td><td>君临城、绝境长城</td><td>DA 的场地是庄园，老友记的场地是中央公园咖啡馆</td></tr>
+  <tr><td>世界观</td><td>权游奇幻</td><td>DA 是 20 世纪初庄园剧，老友记是现代情景喜剧——强行统一风格很奇怪</td></tr>
+</table>
+
+<div class="section" style="border-left: 3px solid var(--amber);">
+  <strong>⚠️ 核心矛盾</strong>
+  <p style="font-size:0.85rem;margin-top:4px;">
+    如果每部剧都用同一个世界观（GOT），那新剧加入时要么强行改编剧情（DA 角色被塞进维斯特洛），要么每部剧独立一套完全不同的游戏系统（开发量 ×N）。<br><br>
+    <strong>两种都不可行。</strong> 需要的是一个 <strong>框架级</strong> 的解——所有剧共用一套对战引擎，但每部剧以「内容包」形式提供自己的卡牌、效果、视觉风格。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== FRAMEWORK =========== -->
+<h2>1. 框架设计：三层架构</h2>
+<p class="muted">卡牌对战系统 = 通用引擎 + 内容层 + 视觉层，每层各司其职</p>
+
+<div class="arch-box">
+  <div class="ab-label">第一层</div>
+  <h3 style="margin:0 0 8px;color:var(--teal);">⚙️ 对战引擎（通用，永不修改）</h3>
+  <div class="two-col">
+    <div>
+      <p style="font-size:0.82rem;"><strong>不变的规则</strong></p>
+      <ul class="dot-list">
+        <li>7 阶段回合制（之前已设计）</li>
+        <li>法力水晶系统（1→10）</li>
+        <li>11 个关键词（战吼/亡语/嘲讽/圣盾/冲锋/潜行/法强/抽牌/耐久/考验/派系关联）</li>
+        <li>装备三槽体系（武器/护甲/宝物）</li>
+        <li>段位/天梯/赛季</li>
+        <li>出牌考验机制</li>
+      </ul>
+    </div>
+    <div>
+      <p style="font-size:0.82rem;"><strong>不可变的 UI</strong></p>
+      <ul class="dot-list">
+        <li>战场布局（对手→中场→玩家）</li>
+        <li>手牌区/法力条/操作栏</li>
+        <li>出牌考验弹窗</li>
+        <li>回合指示器/计时器</li>
+        <li>装备/随从交互</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="arch-box" style="margin-top:8px;">
+  <div class="ab-label">第二层</div>
+  <h3 style="margin:0 0 8px;color:var(--purple);">📦 内容层（每部剧一个扩展包）</h3>
+  <div class="show-block" style="grid-template-columns: repeat(4,1fr); gap: 8px; margin: 8px 0;">
+    <div style="background:rgba(245,158,11,0.06);border-radius:8px;padding:8px;text-align:center;font-size:0.72rem;">
+      <div style="font-size:1.2rem;">🐉</div>
+      <div style="font-weight:600;margin:2px 0;">权力的游戏</div>
+      <div style="color:var(--text-muted);">奇幻·史诗</div>
+    </div>
+    <div style="background:rgba(59,130,246,0.06);border-radius:8px;padding:8px;text-align:center;font-size:0.72rem;">
+      <div style="font-size:1.2rem;">🎩</div>
+      <div style="font-weight:600;margin:2px 0;">唐顿庄园</div>
+      <div style="color:var(--text-muted);">年代·庄园</div>
+    </div>
+    <div style="background:rgba(34,197,94,0.06);border-radius:8px;padding:8px;text-align:center;font-size:0.72rem;">
+      <div style="font-size:1.2rem;">☕</div>
+      <div style="font-weight:600;margin:2px 0;">老友记</div>
+      <div style="color:var(--text-muted);">情景·喜剧</div>
+    </div>
+    <div style="background:rgba(239,68,68,0.06);border-radius:8px;padding:8px;text-align:center;font-size:0.72rem;">
+      <div style="font-size:1.2rem;">⚗️</div>
+      <div style="font-weight:600;margin:2px 0;">绝命毒师</div>
+      <div style="color:var(--text-muted);">犯罪·剧情</div>
+    </div>
+  </div>
+  <p style="font-size:0.82rem;"><strong>每部剧通过统一模板贡献：</strong></p>
+  <table>
+    <tr><th>内容类型</th><th>映射为卡牌</th><th>示例（GOT）</th><th>示例（DA）</th><th>示例（未来剧）</th></tr>
+    <tr><td>主要角色</td><td><span class="tag teal">随从卡</span></td><td>艾德·史塔克</td><td>罗伯特·卡劳利</td><td>剧集主角</td></tr>
+    <tr><td>经典台词</td><td><span class="tag purple">法术卡</span></td><td>"Winter is Coming"</td><td>"I'm a gentleman"</td><td>该剧金句</td></tr>
+    <tr><td>关键场景</td><td><span class="tag green">场地卡</span></td><td>君临城</td><td>唐顿庄园</td><td>剧中地标</td></tr>
+    <tr><td>剧中道具</td><td><span class="tag amber">装备卡</span></td><td>瓦雷利亚钢剑</td><td>庄园传家宝</td><td>剧中标志物</td></tr>
+  </table>
+</div>
+
+<div class="arch-box" style="margin-top:8px;">
+  <div class="ab-label">第三层</div>
+  <h3 style="margin:0 0 8px;color:var(--amber);">🎨 视觉层（每部剧独立皮肤）</h3>
+  <ul class="dot-list">
+    <li><strong>卡牌边框</strong>：GOT 用黑金/龙纹，DA 用象牙金/花体，老友记用暖橙/沙发纹理</li>
+    <li><strong>卡牌背景</strong>：每个卡牌使用该剧对应剧照/场景截图作为背景</li>
+    <li><strong>战场主题</strong>：玩家可选择当前启用的剧集皮肤（默认根据卡组主力剧集切换）</li>
+    <li><strong>字体/装饰</strong>：GOT 用哥特体，DA 用衬线体，老友记用圆润无衬线</li>
+    <li><strong>出牌考验音频</strong>：直接使用该剧的原声片段，无需额外录制</li>
+    <li><strong>英雄头像</strong>：可以从该剧角色头像库中选择</li>
+  </ul>
+  <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">视觉层在设计上使用 CSS 变量化，新剧加入 = 新的一组 token 值，不需要改引擎。</p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== SHOW TEMPLATE =========== -->
+<h2>2. 每部剧 = 一个扩展包</h2>
+<p class="muted">每部剧上线时只需填写统一模板，引擎自动解析所有卡牌</p>
+
+<h3>2.1 扩展包结构</h3>
+<table>
+  <tr><th>项目</th><th>说明</th><th>是否必填</th></tr>
+  <tr><td>show_id</td><td>对应 shows 表主键</td><td>必填</td></tr>
+  <tr><td>show_name</td><td>剧名（中/英）</td><td>必填</td></tr>
+  <tr><td>faction_name</td><td>该剧在游戏中作为派系的名称</td><td>必填</td></tr>
+  <tr><td>faction_icon</td><td>派系图标（Emoji 或 SVG）</td><td>必填</td></tr>
+  <tr><td>faction_bonus</td><td>纯派系组建卡组时获得的额外效果</td><td>推荐</td></tr>
+  <tr><td>cards[]</td><td>卡牌数组（见下方模板）</td><td>必填</td></tr>
+  <tr><td>hero_powers[]</td><td>该剧专属英雄技能（每种 1 个，可选是否启用）</td><td>可选</td></tr>
+  <tr><td>theme_tokens</td><td>视觉 token（背景色、边框色、装饰图标）</td><td>推荐</td></tr>
+</table>
+
+<h3>2.2 单张卡牌模板</h3>
+<div class="section">
+<pre style="font-size:0.78rem;color:var(--text-secondary);background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;overflow-x:auto;">
+{
+  "id": "got_001",
+  "show_id": 1,
+  "name_cn": "艾德·史塔克",
+  "name_en": "Ned Stark",
+  "type": "minion",           // minion | spell | equipment | location
+  "rarity": "legendary",       // common | rare | epic | legendary
+  "cost": 5,                   // 法力费用 0-10
+  "attack": 5,                 // 随从专属：攻击力
+  "health": 5,                 // 随从专属：生命值
+  "effect": {                  // 效果描述
+    "keywords": ["battlecry"],
+    "description_cn": "召唤一个 2/2 的冰原狼",
+    "description_en": "Summon a 2/2 Direwolf"
+  },
+  "challenge": {               // 出牌考验配置
+    "enabled": true,
+    "type": "dictation",       // dictation | fill_blank | multiple_choice
+    "source_line": 154,        // 对应 sentences 表的行 ID
+    "difficulty": "hard"
+  },
+  "quote": "Winter is coming", // 卡牌台词
+  "faction_bonus": {           // 派系联动
+    "stark_only": true,        // 仅史塔克卡组有效
+    "bonus_effect": "+1/+1"
+  }
+}
+</pre>
+</div>
+
+<h3>2.3 三部剧的内容包对比（示意）</h3>
+
+<div class="show-block">
+  <div class="show-card">
+    <div class="sc-badge" style="background:rgba(245,158,11,0.12);color:#f59e0b;">🐉 权力 · 奇幻</div>
+    <div class="sc-title">权力的游戏</div>
+    <div class="sc-type">派系加成：纯 GOT 卡组 → 开场抽 2 张牌</div>
+    <div class="sc-effect" style="margin-top:8px;">
+      <strong>传说随从</strong>：艾德·史塔克 5⚔/5❤️ <span class="tag teal">战吼</span> 召唤 2/2 冰原狼<br>
+      <strong>传说法术</strong>：凛冬将至 ✍️ 全场 4 伤害 + 冻结<br>
+      <strong>核心装备</strong>：瓦雷利亚钢剑 +3 ATK · 缝衣针潜行<br>
+      <strong>场地</strong>：君临城 全场 +1/+1
+    </div>
+  </div>
+
+  <div class="show-card">
+    <div class="sc-badge" style="background:rgba(59,130,246,0.12);color:#3b82f6;">🎩 年代 · 庄园</div>
+    <div class="sc-title">唐顿庄园</div>
+    <div class="sc-type">派系加成：纯 DA 卡组 → 每回合恢复 1 HP</div>
+    <div class="sc-effect" style="margin-top:8px;">
+      <strong>传说随从</strong>：罗伯特·卡劳利 4⚔/6❤️ <span class="tag green">嘲讽</span> 恢复全场 2 HP<br>
+      <strong>稀有法术</strong>："I'm a gentleman" 本回合盟友 +2/+2<br>
+      <strong>核心装备</strong>：家族印章 +2 HP 每回合指挥<br>
+      <strong>场地</strong>：大庄园 每回合获得 1 额外法力（最高 10）
+    </div>
+  </div>
+
+  <div class="show-card" style="opacity:0.7;">
+    <div class="sc-badge" style="background:rgba(34,197,94,0.12);color:#22c55e;">☕ 情景 · 喜剧</div>
+    <div class="sc-title">老友记</div>
+    <div class="sc-type">派系加成：纯 FR 卡组 → 手牌上限 +2</div>
+    <div class="sc-effect" style="margin-top:8px;">
+      <strong>传说随从</strong>：瑞秋·格林 3⚔/5❤️ <span class="tag teal">战吼</span> 复制对手一张手牌<br>
+      <strong>核心法术</strong>："We were on a break!" 重置本回合出牌次数<br>
+      <strong>核心装备</strong>：Central Perk 优惠卡 每回合首次抽牌 0 费<br>
+      <strong>场地</strong>：中央公园咖啡馆 所有卡牌费用 -1（最低 1）
+    </div>
+  </div>
+
+  <div class="show-card" style="opacity:0.5;">
+    <div class="sc-badge" style="background:rgba(239,68,68,0.12);color:#ef4444;">⚗️ 犯罪 · 剧情</div>
+    <div class="sc-title">绝命毒师</div>
+    <div class="sc-type">派系加成：纯 BB 卡组 → 法术伤害翻倍</div>
+    <div class="sc-effect" style="margin-top:8px;">
+      <strong>传说随从</strong>：沃尔特·怀特 ⚔?/❤️? <span class="tag purple">法强+3</span><br>
+      <span style="color:var(--text-muted);font-size:0.72rem;">内容占位——待剧集上线后填充</span>
+    </div>
+  </div>
+</div>
+
+<div class="section insight" style="border-left:3px solid var(--teal);">
+  <strong>💡 关键洞察</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    卡牌效果<strong>不需要和剧情一模一样</strong>，只需要<strong>让玩家觉得"这很符合那个角色"</strong>即可。<br>
+    比如瑞秋·格林的效果是"复制对手一张手牌"——剧情上她没有这个能力，但玩家会觉得"对，瑞秋是那种能从别人那得到东西的人"。<br>
+    这种<strong>印象派匹配</strong>比写实匹配更容易设计出好游戏。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== FACTION SYSTEM =========== -->
+<h2>3. 派系系统重设计</h2>
+<p class="muted">派系 = 剧集，但不仅仅是剧集——还有跨剧联动的可能</p>
+
+<h3>3.1 派系机制</h3>
+<table>
+  <tr><th>概念</th><th>定义</th><th>示例</th></tr>
+  <tr><td><strong>基础派系</strong></td><td>一部剧就是一个派系</td><td>「权力的游戏」「唐顿庄园」「老友记」</td></tr>
+  <tr><td><strong>派系纯化 bonus</strong></td><td>卡组中所有卡牌都来自同一部剧 → 激活特殊效果</td><td>纯 GOT = 开场抽 2 张<br>纯 DA = 每回合恢复 1 HP</td></tr>
+  <tr><td><strong>跨派系 synergy</strong></td><td>某些剧之间存在关键词联动</td><td>GOT + DA 的「贵族」属性卡获得加成</td></tr>
+  <tr><td><strong>中立卡</strong></td><td>不绑定任何剧集的通用卡牌</td><td>「基本装备」「通用法术」（所有玩家初始获得）</td></tr>
+</table>
+
+<h3>3.2 卡组构建的可能形态</h3>
+<table>
+  <tr><th>卡组类型</th><th>构成</th><th>优势</th><th>劣势</th></tr>
+  <tr><td><span class="tag purple">纯系卡组</span></td><td>全部卡牌来自同一部剧</td><td>激活派系专属 bonus</td><td>卡牌选择受限，容易被针对</td></tr>
+  <tr><td><span class="tag teal">双系卡组</span></td><td>两部剧的卡混合</td><td>可覆盖更多策略维度</td><td>无派系 bonus，配合需要磨合</td></tr>
+  <tr><td><span class="tag amber">混搭卡组</span></td><td>多部剧 + 中立卡</td><td>卡池最大，灵活应对</td><td>缺乏主题深度，节奏可能松散</td></tr>
+</table>
+
+<div class="section insight" style="border-left:3px solid var(--amber);">
+  <strong>💡 这个设计给了玩家很强的学习动机</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    想玩纯系卡组？你<strong>必须学完这部剧</strong>的足够集数才能解锁足够多的卡牌。<br>
+    想玩双系？你需要学完两部剧。<br>
+    这不再是"为了学而学"——这是"为了组出我想玩的卡组而去学"。<br>
+    每加入一部新剧，玩家的卡池战略多了一个维度，旧剧的卡可能因为新剧加入而产生新的配合。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== EQUIPMENT REDESIGN =========== -->
+<h2>4. 装备系统重设计</h2>
+<p class="muted">装备来源二分：通用装备（所有剧共享） + 剧集专属装备（从该剧内容产出）</p>
+
+<h3>4.1 通用装备（初始获得，永久可用）</h3>
+<table>
+  <tr><th>位置</th><th>装备</th><th>效果</th><th>获取</th></tr>
+  <tr><td>武器</td><td>🗡️ 训练木剑</td><td>+1 ATK，3 耐久</td><td>初始赠送</td></tr>
+  <tr><td>武器</td><td>🗡️ 铁剑</td><td>+2 ATK，2 耐久</td><td>20 场对战解锁</td></tr>
+  <tr><td>护甲</td><td>🛡️ 布甲</td><td>+1 HP</td><td>初始赠送</td></tr>
+  <tr><td>护甲</td><td>🛡️ 链甲</td><td>+2 HP</td><td>50 场对战解锁</td></tr>
+  <tr><td>宝物</td><td>💎 幸运币</td><td>每 3 回合开始获得 1 临时法力</td><td>天梯达到黄金</td></tr>
+</table>
+
+<h3>4.2 剧集专属装备（从学习该剧获得）</h3>
+<table>
+  <tr><th>剧集</th><th>装备</th><th>效果</th><th>获取条件</th></tr>
+  <tr><td rowspan="2">GOT</td><td>🗡️ 瓦雷利亚钢剑</td><td>+3 ATK，2 耐久。史塔克随从 +1 ATK</td><td>GOT 全收集</td></tr>
+  <tr><td>🛡️ 龙鳞甲</td><td>+2 HP，1 护盾。火焰伤害 -1</td><td>准确率 ≥95% 集</td></tr>
+  <tr><td rowspan="2">DA</td><td>🎩 家族印章戒指</td><td>+1 ATK，回合开始指挥 1 个 1/1 仆人</td><td>DA 全收集</td></tr>
+  <tr><td>👗 蕾丝手套</td><td>+1 HP。你每打出一张法术，装备随从 +1 HP</td><td>准确率 ≥95% 集</td></tr>
+  <tr><td rowspan="2">未来剧</td><td>每部剧 2-3 件专属装备</td><td colspan="2">遵循统一模板：稀有 + 史诗各 1-2 件，与该剧主题绑定</td></tr>
+</table>
+
+<h3>4.3 装备的"剧集亲和"概念</h3>
+<p>每件装备有一个 <strong>affinity（亲和）</strong> 属性，指明它最适合哪部剧的随从：</p>
+<ul class="dot-list">
+  <li>瓦雷利亚钢剑 → affinity: GOT → 装备在 GOT 随从上时效果 100%，其他剧随从只有 80%</li>
+  <li>家族印章戒指 → affinity: DA → 同理</li>
+  <li>铁剑、链甲 → affinity: 通用 → 任何随从都是 100%</li>
+</ul>
+<p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+  这又给玩家一个动机：想发挥某件装备的最大威力？去学它的来源剧集。
+</p>
+
+<hr class="divider">
+
+<!-- =========== BATTLE WITHOUT A THEME =========== -->
+<h2>5. 战场设计：去主题化</h2>
+<p class="muted">战场本身不绑定任何剧集——它是一个通用的"竞技场"</p>
+
+<div class="two-col">
+  <div class="section">
+    <strong>桌游竞技场（默认）</strong>
+    <p style="font-size:0.78rem;margin-top:6px;">
+      深色木质桌面风格，中性的棋子/卡牌布局。<br>
+      没有城堡、没有龙、没有特定剧集元素。<br>
+      所有玩家看到的默认战场相同，就像下棋。
+    </p>
+  </div>
+  <div class="section">
+    <strong>主题皮肤（可选）</strong>
+    <p style="font-size:0.78rem;margin-top:6px;">
+      玩家可在设置中选择战场皮肤：<br>
+      - 🐉 维斯特洛石板地图<br>
+      - 🎩 唐顿庄园橡木书房<br>
+      - ☕ 中央公园咖啡馆沙发区<br>
+      皮肤不影响游戏功能，纯视觉。
+    </p>
+  </div>
+</div>
+
+<div class="section insight" style="border-left:3px solid var(--teal);">
+  <strong>💡 为什么要去主题化</strong>
+  <p style="font-size:0.82rem;margin-top:4px;">
+    如果战场默认就是维斯特洛，那《唐顿庄园》的玩家会觉得"这游戏是 GOT 专有的"。<br>
+    通用竞技场 = 所有剧集的玩家都是平等的。<br>
+    <strong>加入新剧时完全不需要改引擎或 UI</strong> — 只需要往数据库插入新卡牌数据。
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== PLAYER PROGRESSION =========== -->
+<h2>6. 玩家成长路径（多剧集视角）</h2>
+<p class="muted">不是"打通 GOT 再说"，而是"每部剧都是可选的成长树"</p>
+
+<div class="two-col">
+  <div class="section" style="border-left:3px solid var(--teal);">
+    <strong style="font-size:0.9rem;">📖 学业线（已有）</strong>
+    <ul class="dot-list" style="margin-top:6px;">
+      <li>10 级封号系统（不变）</li>
+      <li>每日御前挑战（已有）</li>
+      <li>每部剧有独立的完成度 %</li>
+      <li>剧集完成度影响：该剧卡牌解锁率、专属装备获取</li>
+    </ul>
+  </div>
+  <div class="section" style="border-left:3px solid var(--purple);">
+    <strong style="font-size:0.9rem;">⚔️ 竞技线（新增）</strong>
+    <ul class="dot-list" style="margin-top:6px;">
+      <li>天梯段位（青铜→王者）</li>
+      <li>赛季限定卡牌（每赛季 1 张）</li>
+      <li>卡组多样性奖：鼓励使用不同剧集卡组</li>
+      <li>巅峰赛：限时指定派系环境（如"本月仅限 DA + GOT"）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" style="border-left:3px solid var(--amber);">
+  <strong>📊 新剧上线时会发生什么？</strong>
+  <p style="font-size:0.82rem;margin-top:6px;line-height:1.8;">
+    1. 内容团队填写「剧集扩展包模板」→ 生成 20-40 张新卡牌<br>
+    2. 运行自动测试 → 检查新卡牌是否和现有引擎兼容<br>
+    3. 部署到 SIT → 新旧卡一起匹配无异常<br>
+    4. 上线当天玩家可看到新剧内容，开始学习 → 收获新卡牌<br>
+    5. 新剧上线 2 周后环境稳定 → 如果纯派系 bonus 太强/太弱，调整数值<br>
+    <br>
+    <strong>整个过程不需要改一行引擎代码。只需要：数据 + 测试 + 部署。</strong>
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- =========== P0 ADJUSTMENT =========== -->
+<h2>7. P0 应该做什么</h2>
+<p class="muted">基于新框架，重新调整 P0 的范围</p>
+
+<table>
+  <tr><th>模块</th><th>P0 内容</th><th>说明</th></tr>
+  <tr><td>通用引擎</td><td>核心战斗逻辑（不绑定任何剧集）</td><td>7 阶段 / 法力 / 随从 / 法术 / 装备 / 场地</td></tr>
+  <tr><td>内容模板</td><td>剧集扩展包模板 + 卡牌数据格式</td><td>JSON schema + 数据库设计</td></tr>
+  <tr><td>首部剧集：GOT</td><td>第一批 30-40 张卡牌（覆盖全部 4 种类型）</td><td>用现有内容快速填充</td></tr>
+  <tr><td>首部剧集：DA</td><td>第一批 20-30 张卡牌</td><td>同时做 2 部剧验证框架可扩展性</td></tr>
+  <tr><td>通用装备</td><td>5 件初始装备</td><td>不绑定剧集</td></tr>
+  <tr><td>AI 对战</td><td>简单 AI（任何卡组都能对战）</td><td>AI 不关心卡牌来源剧集</td></tr>
+  <tr><td>纯系 bonus</td><td>先不做派系 bonus，P1 加</td><td>先确保跨剧对战不崩</td></tr>
+</table>
+
+<div class="verdict">
+  <h3 style="margin-top:0;">🎯 最终设计总结</h3>
+  <p style="margin-top:8px;">
+    <strong>核心一句话</strong>：卡牌对战引擎是<strong>中立的</strong>，每部剧是<strong>可插拔的内容包</strong>。<br><br>
+    <strong>玩家视角</strong>：我学 GOT → 拿到 GOT 卡组。我学 DA → 拿到 DA 卡组。我可以纯 GOT 打纯 DA，也可以混搭，也可以和学老友记的人对战。不管对手学的是什么剧，我们对战的<strong>是同一套规则</strong>。<br><br>
+    <strong>运营视角</strong>：新剧上线 = 新卡包上线。不需要开发新玩法，不需要改代码。内容团队填模板 → 测试 → 上线。<br><br>
+    <strong>增长视角</strong>：玩家为了让卡组更强，会主动去学没看过的剧。这是强于任何推送通知的"内容发现引擎"。<br><br>
+    <strong>框架的终极形态</strong>：剧集扩展包可以做"稀有度分级"——GOT 这种大制作有 40 张卡 + 3 件专属装备，DA 有 30 张 + 2 件，轻量剧有 15-20 张 + 1 件。每部剧的 card_count 与它的内容量成正比，自然地。
+  </p>
+</div>
+
+</div>
+</body>
+</html>
