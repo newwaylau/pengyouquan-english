@@ -198,13 +198,13 @@ public class FriendService {
 
     private static class FriendChallenge {
         long id;
-        long challengerId;
-        long defenderId;
+        Long challengerId;
+        Long defenderId;
         String status; // pending / accepted / rejected
         String sessionId; // 游戏会话ID（accepted后）
         long createdAt;
 
-        FriendChallenge(long id, long challengerId, long defenderId) {
+        FriendChallenge(long id, Long challengerId, Long defenderId) {
             this.id = id;
             this.challengerId = challengerId;
             this.defenderId = defenderId;
