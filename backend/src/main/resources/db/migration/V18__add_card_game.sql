@@ -69,14 +69,52 @@ CREATE TABLE IF NOT EXISTS user_equipment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 插入初始卡牌数据（GOT + DA 各 5 张做 P0 演示）
-INSERT INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text) VALUES
-(1, '守夜人誓言', 'Night Watch Oath', 'spell', 'rare', 2, NULL, NULL, '{"keywords":[],"description_cn":"恢复 3 点生命","description_en":"Restore 3 Health"}', 'nightwatch', 'I am the sword in the darkness.'),
-(1, '冰原狼', 'Direwolf', 'minion', 'common', 2, 2, 2, '{"keywords":[],"description_cn":"","description_en":""}', 'stark', ''),
-(1, '凛冬将至', 'Winter Is Coming', 'spell', 'legendary', 5, NULL, NULL, '{"keywords":["challenge"],"description_cn":"对敌方全体造成 4 点伤害","description_en":"Deal 4 damage to all enemies"}', 'stark', 'Winter is coming.'),
-(1, '龙之吐息', 'Dragon Breath', 'spell', 'epic', 3, NULL, NULL, '{"keywords":["challenge"],"description_cn":"造成 5 点伤害","description_en":"Deal 5 damage"}', 'targaryen', 'Dracarys'),
-(1, '铁盾兵', 'Iron Shield', 'minion', 'common', 1, 1, 4, '{"keywords":["taunt"],"description_cn":"","description_en":""}', 'neutral', ''),
-(1, '君临城', 'Kings Landing', 'location', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"所有随从 +1/+1","description_en":"All minions +1/+1"}', 'neutral', ''),
-(2, '卡劳利公馆', 'Crawley House', 'location', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"每回合恢复 2 点生命","description_en":"Restore 2 Health each turn"}', 'crawley', ''),
-(2, '大庄园', 'The Great Hall', 'location', 'epic', 4, NULL, NULL, '{"keywords":[],"description_cn":"每回合获得 1 额外法力","description_en":"Gain 1 extra mana each turn"}', 'crawley', ''),
-(2, '忠诚管家', 'Loyal Butler', 'minion', 'common', 1, 1, 2, '{"keywords":["battlecry"],"description_cn":"恢复 2 点生命","description_en":"Restore 2 Health"}', 'crawley', ''),
-(2, '庄园舞会', 'The Ball', 'spell', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"抽 2 张牌","description_en":"Draw 2 cards"}', 'crawley', '');
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '守夜人誓言', 'Night Watch Oath', 'spell', 'rare', 2, NULL, NULL, '{"keywords":[],"description_cn":"恢复 3 点生命","description_en":"Restore 3 Health"}', 'nightwatch', 'I am the sword in the darkness.'
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '冰原狼', 'Direwolf', 'minion', 'common', 2, 2, 2, '{"keywords":[],"description_cn":"","description_en":""}', 'stark', ''
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '凛冬将至', 'Winter Is Coming', 'spell', 'legendary', 5, NULL, NULL, '{"keywords":["challenge"],"description_cn":"对敌方全体造成 4 点伤害","description_en":"Deal 4 damage to all enemies"}', 'stark', 'Winter is coming.'
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '龙之吐息', 'Dragon Breath', 'spell', 'epic', 3, NULL, NULL, '{"keywords":["challenge"],"description_cn":"造成 5 点伤害","description_en":"Deal 5 damage"}', 'targaryen', 'Dracarys'
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '铁盾兵', 'Iron Shield', 'minion', 'common', 1, 1, 4, '{"keywords":["taunt"],"description_cn":"","description_en":""}', 'neutral', ''
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '君临城', 'Kings Landing', 'location', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"所有随从 +1/+1","description_en":"All minions +1/+1"}', 'neutral', ''
+FROM shows s WHERE s.name LIKE '%S01E01%' AND (s.name LIKE '%Game of Thrones%' OR s.name LIKE '%GOT%')
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '卡劳利公馆', 'Crawley House', 'location', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"每回合恢复 2 点生命","description_en":"Restore 2 Health each turn"}', 'crawley', ''
+FROM shows s WHERE s.name LIKE '%Downton Abbey%' OR s.name LIKE '%唐顿%' OR s.name LIKE '%DA%'
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '大庄园', 'The Great Hall', 'location', 'epic', 4, NULL, NULL, '{"keywords":[],"description_cn":"每回合获得 1 额外法力","description_en":"Gain 1 extra mana each turn"}', 'crawley', ''
+FROM shows s WHERE s.name LIKE '%Downton Abbey%' OR s.name LIKE '%唐顿%' OR s.name LIKE '%DA%'
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '忠诚管家', 'Loyal Butler', 'minion', 'common', 1, 1, 2, '{"keywords":["battlecry"],"description_cn":"恢复 2 点生命","description_en":"Restore 2 Health"}', 'crawley', ''
+FROM shows s WHERE s.name LIKE '%Downton Abbey%' OR s.name LIKE '%唐顿%' OR s.name LIKE '%DA%'
+LIMIT 1;
+
+INSERT IGNORE INTO cards (show_id, name_cn, name_en, card_type, rarity, cost, attack, health, effect_json, faction, quote_text)
+SELECT s.id, '庄园舞会', 'The Ball', 'spell', 'rare', 3, NULL, NULL, '{"keywords":[],"description_cn":"抽 2 张牌","description_en":"Draw 2 cards"}', 'crawley', ''
+FROM shows s WHERE s.name LIKE '%Downton Abbey%' OR s.name LIKE '%唐顿%' OR s.name LIKE '%DA%'
+LIMIT 1;

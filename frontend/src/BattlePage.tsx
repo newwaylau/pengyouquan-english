@@ -3,7 +3,7 @@ import { cardApi } from './api/cardClient';
 import ChestPanel from './ChestPanel';
 
 export default function BattlePage({ user, onNavigate }: { user: any; onNavigate: (target: string, data?: any) => void }) {
-  const [tab, setTab] = useState<'battle' | 'history' | 'rank'>('battle');
+  const [tab, setTab] = useState<'battle' | 'history' | 'rank' | 'season'>('battle');
   const [friends, setFriends] = useState<any[]>([]);
   const [pendingBattles, setPendingBattles] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
@@ -18,6 +18,8 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searching, setSearching] = useState(false);
+  const [seasonData, setSeasonData] = useState<any>(null);
+  const [seasonReward, setSeasonReward] = useState<any>(null);
 
   // 挑战表单
   const [challengeDeckId, setChallengeDeckId] = useState<number | null>(null);
@@ -29,7 +31,17 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
 
   useEffect(() => {
     loadAll();
+    loadSeason();
   }, []);
+
+  const loadSeason = async () => {
+    const [curRes, rewRes] = await Promise.all([
+      cardApi.getCurrentSeason(),
+      cardApi.getSeasonRewards(),
+    ]);
+    if (curRes.code === 200) setSeasonData(curRes.data);
+    if (rewRes.code === 200) setSeasonReward(rewRes.data);
+  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -170,6 +182,9 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
         </button>
         <button className={`cst-btn ${tab === 'rank' ? 'active' : ''}`} onClick={() => setTab('rank')}>
           🏆 排名
+        </button>
+        <button className={`cst-btn ${tab === 'season' ? 'active' : ''}`} onClick={() => setTab('season')}>
+          🗓️ 赛季
         </button>
       </div>
 
@@ -439,6 +454,118 @@ export default function BattlePage({ user, onNavigate }: { user: any; onNavigate
           {leaderboard.length === 0 && (
             <div className="cc-empty">
               <div className="cc-empty-text">暂无排名数据</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: 🗓️ 赛季 */}
+      {tab === 'season' && (
+        <div className="cc-arena-tab">
+          {seasonData?.active ? (
+            <div style={{
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              borderRadius: 'var(--radius-lg)', padding: 20, marginBottom: 16,
+              border: '1px solid var(--teal-glow)',
+              boxShadow: '0 4px 20px rgba(20, 184, 166, 0.15)'
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ fontSize: 14, color: 'var(--teal)', fontWeight: 600 }}>
+                  {seasonData.titleCn || `S${seasonData.seasonNumber} 赛季`}
+                </div>
+                {seasonData.daysLeft > 0 && (
+                  <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)', margin: '8px 0' }}>
+                    {seasonData.daysLeft}天
+                  </div>
+                )}
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  {seasonData.daysLeft > 0 ? `还剩 ${seasonData.daysLeft} 天` : '赛季已结束'}
+                </div>
+              </div>
+              {seasonData.progress > 0 && (
+                <div style={{
+                  height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3,
+                  overflow: 'hidden', marginBottom: 12
+                }}>
+                  <div style={{
+                    width: `${Math.min(100, seasonData.progress * 100)}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, var(--teal), var(--teal-light))',
+                    borderRadius: 3,
+                    transition: 'width 0.5s ease'
+                  }} />
+                </div>
+              )}
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center' }}>
+                {seasonData.startDate?.substring(0, 10)} ~ {seasonData.endDate?.substring(0, 10)}
+              </div>
+            </div>
+          ) : (
+            <div className="cc-empty">
+              <div className="cc-empty-text">暂无赛季信息</div>
+            </div>
+          )}
+
+          {/* 赛季奖励预览 */}
+          <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8, fontWeight: 600 }}>
+            🎁 赛季奖励预览
+          </div>
+          {(seasonData?.rewards || []).map((tier: any, i: number) => (
+            <div key={i} className="cc-deck-item" style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              borderLeft: `3px solid ${['#ff8c00', '#a335ee', '#a335ee', '#0070dd', '#0070dd', '#9d9d9d'][i]}`
+            }}>
+              <div>
+                <div style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }}>
+                  {['传说', '钻石', '白金', '黄金', '白银', '青铜'][i] || tier.tier}
+                </div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                  {tier.legendaryCards ? `传说卡×${tier.legendaryCards} ` : ''}
+                  {tier.epicCards ? `史诗卡×${tier.epicCards} ` : ''}
+                  {tier.rareCards ? `稀有卡×${tier.rareCards} ` : ''}
+                  {tier.commonCards ? `普通卡×${tier.commonCards} ` : ''}
+                  {tier.randomCards > 0 ? `随机卡×${tier.randomCards} ` : ''}
+                  ✨{tier.stardust}
+                </div>
+              </div>
+              <div style={{ fontSize: 20 }}>{['👑', '💎', '🥇', '🥈', '🥉', '🪙'][i]}</div>
+            </div>
+          ))}
+
+          {/* 当前用户赛季奖励状态 */}
+          {seasonReward?.seasonReward?.settled && (
+            <div style={{
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              borderRadius: 'var(--radius-lg)', padding: 16, marginTop: 16,
+              border: '1px solid var(--teal-glow)'
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ fontSize: 14, color: 'var(--teal)', fontWeight: 600 }}>本赛季结算</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: '8px 0' }}>
+                  {seasonReward.seasonReward.finalRank}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  奖杯: {seasonReward.seasonReward.finalTrophies}
+                </div>
+              </div>
+              {!seasonReward.seasonReward.rewardClaimed ? (
+                <button className="btn btn-primary" style={{ width: '100%', padding: '10px' }}
+                  onClick={async () => {
+                    const res = await cardApi.claimSeasonReward();
+                    if (res.code === 200) {
+                      alert(`🎉 领取成功！获得 ${res.data.stardustGained} 星尘`);
+                      loadSeason();
+                    } else {
+                      alert(res.message || '领取失败');
+                    }
+                  }}>
+                  领取赛季奖励
+                </button>
+              ) : (
+                <div style={{ textAlign: 'center', color: 'var(--success)', fontSize: 13 }}>
+                  ✅ 奖励已领取
+                </div>
+              )}
             </div>
           )}
         </div>

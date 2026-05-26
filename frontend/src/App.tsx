@@ -13,6 +13,8 @@ import DailyChallengePage from './DailyChallengePage';
 import CardCollectionPage from './CardCollectionPage';
 import BattlePage from './BattlePage';
 import BattleArenaPage from './BattleArenaPage';
+import EquipmentPage from './EquipmentPage';
+import HeroSelectPage from './HeroSelectPage';
 import ChangePasswordModal from './ChangePasswordModal';
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
@@ -24,7 +26,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -140,6 +142,8 @@ export default function App() {
               {page === 'battle' && '对战'}
               {page === 'battle-arena' && '实时对战'}
               {page === 'clan' && '七国铁王座'}
+              {page === 'equipment' && '装备'}
+              {page === 'hero' && '英雄'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
@@ -203,6 +207,8 @@ export default function App() {
           {page === 'battle' && <BattlePage user={user} onNavigate={handleNavigate} />}
           {page === 'battle-arena' && <BattleArenaPage user={user} onBack={() => setPage('battle')} />}
           {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
+          {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
+          {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
           {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
         </main>
 
@@ -214,6 +220,7 @@ export default function App() {
             { key: 'cards', icon: <span>🎴</span>, label: '卡牌', requiresLogin: true },
             { key: 'battle', icon: <span>⚔️</span>, label: '对战', requiresLogin: true },
             { key: 'clan', icon: <span>👑</span>, label: '封臣', requiresLogin: true },
+            { key: 'hero', icon: <span>🦸</span>, label: '英雄', requiresLogin: true },
           ].map(item => {
             const disabled = item.requiresLogin && !user;
             return (

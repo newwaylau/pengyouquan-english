@@ -70,4 +70,32 @@ export const cardApi = {
   craftCard: async (cardId: number) =>
     request('/api/cards/craft', { method: 'POST', body: JSON.stringify({ cardId }) }),
   getStardust: async () => request('/api/cards/stardust'),
+
+  // 装备系统
+  getEquipment: async () => request('/api/equipment'),
+  getMyGear: async () => request('/api/equipment/mine'),
+  equipItem: async (equipmentId: number, slot: string) =>
+    request(`/api/equipment/equip-by-id/${equipmentId}/${slot}`, { method: 'POST' }),
+  unequipItem: async (slot: string) =>
+    request(`/api/equipment/unequip/${slot}`, { method: 'POST' }),
+  upgradeEquipment: async (userEquipmentId: number) =>
+    request(`/api/equipment/upgrade/${userEquipmentId}`, { method: 'POST' }),
+  rerollEquipment: async (userEquipmentId: number) =>
+    request(`/api/equipment/reroll/${userEquipmentId}`, { method: 'POST' }),
+  getEquipmentStats: async () => request('/api/equipment/stats'),
+
+  // 英雄系统
+  getHeroes: async () => request('/api/heroes'),
+  selectHero: async (heroId: number) =>
+    request(`/api/heroes/select/${heroId}`, { method: 'POST' }),
+  getActiveHero: async () => request('/api/heroes/active'),
+  upgradeHeroSkill: async () =>
+    request('/api/heroes/upgrade-skill', { method: 'POST' }),
+
+  // 赛季系统
+  getCurrentSeason: async () => request('/api/season/current'),
+  getSeasonHistory: async () => request('/api/season/history'),
+  settleSeason: async () => request('/api/season/settle', { method: 'POST' }),
+  claimSeasonReward: async () => request('/api/season/claim', { method: 'POST' }),
+  getSeasonRewards: async () => request('/api/season/rewards'),
 };
