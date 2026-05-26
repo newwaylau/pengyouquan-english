@@ -506,20 +506,26 @@ public class GameEngine {
 
         // 获取用户拥有的卡牌，构建牌组
         List<com.pengyouquan.english.model.UserCard> userCards = userCardRepository.findByUserId(userId);
+        // 构建金卡ID集合
+        Set<Long> goldenCardIds = userCards.stream()
+                .filter(uc -> Boolean.TRUE.equals(uc.getIsGolden()))
+                .map(com.pengyouquan.english.model.UserCard::getCardId)
+                .collect(Collectors.toSet());
+
         if (userCards.isEmpty()) {
             // 没有收藏的卡，用全部卡牌
             List<Card> allCards = cardRepository.findAll();
             List<Card> shuffled = new ArrayList<>(allCards);
             Collections.shuffle(shuffled);
             List<Card> deckCards = shuffled.subList(0, Math.min(DECK_SIZE, shuffled.size()));
-            state.setDeck(cardsToCardStates(deckCards));
+            state.setDeck(applyGoldenBoost(deckCards, goldenCardIds));
         } else {
             // 从收藏中构建牌组（按稀有度和随机混合）
             List<Card> allOwnedCards = cardRepository.findAllById(
                     userCards.stream().map(uc -> uc.getCardId()).collect(Collectors.toList()));
             Collections.shuffle(allOwnedCards);
             List<Card> deckCards = allOwnedCards.subList(0, Math.min(DECK_SIZE, allOwnedCards.size()));
-            state.setDeck(cardsToCardStates(deckCards));
+            state.setDeck(applyGoldenBoost(deckCards, goldenCardIds));
         }
 
         // 洗牌
@@ -543,17 +549,50 @@ public class GameEngine {
 
     private List<CardState> cardsToCardStates(List<Card> cards) {
         return cards.stream().map(c -> {
+            int baseAttack = c.getAttack() != null ? c.getAttack() : 0;
+            int baseHealth = c.getHealth() != null ? c.getHealth() : 0;
+
             CardState cs = new CardState(
                     c.getId(), c.getNameCn(), c.getNameEn(),
                     c.getCardType(), c.getRarity(),
                     c.getCost() != null ? c.getCost() : 0,
-                    c.getAttack() != null ? c.getAttack() : 0,
-                    c.getHealth() != null ? c.getHealth() : 0,
+                    baseAttack,
+                    baseHealth,
                     c.getEffectJson(), c.getChallengeSentenceId()
             );
             // 解析关键词
             parseKeywords(cs, c);
             return cs;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 构建金卡增强状态的CardState（金卡+1攻+1血）
+     */
+    private CardState buildGoldenCardState(Card card) {
+        int goldenAttack = (card.getAttack() != null ? card.getAttack() : 0) + 1;
+        int goldenHealth = (card.getHealth() != null ? card.getHealth() : 0) + 1;
+        CardState cs = new CardState(
+                card.getId(), card.getNameCn(), card.getNameEn(),
+                card.getCardType(), card.getRarity(),
+                card.getCost() != null ? card.getCost() : 0,
+                goldenAttack,
+                goldenHealth,
+                card.getEffectJson(), card.getChallengeSentenceId()
+        );
+        parseKeywords(cs, card);
+        return cs;
+    }
+
+    /**
+     * 对牌组应用金卡加成：金卡版本的卡牌+1攻击、+1生命
+     */
+    private List<CardState> applyGoldenBoost(List<Card> cards, Set<Long> goldenCardIds) {
+        return cards.stream().map(c -> {
+            if (goldenCardIds.contains(c.getId())) {
+                return buildGoldenCardState(c);
+            }
+            return cardsToCardStates(List.of(c)).get(0);
         }).collect(Collectors.toList());
     }
 

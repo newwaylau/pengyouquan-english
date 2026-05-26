@@ -26,12 +26,36 @@ public class ExpeditionService {
     private final ObjectMapper objectMapper;
     private final AchievementService achievementService;
 
-    // 每层节点序列模板
-    private static final Map<Integer, List<String>> ACT_NODE_TEMPLATES = new LinkedHashMap<>();
+    // 每层节点序列模板（内部数组表示分支选项，多元素表示岔路）
+    private static final Map<Integer, List<List<String>>> ACT_NODE_TEMPLATES = new LinkedHashMap<>();
     static {
-        ACT_NODE_TEMPLATES.put(1, List.of("combat", "event", "rest", "combat", "combat", "boss"));
-        ACT_NODE_TEMPLATES.put(2, List.of("combat", "event", "rest", "shop", "combat", "combat", "boss"));
-        ACT_NODE_TEMPLATES.put(3, List.of("combat", "event", "rest", "shop", "combat", "event", "boss"));
+        // Act 1: 第2个节点为岔路（事件/战斗），第4个为岔路（战斗/商店）
+        ACT_NODE_TEMPLATES.put(1, List.of(
+            List.of("combat"),
+            List.of("event", "combat"),   // 岔路
+            List.of("rest"),
+            List.of("combat", "shop"),    // 岔路
+            List.of("combat"),
+            List.of("boss")
+        ));
+        ACT_NODE_TEMPLATES.put(2, List.of(
+            List.of("combat"),
+            List.of("event", "combat"),
+            List.of("rest"),
+            List.of("shop", "event"),
+            List.of("combat"),
+            List.of("combat"),
+            List.of("boss")
+        ));
+        ACT_NODE_TEMPLATES.put(3, List.of(
+            List.of("combat"),
+            List.of("event", "combat"),
+            List.of("rest"),
+            List.of("shop", "event"),
+            List.of("combat"),
+            List.of("event", "combat"),
+            List.of("boss")
+        ));
     }
 
     // 基础敌人攻击力
@@ -91,9 +115,9 @@ public class ExpeditionService {
             validCardIds = validCardIds.subList(0, 10);
         }
 
-        // 生成地图节点
-        List<String> nodes = ACT_NODE_TEMPLATES.get(1);
-        String mapNodesJson = toJson(nodes);
+        // 生成地图节点（分层结构支持岔路）
+        List<List<String>> template = ACT_NODE_TEMPLATES.get(1);
+        String mapNodesJson = toJson(template);
 
         // 创建远征
         Expedition exp = new Expedition();
@@ -139,7 +163,9 @@ public class ExpeditionService {
         String nodeType = getCurrentNodeType(exp);
         result.put("currentNodeType", nodeType);
 
-        if ("combat".equals(nodeType) || "boss".equals(nodeType)) {
+        if ("branch".equals(nodeType)) {
+            result.put("nodeOptions", getCurrentNodeOptions(exp));
+        } else if ("combat".equals(nodeType) || "boss".equals(nodeType)) {
             result.put("enemy", getCurrentEnemyData(exp));
         } else if ("event".equals(nodeType)) {
             result.put("events", getCurrentEventData(exp));
@@ -223,7 +249,15 @@ public class ExpeditionService {
         Random rand = new Random();
         Long cardId = deck.get(rand.nextInt(deck.size()));
         Optional<Card> cardOpt = cardRepository.findById(cardId);
+
+        // 读取升级信息
+        Map<Long, Map<String, Integer>> cardUpgrades = getCardUpgrades(exp);
+
         int cardAttack = cardOpt.map(c -> c.getAttack() != null ? c.getAttack() : 2).orElse(2);
+        // 应用篝火升级
+        if (cardUpgrades.containsKey(cardId)) {
+            cardAttack += cardUpgrades.get(cardId).getOrDefault("attackBonus", 0);
+        }
 
         int damageDealt = 0;
         int damageTaken = 0;
@@ -503,7 +537,7 @@ public class ExpeditionService {
             int newHp = Math.min(exp.getMaxHp(), exp.getPlayerHp() + healAmount);
             exp.setPlayerHp(newHp);
         } else if ("upgrade".equals(action) && cardId != null) {
-            // 升级一张卡牌：增加攻击力2
+            // 升级一张卡牌：+1攻击力或+1生命值（由upgradeType决定，默认攻击）
             List<Long> deck = parseJsonList(exp.getCurrentDeck());
             boolean found = false;
             for (int i = 0; i < deck.size(); i++) {
@@ -515,22 +549,24 @@ public class ExpeditionService {
             if (!found) {
                 throw new IllegalStateException("卡牌不在当前牌组中");
             }
-            // 找原卡升级（这里简化处理，记录升级状态）
+            // 找原卡升级
             Optional<Card> cardOpt = cardRepository.findById(cardId);
             if (cardOpt.isPresent()) {
-                Card original = cardOpt.get();
-                int newAttack = (original.getAttack() != null ? original.getAttack() : 2) + 2;
-                // 在current_deck中用该卡牌id多次出现都算已升级
-                // 实际升级效果在前端处理，后端记录升级在battle_state
+                // 在 battle_state 中记录升级信息
                 try {
                     Map<String, Object> upgrades = new HashMap<>();
                     if (exp.getBattleState() != null && !"{}".equals(exp.getBattleState())) {
                         upgrades = objectMapper.readValue(exp.getBattleState(), Map.class);
                     }
                     if (!upgrades.containsKey("upgradedCards")) {
-                        upgrades.put("upgradedCards", new ArrayList<>());
+                        upgrades.put("upgradedCards", new HashMap<String, Map<String, Integer>>());
                     }
-                    ((List<Object>) upgrades.get("upgradedCards")).add(cardId);
+                    Map<String, Map<String, Integer>> upgradedCards = (Map<String, Map<String, Integer>>) upgrades.get("upgradedCards");
+                    String cardKey = String.valueOf(cardId);
+                    Map<String, Integer> cardUpgrade = upgradedCards.getOrDefault(cardKey, new HashMap<>());
+                    cardUpgrade.put("attackBonus", cardUpgrade.getOrDefault("attackBonus", 0) + 1);
+                    cardUpgrade.put("healthBonus", cardUpgrade.getOrDefault("healthBonus", 0) + 1);
+                    upgradedCards.put(cardKey, cardUpgrade);
                     exp.setBattleState(objectMapper.writeValueAsString(upgrades));
                 } catch (Exception ignored) {}
             }
@@ -540,9 +576,47 @@ public class ExpeditionService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
-        result.put("healAmount", healAmount);
+        if ("heal".equals(action)) {
+            result.put("healAmount", healAmount);
+        } else if ("upgrade".equals(action)) {
+            result.put("upgradedCardId", cardId);
+            result.put("attackBonus", 1);
+            result.put("healthBonus", 1);
+            result.put("upgradeMessage", "卡牌已强化！攻击+1，生命+1");
+        }
         result.put("expedition", buildExpeditionData(exp));
         return result;
+    }
+
+    /**
+     * 获取卡牌升级信息（从 battle_state 读取）
+     */
+    @SuppressWarnings("unchecked")
+    private Map<Long, Map<String, Integer>> getCardUpgrades(Expedition exp) {
+        Map<Long, Map<String, Integer>> upgrades = new HashMap<>();
+        try {
+            String bs = exp.getBattleState();
+            if (bs == null || bs.isBlank() || "{}".equals(bs)) return upgrades;
+            Map<String, Object> state = objectMapper.readValue(bs, Map.class);
+            Object upgradedObj = state.get("upgradedCards");
+            if (upgradedObj instanceof Map) {
+                Map<String, Map<String, Integer>> upgradedCards = (Map<String, Map<String, Integer>>) upgradedObj;
+                for (Map.Entry<String, Map<String, Integer>> entry : upgradedCards.entrySet()) {
+                    Long cardId = Long.parseLong(entry.getKey());
+                    upgrades.put(cardId, entry.getValue());
+                }
+            } else if (upgradedObj instanceof List) {
+                // 向后兼容旧格式（List<Long>）
+                List<Object> oldList = (List<Object>) upgradedObj;
+                for (Object o : oldList) {
+                    if (o instanceof Number) {
+                        Long cid = ((Number) o).longValue();
+                        upgrades.put(cid, new HashMap<>(Map.of("attackBonus", 2, "healthBonus", 0)));
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return upgrades;
     }
 
     // ==================== 8. 商店 ====================
@@ -603,6 +677,18 @@ public class ExpeditionService {
         healItem.put("cost", 25);
         items.add(healItem);
 
+        // 删卡选项：花金币移除一张手牌
+        List<Long> deck = parseJsonList(exp.getCurrentDeck());
+        if (deck.size() > 3) {
+            Map<String, Object> removeItem = new HashMap<>();
+            removeItem.put("type", "remove");
+            removeItem.put("id", 1);
+            removeItem.put("nameCn", "删卡服务");
+            removeItem.put("description", "移除一张卡牌（压缩牌组）");
+            removeItem.put("cost", 30);
+            items.add(removeItem);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("items", items);
         result.put("gold", exp.getGold());
@@ -625,6 +711,23 @@ public class ExpeditionService {
 
             List<Long> deck = parseJsonList(exp.getCurrentDeck());
             deck.add(itemId);
+            exp.setCurrentDeck(toJson(deck));
+
+        } else if ("remove".equals(type)) {
+            cost = 30;
+            if (exp.getGold() < cost) throw new IllegalStateException("金币不足");
+
+            List<Long> deck = parseJsonList(exp.getCurrentDeck());
+            if (deck.isEmpty()) throw new IllegalStateException("牌组已空");
+            // itemId 为要移除的卡牌ID，如果为0或null则移除最后一张
+            Long removeCardId = itemId;
+            if (removeCardId == null || removeCardId == 0) {
+                deck.remove(deck.size() - 1);
+            } else {
+                boolean removed = deck.remove(removeCardId);
+                if (!removed) throw new IllegalStateException("卡牌不在牌组中");
+            }
+            exp.setGold(exp.getGold() - cost);
             exp.setCurrentDeck(toJson(deck));
 
         } else if ("relic".equals(type)) {
@@ -660,15 +763,42 @@ public class ExpeditionService {
         return result;
     }
 
-    // ==================== 9. 下一个节点 ====================
+    // ==================== 9. 选择岔路 ====================
+
+    @Transactional
+    public Map<String, Object> choosePath(Long userId, int choiceIndex) {
+        Expedition exp = getActiveExpedition(userId);
+        List<List<String>> rows = parseJsonNodeRows(exp.getMapNodes());
+        int idx = exp.getNode() - 1;
+        if (idx >= rows.size()) {
+            throw new IllegalStateException("当前没有岔路可选");
+        }
+        List<String> row = rows.get(idx);
+        if (row.size() <= 1) {
+            throw new IllegalStateException("当前节点不是岔路");
+        }
+        if (choiceIndex < 0 || choiceIndex >= row.size()) {
+            throw new IllegalStateException("无效的选择");
+        }
+        setNodeChoice(exp, idx, choiceIndex);
+        expeditionRepository.save(exp);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("expedition", buildExpeditionData(exp));
+        result.put("nodeType", getCurrentNodeType(exp));
+        return result;
+    }
+
+    // ==================== 10. 下一个节点 ====================
 
     @Transactional
     public Map<String, Object> nextNode(Long userId) {
         Expedition exp = getActiveExpedition(userId);
-        List<String> nodes = parseJsonStringList(exp.getMapNodes());
+        List<List<String>> rows = parseJsonNodeRows(exp.getMapNodes());
 
         int nextNode = exp.getNode() + 1;
-        if (nextNode > nodes.size()) {
+        if (nextNode > rows.size()) {
             // 当前层完成，进入下一层
             if (exp.getAct() >= 3) {
                 // 通关！
@@ -862,19 +992,88 @@ public class ExpeditionService {
                 .orElseThrow(() -> new IllegalStateException("没有进行中的远征"));
     }
 
+    /**
+     * 获取当前行的节点类型（考虑了分支选择）
+     * 如果当前行有多个节点（岔路），从 battle_state 中读取已选分支
+     */
     private String getCurrentNodeType(Expedition exp) {
-        List<String> nodes = parseJsonStringList(exp.getMapNodes());
-        if (nodes.isEmpty()) return "combat";
+        List<List<String>> rows = parseJsonNodeRows(exp.getMapNodes());
+        if (rows.isEmpty()) return "combat";
         int idx = exp.getNode() - 1;
-        if (idx >= nodes.size()) return "boss";
-        return nodes.get(idx);
+        if (idx >= rows.size()) return "boss";
+        List<String> row = rows.get(idx);
+        if (row.isEmpty()) return "combat";
+        if (row.size() == 1) {
+            return row.get(0);
+        }
+        // 岔路：从 battle_state 读取分支选择
+        int choice = getNodeChoice(exp, idx);
+        if (choice < 0 || choice >= row.size()) {
+            // 未选择时返回 "branch" 让前端展示选项
+            return "branch";
+        }
+        return row.get(choice);
+    }
+
+    /**
+     * 获取当前行的所有可选节点（岔路选项）
+     */
+    private List<String> getCurrentNodeOptions(Expedition exp) {
+        List<List<String>> rows = parseJsonNodeRows(exp.getMapNodes());
+        if (rows.isEmpty()) return List.of();
+        int idx = exp.getNode() - 1;
+        if (idx >= rows.size()) return List.of();
+        return rows.get(idx);
+    }
+
+    /**
+     * 从 battle_state 中读取指定行的分支选择
+     */
+    private int getNodeChoice(Expedition exp, int rowIndex) {
+        try {
+            String bs = exp.getBattleState();
+            if (bs == null || bs.isBlank() || "{}".equals(bs)) return -1;
+            Map<String, Object> state = objectMapper.readValue(bs, Map.class);
+            Object choices = state.get("nodeChoices");
+            if (choices instanceof Map) {
+                Number choice = (Number) ((Map) choices).get(String.valueOf(rowIndex));
+                return choice != null ? choice.intValue() : -1;
+            }
+        } catch (Exception ignored) {}
+        return -1;
+    }
+
+    /**
+     * 记录分支选择到 battle_state
+     */
+    private void setNodeChoice(Expedition exp, int rowIndex, int choice) {
+        try {
+            String bs = exp.getBattleState();
+            Map<String, Object> state;
+            if (bs == null || bs.isBlank() || "{}".equals(bs)) {
+                state = new HashMap<>();
+            } else {
+                state = objectMapper.readValue(bs, Map.class);
+            }
+            Map<String, Object> choices = (Map<String, Object>) state.computeIfAbsent("nodeChoices", k -> new HashMap<String, Object>());
+            choices.put(String.valueOf(rowIndex), choice);
+            exp.setBattleState(objectMapper.writeValueAsString(state));
+        } catch (Exception ignored) {}
     }
 
     private int getEnemyIndex(Expedition exp, List<ExpeditionEnemy> enemies) {
-        List<String> nodes = parseJsonStringList(exp.getMapNodes());
+        List<List<String>> rows = parseJsonNodeRows(exp.getMapNodes());
         int combatIndex = 0;
-        for (int i = 0; i < exp.getNode() - 1 && i < nodes.size(); i++) {
-            String nt = nodes.get(i);
+        for (int i = 0; i < exp.getNode() - 1 && i < rows.size(); i++) {
+            List<String> row = rows.get(i);
+            String nt = row.isEmpty() ? "combat" : row.get(0);
+            if (row.size() > 1) {
+                // 岔路：使用已选分支
+                int choice = getNodeChoice(exp, i);
+                if (choice >= 0 && choice < row.size()) {
+                    nt = row.get(choice);
+                }
+            }
             if ("combat".equals(nt)) combatIndex++;
         }
         // 确保不会超出非Boss敌人数量
@@ -920,6 +1119,9 @@ public class ExpeditionService {
         int baseHandSize = 4 + extraDraw;
         int handSize = Math.min(baseHandSize, deck.size());
 
+        // 读取卡牌升级信息
+        Map<Long, Map<String, Integer>> cardUpgrades = getCardUpgrades(exp);
+
         // 手牌：随机抽取
         List<Long> drawn = new ArrayList<>(deck);
         Collections.shuffle(drawn, rand);
@@ -934,8 +1136,18 @@ public class ExpeditionService {
                 cardData.put("id", c.getId());
                 cardData.put("nameCn", c.getNameCn());
                 cardData.put("nameEn", c.getNameEn());
-                cardData.put("attack", c.getAttack() != null ? c.getAttack() : 2);
-                cardData.put("cost", c.getCost() != null ? c.getCost() : 1);
+
+                int baseAttack = c.getAttack() != null ? c.getAttack() : 2;
+                int baseCost = c.getCost() != null ? c.getCost() : 1;
+
+                // 应用升级
+                if (cardUpgrades.containsKey(cardId)) {
+                    Map<String, Integer> upgrade = cardUpgrades.get(cardId);
+                    baseAttack += upgrade.getOrDefault("attackBonus", 0);
+                }
+
+                cardData.put("attack", baseAttack);
+                cardData.put("cost", baseCost);
                 cardData.put("rarity", c.getRarity());
                 cardData.put("cardType", c.getCardType());
                 hand.add(cardData);
@@ -1335,9 +1547,33 @@ public class ExpeditionService {
         data.put("enemiesKilled", exp.getEnemiesKilled());
 
         // 解析JSON字段
-        List<String> mapNodes = parseJsonStringList(exp.getMapNodes());
-        data.put("mapNodes", mapNodes);
+        List<List<String>> mapNodeRows = parseJsonNodeRows(exp.getMapNodes());
+        // 展平为前端兼容的一维数组（已完成选择的节点显示已选分支类型）
+        List<String> flatNodes = new ArrayList<>();
+        for (int i = 0; i < mapNodeRows.size(); i++) {
+            List<String> row = mapNodeRows.get(i);
+            if (row.size() <= 1) {
+                flatNodes.add(row.isEmpty() ? "combat" : row.get(0));
+            } else {
+                int choice = getNodeChoice(exp, i);
+                if (choice >= 0 && choice < row.size()) {
+                    flatNodes.add(row.get(choice));
+                } else {
+                    flatNodes.add("branch");
+                }
+            }
+        }
+        data.put("mapNodes", flatNodes);
         data.put("currentNodeType", getCurrentNodeType(exp));
+
+        // 如果是岔路节点，返回选项
+        String nodeType = getCurrentNodeType(exp);
+        if ("branch".equals(nodeType)) {
+            data.put("nodeOptions", getCurrentNodeOptions(exp));
+        }
+
+        // 读取升级信息
+        Map<Long, Map<String, Integer>> cardUpgrades = getCardUpgrades(exp);
 
         List<Long> deckIds = parseJsonList(exp.getCurrentDeck());
         List<Map<String, Object>> deckData = new ArrayList<>();
@@ -1345,7 +1581,21 @@ public class ExpeditionService {
             Optional<Card> cOpt = cardRepository.findById(cid);
             if (cOpt.isPresent()) {
                 Card c = cOpt.get();
-                deckData.add(cardToMap(c));
+                Map<String, Object> cm = cardToMap(c);
+                // 应用升级
+                if (cardUpgrades.containsKey(cid)) {
+                    Map<String, Integer> upgrade = cardUpgrades.get(cid);
+                    cm.put("attackBonus", upgrade.getOrDefault("attackBonus", 0));
+                    cm.put("healthBonus", upgrade.getOrDefault("healthBonus", 0));
+                    cm.put("effectiveAttack", (c.getAttack() != null ? c.getAttack() : 0) + upgrade.getOrDefault("attackBonus", 0));
+                    cm.put("effectiveHealth", (c.getHealth() != null ? c.getHealth() : 0) + upgrade.getOrDefault("healthBonus", 0));
+                } else {
+                    cm.put("attackBonus", 0);
+                    cm.put("healthBonus", 0);
+                    cm.put("effectiveAttack", c.getAttack());
+                    cm.put("effectiveHealth", c.getHealth());
+                }
+                deckData.add(cm);
             }
         }
         data.put("deck", deckData);
@@ -1420,6 +1670,25 @@ public class ExpeditionService {
         m.put("descriptionEn", r.getDescriptionEn());
         m.put("icon", r.getIcon());
         return m;
+    }
+
+    private List<List<String>> parseJsonNodeRows(String json) {
+        if (json == null || json.isBlank()) return new ArrayList<>();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<List<String>>>() {});
+        } catch (Exception e) {
+            // 向下兼容：尝试解析为旧版一维数组
+            try {
+                List<String> flat = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+                List<List<String>> result = new ArrayList<>();
+                for (String s : flat) {
+                    result.add(List.of(s));
+                }
+                return result;
+            } catch (Exception ex) {
+                return new ArrayList<>();
+            }
+        }
     }
 
     private List<Long> parseJsonList(String json) {

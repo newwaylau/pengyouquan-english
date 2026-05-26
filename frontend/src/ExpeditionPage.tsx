@@ -62,11 +62,19 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Node interaction
   const [nodeType, setNodeType] = useState<string>('');
 
+  // Branch state
+  const [nodeOptions, setNodeOptions] = useState<string[]>([]);
+
   // Event state
   const [eventData, setEventData] = useState<any>(null);
+  
+  // Rest upgrade state
+  const [restAction, setRestAction] = useState<'heal' | 'upgrade'>('heal');
+  const [upgradeCardId, setUpgradeCardId] = useState<number | null>(null);
 
   // Shop state
   const [shopItems, setShopItems] = useState<any[]>([]);
+  const [removeMode, setRemoveMode] = useState(false);
 
   // Reward state
   const [rewardChoices, setRewardChoices] = useState<any[]>([]);
@@ -105,6 +113,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         setHasExpedition(true);
         setNodeType(data.currentNodeType);
         setPhase('map');
+        if (data.nodeOptions) setNodeOptions(data.nodeOptions);
         if (data.enemy) setEnemy(data.enemy);
       } else {
         setHasExpedition(false);
@@ -127,6 +136,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       setHasExpedition(true);
       setPhase('map');
       setNodeType(res.data.expedition.currentNodeType);
+      if (res.data.expedition.nodeOptions) setNodeOptions(res.data.expedition.nodeOptions);
     } else {
       alert(res.message);
     }
@@ -243,6 +253,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       } else {
         setExpedition(nextRes.data.expedition);
         setNodeType(nextRes.data.nodeType);
+        setNodeOptions(nextRes.data.expedition?.nodeOptions || []);
         setPhase('map');
       }
     }
@@ -298,7 +309,23 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     const res = await apiFetch('/api/expedition/shop');
     if (res.code === 200) {
       setShopItems(res.data.items || []);
+      setRemoveMode(false);
       setPhase('shop');
+    }
+  }
+
+  // Choose branch path
+  async function handleChoosePath(choiceIndex: number) {
+    const res = await apiFetch('/api/expedition/choose-path', {
+      method: 'POST',
+      body: JSON.stringify({ choiceIndex }),
+    });
+    if (res.code === 200) {
+      setExpedition(res.data.expedition);
+      setNodeType(res.data.nodeType);
+      setNodeOptions([]);
+    } else {
+      alert(res.message || '路径选择失败');
     }
   }
 
@@ -337,6 +364,10 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Handle node click
   function handleNodeClick(ndx: number, nodeType: string, completed: boolean, isCurrent: boolean) {
     if (completed || !isCurrent) return;
+    if (nodeType === 'branch') {
+      // Branch node - show choices (handled by nodeOptions state already set)
+      return;
+    }
     switch (nodeType) {
       case 'combat':
       case 'boss':
@@ -402,6 +433,8 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   function renderMap() {
     if (!expedition) return null;
     const nodes = expedition.mapNodes || [];
+    // Check if current node is a branch and show overlay
+    const isBranchNode = nodeType === 'branch' && nodeOptions.length > 0;
     return (
       <div className="expedition-map">
         <div className="expedition-map-act">{ACT_LABELS[expedition.act] || `第${expedition.act}层`}</div>
@@ -410,14 +443,16 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             const isCompleted = ndx + 1 < expedition.node;
             const isCurrent = ndx + 1 === expedition.node;
             const isFuture = ndx + 1 > expedition.node;
+            // For branch nodes, show based on whether it's the current branch type
+            const displayType = (nt === 'branch') ? 'branch' : nt;
             return (
               <React.Fragment key={ndx}>
                 <div
-                  className={`expedition-node ${isCompleted ? 'completed' : isCurrent ? 'current' : 'future'}`}
+                  className={`expedition-node ${isCompleted ? 'completed' : isCurrent ? 'current' : 'future'} ${displayType === 'branch' ? 'branch-node' : ''}`}
                   onClick={() => handleNodeClick(ndx, nt, isCompleted || isFuture, isCurrent)}
                 >
-                  <span>{renderNodeIcon(nt)}</span>
-                  <span>{NODE_LABELS[nt] || nt}</span>
+                  <span>{displayType === 'branch' ? '🔀' : renderNodeIcon(nt)}</span>
+                  <span>{displayType === 'branch' ? '岔路' : (NODE_LABELS[nt] || nt)}</span>
                 </div>
                 {ndx < nodes.length - 1 && (
                   <div className={`expedition-node-line ${isCompleted ? 'completed' : ''}`} />
@@ -426,6 +461,22 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             );
           })}
         </div>
+        {isBranchNode && (
+          <div className="expedition-result-overlay">
+            <div className="expedition-result-card">
+              <div className="expedition-result-icon">🔀</div>
+              <div className="expedition-result-title">选择路线</div>
+              <div className="expedition-result-text">前方岔路，请选择前进方向：</div>
+              <div className="expedition-rewards">
+                {nodeOptions.map((option: string, i: number) => (
+                  <button key={i} className="expedition-reward-btn" onClick={() => handleChoosePath(i)}>
+                    {renderNodeIcon(option)} {NODE_LABELS[option] || option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -540,6 +591,8 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
   function renderRest() {
     if (!expedition) return null;
+    const deck = expedition.deck || [];
+    const hasUpgradeCards = deck.length > 0;
     return (
       <div className="expedition-rest">
         <div className="expedition-rest-title">🔥 休息</div>
@@ -551,20 +604,60 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             ❤️ 回血
             <div className="expedition-rest-heal-amount">+{Math.ceil(expedition.maxHp * 0.3)}</div>
           </button>
-          <button className="expedition-rest-btn" onClick={() => {
-            const cardId = expedition.deck[expedition.deck.length - 1]?.id;
-            if (cardId) handleRest('upgrade', cardId);
-          }}>
-            ⬆️ 升级卡牌
-            <div className="expedition-rest-heal-amount">攻击+2</div>
+          <button className="expedition-rest-btn" onClick={() => setRestAction('upgrade')}>
+            ⬆️ 强化卡牌
+            <div className="expedition-rest-heal-amount">攻/血+1</div>
           </button>
         </div>
+        {restAction === 'upgrade' && (
+          <div className="expedition-upgrade-section" style={{ marginTop: 12 }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
+              选择要强化的卡牌（攻击+1，生命+1）：
+            </div>
+            <div className="expedition-hand" style={{ flexWrap: 'wrap' }}>
+              {deck.map((card: any, i: number) => (
+                <div
+                  key={i}
+                  className={`expedition-hand-card ${upgradeCardId === card.id ? 'selected' : ''}`}
+                  onClick={() => setUpgradeCardId(card.id)}
+                  style={{
+                    cursor: 'pointer',
+                    border: upgradeCardId === card.id ? '2px solid #ffd700' : '2px solid transparent',
+                    transition: 'border 0.2s',
+                  }}
+                >
+                  <div className="expedition-hand-card-name">{card.nameCn}</div>
+                  <div className="expedition-hand-card-attack">
+                    ⚔️{card.effectiveAttack || card.attack || 0}
+                    {card.attackBonus > 0 && <span style={{ color: '#4ade80', marginLeft: 2 }}>(+{card.attackBonus})</span>}
+                  </div>
+                  <div className="expedition-hand-card-cost">❤️{card.effectiveHealth || card.health || 0}</div>
+                </div>
+              ))}
+            </div>
+            <button
+              className="expedition-rest-btn"
+              style={{ marginTop: 8, opacity: upgradeCardId ? 1 : 0.5 }}
+              disabled={!upgradeCardId}
+              onClick={() => {
+                if (upgradeCardId) {
+                  handleRest('upgrade', upgradeCardId);
+                  setRestAction('heal');
+                  setUpgradeCardId(null);
+                }
+              }}
+            >
+              ✅ 确认强化
+            </button>
+          </div>
+        )}
       </div>
     );
   }
 
   function renderShop() {
     if (!expedition) return null;
+    const deck = expedition.deck || [];
     return (
       <div className="expedition-shop">
         <div className="expedition-shop-header">
@@ -580,18 +673,58 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
                   {item.type === 'card' && `⚔️${item.attack || 0}  ${item.rarity}`}
                   {item.type === 'relic' && item.effectCn}
                   {item.type === 'heal' && `恢复${item.healAmount}点血量`}
+                  {item.type === 'remove' && (item.description || '移除一张卡牌')}
                 </div>
               </div>
               <button
                 className="expedition-shop-buy-btn"
                 disabled={expedition.gold < (item.cost || 999)}
-                onClick={() => handleBuy(item.type, item.id, item.cost || 999)}
+                onClick={() => {
+                  if (item.type === 'remove') {
+                    setRemoveMode(true);
+                  } else {
+                    handleBuy(item.type, item.id, item.cost || 999);
+                  }
+                }}
               >
                 🪙{item.cost || '?'}
               </button>
             </div>
           ))}
         </div>
+        {/* Remove card mode: show deck to pick a card to remove */}
+        {removeMode && (
+          <div className="expedition-remove-section" style={{ marginTop: 12 }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
+              选择要移除的卡牌（消耗30金币）：
+            </div>
+            <div className="expedition-hand" style={{ flexWrap: 'wrap' }}>
+              {deck.map((card: any, i: number) => (
+                <div
+                  key={i}
+                  className="expedition-hand-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    if (expedition.gold < 30) { alert('金币不足'); return; }
+                    handleBuy('remove', card.id, 30);
+                    setRemoveMode(false);
+                  }}
+                >
+                  <div className="expedition-hand-card-name">{card.nameCn}</div>
+                  <div className="expedition-hand-card-attack">⚔️{card.attack || 0}</div>
+                  <div style={{ fontSize: 10, color: '#ef4444' }}>点击移除</div>
+                </div>
+              ))}
+            </div>
+            <button
+              className="expedition-start-btn"
+              style={{ marginTop: 8 }}
+              onClick={() => setRemoveMode(false)}
+            >
+              取消
+            </button>
+          </div>
+        )}
         <button className="expedition-start-btn" onClick={leaveShop} style={{ marginTop: 12 }}>
           离开商店
         </button>

@@ -156,6 +156,19 @@ public class ExpeditionController {
         }
     }
 
+    @PostMapping("/choose-path")
+    public ApiResponse<Map<String, Object>> choosePath(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            int choiceIndex = ((Number) body.get("choiceIndex")).intValue();
+            return ApiResponse.success(expeditionService.choosePath(userId, choiceIndex));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
     @PostMapping("/abandon")
     public ApiResponse<Map<String, Object>> abandonExpedition(@CurrentUserId Long userId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");

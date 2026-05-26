@@ -627,8 +627,13 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
             <div className="cd-name-en">{selectedCard.nameEn}</div>
             {selectedCard.attack !== null && (
               <div className="cd-stats-row">
-                <span className="cd-atk" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>⚔️ 攻击 {selectedCard.attack}</span>
-                <span className="cd-hp" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>❤️ 生命 {selectedCard.health}</span>
+                <span className="cd-atk" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>⚔️ 攻击 {selectedCard.attack}{selectedCard.golden && selectedCard.goldenAttackBonus > 0 && <span style={{ color: '#4ade80', fontSize: 11, marginLeft: 4 }}>(+{selectedCard.goldenAttackBonus})</span>}</span>
+                <span className="cd-hp" style={{ color: selectedCard.golden ? '#ffd700' : undefined }}>❤️ 生命 {selectedCard.health}{selectedCard.golden && selectedCard.goldenHealthBonus > 0 && <span style={{ color: '#4ade80', fontSize: 11, marginLeft: 4 }}>(+{selectedCard.goldenHealthBonus})</span>}</span>
+              </div>
+            )}
+            {selectedCard.golden && selectedCard.goldenAttackBonus > 0 && (
+              <div className="cd-golden-boost" style={{ textAlign: 'center', fontSize: 12, color: '#ffd700', marginTop: 4 }}>
+                🌟 金卡加成：攻击+{selectedCard.goldenAttackBonus}，生命+{selectedCard.goldenHealthBonus}
               </div>
             )}
             {selectedCard.effectJson && (() => {
