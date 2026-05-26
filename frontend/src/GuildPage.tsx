@@ -554,6 +554,83 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
     );
   }
 
+  // ⚔️ 部落战 render
+  function renderWar() {
+    if (!warData) return <div className="guild-empty" style={{padding:24}}>暂无部落战数据</div>;
+    const phase = warData.phase || 'preparation';
+    const phaseNames: Record<string, string> = {preparation:'备战', battle:'战斗', settlement:'结算'};
+    return (
+      <div style={{padding:16}}>
+        <div className="guild-section-title">⚔️ 部落战 ({phaseNames[phase]})</div>
+        {warData.opponent && (
+          <div className="card" style={{padding:12,marginBottom:12}}>
+            <div style={{fontWeight:600}}>对手: {warData.opponent.guildName || warData.opponent.name}</div>
+            <div style={{fontSize:13,color:'var(--text-secondary)'}}>比分: 己方 {warData.ourScore??0} : {warData.theirScore??0} 对方</div>
+          </div>
+        )}
+        {phase === 'preparation' && (
+          <div style={{marginTop:12}}>
+            <p style={{fontSize:13,color:'var(--text-secondary)',marginBottom:8}}>备战阶段：贡献卡牌增强公会战力</p>
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              <input type="number" min={1} max={10} value={contributeCount}
+                onChange={e=>setContributeCount(Number(e.target.value))}
+                style={{width:60,padding:'4px 8px',borderRadius:6,border:'1px solid var(--border)',background:'var(--card)',color:'var(--text)'}} />
+              <button className="btn btn-sm" onClick={handleContribute}>贡献</button>
+            </div>
+          </div>
+        )}
+        {phase === 'settlement' && warData.reward && (
+          <div style={{marginTop:12,padding:12,background:'rgba(255,215,0,0.1)',borderRadius:8}}>
+            🎉 获得 {warData.reward.stardust||0} 星尘 + 公会经验！
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 🔄 换卡 render
+  function renderTrade() {
+    return (
+      <div style={{padding:16}}>
+        <div className="guild-section-title">🔄 公会换卡</div>
+        <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:12}}>
+          今日已换 {tradeDailyLimit?.count||0}/{tradeDailyLimit?.max||3} 次
+        </div>
+        {tradeReceived.length>0 && (
+          <div style={{marginBottom:16}}>
+            <div style={{fontWeight:600,fontSize:14,marginBottom:8}}>收到的请求</div>
+            {tradeReceived.map((t:any)=>(
+              <div key={t.id} className="card" style={{padding:12,marginBottom:8}}>
+                <div>来自: {t.requesterName||'?'}</div>
+                <div style={{fontSize:12,color:'var(--text-secondary)'}}>请求: {t.requestedCardName||'?'}</div>
+                <div style={{display:'flex',gap:8,marginTop:8}}>
+                  <button className="btn btn-sm" style={{background:'rgba(34,197,94,0.2)',color:'#22c55e'}}
+                    onClick={async()=>{await apiFetch('/api/card-trade/'+t.id+'/accept',{method:'POST'});loadTrade();}}>接受</button>
+                  <button className="btn btn-sm" style={{background:'rgba(239,68,68,0.2)',color:'#ef4444'}}
+                    onClick={async()=>{await apiFetch('/api/card-trade/'+t.id+'/reject',{method:'POST'});loadTrade();}}>拒绝</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {tradeSent.length>0 && (
+          <div>
+            <div style={{fontWeight:600,fontSize:14,marginBottom:8}}>已发送</div>
+            {tradeSent.map((t:any)=>(
+              <div key={t.id} className="card" style={{padding:12,marginBottom:8}}>
+                <div>给: {t.receiverName||'?'}</div>
+                <div style={{fontSize:12,color:'var(--text-secondary)'}}>{t.requestedCardName||'?'} · {t.status}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {tradeReceived.length===0 && tradeSent.length===0 && (
+          <div style={{textAlign:'center',padding:24,color:'var(--text-secondary)',fontSize:14}}>暂无换卡记录</div>
+        )}
+      </div>
+    );
+  }
+
   if (loading) {
     return <div className="guild-page"><div className="guild-empty">加载中...</div></div>;
   }
@@ -580,6 +657,16 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
         <button className={`guild-tab ${tab === 'league' ? 'active' : ''}`} onClick={() => { setTab('league'); loadLeague(); }}>
           🏆 联赛
         </button>
+        {inGuild && (
+          <button className={`guild-tab ${tab === 'war' ? 'active' : ''}`} onClick={() => { setTab('war'); loadWar(); }}>
+            ⚔️ 部落战
+          </button>
+        )}
+        {inGuild && (
+          <button className={`guild-tab ${tab === 'trade' ? 'active' : ''}`} onClick={() => { setTab('trade'); loadTrade(); }}>
+            🔄 换卡
+          </button>
+        )}
       </div>
 
       {tab === 'overview' && (inGuild ? renderOverview() : (
@@ -604,6 +691,8 @@ export default function GuildPage({ user, onNavigate }: { user?: any; onNavigate
       {tab === 'create' && renderCreate()}
       {tab === 'leaderboard' && renderLeaderboard()}
       {tab === 'league' && renderLeague()}
+      {tab === 'war' && inGuild && renderWar()}
+      {tab === 'trade' && inGuild && renderTrade()}
     </div>
   );
 }
