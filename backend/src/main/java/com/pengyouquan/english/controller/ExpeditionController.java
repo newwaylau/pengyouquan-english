@@ -194,6 +194,14 @@ public class ExpeditionController {
         }
     }
 
+    @GetMapping("/episode-story")
+    public ApiResponse<Map<String, Object>> getEpisodeStory(
+            @RequestParam Long showId,
+            @RequestParam(defaultValue = "1") int season,
+            @RequestParam(defaultValue = "1") int episode) {
+        return ApiResponse.success(expeditionService.getEpisodeStory(showId, season, episode));
+    }
+
     @GetMapping("/sentence")
     public ApiResponse<Map<String, Object>> getRandomSentence(@CurrentUserId Long userId) {
         if (userId == null) return ApiResponse.unauthorized("未登录");
@@ -246,5 +254,91 @@ public class ExpeditionController {
         } catch (Exception e) {
             return ApiResponse.error(400, e.getMessage());
         }
+    }
+
+    // ==================== 新战斗系统接口 ====================
+
+    @GetMapping("/map")
+    public ApiResponse<Map<String, Object>> getMap(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            return ApiResponse.success(expeditionService.getExpedition(userId));
+        } catch (Exception e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    @PostMapping("/enter-node")
+    public ApiResponse<Map<String, Object>> enterNode(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long nodeId = ((Number) body.get("nodeId")).longValue();
+            return ApiResponse.success(expeditionService.enterCombat(userId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/smith")
+    public ApiResponse<Map<String, Object>> smith(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = ((Number) body.get("cardId")).longValue();
+            return ApiResponse.success(expeditionService.enterRest(userId, "smith", cardId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/shop-list")
+    public ApiResponse<Map<String, Object>> shopList(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            return ApiResponse.success(expeditionService.enterShop(userId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    @PostMapping("/remove-card")
+    public ApiResponse<Map<String, Object>> removeCard(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = ((Number) body.get("cardId")).longValue();
+            return ApiResponse.success(expeditionService.chooseReward(userId, 0));
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/event-choose")
+    public ApiResponse<Map<String, Object>> eventChoose(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            int choiceIndex = ((Number) body.get("choiceIndex")).intValue();
+            return ApiResponse.success(expeditionService.enterEvent(userId, choiceIndex));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/state")
+    public ApiResponse<Map<String, Object>> getState(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(expeditionService.getExpedition(userId));
     }
 }
