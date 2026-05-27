@@ -30,13 +30,14 @@ interface ExpeditionMapProps {
   onNodeClick: (nodeIndex: number) => void;
   onChoosePath: (choiceIndex: number) => void;
   act: number;
+  nodeStories?: Array<{ title?: string; story?: string; choices?: string[] }>;
 }
 
 // ========== Layout Constants ==========
 
 const NODE_SIZE = 40;
 const NODE_RADIUS = NODE_SIZE / 2;
-const SVG_WIDTH = 280;
+const SVG_WIDTH = 320;
 const SVG_HEIGHT = 600;
 const TOP_PAD = 60;
 const BOT_PAD = 50;
@@ -51,6 +52,7 @@ export default function ExpeditionMap({
   onNodeClick,
   onChoosePath,
   act,
+  nodeStories,
 }: ExpeditionMapProps) {
   const nodeCount = mapNodes.length;
   const availHeight = SVG_HEIGHT - TOP_PAD - BOT_PAD;
@@ -91,6 +93,7 @@ export default function ExpeditionMap({
 
   return (
     <div
+      className="expedition-map-container"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -116,7 +119,7 @@ export default function ExpeditionMap({
       {/* ===== SVG Map ===== */}
       <svg
         viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-        style={{ width: '100%', maxWidth: SVG_WIDTH, display: 'block' }}
+        style={{ width: '100%', maxWidth: SVG_WIDTH, height: 'auto', display: 'block' }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -190,7 +193,8 @@ export default function ExpeditionMap({
             const isFuture = ndx > currentNodeIndex;
             const pos = positions[ndx];
             const displayIcon = NODE_ICONS[nt] || '⚪';
-            const displayLabel = NODE_LABELS[nt] || nt;
+            const storyTitle = nodeStories?.[ndx]?.title;
+            const displayLabel = storyTitle || NODE_LABELS[nt] || nt;
 
             return (
               <g

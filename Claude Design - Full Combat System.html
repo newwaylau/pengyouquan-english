@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Design · 完整战斗系统设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e17; color: #e2e8f0; font-family: 'Georgia', serif; padding: 24px; min-height: 100vh; }
+.container { max-width: 920px; margin: 0 auto; }
+
+h1 { font-size: 28px; color: #fbbf24; letter-spacing: 2px; text-align: center; padding: 28px 0 6px; }
+.subtitle { text-align: center; color: #64748b; font-family: sans-serif; font-size: 13px; margin-bottom: 24px; }
+
+h2 { font-size: 18px; color: #fbbf24; margin: 30px 0 12px; letter-spacing: 1px; border-bottom: 1px solid rgba(251,191,36,0.1); padding-bottom: 8px; }
+h3 { font-size: 16px; color: #e2e8f0; margin: 18px 0 8px; }
+h4 { font-size: 14px; color: #94a3b8; margin: 12px 0 6px; }
+
+p { font-size: 14px; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+strong { color: #fbbf24; }
+em { color: #94a3b8; font-style: italic; }
+
+.card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 12px 0;
+}
+
+.flex { display: flex; gap: 14px; flex-wrap: wrap; }
+.flex .col { flex: 1; min-width: 240px; }
+
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 11px; font-family: sans-serif; margin-right: 3px;
+}
+.badge.red { background: rgba(239,68,68,0.12); color: #f87171; }
+.badge.gold { background: rgba(251,191,36,0.12); color: #fbbf24; }
+.badge.blue { background: rgba(99,102,241,0.12); color: #818cf8; }
+.badge.green { background: rgba(34,197,94,0.12); color: #4ade80; }
+.badge.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
+.badge.cyan { background: rgba(6,182,212,0.12); color: #22d3ee; }
+.badge.orange { background: rgba(249,115,22,0.12); color: #fb923c; }
+
+table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 13px; margin: 10px 0; }
+th { text-align: left; padding: 8px 10px; color: #64748b; font-weight: 400; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 11px; letter-spacing: 1px; }
+td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #94a3b8; }
+tr:hover td { background: rgba(255,255,255,0.01); }
+
+.highlight {
+  background: rgba(251,191,36,0.04); border-left: 3px solid #fbbf24;
+  padding: 14px 18px; margin: 12px 0; border-radius: 0 8px 8px 0;
+}
+
+/* ===== Card Preview ===== */
+.card-preview {
+  display: inline-block;
+  width: 180px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 6px;
+  vertical-align: top;
+  font-family: sans-serif;
+}
+.card-preview .cost {
+  display: inline-block; width: 24px; height: 24px;
+  background: radial-gradient(circle, #fbbf24, #d97706);
+  border-radius: 50%; text-align: center; line-height: 24px;
+  font-size: 12px; font-weight: 700; color: #000;
+  float: right;
+}
+.card-preview .name { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+.card-preview .type { font-size: 10px; color: #64748b; margin-bottom: 6px; }
+.card-preview .desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
+.card-preview .rarity {
+  font-size: 9px; text-align: right; margin-top: 6px; letter-spacing: 1px;
+}
+.card-preview.attack { border-color: rgba(239,68,68,0.2); }
+.card-preview.skill { border-color: rgba(34,197,94,0.2); }
+.card-preview.power { border-color: rgba(168,85,247,0.2); }
+
+/* ===== Enemy Preview ===== */
+.enemy-box {
+  display: inline-block; width: 200px;
+  background: rgba(30,41,59,0.6); border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 8px; padding: 12px; margin: 6px;
+  font-family: sans-serif;
+}
+.enemy-box .e-name { font-size: 14px; font-weight: 700; color: #f87171; }
+.enemy-box .e-stat { font-size: 11px; color: #94a3b8; }
+.enemy-box .e-intent { font-size: 11px; color: #fbbf24; margin: 4px 0; }
+.enemy-box .e-moves { font-size: 10px; color: #64748b; }
+
+.pattern-box {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 6px; padding: 10px 14px; margin: 6px 0;
+  font-family: sans-serif; font-size: 12px;
+}
+.pattern-box strong { font-size: 13px; }
+
+hr { border: none; border-top: 1px solid rgba(255,255,255,0.04); margin: 18px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚔️ 完整的杀戮尖塔战斗系统</h1>
+<p class="subtitle">卡牌 · 敌人 · 状态 · 资源 · 英语练习关系 · 全量设计</p>
+
+<!-- ===== 1. 卡牌怎么来 ===== -->
+<h2>一、卡牌从哪里来？（你是对的，这不简单）</h2>
+
+<div class="card">
+  <p><strong>杀戮尖塔的卡牌来源：</strong></p>
+  <ul style="padding-left:20px;margin-bottom:12px;">
+    <li>初始卡组：5 张 Strike + 5 张 Defend + 1 张随机基础牌</li>
+    <li>战斗奖励：打完怪，从 <strong>3 张随机卡</strong> 中选 1 张加入牌组</li>
+    <li>商店：用金币买特定卡</li>
+    <li>事件：特定选择给特定卡</li>
+    <li>升级：篝火选一张卡升级（数值翻倍/效果变强）</li>
+  </ul>
+  <p><strong>但我们不一样——卡牌必须通过学习获得：</strong></p>
+  <div class="highlight">
+    <p style="font-size:15px;"><strong>练习 → 得卡包 → 开卡包 → 卡牌进入你的收藏池</strong></p>
+    <p style="margin-top:6px;font-size:13px;color:#94a3b8;">你收藏池里的卡 = 你学英语挣来的。没练英语，就没有新卡。</p>
+  </div>
+
+  <p style="margin-top:12px;"><strong>进入远征时：</strong></p>
+  <div class="flex">
+    <div class="col" style="background:rgba(34,197,94,0.03);border:1px solid rgba(34,197,94,0.08);border-radius:8px;padding:14px;">
+      <p style="font-size:13px;"><strong style="color:#4ade80;">① 选初始牌组</strong><br>
+      从收藏池里挑 8-10 张作为初始牌组。<br>
+      <em style="font-size:12px;">收藏越大 → 初始牌组选择越多</em></p>
+    </div>
+    <div class="col" style="background:rgba(99,102,241,0.03);border:1px solid rgba(99,102,241,0.08);border-radius:8px;padding:14px;">
+      <p style="font-size:13px;"><strong style="color:#818cf8;">② 战斗中</strong><br>
+      战斗胜利 → 从你收藏池里随 3 张 → 选 1 张加入牌组。<br>
+      <em style="font-size:12px;">和杀戮尖塔一样，但卡池来自收藏</em></p>
+    </div>
+    <div class="col" style="background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.08);border-radius:8px;padding:14px;">
+      <p style="font-size:13px;"><strong style="color:#fbbf24;">③ 商店</strong><br>
+      金币可以买卡包（增加收藏）、删卡（精简牌组）、买药水。<br>
+      <em style="font-size:12px;">远征内得金币 → 金币换新收藏</em></p>
+    </div>
+  </div>
+  <p style="margin-top:8px;font-size:13px;color:#64748b;"><strong>关键区别：</strong> 杀戮尖塔卡池 = 角色固定。我们的卡池 = 你学英语学出来的。学得越多，战斗越强。</p>
+</div>
+
+<!-- ===== 2. 卡牌系统 ===== -->
+<h2>二、卡牌类型与效果</h2>
+
+<div class="card">
+  <p><strong>三种基本类型，和杀戮尖塔完全一致：</strong></p>
+  <div class="flex" style="margin:10px 0;">
+    <div class="card-preview attack">
+      <span class="cost">1</span>
+      <div class="name">北境劈斩</div>
+      <div class="type"><span class="badge red">ATTACK</span></div>
+      <div class="desc">造成 8 点伤害。<br>若敌人有 <strong style="color:#f87171;">Vulnerable</strong>，伤害 +4</div>
+      <div class="rarity" style="color:#64748b;">普通</div>
+    </div>
+    <div class="card-preview skill">
+      <span class="cost">2</span>
+      <div class="name">临冬城誓言</div>
+      <div class="type"><span class="badge green">SKILL</span></div>
+      <div class="desc">获得 12 点格挡。<br>抽 1 张牌。</div>
+      <div class="rarity" style="color:#60a5fa;">稀有</div>
+    </div>
+    <div class="card-preview power">
+      <span class="cost">3</span>
+      <div class="name">龙之狂焰</div>
+      <div class="type"><span class="badge purple">POWER</span></div>
+      <div class="desc">获得 <strong style="color:#fbbf24;">2 点力量</strong>。<br>你的攻击牌获得 +2 伤害<br><em style="font-size:10px;">整场战斗持续</em></div>
+      <div class="rarity" style="color:#fbbf24;">传说</div>
+    </div>
+  </div>
+
+  <h3>完整效果系统</h3>
+  <table>
+    <tr><th>图标</th><th>效果</th><th>说明</th></tr>
+    <tr><td>❤️</td><td>伤害 (Damage)</td><td>直接扣敌人 HP</td></tr>
+    <tr><td>🛡️</td><td>格挡 (Block)</td><td>回合结束时消失的护甲</td></tr>
+    <tr><td>⚔️</td><td>力量 (Strength)</td><td>每点 +1 攻击伤害。永久</td></tr>
+    <tr><td>🛡️</td><td>敏捷 (Dexterity)</td><td>每点 +1 格挡值。永久</td></tr>
+    <tr><td>🔴</td><td>易伤 (Vulnerable)</td><td>受伤害 +50%。2 回合</td></tr>
+    <tr><td>🔵</td><td>虚弱 (Weak)</td><td>造成伤害 -25%。2 回合</td></tr>
+    <tr><td>🟢</td><td>中毒 (Poison)</td><td>回合开始扣 (层数) 血，层数-1</td></tr>
+    <tr><td>🟡</td><td>缠绕 (Slow)</td><td>每打 1 张牌，敌人受伤害 +10%</td></tr>
+    <tr><td>🃏</td><td>抽牌 (Draw)</td><td>从牌组抽牌到手牌</td></tr>
+    <tr><td>⚡</td><td>能量 (Energy)</td><td>获得额外费用</td></tr>
+    <tr><td>🔥</td><td>消耗 (Exhaust)</td><td>此牌使用后从战斗中移除</td></tr>
+  </table>
+</div>
+
+<!-- ===== 3. 敌人系统 ===== -->
+<h2>三、敌人系统（杀戮尖塔的深度都在这里）</h2>
+
+<div class="card">
+  <p><strong>每个敌人都有：HP、意图、攻击模式轮转。</strong> 以下用权游角色示范：</p>
+
+  <div class="flex" style="margin:12px 0;">
+    <div class="enemy-box">
+      <div class="e-name">普通 · 兰尼斯特士兵</div>
+      <div class="e-stat">❤️ HP 24  &nbsp;| &nbsp;⚔️ 伤害 6</div>
+      <div class="e-intent">🔮 意图：<span class="badge red">攻击 6</span></div>
+      <div class="e-moves">轮换：攻击 6 → 攻击 6 → 防御 6</div>
+      <div class="pattern-box">
+        <strong>规律：</strong>AAA 循环<br>
+        简单，每回合固定打 6
+      </div>
+    </div>
+
+    <div class="enemy-box">
+      <div class="e-name">精英 · 魔山</div>
+      <div class="e-stat">❤️ HP 80 &nbsp;|&nbsp; ⚔️ 伤害 12</div>
+      <div class="e-intent">🔮 意图：<span class="badge red">攻击 20</span></div>
+      <div class="e-moves">轮换：攻击 12 → 攻击 12 → 巨力挥舞 20</div>
+      <div class="pattern-box">
+        <strong>规律：</strong>AAB 循环<br>
+        两回合普攻后，第三回合蓄力重击。<br>
+        <em>知道要来了 → 第三回合必须堆够 20 格挡</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex">
+    <div class="enemy-box">
+      <div class="e-name">精英 · 红袍女巫</div>
+      <div class="e-stat">❤️ HP 60 &nbsp;|&nbsp; ⚔️ 伤害 8</div>
+      <div class="e-intent">🔮 意图：<span class="badge gold">Buff → 所有敌人</span></div>
+      <div class="e-moves">先上Buff：+2力量 → 攻击8 → 攻击10(+力量) → 火焰风暴 15</div>
+      <div class="pattern-box">
+        <strong>规律：</strong>B→A→A→C 循环<br>
+        开场给自己加力量 → 攻击越来越痛。<br>
+        <em>必须快速击杀，拖越久越危险</em>
+      </div>
+    </div>
+
+    <div class="enemy-box">
+      <div class="e-name">Boss · 夜王</div>
+      <div class="e-stat">❤️ HP 160  &nbsp;|&nbsp; ⚔️ 伤害 6×4</div>
+      <div class="e-intent">🔮 意图：<span class="badge purple">多段攻击</span></div>
+      <div class="e-moves">
+        第一阶段：攻击6×4 → 召唤异鬼(加一个敌人) → 冰爆15<br>
+        第二阶段(&lt;50%HP)：攻击8×5 → 暴风雪(全体+AoE+虚弱) → 冰矛30
+      </div>
+      <div class="pattern-box">
+        <strong>双阶段！</strong><br>
+        半血转阶段 — 攻击频率和伤害都提升。<br>
+        新追加 AoE 攻击。<br>
+        <em>必须留爆发牌打第二阶段</em>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:16px;">敌人行为模式</h3>
+  <p>每个敌人有固定的攻击轮换表，玩家能看到<strong>下一回合意图图标</strong>：</p>
+  <div class="flex">
+    <div class="col" style="background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.1);border-radius:6px;padding:12px;">
+      <p style="font-size:13px;text-align:center;">⚔️ <strong style="color:#f87171;">攻击</strong></p>
+      <p style="font-size:11px;text-align:center;color:#64748b;">下回合会打你多少血</p>
+    </div>
+    <div class="col" style="background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.1);border-radius:6px;padding:12px;">
+      <p style="font-size:13px;text-align:center;">✨ <strong style="color:#fbbf24;">Buff</strong></p>
+      <p style="font-size:11px;text-align:center;color:#64748b;">下回合敌人加力量/敏捷</p>
+    </div>
+    <div class="col" style="background:rgba(99,102,241,0.03);border:1px solid rgba(99,102,241,0.1);border-radius:6px;padding:12px;">
+      <p style="font-size:13px;text-align:center;">💀 <strong style="color:#818cf8;">Debuff</strong></p>
+      <p style="font-size:11px;text-align:center;color:#64748b;">下回合给你上虚弱/易伤</p>
+    </div>
+    <div class="col" style="background:rgba(168,85,247,0.03);border:1px solid rgba(168,85,247,0.1);border-radius:6px;padding:12px;">
+      <p style="font-size:13px;text-align:center;">🛡️ <strong style="color:#a855f7;">防御</strong></p>
+      <p style="font-size:11px;text-align:center;color:#64748b;">下回合敌人加格挡</p>
+    </div>
+  </div>
+  <p style="margin-top:8px;font-size:13px;color:#94a3b8;"><strong>意图可见 = 策略核心。</strong> 看到下回合要重击，这回合就堆格挡；看到上Buff，这回合灌伤害。</p>
+</div>
+
+<!-- ===== 4. 状态系统 ===== -->
+<h2>四、状态/增益/减益系统</h2>
+
+<div class="card">
+  <p><strong>和杀戮尖塔一模一样的状态系统：</strong></p>
+  <table>
+    <tr><th>状态</th><th>效果</th><th>来源</th></tr>
+    <tr><td>🔥 力量 +X</td><td>每点 +1 攻击伤害</td><td>「龙之狂焰」、「红袍女巫的祝福」</td></tr>
+    <tr><td>🛡️ 敏捷 +X</td><td>每点 +1 格挡值</td><td>「瓦雷利亚护甲」、「铁群岛意志」</td></tr>
+    <tr><td>🔴 易伤 X 回合</td><td>受到伤害 +50%</td><td>「小恶魔的嘲弄」、「多恩毒矛」</td></tr>
+    <tr><td>🔵 虚弱 X 回合</td><td>造成的伤害 -25%</td><td>「猎狗的咆哮」、「荨麻酒」</td></tr>
+    <tr><td>🟢 中毒 X 层</td><td>每回合扣 X 血，层数-1</td><td>「沙蛇之吻」、「血色婚礼」</td></tr>
+    <tr><td>🟡 缠绕 X 层</td><td>每张牌额外+10% 伤害</td><td>「巫术」、「红色彗星」</td></tr>
+    <tr><td>❄️ 冰冻 X 层</td><td>敌人攻击前扣 X 能量，层数-1</td><td>「凛冬将至」、「异鬼吐息」</td></tr>
+    <tr><td>☠️ 标记</td><td>被标记的敌人受到额外 50% 伤害</td><td>「无面者的契约」</td></tr>
+  </table>
+  <p style="margin-top:10px;font-size:13px;color:#94a3b8;"><strong>所有状态叠加。</strong> 打 3 层易伤 = 敌人受伤害 +150%。打 2 层力量 + 1 层虚弱 = 你的攻击 +2 然后 -25%。和杀戮尖塔完全一致。</p>
+</div>
+
+<!-- ===== 5. 英语练习与卡牌的关系 ===== -->
+<h2>五、英语练习 = 卡牌收藏（核心循环）</h2>
+
+<div class="card">
+  <p>这是这个项目与杀戮尖塔<strong>真正的区别和创新点</strong>：</p>
+
+  <center style="margin:16px 0;">
+    <div style="display:inline-block;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px 30px;font-family:sans-serif;font-size:14px;">
+      <span style="color:#4ade80;">📖 练习英语</span>
+      <span style="color:#64748b;margin:0 10px;">→</span>
+      <span style="color:#fbbf24;">🎁 得卡包</span>
+      <span style="color:#64748b;margin:0 10px;">→</span>
+      <span style="color:#818cf8;">🃏 开新卡</span>
+      <span style="color:#64748b;margin:0 10px;">→</span>
+      <span style="color:#f87171;">⚔️ 远征更强</span>
+      <span style="color:#64748b;margin:0 10px;">→</span>
+      <span style="color:#94a3b8;">🏆 赢更多金</span>
+      <span style="color:#64748b;margin:0 10px;">→</span>
+      <span style="color:#4ade80;">📖 更多练习</span>
+    </div>
+  </center>
+
+  <div class="flex">
+    <div class="col" style="background:rgba(34,197,94,0.03);border:1px solid rgba(34,197,94,0.08);border-radius:8px;padding:14px;">
+      <p><strong style="color:#4ade80;">📖 练习英语</strong></p>
+      <p style="font-size:12px;color:#94a3b8;">
+        看剧集片段 → 听写/填空<br>
+        每次练习 → 得经验+星尘<br>
+        星尘可合成卡包
+      </p>
+    </div>
+    <div class="col" style="background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.08);border-radius:8px;padding:14px;">
+      <p><strong style="color:#fbbf24;">🎁 卡包系统</strong></p>
+      <p style="font-size:12px;color:#94a3b8;">
+        每个卡包开 5 张卡<br>
+        常见 70% / 稀有 25% / 传说 5%<br>
+        新卡进入<strong>你的收藏池</strong>
+      </p>
+    </div>
+    <div class="col" style="background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.08);border-radius:8px;padding:14px;">
+      <p><strong style="color:#f87171;">⚔️ 远征更强</strong></p>
+      <p style="font-size:12px;color:#94a3b8;">
+        收藏大 → 初始牌组强<br>
+        收藏大 → 战斗奖励选择多<br>
+        收藏大 → 更多策略组合
+      </p>
+    </div>
+  </div>
+
+  <div class="highlight" style="margin-top:14px;">
+    <p><strong>你不练英语 → 你就没有新卡 → 你就打不过更强的敌人。</strong></p>
+    <p style="font-size:13px;color:#94a3b8;">这不是惩罚，这是正循环。和杀戮尖塔里「你不打精英→你就没有稀有卡→你打不过 Boss」是一个道理。</p>
+  </div>
+</div>
+
+<!-- ===== 6. 改进对比 ===== -->
+<h2>六、之前的设计 vs 现在</h2>
+
+<div class="card">
+  <table>
+    <tr><th>维度</th><th>之前（太简陋）</th><th>现在（完整杀戮尖塔）</th></tr>
+    <tr><td>卡牌来源</td><td>没想清楚</td><td>练习得卡包→开卡→收藏池→进远征</td></tr>
+    <tr><td>卡牌类型</td><td>没分类</td><td>Attack/Skill/Power + 完整关键词系统</td></tr>
+    <tr><td>能量费用</td><td>没有</td><td>每回合 3 能量，卡牌消耗能量</td></tr>
+    <tr><td>敌人行为</td><td>"打敌人"</td><td>固定轮转表 + 意图可见 + 多阶段</td></tr>
+    <tr><td>状态/增益</td><td>没有</td><td>力量/敏捷/易伤/虚弱/中毒/缠绕/冰冻</td></tr>
+    <tr><td>策略深度</td><td>"出牌就赢了"</td><td>看到意图→决定这回合进攻还是防御</td></tr>
+    <tr><td>英语学习</td><td>做题打断战斗</td><td>纯分离：练习挣资源，战斗纯策略</td></tr>
+  </table>
+</div>
+
+<!-- ===== 7. 一局远征的实际流程（修正版） ===== -->
+<h2>七、一局远征完整流程（修正版）</h2>
+
+<div class="card">
+  <p style="font-size:15px;">① <strong>从收藏池选 8-10 张初始卡</strong></p>
+  <p style="font-size:15px;">② <strong>看 10 层地图 → 选路</strong>（每层 3-5 个岔路）</p>
+  <p style="font-size:15px;">③ <strong>进战斗</strong>：</p>
+  <ul style="padding-left:30px;">
+    <li>每回合 3 能量，摸 5 张牌</li>
+    <li>看敌人意图（下回合打你还是Buff）</li>
+    <li>出牌：攻击 / 格挡 / 上Buff / 给敌人Debuff</li>
+    <li>打光手牌 → 点「回合结束」→ 敌人行动</li>
+    <li>战斗胜利 → 从收藏池随机 3 张，选 1 加入牌组</li>
+  </ul>
+  <p style="font-size:15px;">④ <strong>篝火</strong>：回血 或 升级一张牌</p>
+  <p style="font-size:15px;">⑤ <strong>事件</strong>：读权游文本 → 做选择 → 拿/失去</p>
+  <p style="font-size:15px;">⑥ <strong>商店</strong>：用金币买卡包/删卡/药水</p>
+  <p style="font-size:15px;">⑦ <strong>Boss</strong>：每幕末 Boss 战（夜王/魔山/瑟曦/龙母...）</p>
+  <p style="font-size:15px;">⑧ <strong>通关或死亡</strong> → 重开</p>
+</div>
+
+<hr>
+
+<div style="text-align:center;padding:20px 0;">
+  <p style="color:#64748b;font-size:14px;font-family:sans-serif;">你觉得这个深度够了吗？如果方向没问题，我可以继续细化：</p>
+  <p style="font-size:13px;color:#475569;font-family:sans-serif;margin-top:6px;">
+    ✅ 完整的 100+ 张卡牌设计（权游主题、数值、稀有度）<br>
+    ✅ 50+ 个敌人的行为模式表（轮转顺序、意图、阶段转换）<br>
+    ✅ 10 幕 Boss 的详细技能和阶段设计<br>
+    ✅ 实现方案：数据结构 + 状态机 + 前端渲染
+  </p>
+</div>
+
+</div>
+</body>
+</html>

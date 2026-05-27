@@ -858,13 +858,12 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     return <div className="expedition-page"><div className="expedition-empty">加载中...</div></div>;
   }
 
+  if (showNewCombat) {
+    return <BattlePageSit onBack={() => setShowNewCombat(false)} />;
+  }
+
   return (
     <div className="expedition-page">
-      {/* New combat system */}
-      {showNewCombat ? (
-        <BattlePageSit onBack={() => setShowNewCombat(false)} />
-      ) : (
-      <>
       <div className="expedition-tabs">
         <button className={`expedition-tab ${tab === 'current' ? 'active' : ''}`} onClick={() => setTab('current')}>
           当前远征

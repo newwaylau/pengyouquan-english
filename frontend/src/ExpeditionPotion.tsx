@@ -95,12 +95,14 @@ export default function ExpeditionPotion({
                   padding: '8px 12px',
                   borderRadius: 'var(--radius-sm)',
                   fontSize: 11,
-                  whiteSpace: 'nowrap',
+                  whiteSpace: 'normal',
                   zIndex: 100,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
                   pointerEvents: 'none',
-                  minWidth: 160,
+                  minWidth: 140,
+                  maxWidth: 260,
                   textAlign: 'center',
+                  wordBreak: 'break-word',
                 }}
               >
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>

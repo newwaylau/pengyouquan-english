@@ -31,6 +31,7 @@ public class ExpeditionService {
     private final ExpeditionBossService expeditionBossService;
     private final ExpeditionStatusService expeditionStatusService;
     private final ExpeditionPotionRepository expeditionPotionRepository;
+    private final ExpeditionStoryRepository expeditionStoryRepository;
 
     // 每层节点序列模板（内部数组表示分支选项，多元素表示岔路）
     private static final Map<Integer, List<List<String>>> ACT_NODE_TEMPLATES = new LinkedHashMap<>();
@@ -84,7 +85,8 @@ public class ExpeditionService {
                              ExpeditionMapService expeditionMapService,
                              ExpeditionBossService expeditionBossService,
                              ExpeditionStatusService expeditionStatusService,
-                             ExpeditionPotionRepository expeditionPotionRepository) {
+                             ExpeditionPotionRepository expeditionPotionRepository,
+                             ExpeditionStoryRepository expeditionStoryRepository) {
         this.expeditionRepository = expeditionRepository;
         this.relicRepository = relicRepository;
         this.expeditionRelicRepository = expeditionRelicRepository;
@@ -101,6 +103,7 @@ public class ExpeditionService {
         this.expeditionBossService = expeditionBossService;
         this.expeditionStatusService = expeditionStatusService;
         this.expeditionPotionRepository = expeditionPotionRepository;
+        this.expeditionStoryRepository = expeditionStoryRepository;
     }
 
     // ==================== 1. 启动远征 ====================
@@ -154,6 +157,16 @@ public class ExpeditionService {
         exp.setMapData(mapDataJson);
         exp.setBattleState("{}");
         expeditionRepository.save(exp);
+
+        // 查询远征剧情
+        Optional<ExpeditionStory> storyOpt = expeditionStoryRepository
+                .findByShowIdAndEpisodeSeasonAndEpisodeNumber(showId, 1, 1);
+        if (storyOpt.isPresent()) {
+            ExpeditionStory story = storyOpt.get();
+            exp.setStoryIntro(story.getStoryIntro());
+            exp.setNodeStories(story.getNodeStories());
+            expeditionRepository.save(exp);
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("expedition", buildExpeditionData(exp));
@@ -1330,6 +1343,34 @@ public class ExpeditionService {
         return result;
     }
 
+    // ==================== 剧情查询 ====================
+
+    public Map<String, Object> getEpisodeStory(Long showId, int season, int episode) {
+        Optional<ExpeditionStory> storyOpt = expeditionStoryRepository
+                .findByShowIdAndEpisodeSeasonAndEpisodeNumber(showId, season, episode);
+        if (storyOpt.isEmpty()) {
+            Map<String, Object> empty = new HashMap<>();
+            empty.put("found", false);
+            return empty;
+        }
+        ExpeditionStory story = storyOpt.get();
+        Map<String, Object> data = new HashMap<>();
+        data.put("found", true);
+        data.put("id", story.getId());
+        data.put("showId", story.getShowId());
+        data.put("episodeSeason", story.getEpisodeSeason());
+        data.put("episodeNumber", story.getEpisodeNumber());
+        data.put("storyIntro", story.getStoryIntro());
+        data.put("bossName", story.getBossName());
+        data.put("bossStory", story.getBossStory());
+        try {
+            data.put("nodeStories", objectMapper.readValue(story.getNodeStories(), List.class));
+        } catch (Exception e) {
+            data.put("nodeStories", List.of());
+        }
+        return data;
+    }
+
     // ==================== 内部方法 ====================
 
     private Expedition getActiveExpedition(Long userId) {
@@ -1890,6 +1931,18 @@ public class ExpeditionService {
         data.put("questionsAnswered", exp.getQuestionsAnswered());
         data.put("questionsTotal", exp.getQuestionsTotal());
         data.put("enemiesKilled", exp.getEnemiesKilled());
+
+        // 剧情字段
+        data.put("storyIntro", exp.getStoryIntro());
+        if (exp.getNodeStories() != null) {
+            try {
+                data.put("nodeStories", objectMapper.readValue(exp.getNodeStories(), List.class));
+            } catch (Exception e) {
+                data.put("nodeStories", List.of());
+            }
+        } else {
+            data.put("nodeStories", List.of());
+        }
 
         // 解析JSON字段
         List<List<String>> mapNodeRows = parseJsonNodeRows(exp.getMapNodes());

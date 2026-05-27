@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>权游全地图远征 · 500+节点规划</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #070b14;
+  color: #e2e8f0;
+  font-family: 'Georgia', serif;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* ===== Header ===== */
+.header {
+  text-align: center;
+  padding: 40px 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 30px;
+}
+.header h1 {
+  font-size: 32px;
+  color: #fbbf24;
+  letter-spacing: 6px;
+  font-weight: 700;
+}
+.header .subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 10px;
+  letter-spacing: 3px;
+  font-family: sans-serif;
+}
+.header .badge-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.badge {
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid;
+}
+.badge.gold { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.25); color: #fbbf24; }
+.badge.purple { background: rgba(168,85,247,0.10); border-color: rgba(168,85,247,0.25); color: #a855f7; }
+.badge.blue { background: rgba(99,102,241,0.10); border-color: rgba(99,102,241,0.25); color: #818cf8; }
+
+/* ===== Quick Stats ===== */
+.quick-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: sans-serif;
+  line-height: 1;
+}
+.stat-num.purple { color: #a855f7; }
+.stat-num.blue { color: #818cf8; }
+.stat-label {
+  font-size: 12px;
+  color: #64748b;
+  font-family: sans-serif;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* ===== Legend ===== */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 14px 0 20px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  margin-bottom: 24px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: sans-serif;
+}
+.legend-dot {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+}
+
+/* ===== World Map ===== */
+.world-section {
+  margin-bottom: 40px;
+}
+.world-section h2 {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: #94a3b8;
+  font-family: sans-serif;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+.world-section .divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251,191,36,0.10), transparent);
+  margin: 0 0 20px;
+}
+
+/* ===== Act Column Layout ===== */
+.act-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.act-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: default;
+  transition: all 0.2s;
+}
+.act-card:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(251,191,36,0.2);
+  transform: translateY(-2px);
+}
+.act-card .act-icon { font-size: 28px; margin-bottom: 6px; }
+.act-card .act-num {
+  font-size: 11px;
+  font-family: sans-serif;
+  color: #64748b;
+  letter-spacing: 1px;
+}
+.act-card .act-name {
+  font-size: 15px;
+  color: #fbbf24;
+  margin: 4px 0;
+  font-weight: 700;
+}
+.act-card .act-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: sans-serif;
+  line-height: 1.4;
+}
+.act-card .act-nodes {
+  font-size: 11px;
+  color: #64748b;
+  font-family: sans-serif;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ===== Act Detail (exploded view of one act) ===== */
+.act-detail {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 32px 0;
+}
+.act-detail h3 {
+  text-align: center;
+  font-size: 20px;
+  color: #fbbf24;
+  letter-spacing: 3px;
+  margin-bottom: 4px;
+}
+.act-detail .act-location {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+  font-family: sans-serif;
+  margin-bottom: 20px;
+}
+
+/* ===== Floor ===== */
+.floor {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.floor:last-child { border-bottom: none; }
+.floor-label {
+  font-size: 10px;
+  color: #475569;
+  font-family: sans-serif;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+
+/* ===== Node ===== */
+.node {
+  position: relative;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: default;
+}
+.node:hover { transform: scale(1.10); }
+.node-dot {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  transition: all 0.2s;
+}
+.node-dot.combat { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+.node-dot.elite { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); box-shadow: 0 0 6px rgba(251,191,36,0.08); }
+.node-dot.event { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.2); }
+.node-dot.rest { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); }
+.node-dot.shop { background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.2); }
+.node-dot.boss { background: rgba(168,85,247,0.10); border-color: rgba(168,85,247,0.3); box-shadow: 0 0 8px rgba(168,85,247,0.10); }
+.node-label {
+  font-size: 9px;
+  color: #64748b;
+  font-family: sans-serif;
+  text-align: center;
+  max-width: 68px;
+  line-height: 1.2;
+}
+.node:hover .node-dot { border-color: rgba(251,191,36,0.3); }
+
+/* ===== Boss floor special ===== */
+.boss-floor {
+  background: rgba(168,85,247,0.03);
+  border-radius: 0 0 10px 10px;
+  padding: 14px 0;
+  margin-top: 6px;
+  border-top: 1px solid rgba(168,85,247,0.08);
+}
+
+/* ===== Text Volume Table ===== */
+.text-section {
+  margin: 24px 0;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 24px;
+}
+.text-section h3 {
+  text-align: center;
+  font-size: 18px;
+  color: #818cf8;
+  letter-spacing: 3px;
+  font-family: sans-serif;
+  margin-bottom: 18px;
+}
+.text-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: sans-serif;
+  font-size: 13px;
+}
+.text-table th {
+  text-align: left;
+  padding: 8px 12px;
+  color: #64748b;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.text-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: #94a3b8;
+}
+.text-table tr:hover td { background: rgba(255,255,255,0.02); }
+.text-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.text-table .total td {
+  border-top: 1px solid rgba(251,191,36,0.15);
+  color: #fbbf24;
+  font-weight: 700;
+  padding-top: 12px;
+  border-bottom: none;
+}
+
+/* ===== Sample node text ===== */
+.sample-nodes {
+  margin: 24px 0;
+}
+.sample-nodes h3 {
+  text-align: center;
+  font-size: 16px;
+  color: #fbbf24;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+.sample-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.sample-card .sample-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: sans-serif;
+  margin-bottom: 10px;
+}
+.sample-card .sample-tag.event { background: rgba(99,102,241,0.12); color: #818cf8; }
+.sample-card .sample-tag.elite { background: rgba(251,191,36,0.12); color: #fbbf24; }
+.sample-card .sample-tag.combat { background: rgba(239,68,68,0.12); color: #f87171; }
+.sample-card .sample-title {
+  font-size: 18px;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.sample-card .sample-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #cbd5e1;
+}
+.sample-card .sample-word-count {
+  text-align: right;
+  font-size: 11px;
+  color: #64748b;
+  font-family: sans-serif;
+  margin-top: 8px;
+}
+
+/* ===== Journey line ===== */
+.journey {
+  padding: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.journey-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.journey-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fbbf24;
+  margin-bottom: 4px;
+}
+.journey-dot.inactive { background: #334155; }
+.journey-line {
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, #fbbf24, #334155);
+  flex-shrink: 0;
+  margin: 0 4px 20px;
+}
+.journey-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-family: sans-serif;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 800px) {
+  .act-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== Node Type Count ===== */
+.type-breakdown {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.type-card {
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  text-align: center;
+  font-family: sans-serif;
+}
+.type-card .type-icon { font-size: 22px; }
+.type-card .type-count { font-size: 22px; font-weight: 700; color: #e2e8f0; margin: 4px 0; }
+.type-card .type-label { font-size: 11px; color: #64748b; }
+
+/* ===== Mobile ===== */
+@media (max-width: 720px) {
+  .act-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .floor { gap: 10px; }
+  .floor-label { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <h1>🐉 冰与火 · 远征</h1>
+    <div class="subtitle">一次远征 ≡ 从绝境长城到亚夏的史诗之旅</div>
+    <div class="badge-row">
+      <span class="badge gold">杀戮尖塔完全复刻</span>
+      <span class="badge purple">10 幕 · 500+ 节点</span>
+      <span class="badge blue">每节点 300+ 字</span>
+    </div>
+  </div>
+
+  <!-- ===== QUICK STATS ===== -->
+  <div class="quick-stats">
+    <div class="stat-item">
+      <div class="stat-num">10</div>
+      <div class="stat-label">地理幕（Act）</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num purple">520</div>
+      <div class="stat-label">总节点数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num blue">158,000</div>
+      <div class="stat-label">总文字数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num purple">10-15</div>
+      <div class="stat-label">每局约访问节点</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">52</div>
+      <div class="stat-label">每局约访问比例</div>
+    </div>
+  </div>
+
+  <!-- ===== THE JOURNEY ===== -->
+  <div class="world-section">
+    <h2>🏔️ 远征路线 · 从长城到亚夏</h2>
+    <hr class="divider">
+    <p style="text-align:center;font-size:13px;color:#64748b;font-family:sans-serif;margin-bottom:20px;padding:0 40px;line-height:1.7;">
+      你是一位在学英语的旅者，从绝境长城出发，一路南下穿过七大王国，跨过狭海游历自由贸易城邦与奴隶湾，
+      穿越多斯拉克海和瓦雷利亚废墟，最终抵达亚夏阴影之地。每到一处，都有权游角色和事件成为你的对手与盟友。
+    </p>
+  </div>
+
+  <!-- ===== LEGEND ===== -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div>战斗（300字）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div>精英战（400字）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1;"></div>剧情事件（500字）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div>篝火休息（300字）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div>集市商店（300字）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div>首领Boss（800字）</div>
+  </div>
+
+  <!-- ===== 10 ACTS ===== -->
+  <div class="world-section">
+    <h2>📌 十幕全地图</h2>
+    <hr class="divider">
+
+    <div class="act-grid">
+
+      <!-- Act 1 -->
+      <div class="act-card">
+        <div class="act-icon">🏔️</div>
+        <div class="act-num">第一幕</div>
+        <div class="act-name">长城与荒野</div>
+        <div class="act-sub">黑城堡 · 鬼影森林 · 霜雪之牙 · 先民拳峰</div>
+        <div class="act-nodes">52 节点 · 班扬·史塔克 · 野人部落</div>
+      </div>
+
+      <!-- Act 2 -->
+      <div class="act-card">
+        <div class="act-icon">🐺</div>
+        <div class="act-num">第二幕</div>
+        <div class="act-name">北境</div>
+        <div class="act-sub">临冬城 · 白港 · 恐怖堡 · 卡霍城 · 深林堡</div>
+        <div class="act-nodes">54 节点 · 史塔克家族 · 剥皮人</div>
+      </div>
+
+      <!-- Act 3 -->
+      <div class="act-card">
+        <div class="act-icon">🌊</div>
+        <div class="act-num">第三幕</div>
+        <div class="act-name">河间地与铁群岛</div>
+        <div class="act-sub">奔流城 · 赫伦堡 · 孪河城 · 派克城 · 三叉戟河</div>
+        <div class="act-nodes">52 节点 · 徒利家族 · 葛雷乔伊</div>
+      </div>
+
+      <!-- Act 4 -->
+      <div class="act-card">
+        <div class="act-icon">🦅</div>
+        <div class="act-num">第四幕</div>
+        <div class="act-name">谷地与西境</div>
+        <div class="act-sub">鹰巢城 · 血门 · 凯岩城 · 兰尼斯港 · 金牙城</div>
+        <div class="act-nodes">50 节点 · 艾林家族 · 兰尼斯特</div>
+      </div>
+
+      <!-- Act 5 -->
+      <div class="act-card">
+        <div class="act-icon">🌹</div>
+        <div class="act-num">第五幕</div>
+        <div class="act-name">河湾地、风暴地与君临</div>
+        <div class="act-sub">高庭 · 旧镇 · 风息堡 · 君临 · 龙石岛</div>
+        <div class="act-nodes">56 节点 · 提利尔 · 拜拉席恩 · 铁王座</div>
+      </div>
+
+      <!-- Act 6 -->
+      <div class="act-card">
+        <div class="act-icon">☀️</div>
+        <div class="act-num">第六幕</div>
+        <div class="act-name">多恩</div>
+        <div class="act-sub">阳戟城 · 流水花园 · 骨路 · 星坠城 · 板条镇</div>
+        <div class="act-nodes">46 节点 · 马泰尔家族 · 沙蛇</div>
+      </div>
+
+      <!-- Act 7 -->
+      <div class="act-card">
+        <div class="act-icon">⚓</div>
+        <div class="act-num">第七幕</div>
+        <div class="act-name">自由贸易城邦</div>
+        <div class="act-sub">布拉佛斯 · 潘托斯 · 密尔 · 瓦兰提斯 · 里斯</div>
+        <div class="act-nodes">54 节点 · 无面者 · 铁金库</div>
+      </div>
+
+      <!-- Act 8 -->
+      <div class="act-card">
+        <div class="act-icon">🐴</div>
+        <div class="act-num">第八幕</div>
+        <div class="act-name">多斯拉克海与奴隶湾</div>
+        <div class="act-sub">维斯·多斯拉克 · 阿斯塔波 · 渊凯 · 弥林</div>
+        <div class="act-nodes">58 节点 · 龙之母 · 无垢者</div>
+      </div>
+
+      <!-- Act 9 -->
+      <div class="act-card">
+        <div class="act-icon">💎</div>
+        <div class="act-num">第九幕</div>
+        <div class="act-name">魁尔斯与东方</div>
+        <div class="act-sub">魁尔斯 · 玉海 · 夷地 · 阴影之地</div>
+        <div class="act-nodes">48 节点 · 不朽之塔 · 香料古路</div>
+      </div>
+
+      <!-- Act 10 -->
+      <div class="act-card">
+        <div class="act-icon">🔥</div>
+        <div class="act-num">第十幕</div>
+        <div class="act-name">瓦雷利亚与亚夏</div>
+        <div class="act-sub">瓦雷利亚废墟 · 烟海 · 亚夏 · 阴影</div>
+        <div class="act-nodes">50 节点 · 瓦雷利亚魔法 · 最终首领</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== ACT DETAIL (zoomed view of Act 2 - The North) ===== -->
+  <div class="act-detail">
+    <h3>🐺 第二幕 · 北境 详细视图</h3>
+    <div class="act-location">临冬城 → 白港 → 恐怖堡 → 卡霍城 | 54 节点 × 10 层</div>
+
+    <!-- Floor 1 -->
+    <div class="floor">
+      <span class="floor-label">L1</span>
+      <div class="node">
+        <div class="node-dot event">📜</div>
+        <div class="node-label">临冬城大厅</div>
+      </div>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">神木林巡逻</div>
+      </div>
+      <div class="node">
+        <div class="node-dot rest">🔥</div>
+        <div class="node-label">地下墓穴</div>
+      </div>
+      <div class="node">
+        <div class="node-dot shop">🛒</div>
+        <div class="node-label">鲁温师傅</div>
+      </div>
+    </div>
+
+    <!-- Floor 2 -->
+    <div class="floor">
+      <span class="floor-label">L2</span>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">狼林伏击</div>
+      </div>
+      <div class="node">
+        <div class="node-dot elite">💀</div>
+        <div class="node-label">🟡 席恩·葛雷乔伊</div>
+      </div>
+      <div class="node">
+        <div class="node-dot event">📜</div>
+        <div class="node-label">布兰的梦境</div>
+      </div>
+    </div>
+
+    <!-- Floor 3 -->
+    <div class="floor">
+      <span class="floor-label">L3</span>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">白港卫兵</div>
+      </div>
+      <div class="node">
+        <div class="node-dot event">📜</div>
+        <div class="node-label">曼德勒伯爵</div>
+      </div>
+      <div class="node">
+        <div class="node-dot rest">🔥</div>
+        <div class="node-label">银色码头酒馆</div>
+      </div>
+      <div class="node">
+        <div class="node-dot elite">💀</div>
+        <div class="node-label">🟡 达格摩</div>
+      </div>
+    </div>
+
+    <!-- Floor 4 -->
+    <div class="floor">
+      <span class="floor-label">L4</span>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">恐怖堡门前</div>
+      </div>
+      <div class="node">
+        <div class="node-dot event">📜</div>
+        <div class="node-label">拉姆斯·波顿</div>
+      </div>
+      <div class="node">
+        <div class="node-dot shop">🛒</div>
+        <div class="node-label">恐怖堡军械库</div>
+      </div>
+    </div>
+
+    <!-- Floor 5 -->
+    <div class="floor">
+      <span class="floor-label">L5</span>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">卡霍城战役</div>
+      </div>
+      <div class="node">
+        <div class="node-dot elite">💀</div>
+        <div class="node-label">🟡 卢斯·波顿</div>
+      </div>
+      <div class="node">
+        <div class="node-dot combat">⚔️</div>
+        <div class="node-label">荒冢屯伏击</div>
+      </div>
+    </div>
+
+    <!-- Floor 6 → Boss -->
+    <div class="boss-floor">
+      <div class="floor">
+        <span class="floor-label">BOSS</span>
+        <div class="node" style="width:auto;">
+          <div class="node-dot boss" style="width:48px;height:48px;border-radius:50%;font-size:24px;">👑</div>
+          <div class="node-label" style="color:#a855f7;font-weight:700;">琼恩·雪诺<br>北境之王</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NODE TYPE BREAKDOWN ===== -->
+  <div class="world-section">
+    <h2>📊 520 节点构成</h2>
+    <hr class="divider">
+    <div class="type-breakdown">
+      <div class="type-card">
+        <div class="type-icon">⚔️</div>
+        <div class="type-count">200</div>
+        <div class="type-label">普通战斗</div>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">💀</div>
+        <div class="type-count">80</div>
+        <div class="type-label">精英战</div>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">📜</div>
+        <div class="type-count">100</div>
+        <div class="type-label">剧情事件</div>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">🔥</div>
+        <div class="type-count">60</div>
+        <div class="type-label">篝火休息</div>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">🛒</div>
+        <div class="type-count">50</div>
+        <div class="type-label">集市商店</div>
+      </div>
+      <div class="type-card">
+        <div class="type-icon">👑</div>
+        <div class="type-count">30</div>
+        <div class="type-label">首领Boss</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TEXT VOLUME ===== -->
+  <div class="text-section">
+    <h3>📝 文字量总表</h3>
+    <table class="text-table">
+      <tr>
+        <th>节点类型</th>
+        <th>数量</th>
+        <th>每节点字数</th>
+        <th class="num">总计</th>
+      </tr>
+      <tr>
+        <td>⚔️ 普通战斗（英语练习+战斗描写）</td>
+        <td>200</td>
+        <td>300 字</td>
+        <td class="num">60,000</td>
+      </tr>
+      <tr>
+        <td>💀 精英战（角色背景+战斗对话）</td>
+        <td>80</td>
+        <td>400 字</td>
+        <td class="num">32,000</td>
+      </tr>
+      <tr>
+        <td>📜 剧情事件（权游主线故事）</td>
+        <td>100</td>
+        <td>500 字</td>
+        <td class="num">50,000</td>
+      </tr>
+      <tr>
+        <td>🔥 篝火休息（氛围+角色回忆）</td>
+        <td>60</td>
+        <td>300 字</td>
+        <td class="num">18,000</td>
+      </tr>
+      <tr>
+        <td>🛒 集市商店（商人互动+对话）</td>
+        <td>50</td>
+        <td>300 字</td>
+        <td class="num">15,000</td>
+      </tr>
+      <tr>
+        <td>👑 首领Boss（决战高潮）</td>
+        <td>30</td>
+        <td>800 字</td>
+        <td class="num">24,000</td>
+      </tr>
+      <tr class="total">
+        <td>📝 总计</td>
+        <td>520</td>
+        <td>—</td>
+        <td class="num" style="color:#fbbf24;font-size:18px;">~200,000 字</td>
+      </tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#64748b;font-family:sans-serif;margin-top:12px;">
+      对比：一本《冰与火之歌》小说约 300,000 字 · 10 幕 × 每幕 ≈ 一部中篇小说
+    </p>
+  </div>
+
+  <!-- ===== SAMPLE NODES ===== -->
+  <div class="sample-nodes">
+    <h3>✍️ 节点文字样例（每个 300+ 字）</h3>
+
+    <!-- Combat -->
+    <div class="sample-card">
+      <div class="sample-tag combat">⚔️ 普通战斗 · 临冬城神木林</div>
+      <div class="sample-title">"心树下的阴影"</div>
+      <div class="sample-body">
+        <p>清晨的雾气仍未消散，你踏入了临冬城的神木林。古老的鱼梁木矗立在中央，血红色的掌形叶子在微风中颤抖——树干上刻着一张哭泣的面孔，仿佛洞悉一切秘密。</p>
+        <p>  突然，一阵金属碰撞声从树后传来。一个穿着兰尼斯特红金甲的士兵跌跌撞撞地出现在你面前——你认出了那是詹姆·兰尼斯特部下的铠甲。他显然在这片圣地里寻找着什么，神情紧张而狂躁。</p>
+        <p>  "Stand aside, stranger. This is none of your concern." 他拔出长剑，剑刃反射着透过树冠的晨光。</p>
+        <p>  你的手按上剑柄。这片神木林是先民和旧神的圣地，任何亵渎者都该被驱逐。但他口中的英语带着西境口音，"concern"一词的发音微微上扬——那是凯岩城的特征。</p>
+        <p>[🎧 听力理解] Listen to the soldier's words. What does "concern" mean in this context?</p>
+        <p>  神木林的寂静意味着什么？是庇护，还是陷阱？</p>
+      </div>
+      <div class="sample-word-count">约 350 字</div>
+    </div>
+
+    <!-- Event -->
+    <div class="sample-card">
+      <div class="sample-tag event">📜 剧情事件 · 君临 · 红堡小议政会议</div>
+      <div class="sample-title">"权力只在人们相信它存在的地方"</div>
+      <div class="sample-body">
+        <p>  红堡的王座厅让你喘不过气来。不是因为没有窗户——而是因为空气本身厚重如铁，充满了窃窃私语和未说出口的算计。你站在大理石柱的阴影中，看着铁王座前的这一幕。</p>
+        <p>  劳勃国王坐在那把扭曲的剑座上，他的肚子已经撑破了精致的蓝色紧身上衣。在他身边，瑟曦·兰尼斯特穿着金色长裙，如同一尊美丽而冷漠的雕像。奈德·史塔克站在大厅中央，他的脸色像北境的雪一样阴沉。</p>
+        <p>  "You are the Hand of the King, Stark," 劳勃的声音从王座上飘下来，带着醉意和疲惫。"Or have you forgotten already?"</p>
+        <p>  小指头——培提尔·贝里席——站在角落里，手指在账本上轻轻敲击，嘴角带着一丝几乎不可察觉的微笑。他向你的方向瞥了一眼——那眼神里有衡量、有算计，仿佛在评估你这个新来者的价值。</p>
+        <p>  "Your Grace," 奈德艰难地开口，"the previous Hand... Jon Arryn... he was murdered."</p>
+        <p>  大厅里的空气瞬间凝固了。瑟曦的脸没有变化，但她的手握紧了王座的扶手。</p>
+        <p>[📝 语法填空] Choose the correct preposition: "The truth lies ___ the shadows." (A. on  B. in  C. at  D. beneath)</p>
+        <p>  你退了回来，意识到自己已经卷入了某种远比学习英语大得多的游戏之中。</p>
+      </div>
+      <div class="sample-word-count">约 490 字</div>
+    </div>
+
+    <!-- Elite -->
+    <div class="sample-card">
+      <div class="sample-tag elite">💀 精英战 · 谷地 · 鹰巢城 · 猎狗</div>
+      <div class="sample-title">"只有活人才能害怕"</div>
+      <div class="sample-body">
+        <p>  石阶盘旋而上，狭长的风声像某种垂死的动物在呻吟。鹰巢城的阶梯让所有来访者都感到脚软——不是恐惧高度，而是恐惧这条路根本没有尽头。</p>
+        <p>  拐角处，一个庞大的身影挡住了月光。</p>
+        <p>  桑铎·克里冈——猎狗——正靠在墙上，他那半边被烧毁的脸在阴影中格外狰狞。他正在擦拭一把匕首，金属反光映在他完好的那只眼睛里——那只眼里没有一丝温暖。</p>
+        <p>  "Another fool climbing to the Eyrie." 他的声音粗糙得像砂石刮过铁皮。"What are you looking for? Justice? Honor?" 他吐了口唾沫。"There's none of that here. Only cold and death."</p>
+        <p>  他站直了身体，比你高了整整一个头。你能闻到他的气味——马汗、铁锈和篝火烟尘。他的手慢慢移向剑柄。</p>
+        <p>  "I'll give you one piece of advice, free of charge: turn around. Go back down. The world below might be filth, but at least it's warm filth."</p>
+        <p>[📝 单词拼写] Spell the adjective meaning "not afraid" based on the audio: "b_____s"</p>
+        <p>  他没有等你回答。剑已经出鞘了。</p>
+      </div>
+      <div class="sample-word-count">约 410 字</div>
+    </div>
+
+  </div>
+
+  <!-- ===== COMPARISON ===== -->
+  <div class="text-section" style="border-color:rgba(251,191,36,0.10);">
+    <h3 style="color:#fbbf24;">⚡ 新旧方案对比</h3>
+    <table class="text-table">
+      <tr>
+        <th>维度</th>
+        <th>旧方案（按集）</th>
+        <th>新方案（全地图）</th>
+      </tr>
+      <tr>
+        <td>地图</td>
+        <td>每集一条直线</td>
+        <td>🔥 权游全地图（维斯特洛+厄斯索斯）</td>
+      </tr>
+      <tr>
+        <td>总节点</td>
+        <td>73集 × 6 = 438</td>
+        <td>🔥 520 节点 × 岔路 = 无限重玩</td>
+      </tr>
+      <tr>
+        <td>每局约访问</td>
+        <td>6 节点（固定）</td>
+        <td>🔥 15-20 节点（随机岔路）</td>
+      </tr>
+      <tr>
+        <td>文字总量</td>
+        <td>73集 × 1,200 = ~87,600</td>
+        <td>🔥 ~200,000 字</td>
+      </tr>
+      <tr>
+        <td>每节点文字</td>
+        <td>~200 字</td>
+        <td>🔥 300-800 字</td>
+      </tr>
+      <tr>
+        <td>可重玩性</td>
+        <td>低（固定路线）</td>
+        <td>🔥 极高（每次岔路不同）</td>
+      </tr>
+      <tr>
+        <td>和杀戮尖塔相似度</td>
+        <td>普通</td>
+        <td>🔥 完全复刻</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <div class="world-section" style="margin-top:28px;">
+    <h2>🎮 一局远征怎么玩</h2>
+    <hr class="divider">
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:24px;font-family:sans-serif;font-size:13px;color:#94a3b8;line-height:1.8;">
+      <p>1. <strong style="color:#e2e8f0;">选择起始地点</strong> — 从 10 幕中选一个作为起点，但游戏会随机分配你的出发幕</p>
+      <p>2. <strong style="color:#e2e8f0;">看 10 层地图</strong> — 每层 3-6 个节点岔路（战斗/事件/篝火/商店），选一个走</p>
+      <p>3. <strong style="color:#e2e8f0;">进入节点 → 读 300+ 字英文故事</strong> → 回答英语题（听力/单词/语法/阅读理解）</p>
+      <p>4. <strong style="color:#e2e8f0;">答对：出牌打敌人</strong> / <strong style="color:#e2e8f0;">答错：敌人加攻</strong> — 你的英语水平=你的战斗力</p>
+      <p>5. <strong style="color:#e2e8f0;">打败精英拿稀有卡</strong>，篝火升级卡牌，商店买卖卡</p>
+      <p>6. <strong style="color:#e2e8f0;">每幕 Boss</strong> — 30 个 Boss 对应权游核心角色（奈德·史塔克、泰温、魔山、瑟曦、龙母、夜王...）</p>
+      <p>7. <strong style="color:#e2e8f0;">通关 10 幕 → 直面铁王座 / 龙之母 / 夜王</strong>（每次随机最终 Boss）</p>
+      <p style="margin-top:6px;color:#64748b;font-style:italic;">全程不用打字。点节点→看故事→答题→出牌。</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

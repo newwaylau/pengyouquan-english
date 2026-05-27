@@ -96,17 +96,20 @@ export default function ExpeditionReward({ rewardChoices, onChoose }: Expedition
             gap: 12,
             justifyContent: 'center',
             marginTop: 20,
+            flexWrap: 'wrap',
           }}
         >
           {rewardChoices.map((choice: any, i: number) => (
             <div
               key={i}
               data-card-index={i}
+              className="expedition-reward-card-item"
               style={{
                 perspective: '1000px',
                 width: 100,
                 height: 140,
                 cursor: chosen && !flipped.has(i) ? 'default' : 'pointer',
+                flexShrink: 0,
               }}
               onClick={() => handleCardClick(i)}
             >
