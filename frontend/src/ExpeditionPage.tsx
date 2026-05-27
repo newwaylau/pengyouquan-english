@@ -7,7 +7,8 @@ import ExpeditionPotion from './ExpeditionPotion';
 import ExpeditionEvent from './ExpeditionEvent';
 import ExpeditionBoss from './ExpeditionBoss';
 import ExpeditionReward from './ExpeditionReward';
-import { 
+import BattlePageSit from './BattlePageSit';
+import {
   playCardAnimation, elementFlash, showDamageNumber, hitAnimation, screenShake, 
   spawnParticles, victoryEffect, defeatEffect, enemyDeathAnimation, cardDrawAnimation 
 } from './EffectEngine';
@@ -100,9 +101,22 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Hovered relic for tooltip (moved to ExpeditionStatus)
   // const [hoveredRelic, setHoveredRelic] = useState<number | null>(null);
 
+  // Story system
+  const [showMonologue, setShowMonologue] = useState(false);
+  const [storyIntro, setStoryIntro] = useState('');
+  const [nodeStories, setNodeStories] = useState<Array<{title?: string; story?: string; choices?: string[]}>>([]);
+  const [nodeStoryPopup, setNodeStoryPopup] = useState<{
+    title: string;
+    story: string;
+    choices?: string[];
+  } | null>(null);
+
   // Game phase
   type Phase = 'lobby' | 'map' | 'combat' | 'event' | 'rest' | 'shop' | 'reward' | 'settlement';
   const [phase, setPhase] = useState<Phase>('lobby');
+
+  // New combat system toggle
+  const [showNewCombat, setShowNewCombat] = useState(false);
 
   // Load
   useEffect(() => {
@@ -137,6 +151,11 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         setPhase('map');
         if (data.nodeOptions) setNodeOptions(data.nodeOptions);
         if (data.enemy) setEnemy(data.enemy);
+        // Load story data for existing expedition
+        if (data.expedition && data.expedition.storyIntro) {
+          setStoryIntro(data.expedition.storyIntro);
+          setNodeStories(data.expedition.nodeStories || []);
+        }
       } else {
         setHasExpedition(false);
         setPhase('lobby');
@@ -156,9 +175,15 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (res.code === 200) {
       setExpedition(res.data.expedition);
       setHasExpedition(true);
-      setPhase('map');
-      setNodeType(res.data.expedition.currentNodeType);
-      if (res.data.expedition.nodeOptions) setNodeOptions(res.data.expedition.nodeOptions);
+      if (res.data.expedition.storyIntro) {
+        setStoryIntro(res.data.expedition.storyIntro);
+        setNodeStories(res.data.expedition.nodeStories || []);
+        setShowMonologue(true);
+      } else {
+        setPhase('map');
+        setNodeType(res.data.expedition.currentNodeType);
+        if (res.data.expedition.nodeOptions) setNodeOptions(res.data.expedition.nodeOptions);
+      }
     } else {
       alert(res.message);
     }
@@ -419,11 +444,10 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     }
   }
 
-  // Handle node click (called from ExpeditionMap)
-  function handleMapNodeClick(ndx: number) {
-    if (!expedition) return;
-    const nt = expedition.mapNodes[ndx];
-    if (!nt) return;
+  // Show node story popup, then dispatch action on continue
+  const pendingNodeActionRef = useRef<{ nt: string; ndx: number } | null>(null);
+
+  function dispatchNodeAction(nt: string, _ndx: number) {
     switch (nt) {
       case 'combat':
       case 'boss':
@@ -439,6 +463,29 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         enterShop();
         break;
     }
+  }
+
+  // Handle node click (called from ExpeditionMap)
+  function handleMapNodeClick(ndx: number) {
+    if (!expedition) return;
+    const nt = expedition.mapNodes[ndx];
+    if (!nt) return;
+
+    // Show node story popup if available
+    const story = nodeStories[ndx];
+    if (story && story.story) {
+      setNodeStoryPopup({
+        title: story.title || NODE_LABELS[nt] || nt,
+        story: story.story,
+        choices: nt === 'event' ? story.choices : undefined,
+      });
+      // Store pending action for when popup is dismissed
+      pendingNodeActionRef.current = { nt, ndx };
+      return;
+    }
+
+    // Fallback: directly enter node
+    dispatchNodeAction(nt, ndx);
   }
 
   async function fetchEventData() {
@@ -724,24 +771,38 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
         {!selectedShow ? (
           <>
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
-              选择剧集
+            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
+              选择一部剧集开始远征
             </p>
-            <div className="expedition-show-select">
-              {shows.map((show: any) => (
-                <button
-                  key={show.id}
-                  className={`expedition-show-btn ${selectedShow === show.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedShow(show.id)}
-                >
-                  <div style={{ fontSize: 24, marginBottom: 4 }}>{show.name?.includes('Game of Thrones') ? '🐉' : '🏰'}</div>
-                  <div>{show.name || '未知剧集'}</div>
-                </button>
-              ))}
+            <div className="expedition-show-grid">
+              {shows.filter((s: any) => s.id > 1 && s.name && s.name !== '??' && !s.name.includes('[未知]')).map((show: any) => {
+                const showIcon = show.name?.includes('Game of Thrones') || show.name?.includes('Thrones') ? '🐉' : '🏰';
+                const showDesc = show.name?.includes('Game of Thrones') ? '维斯特洛大陆的权力游戏，英语学习经典' : '经典美剧，在剧情中学习英语';
+                return (
+                  <div
+                    key={show.id}
+                    className={`expedition-show-card ${selectedShow === show.id ? 'selected' : ''}`}
+                    onClick={() => setSelectedShow(show.id)}
+                  >
+                    <div className="expedition-show-card-icon">{showIcon}</div>
+                    <div className="expedition-show-card-name">{show.name || '未知剧集'}</div>
+                    <div className="expedition-show-card-desc">{showDesc}</div>
+                  </div>
+                );
+              })}
             </div>
           </>
         ) : (
           <>
+            <div style={{ textAlign: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                已选择：
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--teal)' }}>
+                🐉 S01E01 · 凛冬将至
+              </div>
+            </div>
+
             <div className="expedition-deck-section">
               <h3>选择起始卡牌（{selectedCards.length}/10）</h3>
               <div className="expedition-card-grid">
@@ -775,9 +836,17 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
                 disabled={selectedCards.length < 5}
                 onClick={handleStartExpedition}
               >
-                出发！（{selectedCards.length}张）
+                🐉 进入 S01E01 · 凛冬将至
               </button>
             </div>
+            {/* New combat system test button */}
+            <button
+              className="expedition-start-btn"
+              style={{ marginTop: 8, background: '#7c3aed', color: 'white', padding: 10, fontSize: 14 }}
+              onClick={() => setShowNewCombat(true)}
+            >
+              ⚔️ 新战斗系统 (测试)
+            </button>
           </>
         )}
       </div>
@@ -791,6 +860,11 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
   return (
     <div className="expedition-page">
+      {/* New combat system */}
+      {showNewCombat ? (
+        <BattlePageSit onBack={() => setShowNewCombat(false)} />
+      ) : (
+      <>
       <div className="expedition-tabs">
         <button className={`expedition-tab ${tab === 'current' ? 'active' : ''}`} onClick={() => setTab('current')}>
           当前远征
@@ -810,12 +884,13 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               {/* New: ExpeditionStatus component replaces inline status bar */}
               <ExpeditionStatus expedition={expedition} onAbandon={handleAbandon} />
 
-              {/* New: ExpeditionPotion component */}
-              <ExpeditionPotion
-                potions={expedition.potions || []}
-                onUsePotion={handleUsePotion}
-                disabled={phase === 'combat'}
-              />
+              {/* Potion bar — hidden during combat (renderCombat shows its own) to save vertical space */}
+              {phase !== 'combat' && (
+                <ExpeditionPotion
+                  potions={expedition.potions || []}
+                  onUsePotion={handleUsePotion}
+                />
+              )}
             </>
           )}
 
@@ -831,6 +906,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
                 onNodeClick={handleMapNodeClick}
                 onChoosePath={handleChoosePath}
                 act={expedition.act}
+                nodeStories={nodeStories}
               />
             )}
 
@@ -871,6 +947,64 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
                 <button className="expedition-start-btn" style={{ marginTop: 12 }} onClick={() => setRelicPopup(null)}>
                   确认
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Monologue popup - full screen intro story */}
+          {showMonologue && (
+            <div className="expedition-monologue-overlay">
+              <div className="expedition-monologue-card">
+                <div className="expedition-monologue-title">❄️ 凛冬将至</div>
+                <div className="expedition-monologue-text">{storyIntro}</div>
+                <button
+                  className="expedition-start-btn"
+                  onClick={() => {
+                    setShowMonologue(false);
+                    setPhase('map');
+                    if (expedition) setNodeType(expedition.currentNodeType);
+                  }}
+                >
+                  开始远征
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Node story popup */}
+          {nodeStoryPopup && (
+            <div className="expedition-result-overlay">
+              <div className="expedition-result-card expedition-node-story-card">
+                <div className="expedition-node-story-title">{nodeStoryPopup.title}</div>
+                <div className="expedition-node-story-text">{nodeStoryPopup.story}</div>
+                {nodeStoryPopup.choices ? (
+                  <div className="expedition-event-choices" style={{ marginTop: 16 }}>
+                    {nodeStoryPopup.choices.map((choice, i) => (
+                      <button
+                        key={i}
+                        className="expedition-reward-btn"
+                        onClick={() => {
+                          setNodeStoryPopup(null);
+                          handleEventChoice(i);
+                        }}
+                      >
+                        {choice}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    className="expedition-start-btn"
+                    style={{ marginTop: 16 }}
+                    onClick={() => {
+                      const action = pendingNodeActionRef.current;
+                      setNodeStoryPopup(null);
+                      if (action) dispatchNodeAction(action.nt, action.ndx);
+                    }}
+                  >
+                    继续
+                  </button>
+                )}
               </div>
             </div>
           )}
