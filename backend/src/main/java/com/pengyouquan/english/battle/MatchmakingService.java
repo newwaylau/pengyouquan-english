@@ -23,13 +23,16 @@ public class MatchmakingService {
     private final Map<Long, MatchRequest> pendingRequests = new ConcurrentHashMap<>();
 
     private final GameEngine gameEngine;
+    private final BotService botService;
 
     private static final int BASE_RANGE = 200;
     private static final int RELAX_RANGE_1 = 400;
     private static final int RELAX_RANGE_2 = 800;
+    private static final int BOT_MATCH_SECONDS = 5;
 
-    public MatchmakingService(GameEngine gameEngine) {
+    public MatchmakingService(GameEngine gameEngine, BotService botService) {
         this.gameEngine = gameEngine;
+        this.botService = botService;
         // 启动定时检查线程（每5秒检查一次，放宽匹配范围）
         Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "matchmaking-checker");
@@ -177,17 +180,41 @@ public class MatchmakingService {
         return BASE_RANGE;
     }
 
-    /** 定时检查：超时等待玩家放宽匹配范围 */
+    /** 定时检查：超时等待玩家放宽匹配范围，或匹配AI机器人 */
     private synchronized void checkQueue() {
         if (queue.isEmpty()) return;
 
-        // 重新排列，让等待最久的玩家优先匹配
-        // 但由于队列是ConcurrentLinkedQueue，我们直接遍历尝试重新匹配
         Iterator<MatchRequest> outer = queue.iterator();
         while (outer.hasNext()) {
             MatchRequest req = outer.next();
             long elapsed = System.currentTimeMillis() - req.getJoinTime();
             long elapsedSeconds = elapsed / 1000;
+
+            // 等待超过5秒，匹配AI机器人
+            if (elapsedSeconds >= BOT_MATCH_SECONDS && elapsedSeconds <= 30) {
+                String botName = botService.getRandomBotName();
+                int botTrophies = req.getTrophies();
+
+                log.info("Bot match for {} (waiting {}s): creating AI opponent {}",
+                        req.getNickname(), elapsedSeconds, botName);
+
+                GameSession session = gameEngine.createGame(
+                        req.getUserId(), BotService.BOT_USER_ID,
+                        req.getNickname(), botName,
+                        req.getTrophies(), botTrophies);
+
+                outer.remove();
+                pendingRequests.remove(req.getUserId());
+
+                MatchResult result = new MatchResult(
+                        session.getSessionId(), BotService.BOT_USER_ID, botName, botTrophies);
+                req.getCallback().onMatched(result);
+
+                log.info("Bot match created: {} vs {}", req.getNickname(), botName);
+                return;
+            }
+
+            // 等待超过30秒，尝试用最宽范围匹配纯人类
             if (elapsedSeconds > 30) {
                 // 等待超过30秒，尝试用最宽范围匹配
                 Iterator<MatchRequest> inner = queue.iterator();

@@ -24,15 +24,18 @@ public class BattleWebSocketHandler {
     private final MatchmakingService matchmaking;
     private final GameEngine gameEngine;
     private final com.pengyouquan.english.repository.DeckRepository deckRepository;
+    private final BotService botService;
 
     public BattleWebSocketHandler(SimpMessagingTemplate messaging,
                                   MatchmakingService matchmaking,
                                   GameEngine gameEngine,
-                                  com.pengyouquan.english.repository.DeckRepository deckRepository) {
+                                  com.pengyouquan.english.repository.DeckRepository deckRepository,
+                                  BotService botService) {
         this.messaging = messaging;
         this.matchmaking = matchmaking;
         this.gameEngine = gameEngine;
         this.deckRepository = deckRepository;
+        this.botService = botService;
     }
 
     // ==================== 匹配 ====================
@@ -316,7 +319,23 @@ public class BattleWebSocketHandler {
         // 广播当前状态
         broadcastGameState(sessionId);
 
-        // 通知当前回合的玩家
+        // 如果下一个玩家是AI，触发BotService接管回合
+        if (BotService.isBot(etr.nextPlayerId)) {
+            Long humanId = session.getOpponentId(etr.nextPlayerId);
+            Map<String, Object> opponentTurnNotice = Map.of(
+                    "turnNumber", session.getTurnNumber() + 1,
+                    "nextPlayerId", etr.nextPlayerId
+            );
+            messaging.convertAndSendToUser(
+                    humanId.toString(),
+                    "/queue/opponent-turn",
+                    new BattleMessage("OPPONENT_TURN", sessionId, humanId, opponentTurnNotice)
+            );
+            botService.executeTurn(sessionId);
+            return;
+        }
+
+        // 正常流程：通知当前回合的玩家
         GameEngine.TurnStartResult tsr = gameEngine.startTurn(sessionId);
         if (tsr != null) {
             BattleMessage.TurnStart turnStart = new BattleMessage.TurnStart();
@@ -393,6 +412,16 @@ public class BattleWebSocketHandler {
             return;
         }
 
+        // 如果双方未都提交且对手是AI，自动执行AI的换牌
+        if (!mr.bothReady) {
+            Long botId = BotService.isBot(session.getPlayer1Id()) ? session.getPlayer1Id()
+                    : (BotService.isBot(session.getPlayer2Id()) ? session.getPlayer2Id() : null);
+            if (botId != null && !session.getMulliganSubmitted().contains(botId)) {
+                botService.performMulligan(sessionId);
+                mr = gameEngine.processMulligan(sessionId, botId, null);
+            }
+        }
+
         // 通知换牌结果
         messaging.convertAndSendToUser(
                 userId.toString(),
@@ -405,6 +434,10 @@ public class BattleWebSocketHandler {
             // 通知双方游戏开始
             for (Long pid : List.of(session.getPlayer1Id(), session.getPlayer2Id())) {
                 sendGameStart(sessionId, pid);
+            }
+            // 如果AI先手，触发AI回合
+            if (BotService.isBot(session.getCurrentPlayerId())) {
+                botService.executeTurn(sessionId);
             }
         }
     }
@@ -567,7 +600,12 @@ public class BattleWebSocketHandler {
         PlayerState winner = session.getPlayerState(winnerId);
         PlayerState loser = session.getOpponent(winnerId);
 
+        boolean isBotGame = BotService.isBot(winnerId) || BotService.isBot(loserId);
+
         for (Long playerId : List.of(session.getPlayer1Id(), session.getPlayer2Id())) {
+            // 跳过AI玩家的通知
+            if (BotService.isBot(playerId)) continue;
+
             boolean isWinner = playerId.equals(winnerId);
             BattleMessage.GameOver gameOver = new BattleMessage.GameOver();
             gameOver.winnerId = winnerId;
@@ -576,7 +614,7 @@ public class BattleWebSocketHandler {
 
             PlayerState me = session.getPlayerState(playerId);
 
-            gameOver.trophyChange = isWinner ? 30 : -25;
+            gameOver.trophyChange = isBotGame ? 0 : (isWinner ? 30 : -25);
 
             gameOver.winnerStats = new BattleMessage.PlayerFinalStats();
             gameOver.winnerStats.userId = winnerId;

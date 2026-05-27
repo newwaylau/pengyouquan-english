@@ -217,6 +217,7 @@ export default function BattleArenaPage({
     ws.setCallbacks({
       onMatchFound: (data: any) => {
         const payload = data.payload;
+        const isBot = payload.opponentId === -1;
         setState(prev => ({
           ...prev,
           phase: 'mulligan',
@@ -224,7 +225,9 @@ export default function BattleArenaPage({
           opponentId: payload.opponentId,
           opponentName: payload.opponentName,
           opponentTrophies: payload.opponentTrophies,
-          battleLog: [`⚔️ 匹配到对手: ${payload.opponentName}`],
+          battleLog: [isBot
+            ? `🤖 已匹配到AI对手: ${payload.opponentName}`
+            : `⚔️ 匹配到对手: ${payload.opponentName}`],
         }));
       },
       onMulliganStart: (data: any) => {
@@ -643,6 +646,7 @@ export default function BattleArenaPage({
                   <div className="battle-arena-rule-item">⚡ 点击随从攻击</div>
                   <div className="battle-arena-rule-item">🛡️ 圣盾/嘲讽/潜行关键词生效</div>
                   <div className="battle-arena-rule-item">🏆 胜利+30奖杯，失败-25</div>
+                  <div className="battle-arena-rule-item">🤖 超过5秒匹配AI，AI对战不增减奖杯</div>
                 </div>
                 <button className="battle-arena-btn battle-arena-btn-primary" onClick={handleStartMatching}>
                   开始匹配
@@ -653,9 +657,15 @@ export default function BattleArenaPage({
                 <div className="battle-arena-matching-spinner" />
                 <h2 className="battle-arena-matching-title">正在匹配...</h2>
                 <p className="battle-arena-matching-desc">已等待 {getMatchingWaitTime()} 秒</p>
-                <p className="battle-arena-matching-hint">
-                  系统将根据奖杯数匹配实力相近的对手
-                </p>
+                {getMatchingWaitTime() >= 5 ? (
+                  <p className="battle-arena-matching-hint" style={{ color: '#f59e0b', fontWeight: 600 }}>
+                    🤖 正在尝试匹配AI对手...
+                  </p>
+                ) : (
+                  <p className="battle-arena-matching-hint">
+                    系统将根据奖杯数匹配实力相近的对手
+                  </p>
+                )}
                 <button className="battle-arena-btn battle-arena-btn-secondary" onClick={handleCancelMatching}>
                   取消匹配
                 </button>
@@ -776,7 +786,9 @@ export default function BattleArenaPage({
               {state.result === 'win' ? '胜利！' : '失败'}
             </h2>
             <div className="battle-arena-result-trophy">
-              奖杯变化: {state.result === 'win' ? '+' : ''}{rd?.trophyChange || 0}
+              {rd?.trophyChange !== 0
+                ? `奖杯变化: ${state.result === 'win' ? '+' : ''}${rd?.trophyChange || 0}`
+                : '🤖 AI对战不增减奖杯'}
             </div>
             <div className="battle-arena-result-stats">
               <div className="battle-arena-result-stat">
@@ -942,7 +954,10 @@ export default function BattleArenaPage({
             <span className="hero-icon">🧙</span>
           </div>
           <div>
-            <div className="opponent-name">{state.opponentName || '对手'}</div>
+            <div className="opponent-name">
+              {state.opponentName || '对手'}
+              {state.opponentId === -1 && <span style={{ fontSize: 11, marginLeft: 6, color: '#f59e0b', background: '#1f2937', padding: '1px 6px', borderRadius: 8 }}>🤖AI</span>}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span className="hero-hp">{state.opponentHealth}</span>
               {state.opponentArmor > 0 && (

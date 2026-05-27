@@ -217,6 +217,7 @@ public class GameEngine {
                     if (opponent2.getHealth() <= 0) {
                         opponent2.setHealth(0);
                         result.gameOver = true;
+                        session.setWinnerId(userId);
                     }
                 }
             }
@@ -380,6 +381,7 @@ public class GameEngine {
             if (opponent.getHealth() <= 0) {
                 opponent.setHealth(0);
                 result.gameOver = true;
+                session.setWinnerId(userId);
             }
         } else {
             // 攻击随从
@@ -517,6 +519,7 @@ public class GameEngine {
             if (opponent.getHealth() <= 0) {
                 opponent.setHealth(0);
                 result.gameOver = true;
+                session.setWinnerId(userId);
             }
         } else {
             // 攻击随从（随从不反击英雄 - 炉石规则）
@@ -1053,7 +1056,7 @@ public class GameEngine {
         log.info("Deathrattle triggered for {}: deal 2 damage to enemy hero", card.getNameCn());
     }
 
-    private GameOverResult endGame(GameSession session, Long winnerId) {
+    public GameOverResult endGame(GameSession session, Long winnerId) {
         session.setPhase(GamePhase.FINISHED);
         session.setWinnerId(winnerId);
         session.setLastActionTime(System.currentTimeMillis());
@@ -1062,12 +1065,16 @@ public class GameEngine {
         PlayerState winner = session.getPlayerState(winnerId);
         PlayerState loser = session.getOpponent(winnerId);
 
-        // 更新奖杯
-        try {
-            trophyService.updateTrophies(winnerId, TROPHY_GAIN);
-            trophyService.updateTrophies(loserId, -TROPHY_LOSS);
-        } catch (Exception e) {
-            log.error("Failed to update trophies for game {}: {}", session.getSessionId(), e.getMessage());
+        boolean isBotGame = winnerId <= 0 || loserId <= 0;
+
+        // 更新奖杯（跳过AI对战）
+        if (!isBotGame) {
+            try {
+                trophyService.updateTrophies(winnerId, TROPHY_GAIN);
+                trophyService.updateTrophies(loserId, -TROPHY_LOSS);
+            } catch (Exception e) {
+                log.error("Failed to update trophies for game {}: {}", session.getSessionId(), e.getMessage());
+            }
         }
 
         GameOverResult result = new GameOverResult();
@@ -1075,12 +1082,12 @@ public class GameEngine {
         result.loserId = loserId;
         result.winnerName = winner != null ? winner.getNickname() : "";
         result.loserName = loser != null ? loser.getNickname() : "";
-        result.trophyChange = TROPHY_GAIN;
+        result.trophyChange = isBotGame ? 0 : TROPHY_GAIN;
         result.winnerHealth = winner != null ? winner.getHealth() : 0;
         result.loserHealth = loser != null ? loser.getHealth() : 0;
 
-        int winnerTrophies = trophyService.getTrophies(winnerId);
-        int loserTrophies = trophyService.getTrophies(loserId);
+        int winnerTrophies = winnerId > 0 ? trophyService.getTrophies(winnerId) : 0;
+        int loserTrophies = loserId > 0 ? trophyService.getTrophies(loserId) : 0;
         result.winnerTrophiesAfter = winnerTrophies;
         result.loserTrophiesAfter = loserTrophies;
 
