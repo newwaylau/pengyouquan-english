@@ -3,12 +3,30 @@
 -- 费用：0费5, 1费15, 2费19, 3费15, 4费10, 5费5, 6费5, 7费3, 8费3
 -- 稀有度：common 30 / rare 25 / epic 15 / legendary 10
 
--- 1. 添加 race 和 element 列（动画系统所需）
-ALTER TABLE cards ADD COLUMN IF NOT EXISTS race VARCHAR(20) DEFAULT NULL COMMENT '种族: dragon/human/beast/undead/giant/shadow/wolf'
-    AFTER faction;
+-- 1. 确保 race 和 element 列存在（已在 V18/后续追加）
+-- MySQL 8.0 不支持 ADD COLUMN IF NOT EXISTS，列已存在则跳过
+-- 检查 race 列是否存在
+SET @dbname = 'pengyouquan_english';
+SET @tablename = 'cards';
+SET @colname_race = 'race';
+SET @colname_element = 'element';
+SET @preparedStatement = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @colname_race) = 0,
+  'ALTER TABLE cards ADD COLUMN race VARCHAR(20) DEFAULT NULL COMMENT ''种族: dragon/human/beast/undead/giant/shadow/wolf'' AFTER faction',
+  'SELECT 1'
+));
+PREPARE stmt FROM @preparedStatement;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE cards ADD COLUMN IF NOT EXISTS element VARCHAR(20) DEFAULT NULL COMMENT '元素: fire/ice/shadow/light/nature/metal/lightning/poison/blood'
-    AFTER race;
+SET @preparedStatement = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = @dbname AND TABLE_NAME = @tablename AND COLUMN_NAME = @colname_element) = 0,
+  'ALTER TABLE cards ADD COLUMN element VARCHAR(20) DEFAULT NULL COMMENT ''元素: fire/ice/shadow/light/nature/metal/lightning/poison/blood'' AFTER race',
+  'SELECT 1'
+));
+PREPARE stmt FROM @preparedStatement;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ============================================================================
 -- 2. 插入 80 张 GOT 卡牌（按费用升序排列）
