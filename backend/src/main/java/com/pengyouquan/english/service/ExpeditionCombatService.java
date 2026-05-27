@@ -633,26 +633,31 @@ public class ExpeditionCombatService {
         });
         data.put("enemy", enemyInfo);
 
-        // 手牌信息
+        // 手牌信息 — 批量查卡牌，避免 N+1
         List<Map<String, Object>> handCards = parseJsonListOfMaps(state.getHandCards());
+        List<Long> cardIds = handCards.stream()
+                .map(h -> ((Number) h.get("cardId")).longValue())
+                .collect(Collectors.toList());
+        Map<Long, ExpeditionCard> cardMap = cardRepository.findAllById(cardIds).stream()
+                .collect(Collectors.toMap(ExpeditionCard::getId, c -> c));
         List<Map<String, Object>> handWithDetails = new ArrayList<>();
         for (Map<String, Object> instance : handCards) {
             Long cid = ((Number) instance.get("cardId")).longValue();
-            cardRepository.findById(cid).ifPresent(card -> {
-                Map<String, Object> cardData = new HashMap<>(instance);
-                cardData.put("cardName", card.getCardName());
-                cardData.put("cardNameEn", card.getCardNameEn());
-                cardData.put("cardType", card.getCardType());
-                cardData.put("cost", card.getIsXCost() ? state.getEnergy() : card.getCost());
-                boolean upgraded = Boolean.TRUE.equals(instance.get("upgraded"));
-                cardData.put("baseDamage", upgraded ? card.getBaseDamage() + card.getUpgradeDamage() : card.getBaseDamage());
-                cardData.put("baseBlock", upgraded ? card.getBaseBlock() + card.getUpgradeBlock() : card.getBaseBlock());
-                cardData.put("description", upgraded && card.getUpgradeDescription() != null && !card.getUpgradeDescription().isBlank()
-                        ? card.getUpgradeDescription() : card.getDescription());
-                cardData.put("rarity", card.getRarity());
-                cardData.put("isXCost", card.getIsXCost());
-                handWithDetails.add(cardData);
-            });
+            ExpeditionCard card = cardMap.get(cid);
+            if (card == null) continue;
+            Map<String, Object> cardData = new HashMap<>(instance);
+            cardData.put("cardName", card.getCardName());
+            cardData.put("cardNameEn", card.getCardNameEn());
+            cardData.put("cardType", card.getCardType());
+            cardData.put("cost", card.getIsXCost() ? state.getEnergy() : card.getCost());
+            boolean upgraded = Boolean.TRUE.equals(instance.get("upgraded"));
+            cardData.put("baseDamage", upgraded ? card.getBaseDamage() + card.getUpgradeDamage() : card.getBaseDamage());
+            cardData.put("baseBlock", upgraded ? card.getBaseBlock() + card.getUpgradeBlock() : card.getBaseBlock());
+            cardData.put("description", upgraded && card.getUpgradeDescription() != null && !card.getUpgradeDescription().isBlank()
+                    ? card.getUpgradeDescription() : card.getDescription());
+            cardData.put("rarity", card.getRarity());
+            cardData.put("isXCost", card.getIsXCost());
+            handWithDetails.add(cardData);
         }
         data.put("hand", handWithDetails);
 

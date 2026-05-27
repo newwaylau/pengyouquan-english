@@ -5,14 +5,8 @@ import ExpeditionCampfire from './ExpeditionCampfire';
 import ExpeditionStatus from './ExpeditionStatus';
 import ExpeditionPotion from './ExpeditionPotion';
 import ExpeditionEvent from './ExpeditionEvent';
-import ExpeditionBoss from './ExpeditionBoss';
 import ExpeditionReward from './ExpeditionReward';
 import BattlePageSit from './BattlePageSit';
-import {
-  playCardAnimation, elementFlash, showDamageNumber, hitAnimation, screenShake, 
-  spawnParticles, victoryEffect, defeatEffect, enemyDeathAnimation, cardDrawAnimation 
-} from './EffectEngine';
-import { getCardAnimConfig, ELEMENT_STYLES } from './AnimProfileBuilder';
 
 const API_BASE = '';
 function getToken() { return localStorage.getItem('token'); }
@@ -29,7 +23,7 @@ async function apiFetch(path: string, options: RequestInit = {}) {
 interface ExpeditionData {
   id: number; showId: number; act: number; node: number; maxAct: number;
   playerHp: number; maxHp: number; gold: number; status: string;
-  questionsAnswered: number; questionsTotal: number; enemiesKilled: number;
+  enemiesKilled: number;
   mapNodes: string[]; currentNodeType: string;
   deck: any[]; relics: any[]; potions?: any[];
 }
@@ -115,8 +109,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   type Phase = 'lobby' | 'map' | 'combat' | 'event' | 'rest' | 'shop' | 'reward' | 'settlement';
   const [phase, setPhase] = useState<Phase>('lobby');
 
-  // New combat system toggle
-  const [showNewCombat, setShowNewCombat] = useState(false);
+  // Combat state (reused by BattlePageSit)
 
   // Load
   useEffect(() => {
@@ -186,115 +179,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       }
     } else {
       alert(res.message);
-    }
-  }
-
-  // Enter combat node
-  async function enterCombat() {
-    const res = await apiFetch('/api/expedition/enter-combat', { method: 'POST' });
-    if (res.code === 200) {
-      setEnemy(res.data.enemy);
-      setHandCards(res.data.hand || []);
-      setPhase('combat');
-    } else {
-      alert(res.message || '进入战斗失败，请重试');
-    }
-  }
-
-  // Play card in combat (click a card to attack - no questions)
-  async function handlePlayCard(cardId: number) {
-    if (combatLoading) return;
-    setCombatLoading(true);
-    setAttackingCard(cardId);
-
-    // Card fly animation before API call
-    const cardEl = combatRef.current?.querySelector(`.expedition-hand-card[data-card-id="${cardId}"]`) as HTMLElement;
-    const currentCard = handCards.find(c => c.id === cardId);
-    const cardConfig = currentCard ? getCardAnimConfig(currentCard.attack, currentCard.rarity) : getCardAnimConfig(0, 'common');
-    if (cardEl && combatRef.current) {
-      await playCardAnimation(cardEl, combatRef.current, cardConfig.damageColor);
-    }
-
-    const res = await apiFetch('/api/expedition/play-card', {
-      method: 'POST',
-      body: JSON.stringify({ cardId }),
-    });
-    setAttackingCard(null);
-    setCombatLoading(false);
-    if (res.code === 200) {
-      const data = res.data;
-      if (data.playerDead) {
-        // Defeat effect: dark particles + red overlay
-        if (combatRef.current) {
-          await defeatEffect(combatRef.current);
-        }
-        setExpedition(data.expedition);
-        setSettlement({ cleared: false, expedition: data.expedition });
-        setPhase('settlement');
-        return;
-      }
-      if (data.enemyDefeated) {
-        // Enemy death + victory effects
-        if (combatRef.current) {
-          const enemyEl = combatRef.current.querySelector('.expedition-enemy-area, .expedition-boss') as HTMLElement;
-          if (enemyEl) {
-            await enemyDeathAnimation(enemyEl);
-          }
-          await victoryEffect(combatRef.current);
-        }
-        setExpedition(data.expedition);
-        setEnemy(null);
-        setHandCards([]);
-        setRewardChoices(data.rewards || []);
-        setFeedback(data.resultText);
-        setPhase('reward');
-        return;
-      }
-      // Normal damage: animate hit + particles + numbers
-      if (data.damageDealt > 0 && combatRef.current) {
-        const combat = combatRef.current;
-        const combatRect = combat.getBoundingClientRect();
-        const enemyEl = combat.querySelector('.expedition-enemy-area, .expedition-boss') as HTMLElement;
-
-        elementFlash(combat, cardConfig.element);
-        screenShake(combat, data.damageDealt);
-
-        if (enemyEl) {
-          const enemyRect = enemyEl.getBoundingClientRect();
-          const enemyCx = enemyRect.left - combatRect.left + enemyRect.width / 2;
-          const enemyCy = enemyRect.top - combatRect.top;
-
-          hitAnimation(enemyEl, data.damageDealt >= 8 ? 'big' : data.damageDealt >= 5 ? 'mid' : 'light');
-          spawnParticles(combat, enemyCx, enemyCy + enemyRect.height / 2, cardConfig.particleCount, cardConfig.element);
-          showDamageNumber(combat, enemyCx - 20, enemyCy, data.damageDealt, cardConfig.damageColor);
-        }
-      }
-      if (data.damageTaken > 0 && combatRef.current) {
-        showDamageNumber(
-          combatRef.current,
-          50,
-          combatRef.current.offsetHeight - 80,
-          data.damageTaken,
-          '#ef4444'
-        );
-      }
-      // Keep existing state-based damage number display for backward compat
-      if (data.damageDealt > 0) {
-        setDamageNumber({ text: `-${data.damageDealt}`, type: 'damage-dealt' });
-        setTimeout(() => setDamageNumber(null), 1000);
-      }
-      if (data.damageTaken > 0) {
-        setDamageNumber({ text: `-${data.damageTaken}`, type: 'damage-taken' });
-        setTimeout(() => setDamageNumber(null), 1000);
-      }
-      if (res.data.expedition) setExpedition(res.data.expedition);
-      if (data.enemyRemainingHp !== undefined && enemy) {
-        setEnemy({ ...enemy, currentHp: data.enemyRemainingHp });
-      }
-      setFeedback(data.resultText);
-      setTimeout(() => setFeedback(null), 1500);
-    } else {
-      alert(res.message || '出牌失败');
     }
   }
 
@@ -451,7 +335,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     switch (nt) {
       case 'combat':
       case 'boss':
-        enterCombat();
+        setPhase('combat');
         break;
       case 'event':
         fetchEventData();
@@ -542,86 +426,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
   // ==================== RENDER HELPERS ====================
 
-  function renderCombat() {
-    if (!enemy) return <div className="expedition-empty">加载中...</div>;
-    const playerHpPercent = expedition ? (expedition.playerHp / expedition.maxHp) * 100 : 100;
-
-    return (
-      <div ref={combatRef} className="expedition-combat">
-        {/* Boss area uses ExpeditionBoss when isBoss */}
-        {enemy.isBoss ? (
-          <ExpeditionBoss
-            boss={enemy}
-            playerHp={expedition?.playerHp || 0}
-            maxHp={expedition?.maxHp || 1}
-            damageNumber={damageNumber}
-            feedback={feedback}
-          />
-        ) : (
-          <div ref={enemyAreaRef} className="expedition-enemy-area">
-            {damageNumber && (
-              <div className={`expedition-damage-number ${damageNumber.type}`}>
-                {damageNumber.text}
-              </div>
-            )}
-            <div className="expedition-enemy-name">{enemy.nameCn}</div>
-            <div className="expedition-enemy-sub">{enemy.nameEn}</div>
-            <div className="expedition-enemy-hp-bar">
-              <div className="expedition-enemy-hp-fill" style={{ width: `${(enemy.currentHp / enemy.maxHp) * 100}%` }} />
-            </div>
-            <div className="expedition-enemy-hp-text">{enemy.currentHp} / {enemy.maxHp}</div>
-            {enemy.specialRules && Object.keys(enemy.specialRules).length > 0 && (
-              <div className="expedition-special-rules">
-                {Object.entries(enemy.specialRules).map(([k, v]) => (
-                  <div key={k}>{k}: {String(v)}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="expedition-player-area">
-          <div className="expedition-player-hp-bar">
-            <div className="expedition-player-hp-fill" style={{ width: `${playerHpPercent}%` }} />
-          </div>
-          <div className="expedition-player-stats">
-            <span>❤️ {expedition?.playerHp}/{expedition?.maxHp}</span>
-            <span>🪙 {expedition?.gold}</span>
-            <span>☠️ {expedition?.enemiesKilled}</span>
-          </div>
-        </div>
-
-        {feedback && (
-          <div style={{ textAlign: 'center', margin: '8px 0', fontSize: 13, fontWeight: 600, color: '#4ade80' }}>{feedback}</div>
-        )}
-
-        {/* Potion bar in combat */}
-        <ExpeditionPotion
-          potions={expedition?.potions || []}
-          onUsePotion={handleUsePotion}
-          disabled={combatLoading}
-        />
-
-        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>手牌（点击出牌攻击）</div>
-        <div className="expedition-hand">
-          {handCards.map((card, i) => (
-            <div
-              key={i}
-              data-card-id={card.id}
-              className={`expedition-hand-card ${attackingCard === card.id ? 'attacking' : ''}`}
-              onClick={() => !combatLoading && handlePlayCard(card.id)}
-              style={{ cursor: combatLoading ? 'wait' : 'pointer', opacity: combatLoading ? 0.6 : 1 }}
-            >
-              <div className="expedition-hand-card-name">{card.nameCn}</div>
-              <div className="expedition-hand-card-attack">⚔️{card.attack}</div>
-              <div className="expedition-hand-card-cost">费用:{card.cost}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   function renderShop() {
     if (!expedition) return null;
     const deck = expedition.deck || [];
@@ -702,7 +506,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (!settlement || !settlement.expedition) return null;
     const exp = settlement.expedition;
     const isCleared = settlement.cleared;
-    const accuracy = exp.questionsTotal > 0 ? Math.round((exp.questionsAnswered / exp.questionsTotal) * 100) : 0;
 
     return (
       <div className="expedition-result-overlay">
@@ -721,7 +524,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               <div className="expedition-settlement-stat-label">击杀数</div>
             </div>
             <div className="expedition-settlement-stat">
-              <div className="expedition-settlement-stat-value">{exp.questionsAnswered}</div>
+              <div className="expedition-settlement-stat-value">{exp.enemiesKilled}</div>
               <div className="expedition-settlement-stat-label">出牌数</div>
             </div>
           </div>
@@ -742,7 +545,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         {history.map((h: any, i: number) => (
           <div key={i} className="expedition-history-item">
             <div>
-              <div>第{h.act}层 · 击杀{h.enemiesKilled} · 出牌{h.questionsAnswered}/{h.questionsTotal}</div>
+              <div>第{h.act}层 · 击杀{h.enemiesKilled} · 出牌{h.enemiesKilled}</div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                 {h.createdAt ? new Date(h.createdAt).toLocaleDateString() : ''}
               </div>
@@ -840,13 +643,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               </button>
             </div>
             {/* New combat system test button */}
-            <button
-              className="expedition-start-btn"
-              style={{ marginTop: 8, background: '#7c3aed', color: 'white', padding: 10, fontSize: 14 }}
-              onClick={() => setShowNewCombat(true)}
-            >
-              ⚔️ 新战斗系统 (测试)
-            </button>
           </>
         )}
       </div>
@@ -856,10 +652,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Main render
   if (loading) {
     return <div className="expedition-page"><div className="expedition-empty">加载中...</div></div>;
-  }
-
-  if (showNewCombat) {
-    return <BattlePageSit onBack={() => setShowNewCombat(false)} />;
   }
 
   return (
@@ -909,7 +701,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               />
             )}
 
-            {phase === 'combat' && renderCombat()}
+            {phase === 'combat' && <BattlePageSit onBack={moveToNextNode} />}
 
             {phase === 'event' && (
               <ExpeditionEvent eventData={eventData} onChoice={handleEventChoice} />

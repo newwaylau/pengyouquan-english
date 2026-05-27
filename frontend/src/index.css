@@ -9336,3 +9336,23 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* 页面加载 Spinner（代码分割按需加载用） */
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+}
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(148, 163, 184, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

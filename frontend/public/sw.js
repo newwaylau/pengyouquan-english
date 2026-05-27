@@ -1,6 +1,6 @@
 // 英语剧场 — Service Worker
 // 缓存名称，版本更新时变更
-const CACHE_NAME = 'pengyouquan-english-v3'
+const CACHE_NAME = 'pengyouquan-english-v4'
 
 // 安装时预缓存的静态资源
 const PRECACHE_URLS = [

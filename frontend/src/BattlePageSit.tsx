@@ -59,12 +59,12 @@ interface BattleState {
 }
 
 const BUFF_LABELS: Record<string, string> = {
-  strength: 'Str',
-  dexterity: 'Dex',
-  vulnerable: 'Vuln',
-  weak: 'Weak',
-  frail: 'Frail',
-  poison: 'Poison',
+  strength: '力量',
+  dexterity: '敏捷',
+  vulnerable: '易伤',
+  weak: '虚弱',
+  frail: '脆弱',
+  poison: '中毒',
 };
 
 const BUFF_COLORS: Record<string, string> = {
@@ -189,28 +189,28 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
       setBattleState(data.battleState);
 
       if (data.combatResult?.damageDealt) {
-        addLog(`Dealt ${data.combatResult.damageDealt} damage`);
+        addLog(`造成 ${data.combatResult.damageDealt} 点伤害`);
       }
       if (data.combatResult?.blockGained) {
-        addLog(`Gained ${data.combatResult.blockGained} Block`);
+        addLog(`获得 ${data.combatResult.blockGained} 点格挡`);
       }
       if (data.combatResult?.gainedStrength) {
-        addLog(`Gained ${data.combatResult.gainedStrength} Strength`);
+        addLog(`力量 +${data.combatResult.gainedStrength}`);
       }
       if (data.combatResult?.drewCards) {
-        addLog(`Drew ${data.combatResult.drewCards} cards`);
+        addLog(`抽了 ${data.combatResult.drewCards} 张牌`);
       }
       if (data.combatResult?.appliedVulnerable) {
-        addLog(`Applied ${data.combatResult.appliedVulnerable} Vulnerable`);
+        addLog(`施加 ${data.combatResult.appliedVulnerable} 层易伤`);
       }
       if (data.combatResult?.appliedWeak) {
-        addLog(`Applied ${data.combatResult.appliedWeak} Weak`);
+        addLog(`施加 ${data.combatResult.appliedWeak} 层虚弱`);
       }
       if (data.combatResult?.appliedPoison) {
-        addLog(`Applied ${data.combatResult.appliedPoison} Poison`);
+        addLog(`施加 ${data.combatResult.appliedPoison} 层中毒`);
       }
       if (data.combatResult?.healed) {
-        addLog(`Healed ${data.combatResult.healed} HP`);
+        addLog(`恢复 ${data.combatResult.healed} 生命`);
       }
 
       if (data.battleState.status === 'won') {
@@ -220,7 +220,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
         setResult('lost');
       }
     } else {
-      addLog(`Error: ${res.message}`);
+      addLog(`错误：${res.message}`);
     }
   };
 
@@ -236,12 +236,12 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
       if (data.enemyAction) {
         const a = data.enemyAction;
         if (a.damageToPlayer > 0) {
-          addLog(`Enemy dealt ${a.damageToPlayer} damage`);
+          addLog(`敌人造成 ${a.damageToPlayer} 点伤害`);
         } else {
-          addLog('Enemy attacked, all blocked');
+          addLog('敌人攻击，全部格挡');
         }
-        if (a.enemyBuffApplied) addLog(`Enemy gained ${a.enemyBuffApplied}`);
-        if (a.playerDebuffApplied) addLog(`You received ${a.playerDebuffApplied}`);
+        if (a.enemyBuffApplied) addLog(`敌人获得 ${a.enemyBuffApplied}`);
+        if (a.playerDebuffApplied) addLog(`你受到 ${a.playerDebuffApplied}`);
       }
 
       if (data.battleState.status === 'won') {
@@ -270,7 +270,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
   if (loading) {
     return (
       <div className="expedition-container">
-        <div className="expedition-loading">⚔️ Preparing for battle...</div>
+        <div className="expedition-loading">⚔️ 准备战斗...</div>
       </div>
     );
   }
@@ -278,7 +278,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
   if (!battleState) {
     return (
       <div className="expedition-container">
-        <div className="expedition-loading">No battle data</div>
+        <div className="expedition-loading">无战斗数据</div>
       </div>
     );
   }
@@ -295,29 +295,29 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
           <div className={`expedition-modal ${result === 'won' ? 'victory' : 'defeat'}`}>
             <div className="expedition-modal-icon">{result === 'won' ? '🏆' : '💀'}</div>
             <div className="expedition-modal-title">
-              {result === 'won' ? 'Victory!' : 'Defeated'}
+              {result === 'won' ? '胜利！' : '败北'}
             </div>
             {result === 'won' && rewardCards.length > 0 && (
               <div className="expedition-reward-cards">
-                <div className="expedition-reward-label">Choose a reward card:</div>
+                <div className="expedition-reward-label">选择一张奖励卡牌：</div>
                 <div className="expedition-reward-choices">
                   {rewardCards.map((card: any, i: number) => (
                     <button key={i} className="battle-card-reward-btn" onClick={() => handleChooseReward({ type: 'card', cardId: card.cardId })}>
                       <div className={`battle-card-rarity ${card.rarity}`}>{card.rarity}</div>
-                      <div className="battle-card-name">{card.cardNameEn}</div>
+                      <div className="battle-card-name">{card.cardName || card.cardNameEn}</div>
                       <div className="battle-card-desc">{card.description}</div>
-                      <div className="battle-card-cost">{card.cost} Energy</div>
+                      <div className="battle-card-cost">{card.cost} 费</div>
                     </button>
                   ))}
                 </div>
-                <button className="expedition-btn" onClick={onBack}>Skip</button>
+                <button className="expedition-btn" onClick={onBack}>跳过</button>
               </div>
             )}
             {result === 'won' && rewardCards.length === 0 && (
-              <button className="expedition-btn" onClick={onBack}>Continue</button>
+              <button className="expedition-btn" onClick={onBack}>继续</button>
             )}
             {result === 'lost' && (
-              <button className="expedition-btn" onClick={onBack}>Return</button>
+              <button className="expedition-btn" onClick={onBack}>返回</button>
             )}
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
         {/* Top: Enemy area */}
         <div className="battle-enemy-section">
           <div className="battle-enemy-info">
-            <div className="battle-enemy-name">{enemy.name || enemy.nameCn || 'Enemy'}</div>
+            <div className="battle-enemy-name">{enemy.nameCn || enemy.name || '敌人'}</div>
             <div className="battle-enemy-hp-row">
               <div className="battle-hp-bar">
                 <div className="battle-hp-fill enemy-hp-fill" style={{ width: `${enemyHpPercent}%` }} />
@@ -352,7 +352,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
 
         {/* Middle: Battle log */}
         <div className="battle-log">
-          <div className="battle-log-turn">Turn {turnNumber}</div>
+          <div className="battle-log-turn">回合 {turnNumber}</div>
           {turnLog.slice(-5).map((msg, i) => (
             <div key={i} className="battle-log-entry">{msg}</div>
           ))}
@@ -363,7 +363,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
           <div className="battle-player-stats">
             <div className="battle-player-hp-block">
               <div className="battle-player-hp">
-                <span className="battle-hp-label">HP</span>
+                <span className="battle-hp-label">生命</span>
                 <div className="battle-hp-bar">
                   <div className="battle-hp-fill player-hp-fill" style={{ width: `${hpPercent}%` }} />
                 </div>
@@ -380,8 +380,8 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
               <span className="battle-energy-text">{energy}/{maxEnergy}</span>
             </div>
             <div className="battle-pile-counts">
-              <span className="battle-pile-count draw">Draw: {drawPileCount}</span>
-              <span className="battle-pile-count discard">Discard: {discardPileCount}</span>
+              <span className="battle-pile-count draw">牌库: {drawPileCount}</span>
+              <span className="battle-pile-count discard">弃牌堆: {discardPileCount}</span>
             </div>
             <div className="battle-buffs-row">
               {playerBuffs?.map((buff, i) => (
@@ -409,10 +409,10 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
                   <div className="battle-card-type-icon">
                     {card.cardType === 'attack' ? '⚔️' : card.cardType === 'skill' ? '🛡️' : '⭐'}
                   </div>
-                  <div className="battle-card-name">{card.cardNameEn}</div>
+                  <div className="battle-card-name">{card.cardName || card.cardNameEn}</div>
                   <div className="battle-card-effects">
-                    {card.baseDamage > 0 && <span className="battle-card-damage">{card.baseDamage} dmg</span>}
-                    {card.baseBlock > 0 && <span className="battle-card-block">{card.baseBlock} blk</span>}
+                    {card.baseDamage > 0 && <span className="battle-card-damage">{card.baseDamage} 伤害</span>}
+                    {card.baseBlock > 0 && <span className="battle-card-block">{card.baseBlock} 格挡</span>}
                   </div>
                   <div className="battle-card-desc">{card.description}</div>
                 </button>
@@ -423,7 +423,7 @@ export default function BattlePageSit({ onBack }: { onBack: () => void }) {
           {/* End Turn button */}
           {battleState?.status === 'fighting' && (
             <button className="battle-end-turn-btn" onClick={handleEndTurn} disabled={animatingCard !== null}>
-              End Turn
+              结束回合
             </button>
           )}
         </div>

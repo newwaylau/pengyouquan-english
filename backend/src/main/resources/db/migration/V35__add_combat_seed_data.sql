@@ -2,103 +2,103 @@
 
 -- ==================== 基础卡（4张） ====================
 INSERT IGNORE INTO expedition_cards (card_name, card_name_en, card_type, rarity, cost, description, base_damage, base_block, keywords, upgrade_damage, upgrade_block, upgrade_description, show_id) VALUES
-('长剑劈砍', 'Strike', 'attack', 'basic', 1, 'Deal 6 damage.', 6, 0, '[]', 3, 0, 'Deal 9 damage.', 1),
-('皮盾防御', 'Defend', 'skill', 'basic', 1, 'Gain 5 Block.', 0, 5, '[]', 0, 3, 'Gain 8 Block.', 1),
-('铁剑斩', 'Iron Strike', 'attack', 'basic', 1, 'Deal 9 damage.', 9, 0, '[]', 0, 0, '', 1),
-('铁盾防御', 'Iron Defend', 'skill', 'basic', 1, 'Gain 8 Block.', 0, 8, '[]', 0, 0, '', 1);
+('长剑劈砍', 'Strike', 'attack', 'basic', 1, '造成 6 点伤害。', 6, 0, '[]', 3, 0, '造成 9 点伤害。', 1),
+('皮盾防御', 'Defend', 'skill', 'basic', 1, '获得 5 点格挡。', 0, 5, '[]', 0, 3, '获得 8 点格挡。', 1),
+('铁剑斩', 'Iron Strike', 'attack', 'basic', 1, '造成 9 点伤害。', 9, 0, '[]', 0, 0, '', 1),
+('铁盾防御', 'Iron Defend', 'skill', 'basic', 1, '获得 8 点格挡。', 0, 8, '[]', 0, 0, '', 1);
 
 -- ==================== 攻击牌（20张） ====================
 INSERT IGNORE INTO expedition_cards (card_name, card_name_en, card_type, rarity, cost, description, base_damage, base_block, keywords, upgrade_damage, upgrade_block, upgrade_description, show_id) VALUES
 -- 1. 长剑劈砍 (done above)
 -- 2. 铁剑斩 (done above)
 -- 3. 北境劈斩 - 若敌人易伤+4
-('北境劈斩', 'Northern Slash', 'attack', 'common', 1, 'Deal 8 damage. If enemy is Vulnerable, deal 4 more.', 8, 0, '[{"type":"vulnerable","value":1}]', 3, 0, 'Deal 11 damage. If enemy is Vulnerable, deal 4 more.', 1),
+('北境劈斩', 'Northern Slash', 'attack', 'common', 1, '造成 8 点伤害。若敌人易伤则额外造成 4 点。', 8, 0, '[{"type":"vulnerable","value":1}]', 3, 0, '造成 11 点伤害。若敌人易伤则额外造成 4 点。', 1),
 -- 4. 野人冲撞 - 2费 14伤
-('野人冲撞', 'Wildling Charge', 'attack', 'common', 2, 'Deal 14 damage.', 14, 0, '[]', 4, 0, 'Deal 18 damage.', 1),
+('野人冲撞', 'Wildling Charge', 'attack', 'common', 2, '造成 14 点伤害。', 14, 0, '[]', 4, 0, '造成 18 点伤害。', 1),
 -- 5. 双刃斩 - 1费 5伤×2
-('双刃斩', 'Double Strike', 'attack', 'common', 1, 'Deal 5 damage twice.', 5, 0, '[{"type":"multihit","value":2}]', 2, 0, 'Deal 7 damage twice.', 1),
+('双刃斩', 'Double Strike', 'attack', 'common', 1, '造成 5 点伤害两次。', 5, 0, '[{"type":"multihit","value":2}]', 2, 0, '造成 7 点伤害两次。', 1),
 -- 6. 重劈 - 2费 12伤 消耗
-('重劈', 'Heavy Strike', 'attack', 'common', 2, 'Deal 12 damage. Exhaust.', 12, 0, '[{"type":"exhaust"}]', 4, 0, 'Deal 16 damage. Exhaust.', 1),
+('重劈', 'Heavy Strike', 'attack', 'common', 2, '造成 12 点伤害。消耗。', 12, 0, '[{"type":"exhaust"}]', 4, 0, '造成 16 点伤害。消耗。', 1),
 -- 7. 投掷长矛 - 1费 7伤 抽1
-('投掷长矛', 'Spear Throw', 'attack', 'common', 1, 'Deal 7 damage. Draw 1 card.', 7, 0, '[{"type":"draw","value":1}]', 2, 0, 'Deal 9 damage. Draw 1 card.', 1),
+('投掷长矛', 'Spear Throw', 'attack', 'common', 1, '造成 7 点伤害。抽 1 张牌。', 7, 0, '[{"type":"draw","value":1}]', 2, 0, '造成 9 点伤害。抽 1 张牌。', 1),
 -- 8. 怒吼 - 0费 4伤 消耗
-('怒吼', 'War Cry', 'attack', 'common', 0, 'Deal 4 damage. Exhaust.', 4, 0, '[{"type":"exhaust"}]', 2, 0, 'Deal 6 damage. Exhaust.', 1),
+('怒吼', 'War Cry', 'attack', 'common', 0, '造成 4 点伤害。消耗。', 4, 0, '[{"type":"exhaust"}]', 2, 0, '造成 6 点伤害。消耗。', 1),
 -- 9. 旋风斩 - X费 X×4伤
-('旋风斩', 'Whirlwind', 'attack', 'uncommon', 99, 'Deal 4 damage X times.', 4, 0, '[{"type":"aoe"}]', 1, 0, 'Deal 5 damage X times. X cost.', 1),
+('旋风斩', 'Whirlwind', 'attack', 'uncommon', 99, '造成 4 点伤害 X 次。', 4, 0, '[{"type":"aoe"}]', 1, 0, '造成 5 点伤害 X 次。X 费。', 1),
 -- 10. 突刺 - 1费 6伤 抽1
-('突刺', 'Lunge', 'attack', 'common', 1, 'Deal 6 damage. Draw 1 card.', 6, 0, '[{"type":"draw","value":1}]', 2, 0, 'Deal 8 damage. Draw 1 card.', 1),
+('突刺', 'Lunge', 'attack', 'common', 1, '造成 6 点伤害。抽 1 张牌。', 6, 0, '[{"type":"draw","value":1}]', 2, 0, '造成 8 点伤害。抽 1 张牌。', 1),
 -- 11. 烈火剑 - 1费 5伤 2烧伤
-('烈火剑', 'Fire Sword', 'attack', 'uncommon', 1, 'Deal 5 damage. Apply 2 Poison.', 5, 0, '[{"type":"poison","value":2}]', 2, 0, 'Deal 7 damage. Apply 3 Poison.', 1),
+('烈火剑', 'Fire Sword', 'attack', 'uncommon', 1, '造成 5 点伤害。施加 2 层中毒。', 5, 0, '[{"type":"poison","value":2}]', 2, 0, '造成 7 点伤害。施加 3 层中毒。', 1),
 -- 12. 碎甲锤 - 2费 8伤 移除所有格挡
-('碎甲锤', 'Shield Breaker', 'attack', 'uncommon', 2, 'Deal 8 damage. Remove all enemy Block.', 8, 0, '[]', 3, 0, 'Deal 11 damage. Remove all enemy Block.', 1),
+('碎甲锤', 'Shield Breaker', 'attack', 'uncommon', 2, '造成 8 点伤害。移除敌人所有格挡。', 8, 0, '[]', 3, 0, '造成 11 点伤害。移除敌人所有格挡。', 1),
 -- 13. 连击 - 1费 3伤×3
-('连击', 'Combo Strike', 'attack', 'common', 1, 'Deal 3 damage 3 times.', 3, 0, '[{"type":"multihit","value":3}]', 1, 0, 'Deal 4 damage 3 times.', 1),
+('连击', 'Combo Strike', 'attack', 'common', 1, '造成 3 点伤害三次。', 3, 0, '[{"type":"multihit","value":3}]', 1, 0, '造成 4 点伤害三次。', 1),
 -- 14. 致命一击 - 2费 6伤 半血翻倍
-('致命一击', 'Finishing Blow', 'attack', 'uncommon', 2, 'Deal 6 damage. Double if enemy below 50% HP.', 6, 0, '[]', 3, 0, 'Deal 9 damage. Double if enemy below 50% HP.', 1),
+('致命一击', 'Finishing Blow', 'attack', 'uncommon', 2, '造成 6 点伤害。若敌人生命低于 50% 则伤害翻倍。', 6, 0, '[]', 3, 0, '造成 9 点伤害。若敌人生命低于 50% 则伤害翻倍。', 1),
 -- 15. 战吼 - 2费 10伤 1易伤
-('战吼', 'Battle Cry', 'attack', 'common', 2, 'Deal 10 damage. Apply 1 Vulnerable.', 10, 0, '[{"type":"vulnerable","value":1}]', 3, 0, 'Deal 13 damage. Apply 2 Vulnerable.', 1),
+('战吼', 'Battle Cry', 'attack', 'common', 2, '造成 10 点伤害。施加 1 层易伤。', 10, 0, '[{"type":"vulnerable","value":1}]', 3, 0, '造成 13 点伤害。施加 2 层易伤。', 1),
 -- 16. 回旋踢 - 1费 5伤 1虚弱
-('回旋踢', 'Roundhouse Kick', 'attack', 'common', 1, 'Deal 5 damage. Apply 1 Weak.', 5, 0, '[{"type":"weak","value":1}]', 2, 0, 'Deal 7 damage. Apply 1 Weak.', 1),
+('回旋踢', 'Roundhouse Kick', 'attack', 'common', 1, '造成 5 点伤害。施加 1 层虚弱。', 5, 0, '[{"type":"weak","value":1}]', 2, 0, '造成 7 点伤害。施加 1 层虚弱。', 1),
 -- 17. 穿刺 - 2费 7伤 无视格挡
-('穿刺', 'Piercing Strike', 'attack', 'uncommon', 2, 'Deal 7 damage. Ignores Block.', 7, 0, '[]', 3, 0, 'Deal 10 damage. Ignores Block.', 1),
+('穿刺', 'Piercing Strike', 'attack', 'uncommon', 2, '造成 7 点伤害。无视格挡。', 7, 0, '[]', 3, 0, '造成 10 点伤害。无视格挡。', 1),
 -- 18. 猛击 - 3费 20伤
-('猛击', 'Slam', 'attack', 'uncommon', 3, 'Deal 20 damage.', 20, 0, '[]', 5, 0, 'Deal 25 damage.', 1),
+('猛击', 'Slam', 'attack', 'uncommon', 3, '造成 20 点伤害。', 20, 0, '[]', 5, 0, '造成 25 点伤害。', 1),
 -- 19. 血色打击 - 1费 4伤 回2血
-('血色打击', 'Blood Strike', 'attack', 'common', 1, 'Deal 4 damage. Heal 2 HP.', 4, 0, '[{"type":"heal","value":2}]', 1, 0, 'Deal 5 damage. Heal 3 HP.', 1),
+('血色打击', 'Blood Strike', 'attack', 'common', 1, '造成 4 点伤害。恢复 2 点生命。', 4, 0, '[{"type":"heal","value":2}]', 1, 0, '造成 5 点伤害。恢复 3 点生命。', 1),
 -- 20. 终结技 - 2费 8伤 中毒翻倍
-('终结技', 'Execute', 'attack', 'uncommon', 2, 'Deal 8 damage. Triple damage if enemy is Poisoned.', 8, 0, '[{"type":"poison","value":2}]', 3, 0, 'Deal 11 damage. Triple damage if enemy is Poisoned.', 1);
+('终结技', 'Execute', 'attack', 'uncommon', 2, '造成 8 点伤害。若敌人中毒则伤害翻倍。', 8, 0, '[{"type":"poison","value":2}]', 3, 0, '造成 11 点伤害。若敌人中毒则伤害翻倍。', 1);
 
 -- ==================== 格挡/技能牌（15张） ====================
 INSERT IGNORE INTO expedition_cards (card_name, card_name_en, card_type, rarity, cost, description, base_damage, base_block, keywords, upgrade_damage, upgrade_block, upgrade_description, show_id) VALUES
 -- 21. 皮盾防御 (done above)
 -- 22. 铁盾防御 (done above)
 -- 23. 举盾
-('举盾', 'Shield Up', 'skill', 'common', 1, 'Gain 6 Block.', 0, 6, '[]', 0, 3, 'Gain 9 Block.', 1),
+('举盾', 'Shield Up', 'skill', 'common', 1, '获得 6 点格挡。', 0, 6, '[]', 0, 3, '获得 9 点格挡。', 1),
 -- 24. 铁壁
-('铁壁', 'Iron Wall', 'skill', 'common', 2, 'Gain 12 Block.', 0, 12, '[]', 0, 4, 'Gain 16 Block.', 1),
+('铁壁', 'Iron Wall', 'skill', 'common', 2, '获得 12 点格挡。', 0, 12, '[]', 0, 4, '获得 16 点格挡。', 1),
 -- 25. 盾墙
-('盾墙', 'Shield Wall', 'skill', 'common', 1, 'Gain 4 Block. Gain 1 Dexterity.', 0, 4, '[{"type":"dexterity","value":1}]', 0, 2, 'Gain 6 Block. Gain 1 Dexterity.', 1),
+('盾墙', 'Shield Wall', 'skill', 'common', 1, '获得 4 点格挡。获得 1 点敏捷。', 0, 4, '[{"type":"dexterity","value":1}]', 0, 2, '获得 6 点格挡。获得 1 点敏捷。', 1),
 -- 26. 战术撤退
-('战术撤退', 'Tactical Retreat', 'skill', 'common', 1, 'Gain 8 Block. Draw 2 cards.', 0, 8, '[{"type":"draw","value":2}]', 0, 3, 'Gain 11 Block. Draw 2 cards.', 1),
+('战术撤退', 'Tactical Retreat', 'skill', 'common', 1, '获得 8 点格挡。抽 2 张牌。', 0, 8, '[{"type":"draw","value":2}]', 0, 3, '获得 11 点格挡。抽 2 张牌。', 1),
 -- 27. 坚守阵地
-('坚守阵地', 'Hold Ground', 'skill', 'uncommon', 2, 'Gain 10 Block. Gain 1 Strength.', 0, 10, '[{"type":"strength","value":1}]', 0, 4, 'Gain 14 Block. Gain 1 Strength.', 1),
+('坚守阵地', 'Hold Ground', 'skill', 'uncommon', 2, '获得 10 点格挡。获得 1 点力量。', 0, 10, '[{"type":"strength","value":1}]', 0, 4, '获得 14 点格挡。获得 1 点力量。', 1),
 -- 28. 铁甲
-('铁甲', 'Iron Armor', 'skill', 'uncommon', 2, 'Gain 12 Block. Exhaust.', 0, 12, '[{"type":"exhaust"}]', 0, 6, 'Gain 18 Block. Exhaust.', 1),
+('铁甲', 'Iron Armor', 'skill', 'uncommon', 2, '获得 12 点格挡。消耗。', 0, 12, '[{"type":"exhaust"}]', 0, 6, '获得 18 点格挡。消耗。', 1),
 -- 29. 反射
-('反射', 'Reflection', 'skill', 'uncommon', 2, 'Gain 6 Block. Enemy takes half the damage dealt this turn.', 0, 6, '[]', 0, 3, 'Gain 9 Block. Enemy takes half the damage dealt this turn.', 1),
+('反射', 'Reflection', 'skill', 'uncommon', 2, '获得 6 点格挡。敌人受到本回合造成伤害的一半。', 0, 6, '[]', 0, 3, '获得 9 点格挡。敌人受到本回合造成伤害的一半。', 1),
 -- 30. 哨兵
-('哨兵', 'Sentinel', 'skill', 'common', 1, 'Gain 5 Block. Draw 1 card.', 0, 5, '[{"type":"draw","value":1}]', 0, 2, 'Gain 7 Block. Draw 1 card.', 1),
+('哨兵', 'Sentinel', 'skill', 'common', 1, '获得 5 点格挡。抽 1 张牌。', 0, 5, '[{"type":"draw","value":1}]', 0, 2, '获得 7 点格挡。抽 1 张牌。', 1),
 -- 31. 绊马索
-('绊马索', 'Tripwire', 'skill', 'common', 1, 'Gain 5 Block. Apply 1 Vulnerable.', 0, 5, '[{"type":"vulnerable","value":1}]', 0, 2, 'Gain 7 Block. Apply 1 Vulnerable.', 1),
+('绊马索', 'Tripwire', 'skill', 'common', 1, '获得 5 点格挡。施加 1 层易伤。', 0, 5, '[{"type":"vulnerable","value":1}]', 0, 2, '获得 7 点格挡。施加 1 层易伤。', 1),
 -- 32. 战旗
-('战旗', 'Battle Standard', 'skill', 'uncommon', 1, 'Gain 3 Block. All attacks +2 damage this turn.', 0, 3, '[]', 0, 2, 'Gain 5 Block. All attacks +3 damage this turn.', 1),
+('战旗', 'Battle Standard', 'skill', 'uncommon', 1, '获得 3 点格挡。本回合所有攻击伤害 +2。', 0, 3, '[]', 0, 2, '获得 5 点格挡。本回合所有攻击伤害 +3。', 1),
 -- 33. 铜墙铁壁
-('铜墙铁壁', 'Fortress', 'skill', 'uncommon', 3, 'Gain 18 Block.', 0, 18, '[]', 0, 6, 'Gain 24 Block.', 1),
+('铜墙铁壁', 'Fortress', 'skill', 'uncommon', 3, '获得 18 点格挡。', 0, 18, '[]', 0, 6, '获得 24 点格挡。', 1),
 -- 34. 卸力
-('卸力', 'Parry', 'skill', 'common', 0, 'Gain 3 Block.', 0, 3, '[]', 0, 2, 'Gain 5 Block.', 1),
+('卸力', 'Parry', 'skill', 'common', 0, '获得 3 点格挡。', 0, 3, '[]', 0, 2, '获得 5 点格挡。', 1),
 -- 35. 盾牌猛击
-('盾牌猛击', 'Shield Bash', 'attack', 'uncommon', 2, 'Gain 6 Block. Deal damage equal to Block gained.', 6, 6, '[]', 2, 2, 'Gain 8 Block. Deal damage equal to Block gained.', 1);
+('盾牌猛击', 'Shield Bash', 'attack', 'uncommon', 2, '获得 6 点格挡。造成等同于格挡的伤害。', 6, 6, '[]', 2, 2, '获得 8 点格挡。造成等同于格挡的伤害。', 1);
 
 -- ==================== 技能牌（10张） ====================
 INSERT IGNORE INTO expedition_cards (card_name, card_name_en, card_type, rarity, cost, description, base_damage, base_block, keywords, upgrade_damage, upgrade_block, upgrade_description, show_id) VALUES
-('战术谋划', 'Tactical Planning', 'skill', 'common', 1, 'Draw 2 cards.', 0, 0, '[{"type":"draw","value":2}]', 0, 0, 'Draw 3 cards.', 1),
-('集结', 'Rally', 'skill', 'common', 1, 'Gain 1 Energy. Exhaust.', 0, 0, '[{"type":"exhaust"}]', 0, 0, 'Gain 2 Energy. Exhaust.', 1),
-('鼓舞', 'Inspire', 'skill', 'uncommon', 2, 'Gain 1 Strength. Exhaust.', 0, 0, '[{"type":"strength","value":1},{"type":"exhaust"}]', 0, 0, 'Gain 2 Strength. Exhaust.', 1),
-('磨刀石', 'Whetstone', 'skill', 'uncommon', 1, 'All attacks +2 damage this turn.', 0, 0, '[]', 0, 0, 'All attacks +3 damage this turn.', 1),
-('包扎', 'Bandage', 'skill', 'common', 1, 'Heal 4 HP. Exhaust.', 0, 0, '[{"type":"heal","value":4},{"type":"exhaust"}]', 0, 0, 'Heal 7 HP. Exhaust.', 1),
-('战前准备', 'Battle Prep', 'skill', 'common', 0, 'Draw 1 card. If hand has 3 or fewer, draw 1 more.', 0, 0, '[{"type":"draw","value":2}]', 0, 0, 'Draw 2 cards. If hand has 4 or fewer, draw 1 more.', 1),
-('振奋', 'Energize', 'skill', 'uncommon', 2, 'Gain 2 Energy. Draw 2 cards.', 0, 0, '[]', 0, 0, 'Gain 3 Energy. Draw 2 cards.', 1),
-('急行军', 'March', 'skill', 'common', 1, 'Draw 3 cards. Discard 1 card.', 0, 0, '[{"type":"draw","value":3}]', 0, 0, 'Draw 4 cards. Discard 1 card.', 1),
-('突袭命令', 'Assault Order', 'skill', 'uncommon', 1, 'All attacks cost 1 less this turn.', 0, 0, '[]', 0, 0, 'All attacks cost 1 less this turn.', 1),
-('回天', 'Revitalize', 'skill', 'rare', 3, 'Heal 12 HP. Exhaust. Convert all Block to healing.', 0, 0, '[{"type":"heal","value":12},{"type":"exhaust"}]', 0, 0, 'Heal 16 HP. Exhaust. Convert all Block to healing.', 1);
+('战术谋划', 'Tactical Planning', 'skill', 'common', 1, '抽 2 张牌。', 0, 0, '[{"type":"draw","value":2}]', 0, 0, '抽 3 张牌。', 1),
+('集结', 'Rally', 'skill', 'common', 1, '获得 1 点能量。消耗。', 0, 0, '[{"type":"exhaust"}]', 0, 0, '获得 2 点能量。消耗。', 1),
+('鼓舞', 'Inspire', 'skill', 'uncommon', 2, '获得 1 点力量。消耗。', 0, 0, '[{"type":"strength","value":1},{"type":"exhaust"}]', 0, 0, '获得 2 点力量。消耗。', 1),
+('磨刀石', 'Whetstone', 'skill', 'uncommon', 1, '本回合所有攻击伤害 +2。', 0, 0, '[]', 0, 0, '本回合所有攻击伤害 +3。', 1),
+('包扎', 'Bandage', 'skill', 'common', 1, '恢复 4 点生命。消耗。', 0, 0, '[{"type":"heal","value":4},{"type":"exhaust"}]', 0, 0, '恢复 7 点生命。消耗。', 1),
+('战前准备', 'Battle Prep', 'skill', 'common', 0, '抽 1 张牌。若手牌小于等于 3 张，再抽 1 张。', 0, 0, '[{"type":"draw","value":2}]', 0, 0, '抽 2 张牌。若手牌小于等于 4 张，再抽 1 张。', 1),
+('振奋', 'Energize', 'skill', 'uncommon', 2, '获得 2 点能量。抽 2 张牌。', 0, 0, '[]', 0, 0, '获得 3 点能量。抽 2 张牌。', 1),
+('急行军', 'March', 'skill', 'common', 1, '抽 3 张牌。弃置 1 张牌。', 0, 0, '[{"type":"draw","value":3}]', 0, 0, '抽 4 张牌。弃置 1 张牌。', 1),
+('突袭命令', 'Assault Order', 'skill', 'uncommon', 1, '本回合所有攻击费用减 1。', 0, 0, '[]', 0, 0, '本回合所有攻击费用减 1。', 1),
+('回天', 'Revitalize', 'skill', 'rare', 3, '恢复 12 点生命。消耗。将所有格挡转化为治疗。', 0, 0, '[{"type":"heal","value":12},{"type":"exhaust"}]', 0, 0, '恢复 16 点生命。消耗。将所有格挡转化为治疗。', 1);
 
 -- ==================== 能力牌（5张） ====================
 INSERT IGNORE INTO expedition_cards (card_name, card_name_en, card_type, rarity, cost, description, base_damage, base_block, keywords, upgrade_damage, upgrade_block, upgrade_description, show_id) VALUES
-('战争艺术', 'Art of War', 'power', 'rare', 2, 'At the start of each turn, gain 1 Strength.', 0, 0, '[{"type":"strength","value":1}]', 0, 0, 'At the start of each turn, gain 2 Strength.', 1),
-('铁甲护体', 'Iron Body', 'power', 'uncommon', 2, 'At the start of each turn, gain 2 Block.', 0, 0, '[]', 0, 0, 'At the start of each turn, gain 3 Block.', 1),
-('狂暴', 'Berserker', 'power', 'uncommon', 1, 'Lose 3 Max HP. Gain 1 Strength at start of each turn.', 0, 0, '[{"type":"strength","value":1}]', 0, 0, 'Lose 2 Max HP. Gain 1 Strength at start of each turn.', 1),
-('寒冰护盾', 'Ice Shield', 'power', 'rare', 1, 'Gain 1 Block at start of each turn. Attacker takes 2 damage.', 0, 0, '[]', 0, 0, 'Gain 2 Block at start of each turn. Attacker takes 2 damage.', 1),
-('复仇意志', 'Vengeance', 'power', 'rare', 2, 'For each 1 HP lost, deal 1 extra damage this combat.', 0, 0, '[]', 0, 0, 'For each 1 HP lost, deal 1 extra damage this combat.', 1);
+('战争艺术', 'Art of War', 'power', 'rare', 2, '每回合开始时获得 1 点力量。', 0, 0, '[{"type":"strength","value":1}]', 0, 0, '每回合开始时获得 2 点力量。', 1),
+('铁甲护体', 'Iron Body', 'power', 'uncommon', 2, '每回合开始时获得 2 点格挡。', 0, 0, '[]', 0, 0, '每回合开始时获得 3 点格挡。', 1),
+('狂暴', 'Berserker', 'power', 'uncommon', 1, '失去 3 点最大生命。每回合开始时获得 1 点力量。', 0, 0, '[{"type":"strength","value":1}]', 0, 0, '失去 2 点最大生命。每回合开始时获得 1 点力量。', 1),
+('寒冰护盾', 'Ice Shield', 'power', 'rare', 1, '每回合开始时获得 1 点格挡。攻击者受到 2 点伤害。', 0, 0, '[]', 0, 0, '每回合开始时获得 2 点格挡。攻击者受到 2 点伤害。', 1),
+('复仇意志', 'Vengeance', 'power', 'rare', 2, '本场战斗中每失去 1 点生命，额外造成 1 点伤害。', 0, 0, '[]', 0, 0, '本场战斗中每失去 1 点生命，额外造成 1 点伤害。', 1);
 
 -- ==================== 第一幕敌人（含行为模式） ====================
 
@@ -156,183 +156,183 @@ INSERT IGNORE INTO expedition_enemies (show_id, act, name_cn, name_en, hp, is_bo
 
 -- 层1: 3个战斗节点入口
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 1, 'combat', 0, 'The Wall - West Gate',
- 'The Wall stretches before you, a monument of ice and ancient magic. Beyond it lies the true north, a land of snow and secrets. Lord Commander Mormont has sent you on a ranging mission to discover what lies beyond the Wall. The wind howls through the battlements as you prepare to venture into the unknown. A group of wildling scouts has been spotted near the western gate. They must be dealt with before they can report your movements.',
+(1, 1, 'combat', 0, '长城 - 西门',
+ '长城巍然屹立在你面前，一座由寒冰和远古魔法筑成的丰碑。长城之外是真北之地，一片冰雪与秘密的土地。莫尔蒙总司令派你外出巡游，探寻长城之外的秘密。风在城垛间呼啸，你准备踏入未知。西门附近发现了一群野人斥候，必须在他们报告你的行踪之前将其解决。',
  '[2,2,2]', FALSE),
-(1, 1, 'combat', 1, 'The Wall - East Gate',
- 'The eastern approach to Castle Black is quieter, but no less dangerous. The snow lies thick on the ground, and the cold seeps through even the thickest furs. You tighten your cloak and begin the descent down the winding staircase carved into the ice itself. Below, the haunted forest waits, its trees standing like silent sentinels. Reports speak of a direwolf prowling these parts, driven south by the harsh winter.',
+(1, 1, 'combat', 1, '长城 - 东门',
+ '通往黑城堡的东侧道路更为安静，但同样危险。积雪厚厚地覆盖着地面，寒冷侵蚀着最厚的毛皮。你收紧斗篷，开始沿着冰面上开凿的蜿蜒阶梯下行。下方，鬼影森林静静等待，树木如同沉默的哨兵。有报告称一只冰原狼因严冬而南下，在此出没。',
  '[2,2]', FALSE),
-(1, 1, 'combat', 2, 'The Wall - Castle Black',
- 'You take the main gate through Castle Black, passing the training yard where recruits practice with wooden swords. The Night''s Watch is stretched thin, and every ranger is needed beyond the Wall. The gate creaks open, and the cold hits you like a wall. Beyond lies the true north, and your first test. A wildling raiding party has been seen nearby, and they must be stopped.',
+(1, 1, 'combat', 2, '长城 - 黑城堡',
+ '你从黑城堡的正门出发，经过训练场，新兵们正在那里用木剑练习。守夜人兵力紧张，每名游骑兵都需要前往长城之外。大门吱呀作响地打开，寒冷如墙般向你袭来。前方就是真正的北方，你的第一个考验。附近发现了一支野人劫掠队，必须阻止他们。',
  '[2,3]', FALSE);
 
 -- 层2: 战斗/事件岔路
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 2, 'combat', 0, 'The Haunted Forest - Edge',
- 'You enter the haunted forest, where the trees grow twisted and strange. The canopy blocks out the sun, casting everything in an eerie twilight. Snow muffles your footsteps as you move deeper. The air smells of pine and decay. Something moves in the shadows ahead. You grip your weapon and press forward.',
+(1, 2, 'combat', 0, '鬼影森林 - 边缘',
+ '你进入鬼影森林，树木扭曲怪异，树冠遮蔽了阳光，万物笼罩在诡异的暮色中。积雪掩盖了你的脚步声。空气中弥漫着松木和腐朽的气味。前方的阴影中有什么东西在移动。你握紧武器，继续前进。',
  '[3,3]', FALSE),
-(1, 2, 'event', 1, 'Abandoned Camp',
- 'You discover an abandoned wildling camp. The fires are still warm, suggesting the occupants left in a hurry. Among the debris, you find scattered supplies and what appears to be a crude map drawn on leather. The map shows a path through the forest that avoids the main wildling patrols. A raven''s feather lies beside the map, still black as night.',
+(1, 2, 'event', 1, '废弃营地',
+ '你发现了一个被遗弃的野人营地。篝火仍有余温，说明居住者匆忙离开。在杂物中，你找到散落的补给和一张画在皮革上的粗糙地图。地图标出穿过森林、避开野人巡逻队的路线。地图旁有一根渡鸦的羽毛，漆黑如夜。',
  '[3,3,3]', FALSE),
-(1, 2, 'combat', 2, 'Frozen Stream',
- 'A frozen stream cuts across your path. The ice looks solid, but you can hear the water flowing beneath. On the far bank, movement catches your eye. Wildling scouts are crossing upstream. If you hurry, you can cut them off before they reach higher ground.',
+(1, 2, 'combat', 2, '冰封溪流',
+ '一条冰封的溪流横亘在你的道路上。冰面看起来很结实，但你能听到下方水流的声音。对岸有动静引起了你的注意。野人斥候正在上游渡河。如果你动作快，可以在他们抵达高地之前截住他们。',
  '[3,4]', FALSE);
 
 -- 层3: 战斗节点
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 3, 'combat', 0, 'Wolf Den',
- 'You come upon a den of direwolves. The massive wolves are larger than any you have seen in the south, with thick grey fur and eyes that glow in the dim light. They have been feeding on something, and they do not appreciate the intrusion. The alpha rises, baring teeth as long as your fingers.',
+(1, 3, 'combat', 0, '狼穴',
+ '你发现了一个冰原狼的巢穴。这些巨狼比你见过的任何南方狼都要大，有着厚实的灰色皮毛和在昏暗光线中发光的眼睛。它们正在进食，不欢迎打扰。头狼站起身，露出有你手指那么长的獠牙。',
  '[4,4]', FALSE),
-(1, 3, 'combat', 1, 'Ranger Tower',
- 'An old ranger tower stands atop a rocky outcropping. It has been abandoned for years, but smoke rises from the chimney. Someone - or something - has taken up residence. The door hangs open, and you can hear rough voices from inside. Deserters from the Night''s Watch, by the sound of it.',
+(1, 3, 'combat', 1, '游骑兵塔',
+ '一座古老的游骑兵塔矗立在岩石突出部上。它已被废弃多年，但烟囱中升起袅袅青烟。有人——或者什么东西——占据了这里。门敞开着，你能听到里面粗犷的声音。听起来是守夜人的逃兵。',
  '[4,4,5]', FALSE),
-(1, 3, 'rest', 2, 'Sacred Grove',
- 'You find a grove of weirwood trees, their white bark and red leaves creating a stark contrast against the snow. The faces carved into the trunks seem to watch you. The ground is soft with fallen leaves, and the area feels protected somehow. A good place to rest and tend to your wounds. The old gods watch over this place.',
+(1, 3, 'rest', 2, '神圣树林',
+ '你发现了一片鱼梁木树林，白色的树皮和红色的叶子和白雪形成鲜明对比。树干上雕刻的面孔似乎在注视着你。地面铺满落叶，柔软舒适，这片区域有种被保护的感觉。是休息和疗伤的好地方。旧神守护着这片土地。',
  '[4,5]', FALSE);
 
 -- 层4: 战斗/事件
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 4, 'combat', 0, 'Hidden Path',
- 'You find a narrow game trail winding through the thickest part of the forest. It is barely visible, but it leads in the direction you need to go. As you push through the undergrowth, you hear voices ahead. Wildling scouts are using this same path. They have not seen you yet.',
+(1, 4, 'combat', 0, '隐蔽小径',
+ '你发现一条狭窄的兽道蜿蜒穿过森林最茂密的部分。几乎难以辨认，但通向你要去的方向。当你拨开灌木前行时，听到前方有说话声。野人斥候也在使用这条小路。他们还没有发现你。',
  '[5,5]', FALSE),
-(1, 4, 'event', 1, 'Crone''s Hut',
- 'Deep in the woods, you find a small hut that seems out of place. An old woman sits by the fire, stirring a pot. She speaks in the Old Tongue, but she seems to understand the Common Tongue well enough. She offers you warmth and food, but her eyes hold secrets. There is something not quite right about this place.',
+(1, 4, 'event', 1, '老妪小屋',
+ '在森林深处，你发现一间显得格格不入的小屋。一个老妇人坐在火边搅动锅中的东西。她说的是上古语言，但似乎也能理解通用语。她给你提供温暖和食物，但她的眼中隐藏着秘密。这个地方有些不对劲。',
  '[5,5,6]', FALSE),
-(1, 4, 'shop', 2, 'Wandering Merchant',
- 'A wildling merchant has set up a makeshift stall in a clearing. He has furs, dried meat, and various trinkets spread out on a sled. He eyes you warily but does not reach for his weapon. "Trade?" he asks in broken Common. His goods look surprisingly well-made for a wildling craftsman.',
+(1, 4, 'shop', 2, '流浪商人',
+ '一个野人商人在空地中搭起了一个临时摊位。他把皮毛、干肉和各种小物件摊在雪橇上。他警惕地打量着你，但没有伸手去拿武器。"交易？"他用蹩脚的通用语问道。他的货物对于一个野人工匠来说出奇地精良。',
  '[5,6]', FALSE);
 
 -- 层5: 战斗节点
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 5, 'combat', 0, 'Frozen Lake',
- 'The forest opens onto a frozen lake. The ice is smooth and dark, reflecting the grey sky like a mirror. In the middle of the lake, a group of wildlings are performing some sort of ritual. They have not noticed you yet, but your passage across the open ice would be exposed. You need to cross, or find another way around.',
+(1, 5, 'combat', 0, '冰封之湖',
+ '森林开阔处，露出一个冰封的湖泊。冰面平滑幽暗，如镜子般映照着灰色的天空。湖中央，一群野人正在举行某种仪式。他们还没有注意到你，但你在开阔冰面上的行动会被发现。你必须穿过湖面，或者另寻他路。',
  '[6,6]', FALSE),
-(1, 5, 'rest', 1, 'Cave Shelter',
- 'You discover a cave hidden behind a frozen waterfall. The cave is dry and relatively warm, with evidence of previous occupants. A fire pit has been dug in the center, and there is a stack of dry wood nearby. The sound of rushing water fills the cave, creating a surprisingly peaceful atmosphere. A good place to recuperate.',
+(1, 5, 'rest', 1, '洞穴庇护所',
+ '你发现了一个隐藏在冰冻瀑布后面的洞穴。洞穴干燥温暖，有之前居住者的痕迹。中央挖了一个火坑，旁边有一堆干柴。流水的声音充满洞穴，营造出出奇宁静的氛围。是恢复体力的好地方。',
  '[6,6,6]', FALSE),
-(1, 5, 'combat', 2, 'Ambush Alley',
- 'The terrain narrows into a rocky pass. It is an ideal place for an ambush, and you are proven right when arrows fly from the rocks above. Snow-covered wildlings emerge from hiding, their weapons ready. They have done this before. The leader barks orders in the Old Tongue.',
+(1, 5, 'combat', 2, '埋伏峡谷',
+ '地形收窄成一条岩石隘口，是完美的伏击地点。当箭矢从上方岩石中飞来，你的猜测被证实了。身披白雪的野人从藏身处现身，武器已出鞘。他们对此驾轻就熟。首领用上古语言吼叫着下达命令。',
  '[6,7]', FALSE);
 
 -- 层6: 精英层
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 6, 'combat', 0, 'Old Battlefield',
- 'You stumble onto an old battlefield, where the bones of fallen warriors protrude from the snow like pale branches. The ground is littered with shattered weapons and frozen banners. In the center stands a lone figure, seemingly waiting for you. He wears the black of the Night''s Watch, but his cloak is tattered and his eyes are hard. Benjen Stark has heard of your ranging and comes to test your worth.',
+(1, 6, 'combat', 0, '古战场',
+ '你偶然发现一片古战场，阵亡战士的骸骨如苍白树枝般从雪中伸出。地面上散落着破碎的武器和冻僵的旗帜。中央站着一个孤独的身影，似乎在等待着你。他身着守夜人的黑衣，但斗篷破旧，目光坚毅。班扬·史塔克听说了你的巡游，前来考验你的实力。',
  '[7,7]', FALSE),
-(1, 6, 'event', 1, 'Hot Spring',
- 'Steam rises from a pool of water fed by volcanic activity deep underground. The hot spring is surrounded by moss-covered rocks, and the air here is warm and humid. The contrast with the frozen forest is striking. You could rest here and recover, but the steam would mask the approach of enemies. Strange markings on the rocks suggest this place is considered sacred.',
+(1, 6, 'event', 1, '温泉',
+ '一池由地下火山活动供给的泉水散发着蒸汽。温泉被长满苔藓的岩石环绕，这里的空气温暖湿润，与冰冻森林形成鲜明对比。你可以在此休息恢复，但蒸汽也会掩盖敌人的靠近。岩石上的奇异标记表明此地被视为圣地。',
  '[7,7,7]', FALSE),
-(1, 6, 'combat', 2, 'Raider Camp',
- 'You find a large wildling raider camp. These are not simple scouts; these are hardened warriors, their faces painted with woad and their weapons sharp. They have been raiding the Gift, the fertile lands south of the Wall. Their leader is a massive brute who swings an axe as if it weighs nothing. The camp is well-organized, suggesting these are not just random raiders.',
+(1, 6, 'combat', 2, '掠夺者营地',
+ '你发现了一个大型野人掠夺者营地。这些人不是简单的斥候，而是身经百战的战士，脸上涂着靛蓝染料，武器锋利。他们一直在掠夺长城以南的富饶土地——赠地。他们的首领是一个挥舞巨斧如同无物的庞然大物。营地组织有序，表明他们不是普通的掠夺者。',
  '[7,8]', FALSE);
 
 -- 层7: 篝火
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 7, 'rest', 0, 'Watchtower',
- 'You reach an ancient watchtower that predates the Wall itself. Built by the First Men, its stones are covered in old runes that tell of battles long forgotten. The tower offers shelter and a strategic view of the surrounding forest. A fire can be lit safely within its stone walls without being seen from outside.',
+(1, 7, 'rest', 0, '瞭望塔',
+ '你到达了一座比长城本身还古老的瞭望塔。由先民建造，石头上刻满了讲述早已被遗忘的战役的古老符文。塔楼提供庇护，并可以俯瞰周围森林。可以在石墙内安全生火，不会被外面看到。',
  '[8,8]', FALSE),
-(1, 7, 'rest', 1, 'Wildling Hut',
- 'You find a deserted wildling hut, built from sod and timbers. It is crude but functional. There is a fire pit and beds of furs. Whoever lived here left in a hurry, abandoning tools and personal effects. The hut offers shelter from the elements and a chance to rest.',
+(1, 7, 'rest', 1, '野人小屋',
+ '你发现了一间用草皮和木材建造的废弃野人小屋。简陋但实用。里面有火坑和皮毛床铺。住在这里的人匆忙离开，遗弃了工具和个人物品。小屋可以遮风挡雨，给你一个休息的机会。',
  '[8,8,8]', FALSE),
-(1, 7, 'rest', 2, 'Frozen Waterfall Cave',
- 'Behind a frozen waterfall, you find another cave system. This one is larger, with multiple chambers. Glowing fungi line the walls, providing dim illumination. The air is still and quiet. A perfect place to rest and prepare for the challenges ahead.',
+(1, 7, 'rest', 2, '冰冻瀑布洞穴',
+ '在一个冰冻瀑布后面，你发现了另一个洞穴系统。这个更大，有多个洞穴。墙壁上长满了发光的真菌，提供昏暗的照明。空气宁静。是休息和为前方挑战做准备的好地方。',
  '[8,9]', FALSE);
 
 -- 层8-9: 中段战斗
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 8, 'combat', 0, 'Frost Canyon',
- 'The ground drops away into a deep canyon carved by ancient glaciers. A narrow bridge of ice spans the gap, creaking under its own weight. On the far side, wildlings are waiting. They have been expecting you and have prepared an ambush. There is no other way across for miles.',
+(1, 8, 'combat', 0, '冰霜峡谷',
+ '地面骤降，形成一个由远古冰川切割而成的深谷。一座狭窄的冰桥横跨峡谷，在自身重压下吱吱作响。对岸，野人在等候。他们早有预料，准备好了伏击。方圆数里没有其他通路。',
  '[9,9]', FALSE),
-(1, 8, 'combat', 1, 'Snowstorm',
- 'A sudden snowstorm reduces visibility to almost nothing. You struggle forward, your cloak heavy with accumulating snow. In the white chaos, shapes move. The wildlings know this weather and use it to their advantage. You hear their war cries mixing with the howling wind.',
+(1, 8, 'combat', 1, '暴风雪',
+ '突然暴风雪袭来，能见度降到几乎为零。你艰难前行，斗篷上积满了沉重的雪。在白色的混沌中，有影子在移动。野人熟知这种天气并善于利用。你听到他们的战吼与狂风的呼啸声交织在一起。',
  '[9,9,10]', FALSE),
-(1, 8, 'event', 2, 'Buried Temple',
- 'The storm reveals something unexpected: the entrance to an ancient temple buried beneath the snow for centuries. The stone door is carved with the symbols of the old gods and the children of the forest. What secrets lie within? The temple radiates an ancient power that both intrigues and disturbs you.',
+(1, 8, 'event', 2, '埋没神庙',
+ '暴风雪揭示了一件意想不到的东西：一座被白雪掩埋了数个世纪的古庙入口。石门上刻着旧神和森林之子的符号。里面隐藏着什么秘密？神庙散发着一种既让你好奇又让你不安的古老力量。',
  '[9,10]', FALSE);
 
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 9, 'combat', 0, 'Ice Caves',
- 'The trail leads into a labyrinth of ice caves. The walls glow with an ethereal blue light, and the sound of dripping water echoes through the tunnels. The ice formations are beautiful but treacherous. Someone - or something - has been using these caves as a highway. Fresh footprints mark the frozen floor.',
+(1, 9, 'combat', 0, '冰晶洞穴',
+ '小径通向一个冰洞迷宫。墙壁发出空灵的蓝光，滴水声在隧道中回荡。冰层精美但险恶。有人——或者什么东西——一直把这些洞穴当高速公路使用。冰冻的地面上有新鲜的脚印。',
  '[10,10]', FALSE),
-(1, 9, 'rest', 1, 'Geothermal Vent',
- 'A crack in the earth releases warm air from deep below, creating a pocket of warmth in the frozen landscape. Moss and even some hardy flowers grow here. The ground is comfortable, and the warmth seeps into your cold bones. This natural hot spot is a welcome respite from the bitter cold.',
+(1, 9, 'rest', 1, '地热裂隙',
+ '地面的一道裂隙释放出地底的温暖空气，在冰封的景色中创造出一片温暖区域。苔藓甚至一些耐寒的花朵在这里生长。地面舒适，温暖渗入你冰冷的骨髓。这片天然热点是严寒中难得的喘息之处。',
  '[10,10,11]', FALSE),
-(1, 9, 'combat', 2, 'Ridge Ambush',
- 'You follow a ridge that offers a clear view of the surrounding forest. The vantage point is excellent, but it also makes you silhouetted against the sky. Wildling archers have taken position on a higher ridge. Their arrows rain down as you scramble for cover.',
+(1, 9, 'combat', 2, '山脊伏击',
+ '你沿着山脊前进，可以清晰看到周围的森林。视野极佳，但也让你在天空的映衬下成为剪影。野人弓箭手已经在更高的山脊上就位。当你寻找掩护时，箭矢如雨般落下。',
  '[10,11]', FALSE);
 
 -- 层10: 商店
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 10, 'shop', 0, 'Underground Market',
- 'Deep beneath an uprooted tree, you discover a hidden market where wildlings trade with a man who wears the black of the Night''s Watch. Deserters, both sides, find common ground in commerce. The merchant offers you a nod of recognition. His goods include weapons, potions, and various supplies that could prove vital for the journey ahead. He speaks the Common Tongue with a northern accent.',
+(1, 10, 'shop', 0, '地下市场',
+ '在一棵连根拔起的大树下，你发现了一个隐藏的市场。野人正与一个穿着守夜人黑衣的男人进行交易。双方——逃兵们——在商业中找到了共同点。商人向你点头致意。他的货物包括武器、药水和各种可能对前方旅程至关重要的补给品。他说的通用语带着北方口音。',
  '[11,11]', FALSE),
-(1, 10, 'shop', 1, 'Free Folk Trader',
- 'A group of free folk have set up a trading post by a frozen river. They are more civilized than the raiders, and they seem willing to do business. Their leader, a woman with grey-streaked hair, examines you with keen interest. "You''re the one they''re all talking about," she says. "The crow who walks alone." Her prices are fair, and her goods are quality.',
+(1, 10, 'shop', 1, '自由民商人',
+ '一群自由民在冰封的河边建立了一个贸易站。他们比掠夺者文明得多，似乎愿意做生意。他们的首领是一个头发花白的女人，饶有兴趣地打量着你。"你就是大家都在说的那个人，"她说，"那只独行的乌鸦。"她的价格公道，货物优质。',
  '[11,11,11]', FALSE),
-(1, 10, 'combat', 2, 'Supplies Cache',
- 'You discover a hidden cache of supplies, likely stashed by rangers who passed this way before. But as you approach, you realize it is guarded. A massive snow bear has made its den here, and it does not appreciate intruders. The bear rises on its hind legs, easily ten feet tall. Its roar echoes through the forest.',
+(1, 10, 'combat', 2, '补给储藏点',
+ '你发现了一个隐藏的补给储藏点，可能是之前经过的游骑兵留下的。但当你靠近时，你意识到有守卫。一只巨大的雪熊在这里筑巢，不欢迎入侵者。熊用后腿站立起来，足足有十英尺高。它的咆哮在森林中回荡。',
  '[11,12]', FALSE);
 
 -- 层11-13: 后段战斗
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 11, 'combat', 0, 'Winding Pass',
- 'The terrain becomes increasingly rocky and difficult. The pass winds through tight spaces where you must squeeze between boulders. It is slow going, and the cold seeps into your joints. Wildling hunters know these passes well and use them to trap unwary rangers. The sound of rolling stones ahead warns you of approaching danger.',
+(1, 11, 'combat', 0, '蜿蜒隘口',
+ '地形变得越发崎岖难行。隘口蜿蜒穿过狭窄的空间，你必须在巨石之间挤过。行进缓慢，寒冷渗入关节。野人猎手熟悉这些隘口，用来陷阱粗心的游骑兵。前方滚石的声音警告你危险临近。',
  '[12,12]', FALSE),
-(1, 11, 'event', 1, 'Deserter''s Confession',
- 'You find a man in tattered black, half-frozen against a tree. He is a deserter from the Watch, and he knows he will be executed if taken back. He speaks of what drove him to flee: not cowardice, but something he saw beyond the Wall. "The dead walk," he whispers, his eyes wild with terror. "I saw them. The dead walk."',
+(1, 11, 'event', 1, '逃兵的忏悔',
+ '你发现一个穿着破烂黑衣的男人，半冻僵地靠在一棵树上。他是守夜人的逃兵，知道如果被带回去会被处决。他讲述了驱使他逃跑的原因：不是懦弱，而是他在长城之外看到的景象。"死人会走路，"他低声说，眼中充满恐惧，"我看到了。死人会走路。"',
  '[12,12,13]', FALSE),
-(1, 11, 'combat', 2, 'Wolf Pack',
- 'A pack of direwolves has been tracking you for miles. They have finally decided to make their move. They surround you, their breath forming clouds in the cold air. The alpha is a massive beast with a scarred muzzle and one eye. The pack works together with deadly coordination, herding you toward a cliff edge.',
+(1, 11, 'combat', 2, '狼群',
+ '一群冰原狼已经跟踪你数英里。它们终于决定采取行动了。它们包围了你，呼吸在冷空气中形成云雾。头狼是一只巨大的野兽，口鼻部有疤痕，仅有一只眼。狼群以致命的协作行动，把你驱向悬崖边缘。',
  '[12,13]', FALSE);
 
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 12, 'combat', 0, 'Frozen Fortress',
- 'An ancient fortress of the First Men emerges from the snow. Its walls are made of black stone, and it stands defiant against the elements. The gate hangs broken, and snow has drifted into the courtyard. But lights flicker in the tower - someone occupies this place. Wildlings have made this fortress their stronghold.',
+(1, 12, 'combat', 0, '冰封要塞',
+ '一座先民的古老要塞从雪中浮现。城墙由黑石砌成，傲然屹立于风雪之中。大门破损，雪飘进了庭院。但塔楼中有灯光闪烁——有人占据了这个地方。野人把这座要塞当成了据点。',
  '[13,13]', FALSE),
-(1, 12, 'rest', 1, 'Shielded Valley',
- 'You discover a valley sheltered from the wind by high cliffs. The sun actually reaches the floor here, and the snow is less deep. A small stream flows, not frozen, fed by an underground spring. The valley feels almost peaceful, a hidden paradise in the frozen north.',
+(1, 12, 'rest', 1, '避风山谷',
+ '你发现了一个被高耸悬崖遮蔽的山谷。阳光居然能照射到谷底，积雪也较浅。一条小溪潺潺流淌，没有被冻结，由地下泉水供给。山谷几乎让人感到安宁，是极北之地的一处隐藏天堂。',
  '[13,13,13]', FALSE),
-(1, 12, 'combat', 2, 'Snowmelt River',
- 'The spring thaw has turned a river into a raging torrent. The only crossing is a fallen tree, slick with ice and spray. On the far side, wildlings are waiting. They have you at a disadvantage, and they know it. Their leader shouts something in the Old Tongue, and you hear mocking laughter.',
+(1, 12, 'combat', 2, '雪融之河',
+ '春天融雪使河流变成了汹涌的急流。唯一的通道是一棵倒下的树，表面覆盖着冰和水花，非常滑。对岸，野人正在等候。他们知道你已经处于劣势。首领用上古语言喊了些什么，你听到了嘲弄的笑声。',
  '[13,14]', FALSE);
 
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 13, 'combat', 0, 'Elite Camp',
- 'This is no ordinary wildling camp. The warriors here are veterans, their weapons of steel rather than bone. They wear the trophies of fallen rangers. A massive banner made of Night''s Watch cloaks hangs from a pole. The Wildling Marauder who leads them is a legend beyond the Wall, known for his cruelty and his tactical mind.',
+(1, 13, 'combat', 0, '精英营地',
+ '这不是普通的野人营地。这里的战士都是老兵，武器是钢铁而非骨头。他们佩戴着阵亡游骑兵的战利品。一根杆子上挂着一面由守夜人斗篷制成的巨大旗帜。率领他们的野人掠夺者是长城之外的传奇，以其残忍和战术头脑闻名。',
  '[14,14]', FALSE),
-(1, 13, 'combat', 1, 'Ambush Canyon',
- 'A narrow canyon funnels you into a kill zone. As you realize the danger, warriors rise from beneath the snow where they were hiding. The ambush is well-planned and nearly perfect. But you are not an easy target. The wildlings realize they have caught more than they bargained for.',
+(1, 13, 'combat', 1, '伏击峡谷',
+ '一个狭窄的峡谷把你引向杀戮区。当你意识到危险时，战士从藏身的雪中冒了出来。伏击计划周密，近乎完美。但你可不是好对付的目标。野人意识到他们碰到了硬茬。',
  '[14,14,15]', FALSE),
-(1, 13, 'event', 2, 'Children of the Forest',
- 'Deep in the woods, you encounter a being you thought existed only in legend. One of the children of the forest, small and dark, with eyes like pools of ancient knowledge. It speaks in a language older than the First Men, but somehow you understand. It offers you a choice: knowledge or power. The decision will shape your journey.',
+(1, 13, 'event', 2, '森林之子',
+ '在森林深处，你遇到了一个你以为只存在于传说中的存在。一个森林之子，身材矮小，肤色黝黑，双眼如蕴藏古老知识的深潭。它说着比先民更古老的语言，但不知为何你能够理解。它给你一个选择：知识或力量。这个决定将塑造你的旅程。',
  '[14,15]', FALSE);
 
 -- 层14: 篝火
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 14, 'rest', 0, 'Last Hearth',
- 'You find the ruins of an ancient hall, once the seat of a northern house. The roof is long gone, but the stone walls provide shelter. A great hearth, cold for centuries, dominates the main hall. You gather wood and start a fire. The flames cast dancing shadows on the carved stone walls, telling stories of a forgotten age.',
+(1, 14, 'rest', 0, '最后壁炉',
+ '你发现了一座古老厅堂的废墟，曾经是北方家族所在地。屋顶早已不在，但石墙仍能提供遮蔽。一个冰冷了数个世纪的巨大壁炉占据了大厅中央。你收集木柴生起火来。火焰在雕刻的石墙上投下舞动的影子，诉说着一个被遗忘时代的故事。',
  '[15,15]', FALSE),
-(1, 14, 'rest', 1, 'Hot Springs Cave',
- 'Another hot spring, this one inside a cave system adorned with primitive paintings. The paintings tell a story of battle between men and something else, something cold and white. The warm water soothes your tired muscles, but the images on the walls trouble your sleep. What awaits you in the far north?',
+(1, 14, 'rest', 1, '温泉洞穴',
+ '又一个温泉，这次是在一个装饰着原始绘画的洞穴系统中。画作讲述了人类与某种寒冷而苍白的东西之间的战斗。温暖的水舒缓了你疲惫的肌肉，但墙上的画面让你难以入眠。远北之地还有什么在等待着你？',
  '[15,15,15]', FALSE),
-(1, 14, 'rest', 2, 'Ranger Cache',
- 'You find a well-stocked ranger cache, hidden in a hollow tree marked with the Watch''s sign. Inside are dried provisions, medicine, and a fresh set of warm clothing. Someone was preparing for a long journey north. A note, partially decayed, warns of "the King Beyond the Wall."',
+(1, 14, 'rest', 2, '游骑兵藏匿点',
+ '你发现了一个储备充足的游骑兵藏匿点，藏在标记着守夜人标志的空心树中。里面有干粮、药品和一套干净的保暖衣物。有人正在为北上长途旅行做准备。一张已经部分腐朽的便条警告着"塞外之王"。',
  '[15,16]', FALSE);
 
 -- 层15: 精英
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 15, 'combat', 0, 'Benjen Stark - Last Ranger',
- 'A lone figure blocks your path, leaning on a spear. He wears the black of the Night''s Watch, but his cloak is pristine, his boots polished. First Ranger Benjen Stark has been tracking you since you left the Wall. "You have come far," he says, his breath misting in the cold. "But the true test lies ahead. Show me you are ready." He raises his spear in challenge.',
+(1, 15, 'combat', 0, '班扬·史塔克 - 最后的游骑兵',
+ '一个孤独的身影挡在你的路上，倚靠着一支长矛。他穿着守夜人的黑衣，但斗篷一尘不染，靴子擦得锃亮。首席游骑兵班扬·史塔克从你离开长城起就一直在跟踪你。"你走了很远，"他说，呼吸在寒冷中形成白雾，"但真正的考验还在前方。让我看看你是否准备好了。"他举起长矛发出挑战。',
  '[16]', FALSE),
-(1, 15, 'combat', 1, 'The Marauder''s Challenge',
- 'The Wildling Marauder has heard of your progress and has come to meet you personally. He is a mountain of a man, clad in furs and boiled leather, wielding a great axe that could cleave a man in half. His warriors form a circle, chanting in the Old Tongue. This is a challenge, a trial by combat. Win, and you earn the right to face their king.',
+(1, 15, 'combat', 1, '掠夺者的挑战',
+ '野人掠夺者听说了你的进展，亲自前来会你。他是一座山般的男人，身着毛皮和熟皮甲，挥舞着一把能将人劈成两半的巨斧。他的战士围成一圈，用上古语言吟唱。这是一场挑战，一场战斗审判。赢了，你就获得面对他们国王的权利。',
  '[16,16]', FALSE),
-(1, 15, 'combat', 2, 'Wight Scout',
- 'A scout from the Night''s Watch rides toward you, his horse lathered with sweat. He has ridden hard and long. "The King Beyond the Wall," he gasps. "He''s gathering his host. Mance Rayder means to march on the Wall with all the free folk behind him. And there''s worse... there''s something in the snow with him." The scout''s face is pale with more than cold.',
+(1, 15, 'combat', 2, '守夜人斥候',
+ '一个守夜人的斥候骑马向你奔来，他的马浑身是汗。他已经赶了很远的路。"塞外之王，"他气喘吁吁地说，"他正在集结军队。曼斯·雷德打算率领所有自由民向长城进军。还有更糟的……雪中还有别的东西与他同行。"斥候的脸苍白得不只是因为寒冷。',
  '[16]', FALSE);
 
 -- 层16: Boss
 INSERT IGNORE INTO node_content (act, floor, node_type, position, title, content, connected_to, is_boss_node) VALUES
-(1, 16, 'boss', 0, 'Mance Rayder - The King Beyond the Wall',
- 'At last you stand before the King Beyond the Wall. Mance Rayder sits on a makeshift throne of antlers and fur, his cloak a patchwork of fabrics from beyond the Wall and the seven kingdoms alike. He was once a man of the Night''s Watch, but he abandoned his vows to unite the free folk. He is a warrior, a leader, and a visionary. Around him, his fiercest warriors stand guard. He rises and draws his sword. "So," he says, his voice calm, "the Watch sends boys to stop me. Let us see what you are made of."',
+(1, 16, 'boss', 0, '曼斯·雷德 - 塞外之王',
+ '你终于站在了塞外之王面前。曼斯·雷德坐在一个由鹿角和毛皮制成的临时王座上，他的斗篷由来自长城之外和七大王国的布料拼凑而成。他曾是守夜人的一员，但为了团结自由民而背弃了誓言。他是一位战士、领袖和远见者。在他周围，最凶猛的战士护卫着。他站起身，拔出剑。"那么，"他平静地说，"守夜人派了孩子来阻止我。让我看看你有多大本事。"',
  '[]', TRUE);

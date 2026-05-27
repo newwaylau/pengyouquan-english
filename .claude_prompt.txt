@@ -1,0 +1,130 @@
+# 远征系统改造任务
+
+## 项目背景
+英语学习网站（pengyouquan-english），Spring Boot + React + TypeScript + MySQL，Docker部署在SIT环境。
+
+## 任务一：移除老远征系统代码
+
+ExpeditionPage.tsx 中同时存在"老战斗系统"和"新战斗系统"（BattlePageSit.tsx）两套代码。需要清理：
+
+1. **移除 `showNewCombat` 状态**（第119行）和所有相关引用
+   - 只保留 BattlePageSit 的战斗方式
+   - 战斗入口统一走 BattlePageSit
+
+2. **移除老战斗函数**：
+   - `enterCombat()`（第193~202行）— 老版本进入战斗
+   - `handlePlayCard()`（第205~299行）— 老版本手动出牌+动画逻辑
+   - 老战斗渲染区域——当 phase === 'combat' 时渲染的老UI代码
+
+3. **清理老数据字段**：
+   - `questionsAnswered`、`questionsTotal` 从 ExpeditionData 接口移除
+   - settlement 结算函数中的 `exp.questionsAnswered / exp.questionsTotal` 改为使用 `exp.enemiesKilled`
+
+4. **清理老战斗API调用**：
+   - `/api/expedition/play-card`（老版出牌接口）
+   - `/api/expedition/enter-combat`（老版进入战斗）
+   - 这些接口在后端的 ExpeditionService 中保留（其他地方可能用到），前端不再调用即可
+
+5. **清理 `ExpeditionPage.tsx` 中老战斗相关的 effect/animation 引用**：playCardAnimation, elementFlash, showDamageNumber, hitAnimation, screenShake, spawnParticles, victoryEffect, defeatEffect, enemyDeathAnimation, cardDrawAnimation — 这些在清理后如果其他地方（如新战斗）也用了，保留导入；只移除老战斗代码中那些调用。
+
+6. **移除 `ExpeditionPage.tsx.tail` 文件**（已标记删除但可能残留）
+
+**关键原则**：只动 ExpeditionPage.tsx，不动 BattlePageSit.tsx（Task 2会改它）
+
+## 任务二：新远征系统全中文化
+
+### BattlePageSit.tsx 中文化
+
+所有 UI 英文文本改为中文：
+
+| 位置 | 原文 | 改为 |
+|------|------|------|
+| BUFF_LABELS (第61~68行) | strength:'Str', dexterity:'Dex', vulnerable:'Vuln', weak:'Weak', frail:'Frail', poison:'Poison' | strength:'力量', dexterity:'敏捷', vulnerable:'易伤', weak:'虚弱', frail:'脆弱', poison:'中毒' |
+| 战斗日志 (第192~214行) | 'Dealt ${x} damage' | '造成 ${x} 点伤害' |
+| 战斗日志 (第214行) | 'Gained ${x} Block' | '获得 ${x} 点格挡' |
+| 战斗日志 (第197~198行) | 'Gained ${x} Strength' | '力量 +${x}' |
+| 战斗日志 (第200~201行) | 'Drew ${x} cards' | '抽了 ${x} 张牌' |
+| 战斗日志 (第203~204行) | 'Applied ${x} Vulnerable' | '施加 ${x} 层易伤' |
+| 战斗日志 (第206~207行) | 'Applied ${x} Weak' | '施加 ${x} 层虚弱' |
+| 战斗日志 (第209~210行) | 'Applied ${x} Poison' | '施加 ${x} 层中毒' |
+| 战斗日志 (第212~213行) | 'Healed ${x} HP' | '恢复 ${x} 生命' |
+| 敌人行动日志 (第239行) | 'Enemy dealt ${x} damage' | '敌人造成 ${x} 点伤害' |
+| 敌人行动日志 (第241行) | 'Enemy attacked, all blocked' | '敌人攻击，全部格挡' |
+| 敌人行动日志 (第243行) | 'Enemy gained ${x}' | '敌人获得 ${x}' |
+| 敌人行动日志 (第244行) | 'You received ${x}' | '你受到 ${x}' |
+| 胜利标题 (第298行) | 'Victory!' | '胜利！' |
+| 失败标题 (第298行) | 'Defeated' | '败北' |
+| 奖励文字 (第302行) | 'Choose a reward card:' | '选择一张奖励卡牌：' |
+| 跳过按钮 (第313行) | 'Skip' | '跳过' |
+| 继续按钮 (第317行) | 'Continue' | '继续' |
+| 返回按钮 (第320行) | 'Return' | '返回' |
+| 加载文字 (第273行) | 'Preparing for battle...' | '⚔️ 准备战斗...' |
+| 无数据 (第281行) | 'No battle data' | '无战斗数据' |
+| HP标签 (第366行) | 'HP' | '生命' |
+| 牌库/弃牌 (第383~384行) | 'Draw: N' → '牌库: N', 'Discard: N' → '弃牌堆: N' | |
+| 结束回合 (第426行) | 'End Turn' | '结束回合' |
+| 回合号 (第355行) | 'Turn N' | '回合 N' |
+| 卡片显示名字 (第308, 412行) | card.cardNameEn | card.cardName (如果后端返回中文名则用中文名) |
+| 能量显示 (第309行) | '{cost} Energy' | '{cost} 费' |
+| 卡牌效果 (第414~415行) | '{n} dmg' / '{n} blk' | '{n} 伤害' / '{n} 格挡' |
+| Error日志 (第223行) | 'Error: ${msg}' | '错误：${msg}' |
+| 敌人名称 (第331行) | enemy.name \|\| enemy.nameCn \|\| 'Enemy' | enemy.nameCn \|\| enemy.name \|\| '敌人' |
+
+### V35 seed 数据中文化
+
+`backend/src/main/resources/db/migration/V35__add_combat_seed_data.sql` 中的英文节点标题和描述全部翻译为中文。
+
+**翻译原则**：
+- 保留权游风味，用中文描写
+- 标题：'Frozen Lake' → '冰封湖面', 'Cave Shelter' → '洞穴庇护所', 'Ambush Alley' → '伏击谷', etc.
+- 描述：保持原文的史诗感、情景感，500字左右英文对应300~400字中文
+- 敌人对话中保留关键英文名（Benjen Stark 保留，但描述用中文）
+- 所有20+个节点的 title 和 content 都要翻译，位置从 SQL 的第150行~337行
+
+### V35 卡片说明中文化
+
+V35 中卡片 `description` 字段是英文（如 'Deal 6 damage.'），也改为中文：
+- 'Deal 6 damage.' → '造成 6 点伤害。'
+- 'Gain 5 Block.' → '获得 5 点格挡。'
+- 'Draw 2 cards.' → '抽 2 张牌。'
+- 'Apply 2 Poison.' → '施加 2 层中毒。'
+- 等
+
+**注意**：`upgrade_description` 也对应翻译。
+
+### ExpeditionPage.tsx 中的英文文本
+
+搜索并替换所有残留的英文字符串为中文字符串：
+- 各节点的英文标签（NODE_ICONS 和 NODE_LABELS 已经是中文的，确认一下）
+- 错误提示、加载提示等
+
+## 任务三：修复卡片乱码问题
+
+**问题**：用户在手机端看到有些卡片显示乱码（可能是UTF-8编码问题）。
+
+需要检查的地方：
+1. **V18/V20/V27/V29 卡牌 seed 数据** — 检查 `effect_json` 中的中文是否正常，特别是 `description_cn` 字段
+2. **CardCollectionPage.tsx** — 卡片渲染时是否正确解析了 JSON 中的中文
+3. **BattlePage.tsx** — 对战页面的卡片显示
+4. **DeckBuilderPage.tsx** — 卡组构建页面的卡片名称
+5. **BattleArenaPage.tsx** — 实时对战页面卡片显示
+
+具体操作：
+1. 查找前端卡片渲染组件中所有显示 `name_cn` / `nameEn` / `nameCn` 的地方，确认优先使用中文名
+2. 查找 `effect_json` 的解析逻辑，确认 `description_cn` 被正确提取并显示，而不是显示 `description_en`
+3. 确认所有中文内容在数据库中是正确的 UTF-8 编码
+4. 如果发现具体乱码位置，修复编码问题
+
+**注意**：如果实在找不到具体乱码位置，就全面检查并确保：
+- 所有卡片优先显示中文名（name_cn）而不是英文名（name_en）
+- 所有卡片效果优先显示中文描述（effect_json.description_cn）而不是英文描述
+- 前端所有卡片展示组件统一使用中文
+
+## 执行说明
+
+1. 请逐个任务依次执行，每次修改后验证语法
+2. 前端：TypeScript/React，npm run build 验证编译
+3. 后端：Java/Spring Boot，./gradlew build 验证编译
+4. 种子数据 SQL 改动需要清理 flyway_schema_history 中对应版本并重启 Docker
+5. 改动完成后 git commit 推送到 sit 分支
+6. 报告每个任务的完成情况

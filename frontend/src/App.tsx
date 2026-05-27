@@ -1,23 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { api, setToken, getToken, clearToken } from './api/client';
-import PracticePage from './PracticePage';
-import LoginPage from './LoginPage';
-import WrongPage from './WrongPage';
-import SearchPage from './SearchPage';
-import BrowsePage from './BrowsePage';
-import AdminPage from './AdminPage';
-import DemoPage from './DemoPage';
-import ArenaPage from './ArenaPage';
-import LeaderboardPage from './LeaderboardPage';
-import DailyChallengePage from './DailyChallengePage';
-import CardCollectionPage from './CardCollectionPage';
-import BattlePage from './BattlePage';
-import BattleArenaPage from './BattleArenaPage';
-import EquipmentPage from './EquipmentPage';
-import HeroSelectPage from './HeroSelectPage';
-import ChangePasswordModal from './ChangePasswordModal';
-import ExpeditionPage from './ExpeditionPage';
-import GuildPage from './GuildPage';
+
+// 代码分割：每个页面按需加载
+const PracticePage = React.lazy(() => import('./PracticePage'));
+const LoginPage = React.lazy(() => import('./LoginPage'));
+const WrongPage = React.lazy(() => import('./WrongPage'));
+const SearchPage = React.lazy(() => import('./SearchPage'));
+const BrowsePage = React.lazy(() => import('./BrowsePage'));
+const AdminPage = React.lazy(() => import('./AdminPage'));
+const DemoPage = React.lazy(() => import('./DemoPage'));
+const ArenaPage = React.lazy(() => import('./ArenaPage'));
+const LeaderboardPage = React.lazy(() => import('./LeaderboardPage'));
+const DailyChallengePage = React.lazy(() => import('./DailyChallengePage'));
+const CardCollectionPage = React.lazy(() => import('./CardCollectionPage'));
+const BattlePage = React.lazy(() => import('./BattlePage'));
+const BattleArenaPage = React.lazy(() => import('./BattleArenaPage'));
+const EquipmentPage = React.lazy(() => import('./EquipmentPage'));
+const HeroSelectPage = React.lazy(() => import('./HeroSelectPage'));
+const ChangePasswordModal = React.lazy(() => import('./ChangePasswordModal'));
+const ExpeditionPage = React.lazy(() => import('./ExpeditionPage'));
+const GuildPage = React.lazy(() => import('./GuildPage'));
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
 import { IconTarget, IconClose, IconSettings } from './Icons';
@@ -98,7 +100,11 @@ export default function App() {
   };
 
   if (page === 'login' || (!getToken() && page !== 'practice' && page !== 'demo')) {
-    return <LoginPage onLogin={(token) => { setLoginMode('login'); handleLogin(token); }} onHome={() => setPage('practice')} initialMode={loginMode} />;
+    return (
+      <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
+        <LoginPage onLogin={(token) => { setLoginMode('login'); handleLogin(token); }} onHome={() => setPage('practice')} initialMode={loginMode} />
+      </Suspense>
+    );
   }
 
   return (
@@ -200,22 +206,24 @@ export default function App() {
         )}
 
         <main className="page-enter main-content-new" key={page} id="main-content" ref={mainRef} tabIndex={-1}>
-          {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} onWrongCountChange={setWrongCount} />}
-          {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-          {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-          {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
-          {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
-          {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
-          {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} refreshKey={refreshKey} />}
-          {page === 'cards' && <CardCollectionPage user={user} onNavigate={handleNavigate} />}
-          {page === 'battle' && <BattlePage user={user} onNavigate={handleNavigate} />}
-          {page === 'battle-arena' && <BattleArenaPage user={user} onBack={() => setPage('battle')} />}
-          {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
-          {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
-          {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
-          {page === 'expedition' && <ExpeditionPage user={user} onNavigate={handleNavigate} />}
-          {page === 'guild' && <GuildPage user={user} onNavigate={handleNavigate} />}
-          {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
+          <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
+            {page === 'practice' && <PracticePage user={user} jumpId={jumpId} onNavigate={handleNavigate} onWrongCountChange={setWrongCount} />}
+            {page === 'wrong' && <WrongPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+            {page === 'search' && <SearchPage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+            {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
+            {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
+            {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
+            {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} refreshKey={refreshKey} />}
+            {page === 'cards' && <CardCollectionPage user={user} onNavigate={handleNavigate} />}
+            {page === 'battle' && <BattlePage user={user} onNavigate={handleNavigate} />}
+            {page === 'battle-arena' && <BattleArenaPage user={user} onBack={() => setPage('battle')} />}
+            {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
+            {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
+            {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
+            {page === 'expedition' && <ExpeditionPage user={user} onNavigate={handleNavigate} />}
+            {page === 'guild' && <GuildPage user={user} onNavigate={handleNavigate} />}
+            {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
+          </Suspense>
         </main>
 
         {/* 手机端底部导航 */}
@@ -279,7 +287,9 @@ export default function App() {
         )}
         {/* 修改密码弹窗 */}
         {showChangePassword && (
-          <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+          <Suspense fallback={null}>
+            <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+          </Suspense>
         )}
         {/* 退出确认弹窗 */}
         {showLogoutConfirm && (
