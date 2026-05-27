@@ -5,11 +5,11 @@
 -- ========== 1. expeditions 表新增列 ==========
 
 -- map_data: 存储完整的地图结构（每个节点的坐标、类型、连接关系、是否已到达等）
-ALTER TABLE expeditions ADD COLUMN IF NOT EXISTS map_data JSON
+ALTER TABLE expeditions ADD COLUMN map_data JSON
     COMMENT '完整地图结构：{acts:[{nodes:[{id,type,row,col,connections:[],cleared,branchChoice},...]}]}';
 
 -- potions: 玩家当前拥有的药水（数组）
-ALTER TABLE expeditions ADD COLUMN IF NOT EXISTS potions JSON
+ALTER TABLE expeditions ADD COLUMN potions JSON
     COMMENT '拥有的药水：[{potionId,quantity}]';
 
 -- 更新已有数据默认值

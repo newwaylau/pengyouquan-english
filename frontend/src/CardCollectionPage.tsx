@@ -55,6 +55,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
   const [craftConfirm, setCraftConfirm] = useState<any>(null);
   const [goldenCraftCards, setGoldenCraftCards] = useState<any[]>([]);
   const [toastMsg, setToastMsg] = useState('');
+  const [newCardIds, setNewCardIds] = useState<number[]>([]);
 
   useEffect(() => {
     loadData();
@@ -85,6 +86,13 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
     if (res.code === 200) setGoldenCraftCards(res.data || []);
   };
 
+  // 新卡动画：动画结束后从 newCardIds 移除
+  useEffect(() => {
+    if (newCardIds.length === 0) return;
+    const timer = setTimeout(() => setNewCardIds([]), 1200);
+    return () => clearTimeout(timer);
+  }, [newCardIds]);
+
   const handleDisenchant = async (cardId: number) => {
     setDisenchantConfirm(null);
     const res = await cardApi.disenchantCard(cardId);
@@ -104,6 +112,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
     const isGolden = craftSubTab === 'golden';
     const res = isGolden ? await cardApi.craftGoldenCard(cardId) : await cardApi.craftCard(cardId);
     if (res.code === 200) {
+      setNewCardIds(prev => [...prev, cardId]);
       setToastMsg(`🎉 ${isGolden ? '合成了金卡' : '合成了新卡牌'}！消耗 ${res.data.stardustCost} 星尘`);
       setTimeout(() => setToastMsg(''), 3000);
       loadData();
@@ -201,10 +210,11 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
           {mergedCards.map(card => (
             <div
               key={card.id}
-              className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'} ${card.golden ? 'golden-card' : ''}`}
+              className={`cg-card rarity-${card.rarity} ${card.quantity > 0 ? 'owned' : 'unowned'} ${card.golden ? 'golden-card' : ''} ${newCardIds.includes(card.id) ? 'card-new' : ''}`}
               onClick={() => setSelectedCard(card)}
             >
               {card.golden && <div className="golden-glow" />}
+              {card.golden && <div className="golden-conic-overlay" />}
               <div className="cg-rarity-bar" style={{ background: RARITY_COLORS[card.rarity] }} />
               <div className="cg-type-icon">{TYPE_ICONS[card.cardType] || '🃏'}</div>
               <div className="cg-cost">{card.cost}</div>
@@ -498,6 +508,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
                     style={{ position: 'relative' }}
                   >
                     <div className="golden-glow" />
+                    <div className="golden-conic-overlay" />
                     <div className="cg-rarity-bar" style={{ background: RARITY_COLORS[card.rarity] }} />
                     <div className="cg-type-icon">{TYPE_ICONS[card.cardType] || '🃏'}</div>
                     <div className="cg-cost">{card.cost}</div>
@@ -616,6 +627,7 @@ export default function CardCollectionPage({ user, onNavigate }: { user: any; on
           <div className={`card-detail-modal ${selectedCard.golden ? 'golden-detail' : ''}`} onClick={e => e.stopPropagation()}>
             <button className="cd-close" onClick={() => setSelectedCard(null)}>✕</button>
             {selectedCard.golden && <div className="golden-glow" />}
+            {selectedCard.golden && <div className="golden-conic-overlay" />}
             <div className={`cd-rarity-bar rarity-${selectedCard.rarity}`} style={{ background: selectedCard.golden ? 'linear-gradient(90deg, #ffd700, #ffaa00)' : RARITY_COLORS[selectedCard.rarity] }} />
             <div className="cd-type-icon">{TYPE_ICONS[selectedCard.cardType] || '🃏'}</div>
             <div className="cd-cost">{selectedCard.cost}</div>

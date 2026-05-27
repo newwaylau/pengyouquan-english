@@ -53,6 +53,12 @@ export default function ExpeditionCampfire({
         当前血量：{playerHp}/{maxHp}
       </p>
 
+      <div className="expedition-flame-container">
+        <div className="expedition-flame" style={{ height: 40, animationDelay: '0s' }} />
+        <div className="expedition-flame" style={{ height: 55, animationDelay: '0.3s' }} />
+        <div className="expedition-flame" style={{ height: 45, animationDelay: '0.6s' }} />
+      </div>
+
       <div className="expedition-rest-buttons">
         <button className="expedition-rest-btn" onClick={handleHeal}>
           ❤️ 回血
@@ -78,7 +84,7 @@ export default function ExpeditionCampfire({
             {deck.map((card: any, i: number) => (
               <div
                 key={i}
-                className={`expedition-hand-card ${selectedCardId === card.id ? 'selected' : ''}`}
+                className={`expedition-hand-card ${selectedCardId === card.id ? 'selected expedition-upgrade-glow' : ''}`}
                 onClick={() => setSelectedCardId(card.id)}
                 style={{
                   cursor: 'pointer',

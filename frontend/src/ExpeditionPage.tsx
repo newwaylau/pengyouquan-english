@@ -750,42 +750,44 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             </>
           )}
 
-          {phase === 'lobby' && renderLobby()}
+          <div key={phase} className="expedition-phase-enter">
+            {phase === 'lobby' && renderLobby()}
 
-          {phase === 'map' && expedition && (
-            <ExpeditionMap
-              mapNodes={expedition.mapNodes || []}
-              currentNodeIndex={expedition.node - 1}
-              nodeType={nodeType}
-              nodeOptions={nodeOptions}
-              onNodeClick={handleMapNodeClick}
-              onChoosePath={handleChoosePath}
-              act={expedition.act}
-            />
-          )}
+            {phase === 'map' && expedition && (
+              <ExpeditionMap
+                mapNodes={expedition.mapNodes || []}
+                currentNodeIndex={expedition.node - 1}
+                nodeType={nodeType}
+                nodeOptions={nodeOptions}
+                onNodeClick={handleMapNodeClick}
+                onChoosePath={handleChoosePath}
+                act={expedition.act}
+              />
+            )}
 
-          {phase === 'combat' && renderCombat()}
+            {phase === 'combat' && renderCombat()}
 
-          {phase === 'event' && (
-            <ExpeditionEvent eventData={eventData} onChoice={handleEventChoice} />
-          )}
+            {phase === 'event' && (
+              <ExpeditionEvent eventData={eventData} onChoice={handleEventChoice} />
+            )}
 
-          {phase === 'rest' && expedition && (
-            <ExpeditionCampfire
-              playerHp={expedition.playerHp}
-              maxHp={expedition.maxHp}
-              deck={expedition.deck || []}
-              onRest={handleRest}
-            />
-          )}
+            {phase === 'rest' && expedition && (
+              <ExpeditionCampfire
+                playerHp={expedition.playerHp}
+                maxHp={expedition.maxHp}
+                deck={expedition.deck || []}
+                onRest={handleRest}
+              />
+            )}
 
-          {phase === 'shop' && renderShop()}
+            {phase === 'shop' && renderShop()}
 
-          {phase === 'reward' && (
-            <ExpeditionReward rewardChoices={rewardChoices} onChoose={handleApplyReward} />
-          )}
+            {phase === 'reward' && (
+              <ExpeditionReward rewardChoices={rewardChoices} onChoose={handleApplyReward} />
+            )}
 
-          {phase === 'settlement' && renderSettlement()}
+            {phase === 'settlement' && renderSettlement()}
+          </div>
 
           {relicPopup && (
             <div className="expedition-result-overlay" onClick={() => setRelicPopup(null)}>

@@ -877,8 +877,143 @@
 }
 
 @keyframes relic-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.4); }
-  50% { box-shadow: 0 0 16px rgba(245,158,11,0.7); }
+  0%, 100% { box-shadow: 0 0 10px rgba(20,184,166,0.2); }
+  50% { box-shadow: 0 0 30px rgba(20,184,166,0.4); }
+}
+
+/* === Expedition Animation CSS Classes === */
+
+/* 阶段过渡容器 */
+.expedition-phase-enter {
+  animation: expedition-fade-in 0.3s ease-out;
+}
+
+/* 选项延迟链 */
+.expedition-event-choice {
+  animation: expedition-slide-up 0.4s ease-out backwards;
+}
+
+.expedition-event-choice.fade-out {
+  animation: expedition-fade-out 0.3s ease-in forwards;
+}
+
+/* 翻牌延迟链基类 */
+.expedition-reward-card {
+  animation: expedition-flip-card 0.6s ease-in-out backwards;
+}
+
+/* 粒子爆发容器 */
+.expedition-particle-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.expedition-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: expedition-particle-burst 0.8s ease-out forwards;
+}
+
+.expedition-golden-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 6px #ffd700;
+  animation: expedition-golden-particle 1s ease-out forwards;
+}
+
+/* 屏幕微闪 */
+.expedition-screen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  animation: expedition-screen-flash 0.5s ease-out forwards;
+}
+
+/* Boss 入场暗幕 */
+.expedition-boss-darken {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  animation: expedition-boss-darken 0.8s ease-in-out forwards;
+}
+
+.expedition-boss-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #f59e0b;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: expedition-boss-particles 0.8s ease-out forwards;
+}
+
+.expedition-boss-reveal {
+  animation: expedition-boss-reveal 0.6s ease-out 0.8s both;
+}
+
+/* Boss 狂暴状态 */
+.expedition-boss-rage {
+  animation: expedition-boss-rage 1s ease-in-out infinite;
+}
+
+.expedition-boss-rage-flash {
+  animation: expedition-boss-flash 0.5s ease-in-out infinite;
+}
+
+/* 篝火火焰 */
+.expedition-flame {
+  width: 20px;
+  height: 40px;
+  background: linear-gradient(to top, #f59e0b, #ef4444, transparent);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: expedition-flame-float 1.5s ease-in-out infinite;
+}
+
+.expedition-flame:nth-child(2) {
+  height: 30px;
+  animation-delay: -0.5s;
+}
+
+.expedition-flame:nth-child(3) {
+  height: 50px;
+  animation-delay: -1s;
+}
+
+/* 篝火卡牌强化发光 */
+.expedition-upgrade-glow {
+  animation: expedition-upgrade-glow 0.8s ease-in-out;
+}
+
+/* 地图节点金色脉冲 */
+.expedition-map-node-gold {
+  animation: expedition-map-node-pulse 2s ease-in-out infinite;
+}
+
+/* 完成节点勾号 */
+.expedition-node-check {
+  animation: expedition-check-fade-in 0.5s ease-out;
+}
+
+/* 地图路径渐变（CSS 已内联 in SVG） */
+
+/* 篝火容器 */
+.expedition-flame-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 60px;
+  margin: 16px 0;
 }
 
 /* Relic tooltip on hover */
@@ -1124,4 +1259,76 @@
   font-weight: 600;
   color: var(--teal);
   font-size: 13px;
+}
+
+/* ====== Expedition Battle Animations (EffectEngine) ====== */
+
+/* 伤害数字浮出 */
+@keyframes ba-dmg-float {
+  0% { transform: translateY(0) scale(0.3); opacity: 0; }
+  15% { transform: translateY(-8px) scale(1.4); opacity: 1; }
+  40% { transform: translateY(-20px) scale(1.8); opacity: 1; }
+  70% { transform: translateY(-35px) scale(1.2); opacity: 0.5; }
+  100% { transform: translateY(-55px) scale(0.8); opacity: 0; }
+}
+
+/* 敌人受击后仰 */
+@keyframes ba-enemy-hit {
+  0% { transform: translateX(0) scale(1); }
+  10% { transform: translateX(10px) scale(0.92); filter: brightness(2); }
+  25% { transform: translateX(-5px) scale(0.95); filter: brightness(1.3); }
+  45% { transform: translateX(3px) scale(0.98); }
+  70% { transform: translateX(-2px); }
+  100% { transform: translateX(0) scale(1); filter: brightness(1); }
+}
+
+/* 屏幕震动 */
+@keyframes ba-shake-big {
+  0%,100%{transform:translate(0,0)} 8%{transform:translate(-5px,4px)}
+  16%{transform:translate(6px,-3px)} 24%{transform:translate(-4px,5px)}
+  32%{transform:translate(5px,-4px)} 40%{transform:translate(-3px,3px)}
+  50%{transform:translate(4px,-3px)} 60%{transform:translate(-3px,2px)}
+  72%{transform:translate(3px,-2px)} 84%{transform:translate(-2px,1px)}
+  92%{transform:translate(2px,-1px)}
+}
+@keyframes ba-shake-mid {
+  0%,100%{transform:translate(0,0)} 12%{transform:translate(-3px,2px)}
+  25%{transform:translate(3px,-2px)} 37%{transform:translate(-2px,3px)}
+  50%{transform:translate(2px,-1px)} 62%{transform:translate(-1px,2px)}
+  75%{transform:translate(1px,-2px)} 87%{transform:translate(-2px,1px)}
+}
+@keyframes ba-shake-light {
+  0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)}
+  40%{transform:translate(2px,-1px)} 60%{transform:translate(-1px,2px)}
+  80%{transform:translate(1px,-1px)}
+}
+
+/* 敌人死亡消散 */
+@keyframes ba-enemy-death {
+  0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+  40% { transform: scale(1.2); filter: brightness(1.5); }
+  70% { transform: scale(1.4); opacity: 0.5; filter: brightness(2); }
+  100% { transform: scale(1.5); opacity: 0; filter: brightness(3); }
+}
+
+/* 敌人闪烁(受击) */
+@keyframes ba-enemy-flash {
+  0%, 100% { filter: brightness(1); }
+  25% { filter: brightness(2); }
+  50% { filter: brightness(0.6); }
+  75% { filter: brightness(1.5); }
+}
+
+/* 胜利文本弹跳 */
+@keyframes ba-result-bounce {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.2) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* 抽牌入场 */
+@keyframes ba-card-draw {
+  0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.08) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }

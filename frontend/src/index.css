@@ -8928,6 +8928,78 @@ body {
   box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,215,0,0.1) !important;
 }
 
+/* === Card Collection Animation CSS === */
+
+/* 史诗卡片边框发光脉冲 */
+.cg-card.rarity-epic {
+  position: relative;
+}
+.cg-card.rarity-epic.owned {
+  --glow-color: #a335ee;
+  animation: expedition-border-glow-pulse 2s ease-in-out infinite;
+}
+
+/* 传说卡片边框发光脉冲 */
+.cg-card.rarity-legendary {
+  position: relative;
+}
+.cg-card.rarity-legendary.owned {
+  --glow-color: #ff8c00;
+  animation: expedition-border-glow-pulse 2s ease-in-out infinite;
+}
+
+/* 金卡流光（conic-gradient 旋转覆盖层） */
+.golden-card .golden-glow {
+  /* Already defined above — keep as-is */
+}
+.golden-card .golden-conic-overlay {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 10px;
+  background: conic-gradient(from 0deg, #ffd700, #ffaa00, #ff8c00, #ffd700, #ffaa00, #ff8c00, #ffd700, #ffaa00);
+  z-index: 0;
+  pointer-events: none;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  padding: 2px;
+  animation: expedition-golden-conic 3s linear infinite;
+}
+
+/* 卡牌飞出（新获得） */
+.cg-card.card-new {
+  animation: expedition-card-fly-in 0.6s ease-out;
+}
+
+/* 新卡闪光效果 */
+.cg-card.card-new::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255,215,0,0.3) 40%,
+    rgba(255,215,0,0.5) 45%,
+    transparent 50%
+  );
+  animation: card-new-shimmer 0.8s ease-in-out forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes card-new-shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
 /* =========================================
    成就系统
    ========================================= */
@@ -9120,4 +9192,147 @@ body {
   background: rgba(167,139,250,0.15);
   color: #a78bfa;
   border: 1px solid #a78bfa;
+}
+
+/* =====================================================
+   远征动画 @keyframes 集中管理
+   ===================================================== */
+
+/* 阶段过渡淡入 */
+@keyframes expedition-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 选项滑入 */
+@keyframes expedition-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 选项淡出 */
+@keyframes expedition-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+/* 翻牌旋转 */
+@keyframes expedition-flip-card {
+  0% { transform: rotateY(0deg) scale(1); }
+  50% { transform: rotateY(90deg) scale(1.05); }
+  100% { transform: rotateY(180deg) scale(1); }
+}
+
+/* 粒子爆发（通用） */
+@keyframes expedition-particle-burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+}
+
+/* 金色流光粒子 */
+@keyframes expedition-golden-particle {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; filter: drop-shadow(0 0 6px #ffd700); }
+  100% { transform: translate(var(--px), var(--py)) scale(0.3); opacity: 0; filter: drop-shadow(0 0 0 #ffd700); }
+}
+
+/* 屏幕微闪 */
+@keyframes expedition-screen-flash {
+  0% { background: rgba(255,215,0,0.4); }
+  50% { background: rgba(255,215,0,0.15); }
+  100% { background: transparent; }
+}
+
+/* Boss 入场：暗幕 */
+@keyframes expedition-boss-darken {
+  0% { background: rgba(0,0,0,0); }
+  50% { background: rgba(0,0,0,0.8); }
+  100% { background: rgba(0,0,0,0); }
+}
+
+/* Boss 入场：粒子爆发（暗色） */
+@keyframes expedition-boss-particles {
+  0% { transform: translate(0, 0) scale(0.5); opacity: 1; }
+  50% { transform: translate(var(--px), var(--py)) scale(1.5); opacity: 0.8; }
+  100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+}
+
+/* Boss 显形 */
+@keyframes expedition-boss-reveal {
+  0% { opacity: 0; transform: scale(0.3) rotateY(90deg); }
+  60% { opacity: 1; transform: scale(1.1) rotateY(0deg); }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+/* Boss 狂暴：红色边框脉冲 */
+@keyframes expedition-boss-rage {
+  0%, 100% { box-shadow: 0 0 8px rgba(239,68,68,0.4); border-color: rgba(239,68,68,0.6); }
+  50% { box-shadow: 0 0 24px rgba(239,68,68,0.8), 0 0 48px rgba(239,68,68,0.3); border-color: #ef4444; }
+}
+
+/* Boss 狂暴：闪烁 */
+@keyframes expedition-boss-flash {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.3; }
+  50% { opacity: 1; }
+  75% { opacity: 0.3; }
+}
+
+/* 篝火火焰浮动 */
+@keyframes expedition-flame-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(var(--float-y)) scale(1.1); opacity: 0.9; }
+}
+
+/* 卡牌强化旋转发光 */
+@keyframes expedition-upgrade-glow {
+  0% { box-shadow: 0 0 8px rgba(255,215,0,0.3); transform: rotateY(0deg); }
+  50% { box-shadow: 0 0 24px rgba(255,215,0,0.7), 0 0 48px rgba(255,215,0,0.2); transform: rotateY(180deg); }
+  100% { box-shadow: 0 0 8px rgba(255,215,0,0.3); transform: rotateY(360deg); }
+}
+
+/* 地图节点脉冲（金色） */
+@keyframes expedition-map-node-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 24px rgba(255,215,0,0.8), 0 0 48px rgba(255,215,0,0.2); }
+}
+
+/* 完成节点勾号淡入 */
+@keyframes expedition-check-fade-in {
+  0% { opacity: 0; transform: scale(0.3); }
+  60% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 卡牌飞出动画 */
+@keyframes expedition-card-fly-in {
+  0% { transform: translateY(40px) scale(0.5); opacity: 0; }
+  60% { transform: translateY(-5px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* 金卡流光（conic-gradient 旋转） */
+@keyframes expedition-golden-conic {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 史诗/传说边框发光脉冲 */
+@keyframes expedition-border-glow-pulse {
+  0%, 100% { box-shadow: 0 0 6px var(--glow-color, #a335ee); }
+  50% { box-shadow: 0 0 18px var(--glow-color, #a335ee), 0 0 36px color-mix(in srgb, var(--glow-color, #a335ee) 50%, transparent); }
+}
+
+/* =====================================================
+   全局 prefers-reduced-motion
+   尊重用户无障碍偏好，关闭所有动画
+   ===================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

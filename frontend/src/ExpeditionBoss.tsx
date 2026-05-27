@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './expedition.css';
 
 interface BossData {
@@ -25,18 +25,44 @@ export default function ExpeditionBoss({
   damageNumber,
   feedback,
 }: ExpeditionBossProps) {
+  const [entering, setEntering] = useState(true);
+  const [revealed, setRevealed] = useState(false);
   const hpPercent = boss.maxHp > 0 ? (boss.currentHp / boss.maxHp) * 100 : 0;
   const playerHpPercent = maxHp > 0 ? (playerHp / maxHp) * 100 : 100;
 
+  // Boss entrance animation sequence
+  useEffect(() => {
+    setEntering(true);
+    const particlesTimer = setTimeout(() => {
+      // Particles phase — particle divs remain rendered while entering is true
+    }, 300);
+    const revealTimer = setTimeout(() => {
+      setEntering(false);
+      setRevealed(true);
+    }, 800);
+    return () => {
+      clearTimeout(particlesTimer);
+      clearTimeout(revealTimer);
+    };
+  }, []);
+
   return (
-    <div className="expedition-enemy-area">
+    <div
+      className={`expedition-enemy-area${hpPercent < 30 ? ' expedition-boss-rage' : ''}${revealed ? ' expedition-boss-reveal' : ''}`}
+    >
+      {entering && (
+        <>
+          <div className="expedition-boss-darken" />
+          <div className="expedition-boss-particle" />
+        </>
+      )}
       {damageNumber && (
         <div className={`expedition-damage-number ${damageNumber.type}`}>
           {damageNumber.text}
         </div>
       )}
 
-      <div className="expedition-boss-tag">BOSS</div>
+      <div className={`expedition-boss-tag${hpPercent < 30 ? ' expedition-boss-rage-flash' : ''}`}>BOSS</div>
 
       <div className="expedition-enemy-name">{boss.nameCn}</div>
       <div className="expedition-enemy-sub">{boss.nameEn}</div>

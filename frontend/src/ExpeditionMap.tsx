@@ -139,22 +139,31 @@ export default function ExpeditionMap({
             </feMerge>
           </filter>
 
-          {/* CSS animation for current node pulse */}
+          {/* CSS animations for current node glow + checkmark */}
           <style>
             {`
-              @keyframes svg-node-pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.6; }
+              @keyframes expedition-map-node-pulse {
+                0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px gold); }
+                50% { opacity: 0.85; filter: drop-shadow(0 0 14px gold); }
               }
-              .current-node-circle {
-                animation: svg-node-pulse 2s ease-in-out infinite;
+              .expedition-map-node-gold {
+                animation: expedition-map-node-pulse 2s ease-in-out infinite;
+              }
+              @keyframes expedition-check-fade-in {
+                0% { opacity: 0; transform: scale(0.3); }
+                100% { opacity: 1; transform: scale(1); }
+              }
+              .expedition-node-check {
+                animation: expedition-check-fade-in 0.4s ease-out forwards;
               }
             `}
           </style>
         </defs>
 
-        {/* Scrollable group */}
-        <g transform={`translate(0, ${Math.round(translateY)})`}>
+        {/* Scrollable group with smooth character movement transition */}
+        <g
+          style={{ transition: 'transform 0.5s ease' }}
+          transform={`translate(0, ${Math.round(translateY)})`}>
           {/* Connection paths between nodes */}
           {nodeCount > 1 &&
             Array.from({ length: nodeCount - 1 }, (_, i) => {
@@ -165,10 +174,10 @@ export default function ExpeditionMap({
                   d={getPathBetween(i)}
                   fill="none"
                   stroke={isCompleted ? 'var(--teal)' : 'var(--border)'}
-                  strokeWidth={isCompleted ? 2.5 : 1.5}
+                  strokeWidth={isCompleted ? 3 : 1.5}
                   strokeDasharray={isCompleted ? 'none' : '5,4'}
                   strokeLinecap="round"
-                  opacity={isCompleted ? 0.7 : 0.45}
+                  opacity={isCompleted ? 0.9 : 0.45}
                   filter={isCompleted ? 'url(#line-glow)' : undefined}
                 />
               );
@@ -200,7 +209,7 @@ export default function ExpeditionMap({
               >
                 {/* Node circle */}
                 <circle
-                  className={isCurrent ? 'current-node-circle' : undefined}
+                  className={isCurrent ? 'expedition-map-node-gold' : undefined}
                   cx={pos.x}
                   cy={pos.y}
                   r={NODE_RADIUS}
@@ -208,20 +217,36 @@ export default function ExpeditionMap({
                     isCompleted
                       ? 'var(--card)'
                       : isCurrent
-                        ? 'var(--teal)'
+                        ? 'gold'
                         : 'var(--card)'
                   }
                   stroke={
                     isCompleted
                       ? 'var(--border)'
                       : isCurrent
-                        ? 'var(--teal-glow)'
+                        ? 'goldenrod'
                         : 'var(--border)'
                   }
                   strokeWidth={2}
                   opacity={isFuture ? 0.4 : 1}
                   filter={isCurrent ? 'url(#node-glow)' : undefined}
                 />
+
+                {/* Checkmark for completed nodes */}
+                {isCompleted && (
+                  <text
+                    className="expedition-node-check"
+                    x={pos.x + NODE_RADIUS - 4}
+                    y={pos.y - NODE_RADIUS + 4}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize={13}
+                    fill="var(--cyan)"
+                    style={{ userSelect: 'none', pointerEvents: 'none' }}
+                  >
+                    ✓
+                  </text>
+                )}
 
                 {/* Icon (emoji) */}
                 <text
