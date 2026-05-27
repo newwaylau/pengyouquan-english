@@ -21,6 +21,8 @@ public class CardResponse {
     private String keywords;
     private String challengeType;
     private String faction;
+    private String race;
+    private String element;
     private String quoteText;
     private int quantity;
     private boolean hasGolden;
@@ -46,6 +48,8 @@ public class CardResponse {
             card.getKeywords(),
             card.getChallengeType(),
             card.getFaction(),
+            card.getRace(),
+            card.getElement(),
             card.getQuoteText(),
             quantity,
             Boolean.TRUE.equals(card.getHasGolden()),

@@ -47,6 +47,12 @@ public class Card {
     @Column(name = "challenge_sentence_id")
     private Long challengeSentenceId;
 
+    @Column(length = 20)
+    private String race;
+
+    @Column(length = 20)
+    private String element;
+
     @Column(length = 50)
     private String faction;
 
