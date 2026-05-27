@@ -1,0 +1,2 @@
+-- 为用户添加金币字段
+ALTER TABLE users ADD COLUMN gold INT NOT NULL DEFAULT 0;

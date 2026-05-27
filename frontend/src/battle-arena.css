@@ -1036,5 +1036,55 @@
   margin: 0;
 }
 
+/* ====== 武器指示器 ====== */
+.weapon-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #f59e0b;
+}
+.weapon-icon { font-size: 14px; }
+.weapon-atk { color: #ef4444; }
+.weapon-dur { color: #94a3b8; }
+.weapon-dur::before { content: '/'; margin: 0 2px; color: #475569; }
+
+.opponent-weapon {
+  margin-top: 2px;
+}
+.my-weapon {
+  margin-left: 4px;
+}
+
+/* ====== 英雄可攻击 ====== */
+.hero-portrait.hero-can-attack {
+  border-color: #22c55e;
+  box-shadow: 0 0 12px rgba(34,197,94,0.5);
+  cursor: pointer;
+  animation: atk-glow 1.5s ease-in-out infinite;
+}
+.hero-portrait.hero-attack-target {
+  border-color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245,158,11,0.6);
+  cursor: pointer;
+  animation: target-glow 0.8s ease-in-out infinite;
+}
+
+/* ====== 己方奥秘显示 ====== */
+.my-secrets {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 4px;
+}
+.my-secrets .secret-slot.small {
+  width: 16px;
+  height: 22px;
+  font-size: 11px;
+}
+
 /* 旧样式别名保留（兼容性） */
 .battle-arena-opponent-bar { /* kept for animation code compatibility */ }

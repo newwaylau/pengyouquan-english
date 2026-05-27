@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +21,7 @@ public interface BattleHistoryRepository extends JpaRepository<BattleHistory, Lo
 
     @Query("SELECT b FROM BattleHistory b WHERE (b.challengerId = :userId OR b.defenderId = :userId) AND b.status = 'completed' ORDER BY b.createdAt DESC")
     List<BattleHistory> findCompletedByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT b FROM BattleHistory b WHERE (b.challengerId = :userId OR b.defenderId = :userId) AND b.winnerId = :userId AND b.status = 'completed' AND b.completedAt >= :since")
+    List<BattleHistory> findWinsSince(@Param("userId") Long userId, @Param("since") LocalDateTime since);
 }

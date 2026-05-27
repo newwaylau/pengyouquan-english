@@ -26,6 +26,10 @@ const KEYWORD_CONFIG: Record<string, { label: string; color: string }> = {
   stealth: { label: '潜行', color: '#2ecc71' },
   rush: { label: '突袭', color: '#e67e22' },
   charge: { label: '冲锋', color: '#e67e22' },
+  lifesteal: { label: '吸血', color: '#e74c3c' },
+  poisonous: { label: '剧毒', color: '#00ff88' },
+  windfury: { label: '风怒', color: '#3498db' },
+  spell_damage: { label: '法强', color: '#9b59b6' },
 };
 
 // 解析关键词数组
@@ -50,7 +54,19 @@ interface CardData {
   baseHealth: number;
   canAttack: boolean;
   hasTaunt: boolean;
+  hasLifesteal?: boolean;
+  hasPoisonous?: boolean;
+  hasWindfury?: boolean;
+  hasSpellDamage?: boolean;
   keywords?: any;
+}
+
+interface WeaponData {
+  cardId: number;
+  nameCn: string;
+  attack: number;
+  durability: number;
+  maxDurability: number;
 }
 
 interface GameState {
@@ -107,11 +123,16 @@ interface BattleState {
   attackMode: boolean;
   selectedAttacker: CardData | null;
 
+  // 武器
+  myWeapon: WeaponData | null;
+  opponentWeapon: WeaponData | null;
+
   // 护甲 & 扩展信息
   myArmor: number;
   myGraveyardCount: number;
   opponentArmor: number;
   opponentSecrets: number;
+  mySecretsCount: number;
 
   // 提示信息
   battleLog: string[];
@@ -160,10 +181,14 @@ export default function BattleArenaPage({
     attackMode: false,
     selectedAttacker: null,
 
+    myWeapon: null,
+    opponentWeapon: null,
+
     myArmor: 0,
     myGraveyardCount: 0,
     opponentArmor: 0,
     opponentSecrets: 0,
+    mySecretsCount: 0,
 
     battleLog: [],
   });
@@ -355,6 +380,10 @@ export default function BattleArenaPage({
           opponentBoard: payload.opponentBoard || [],
           opponentHandCount: payload.opponentHandCount,
           opponentDeckCount: payload.opponentDeckCount,
+          myWeapon: payload.myWeapon || null,
+          opponentWeapon: payload.opponentWeapon || null,
+          opponentSecrets: payload.opponentSecretsCount || 0,
+          mySecretsCount: payload.mySecretsCount || 0,
           turnNumber: payload.turnNumber,
           isMyTurn: payload.isMyTurn,
         }));
@@ -504,26 +533,37 @@ export default function BattleArenaPage({
   };
 
   const handleAttackTarget = async (targetType: 'minion' | 'hero', targetId?: number) => {
-    if (!state.selectedAttacker || !state.sessionId) return;
+    if (!state.sessionId) return;
     const ws = wsRef.current;
     if (!ws) return;
 
-    const attacker = state.selectedAttacker;
-    lastAttackerRef.current = attacker;
+    if (state.selectedAttacker) {
+      // 随从攻击
+      const attacker = state.selectedAttacker;
+      lastAttackerRef.current = attacker;
 
-    // 攻击方冲锋动画
-    const attackerEl = myBoardRefs.current.get(attacker.cardId);
-    if (attackerEl && fieldRef.current) {
-      await minionChargeAnimation(attackerEl, attacker.attack);
+      const attackerEl = myBoardRefs.current.get(attacker.cardId);
+      if (attackerEl && fieldRef.current) {
+        await minionChargeAnimation(attackerEl, attacker.attack);
+      }
+
+      ws.attack(state.sessionId, attacker.cardId, targetType, targetId);
+      setState(prev => ({
+        ...prev,
+        attackMode: false,
+        selectedAttacker: null,
+        battleLog: [...prev.battleLog, `⚡ ${prev.selectedAttacker?.nameCn} 发起攻击`],
+      }));
+    } else {
+      // 英雄攻击（无选中随从 = 用武器攻击）
+      ws.heroAttack(state.sessionId, targetType, targetId);
+      setState(prev => ({
+        ...prev,
+        attackMode: false,
+        selectedAttacker: null,
+        battleLog: [...prev.battleLog, `⚔️ 英雄攻击`],
+      }));
     }
-
-    ws.attack(state.sessionId, attacker.cardId, targetType, targetId);
-    setState(prev => ({
-      ...prev,
-      attackMode: false,
-      selectedAttacker: null,
-      battleLog: [...prev.battleLog, `⚡ ${prev.selectedAttacker?.nameCn} 发起攻击`],
-    }));
   };
 
   const handleCancelAttack = () => {
@@ -830,7 +870,7 @@ export default function BattleArenaPage({
           onClick={() => {
             if (isMine) {
               handleSelectAttacker(card);
-            } else if (state.attackMode && state.selectedAttacker) {
+            } else if (state.attackMode) {
               handleAttackTarget('minion', card.cardId);
             }
           }}
@@ -867,12 +907,38 @@ export default function BattleArenaPage({
   const heroRarity = 'epic';
   const heroRarityClass = heroRarity;
 
+  // 英雄攻击：点击对手英雄头像
+  const handleHeroAttack = () => {
+    if (!state.isMyTurn || state.attackMode) return;
+    // 先进入攻击模式
+    setState(prev => ({
+      ...prev,
+      attackMode: true,
+      selectedAttacker: null,
+    }));
+  };
+
+  const handleConfirmHeroAttack = () => {
+    const ws = wsRef.current;
+    if (!ws || !state.sessionId) return;
+    ws.heroAttack(state.sessionId, 'hero');
+    setState(prev => ({
+      ...prev,
+      attackMode: false,
+      selectedAttacker: null,
+      battleLog: [...prev.battleLog, `⚔️ 英雄攻击`],
+    }));
+  };
+
   return (
     <div className="battle-arena" ref={fieldRef}>
       {/* ====== 顶部：对手信息区域 ====== */}
       <div className="battle-arena-opponent-area">
         <div className="opponent-portrait-area">
-          <div className={`hero-portrait ${heroRarityClass}`}>
+          <div
+            className={`hero-portrait ${heroRarityClass} ${state.attackMode ? 'hero-attack-target' : ''} ${state.isMyTurn && !state.attackMode && state.myWeapon ? 'hero-can-attack' : ''}`}
+            onClick={state.attackMode ? handleConfirmHeroAttack : handleHeroAttack}
+          >
             <span className="hero-icon">🧙</span>
           </div>
           <div>
@@ -883,6 +949,14 @@ export default function BattleArenaPage({
                 <span className="hero-armor">🛡️{state.opponentArmor}</span>
               )}
             </div>
+            {/* 对手武器 */}
+            {state.opponentWeapon && (
+              <div className="weapon-indicator opponent-weapon">
+                <span className="weapon-icon">⚔️</span>
+                <span className="weapon-atk">{state.opponentWeapon.attack}</span>
+                <span className="weapon-dur">{state.opponentWeapon.durability}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="opponent-meta-stats">
@@ -949,7 +1023,7 @@ export default function BattleArenaPage({
         </span>
       </div>
 
-      {/* ====== 己方状态条（HP/护甲/牌库/墓地） ====== */}
+      {/* ====== 己方状态条（HP/武器/护甲/牌库/墓地） ====== */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -961,6 +1035,22 @@ export default function BattleArenaPage({
           <span className="hero-hp" style={{ fontSize: 20 }}>{state.myHealth}</span>
           {state.myArmor > 0 && (
             <span className="hero-armor">🛡️{state.myArmor}</span>
+          )}
+          {/* 己方武器 */}
+          {state.myWeapon && (
+            <div className="weapon-indicator my-weapon">
+              <span className="weapon-icon">⚔️</span>
+              <span className="weapon-atk">{state.myWeapon.attack}</span>
+              <span className="weapon-dur">{state.myWeapon.durability}</span>
+            </div>
+          )}
+          {/* 己方奥秘 */}
+          {state.mySecretsCount > 0 && (
+            <div className="my-secrets">
+              {Array.from({ length: state.mySecretsCount }).map((_, i) => (
+                <span key={i} className="secret-slot small" style={{ display: 'inline-block', marginLeft: 2 }}>?</span>
+              ))}
+            </div>
           )}
         </div>
         <div className="deck-graveyard-area">

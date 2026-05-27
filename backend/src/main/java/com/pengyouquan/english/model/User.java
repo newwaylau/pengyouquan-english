@@ -63,6 +63,9 @@ public class User {
     @Column(nullable = false)
     private Integer stardust = 0;
 
+    @Column(nullable = false)
+    private Integer gold = 0;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

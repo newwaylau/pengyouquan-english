@@ -268,6 +268,13 @@ class BattleWebSocket {
     });
   }
 
+  heroAttack(sessionId: string, targetType: 'minion' | 'hero', targetId?: number) {
+    this.client.publish({
+      destination: '/app/battle/hero-attack',
+      body: JSON.stringify({ sessionId, targetType, targetId }),
+    });
+  }
+
   submitDefense(sessionId: string, correct: boolean) {
     this.client.publish({
       destination: '/app/battle/submit-defense',

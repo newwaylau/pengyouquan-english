@@ -19,6 +19,9 @@ public class PlayerState {
     private boolean hasPlayedThisTurn = false;
     private boolean hasAttackedThisTurn = false;
     private int trophies;
+    private int spellDamage;
+    private WeaponState weapon;
+    private java.util.List<SecretState> secrets;
 
     // --- getters/setters ---
 
@@ -69,4 +72,14 @@ public class PlayerState {
 
     public int getTrophies() { return trophies; }
     public void setTrophies(int trophies) { this.trophies = trophies; }
+
+    public int getSpellDamage() { return spellDamage; }
+    public void setSpellDamage(int spellDamage) { this.spellDamage = spellDamage; }
+    public void addSpellDamage(int delta) { this.spellDamage += delta; }
+
+    public WeaponState getWeapon() { return weapon; }
+    public void setWeapon(WeaponState weapon) { this.weapon = weapon; }
+
+    public java.util.List<SecretState> getSecrets() { return secrets; }
+    public void setSecrets(java.util.List<SecretState> secrets) { this.secrets = secrets; }
 }

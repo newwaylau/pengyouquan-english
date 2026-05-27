@@ -22,8 +22,13 @@ public class CardState {
     private boolean hasBattlecry;
     private boolean hasStealth;
     private boolean hasRush;
+    private boolean hasLifesteal;
+    private boolean hasPoisonous;
+    private boolean hasWindfury;
+    private boolean hasSpellDamage;
     private boolean battlecryTriggered;
     private boolean stealthRevealed;
+    private int windfuryAttacksRemaining;
 
     public CardState() {}
 
@@ -47,8 +52,13 @@ public class CardState {
         this.hasBattlecry = false;
         this.hasStealth = false;
         this.hasRush = false;
+        this.hasLifesteal = false;
+        this.hasPoisonous = false;
+        this.hasWindfury = false;
+        this.hasSpellDamage = false;
         this.battlecryTriggered = false;
         this.stealthRevealed = false;
+        this.windfuryAttacksRemaining = 0;
     }
 
     // --- getters/setters ---
@@ -115,4 +125,19 @@ public class CardState {
 
     public boolean isStealthRevealed() { return stealthRevealed; }
     public void setStealthRevealed(boolean stealthRevealed) { this.stealthRevealed = stealthRevealed; }
+
+    public boolean isHasLifesteal() { return hasLifesteal; }
+    public void setHasLifesteal(boolean hasLifesteal) { this.hasLifesteal = hasLifesteal; }
+
+    public boolean isHasPoisonous() { return hasPoisonous; }
+    public void setHasPoisonous(boolean hasPoisonous) { this.hasPoisonous = hasPoisonous; }
+
+    public boolean isHasWindfury() { return hasWindfury; }
+    public void setHasWindfury(boolean hasWindfury) { this.hasWindfury = hasWindfury; }
+
+    public boolean isHasSpellDamage() { return hasSpellDamage; }
+    public void setHasSpellDamage(boolean hasSpellDamage) { this.hasSpellDamage = hasSpellDamage; }
+
+    public int getWindfuryAttacksRemaining() { return windfuryAttacksRemaining; }
+    public void setWindfuryAttacksRemaining(int windfuryAttacksRemaining) { this.windfuryAttacksRemaining = windfuryAttacksRemaining; }
 }

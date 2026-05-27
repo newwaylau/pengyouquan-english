@@ -22,6 +22,9 @@ public class Deck {
     @Column(name = "card_ids", columnDefinition = "JSON")
     private String cardIds;
 
+    @Column(name = "is_active")
+    private Boolean isActive = false;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

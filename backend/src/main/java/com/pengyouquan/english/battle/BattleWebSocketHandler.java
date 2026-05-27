@@ -23,13 +23,16 @@ public class BattleWebSocketHandler {
     private final SimpMessagingTemplate messaging;
     private final MatchmakingService matchmaking;
     private final GameEngine gameEngine;
+    private final com.pengyouquan.english.repository.DeckRepository deckRepository;
 
     public BattleWebSocketHandler(SimpMessagingTemplate messaging,
                                   MatchmakingService matchmaking,
-                                  GameEngine gameEngine) {
+                                  GameEngine gameEngine,
+                                  com.pengyouquan.english.repository.DeckRepository deckRepository) {
         this.messaging = messaging;
         this.matchmaking = matchmaking;
         this.gameEngine = gameEngine;
+        this.deckRepository = deckRepository;
     }
 
     // ==================== 匹配 ====================
@@ -40,6 +43,21 @@ public class BattleWebSocketHandler {
         if (userId == null) {
             sendError(null, null, "未认证");
             return;
+        }
+
+        // 检查是否有牌组
+        java.util.Optional<com.pengyouquan.english.model.Deck> activeDeck = deckRepository.findByUserIdAndIsActiveTrue(userId);
+        if (activeDeck.isEmpty()) {
+            boolean hasAnyDeck = !deckRepository.findByUserId(userId).isEmpty();
+            if (!hasAnyDeck) {
+                sendError(null, userId, "请先在牌组编辑器中保存一套20张的牌组");
+                log.warn("User {} tried to queue without a deck", userId);
+                return;
+            }
+            // 有牌组但没有激活的，自动激活第一个
+            com.pengyouquan.english.model.Deck first = deckRepository.findByUserId(userId).get(0);
+            first.setIsActive(true);
+            deckRepository.save(first);
         }
 
         String nickname = getStringHeader(headerAccessor, "nickname");
@@ -221,6 +239,62 @@ public class BattleWebSocketHandler {
         }
 
         // 广播当前状态
+        broadcastGameState(sessionId);
+    }
+
+    // ==================== 英雄/武器攻击 ====================
+
+    @MessageMapping("/battle/hero-attack")
+    public void heroAttack(@Payload Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
+        Long userId = getUserId(headerAccessor);
+        if (userId == null) { sendError(null, null, "未认证"); return; }
+
+        String sessionId = getString(payload, "sessionId");
+        String targetType = getString(payload, "targetType");
+        Long targetId = targetType != null && "minion".equals(targetType) ? getLong(payload, "targetId") : null;
+
+        if (sessionId == null || targetType == null) {
+            sendError(sessionId, userId, "缺少参数");
+            return;
+        }
+
+        GameEngine.AttackResult ar = gameEngine.heroAttack(sessionId, userId, targetType, targetId);
+
+        if (!ar.success) {
+            sendError(sessionId, userId, ar.errorMessage);
+            return;
+        }
+
+        // 通知攻击方
+        BattleMessage.AttackResult attackResult = new BattleMessage.AttackResult();
+        attackResult.attackerId = ar.attackerId;
+        attackResult.defenderId = ar.defenderId;
+        attackResult.damage = ar.damage;
+        attackResult.defenderDead = ar.defenderDead;
+        attackResult.defenderHealthLeft = ar.defenderHealthLeft;
+
+        messaging.convertAndSendToUser(
+                userId.toString(),
+                "/queue/attack-result",
+                new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, userId, attackResult)
+        );
+
+        // 通知对手
+        GameSession session = gameEngine.getSession(sessionId);
+        if (session != null) {
+            Long opponentId = session.getOpponentId(userId);
+            messaging.convertAndSendToUser(
+                    opponentId.toString(),
+                    "/queue/defense-result",
+                    new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, opponentId, attackResult)
+            );
+        }
+
+        if (ar.gameOver && session != null) {
+            endGame(session);
+            return;
+        }
+
         broadcastGameState(sessionId);
     }
 
@@ -467,6 +541,10 @@ public class BattleWebSocketHandler {
             state.put("opponentBoard", opponent.getBoard() != null ? opponent.getBoard() : java.util.List.of());
             state.put("opponentHandCount", opponent.getHand() != null ? opponent.getHand().size() : 0);
             state.put("opponentDeckCount", opponent.getDeck() != null ? opponent.getDeck().size() : 0);
+            state.put("myWeapon", me.getWeapon());
+            state.put("opponentWeapon", opponent.getWeapon());
+            state.put("mySecretsCount", me.getSecrets() != null ? me.getSecrets().size() : 0);
+            state.put("opponentSecretsCount", opponent.getSecrets() != null ? opponent.getSecrets().size() : 0);
             state.put("turnNumber", session.getTurnNumber());
             state.put("currentPlayerId", session.getCurrentPlayerId());
             state.put("isMyTurn", session.getCurrentPlayerId().equals(playerId));
