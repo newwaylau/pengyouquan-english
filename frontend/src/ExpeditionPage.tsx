@@ -66,10 +66,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   const [attackingCard, setAttackingCard] = useState<number | null>(null);
   const [combatLoading, setCombatLoading] = useState(false);
 
-  // Animation refs
-  const combatRef = useRef<HTMLDivElement>(null);
-  const enemyAreaRef = useRef<HTMLDivElement>(null);
-
   // Node interaction
   const [nodeType, setNodeType] = useState<string>('');
 
@@ -109,23 +105,12 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   type Phase = 'lobby' | 'map' | 'combat' | 'event' | 'rest' | 'shop' | 'reward' | 'settlement';
   const [phase, setPhase] = useState<Phase>('lobby');
 
-  // Combat state (reused by BattlePageSit)
-
   // Load
   useEffect(() => {
     loadInitialData();
   }, []);
 
   // Card draw animation when new hand cards appear in combat
-  useEffect(() => {
-    if (handCards.length > 0 && phase === 'combat' && combatRef.current) {
-      const handArea = combatRef.current.querySelector('.expedition-hand') as HTMLElement;
-      if (handArea) {
-        cardDrawAnimation(combatRef.current, handArea, '🃏');
-      }
-    }
-  }, [handCards.length, phase]);
-
   async function loadInitialData() {
     setLoading(true);
     const [showsRes, cardsRes, expRes] = await Promise.all([
