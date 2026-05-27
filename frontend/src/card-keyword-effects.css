@@ -1,0 +1,320 @@
+/* ====== 关键词专属动画效果 ====== */
+
+/* 嘲讽: 红色脉冲边框呼吸光效 */
+@keyframes taunt-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px #e74c3c, 0 0 8px rgba(231, 76, 60, 0.3);
+    border-color: #e74c3c;
+  }
+  50% {
+    box-shadow: 0 0 12px #e74c3c, 0 0 24px rgba(231, 76, 60, 0.5);
+    border-color: #ff6b6b;
+  }
+}
+.minion-taunt {
+  animation: taunt-pulse 2s ease-in-out infinite;
+}
+
+/* 圣盾: 金色流光环绕 */
+@keyframes shield-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+.minion-divine-shield {
+  position: relative;
+  overflow: hidden;
+}
+.minion-divine-shield::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(241, 196, 15, 0) 20%,
+    rgba(241, 196, 15, 0.6) 50%,
+    rgba(241, 196, 15, 0) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shield-shimmer 2s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+.minion-divine-shield::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(241, 196, 15, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 潜行: 半透明虚化 + 微光闪烁 */
+@keyframes stealth-shimmer {
+  0%, 100% { opacity: 0.7; filter: brightness(0.9); }
+  50% { opacity: 0.5; filter: brightness(1.1); }
+}
+.minion-stealth {
+  opacity: 0.6;
+  filter: brightness(0.85) blur(0.5px);
+  animation: stealth-shimmer 3s ease-in-out infinite;
+}
+
+/* 突袭/冲锋: 橙色边框光晕 */
+.minion-rush,
+.minion-charge {
+  box-shadow: 0 0 8px #e67e22, 0 0 16px rgba(230, 126, 34, 0.3);
+  border-color: #e67e22;
+  animation: rush-glow 1.5s ease-in-out infinite;
+}
+@keyframes rush-glow {
+  0%, 100% { box-shadow: 0 0 8px #e67e22, 0 0 16px rgba(230, 126, 34, 0.3); }
+  50% { box-shadow: 0 0 14px #f39c12, 0 0 28px rgba(230, 126, 34, 0.5); }
+}
+
+/* 亡语: 紫色微光 */
+.minion-deathrattle {
+  box-shadow: inset 0 0 8px rgba(142, 68, 173, 0.3);
+  border-bottom: 2px solid #8e44ad;
+}
+
+/* 吸血: 红色微光 */
+.minion-lifesteal {
+  box-shadow: 0 0 6px #e74c3c, inset 0 0 4px rgba(231, 76, 60, 0.15);
+  border-color: #c0392b;
+}
+
+/* 剧毒: 绿色毒雾边框 */
+.minion-poisonous {
+  box-shadow: 0 0 8px #27ae60, 0 0 16px rgba(39, 174, 96, 0.2);
+  border-color: #27ae60;
+}
+
+/* 风怒: 蓝色双弧线 */
+.minion-windfury {
+  position: relative;
+}
+.minion-windfury::before,
+.minion-windfury::after {
+  content: '⚡';
+  position: absolute;
+  font-size: 10px;
+  opacity: 0.6;
+  animation: windfury-spin 2s linear infinite;
+}
+.minion-windfury::before {
+  top: -4px;
+  right: -4px;
+  animation-delay: 0s;
+}
+.minion-windfury::after {
+  top: -4px;
+  right: 4px;
+  animation-delay: 1s;
+}
+@keyframes windfury-spin {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+/* 法强: 蓝色光晕 */
+.minion-spell-damage {
+  box-shadow: 0 0 8px #3498db, 0 0 16px rgba(52, 152, 219, 0.2);
+  border-color: #3498db;
+}
+
+/* ====== 手牌扇形效果 ====== */
+
+/* 迷你卡牌样式 */
+.mini-card {
+  width: 60px;
+  height: 80px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #475569;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px 2px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+  transform-origin: bottom center;
+  box-sizing: border-box;
+}
+
+.hand-fan-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 4px 8px;
+  min-height: 90px;
+  position: relative;
+  perspective: 800px;
+}
+
+.hand-card-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              margin 0.25s ease-out;
+  transform-origin: bottom center;
+  cursor: pointer;
+  margin-bottom: 0;
+  transform-style: preserve-3d;
+}
+
+.hand-card-wrapper:hover:not(.mobile) {
+  z-index: 100 !important;
+  filter: brightness(1.15);
+}
+
+.hand-card-wrapper:hover:not(.mobile) .mini-card {
+  box-shadow: 0 -8px 25px rgba(255, 255, 255, 0.2), 0 0 30px rgba(45, 212, 191, 0.3);
+  border-color: #2dd4bf;
+}
+
+/* 手机端手牌适配 */
+@media (max-width: 500px) {
+  .hand-fan-container {
+    padding: 2px 4px;
+    min-height: 80px;
+  }
+  .hand-card-wrapper .mini-card {
+    width: 40px;
+    height: 55px;
+    font-size: 9px;
+  }
+}
+
+/* ====== 抽牌动画增强 ====== */
+@keyframes card-draw-glow {
+  0% { box-shadow: 0 0 0px rgba(45,212,191,0); }
+  30% { box-shadow: 0 0 30px rgba(45,212,191,0.6); }
+  100% { box-shadow: 0 0 0px rgba(45,212,191,0); }
+}
+
+/* ====== 回合过渡动画 ====== */
+@keyframes turn-start-flash {
+  0% { opacity: 0; }
+  20% { opacity: 0.15; }
+  100% { opacity: 0; }
+}
+.turn-start-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(45, 212, 191, 0.3), transparent 60%);
+  animation: turn-start-flash 0.8s ease-out forwards;
+}
+
+/* 对手回合状态 */
+.opponent-turn-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.opponent-turn-overlay.visible {
+  opacity: 1;
+}
+.opponent-turn-text {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  animation: opponent-text-pulse 2s ease-in-out infinite;
+}
+@keyframes opponent-text-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* 手牌不可操作状态 */
+.hand-disabled .hand-card-wrapper {
+  filter: brightness(0.6) saturate(0.5);
+  pointer-events: none;
+}
+
+/* ====== 法力水晶填充动画 ====== */
+.mana-crystal {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.mana-crystal.locked {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-color: #334155;
+  box-shadow: none;
+  opacity: 0.5;
+}
+.mana-crystal.spent {
+  background: linear-gradient(135deg, #334155, #1e293b);
+  border-color: #475569;
+  box-shadow: none;
+  opacity: 0.6;
+}
+.mana-crystal.spent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, transparent 40%, rgba(0, 0, 0, 0.3) 70%);
+}
+@keyframes mana-fill {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.mana-crystal-enter {
+  animation: mana-fill 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ====== 计时器紧迫状态 ====== */
+.turn-timer-fill.urgent {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: timer-pulse 0.5s ease-in-out infinite;
+}
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ====== 关键词标签样式 ====== */
+.kw-icon {
+  font-size: 10px;
+  margin-right: 2px;
+}
+.keyword-badge-taunt { background: #e74c3c; }
+.keyword-badge-divine_shield { background: #f1c40f; color: #333; }
+.keyword-badge-stealth { background: #2ecc71; }
+.keyword-badge-deathrattle { background: #8e44ad; }
+.keyword-badge-battlecry { background: #3498db; }
+.keyword-badge-rush { background: #e67e22; }
+.keyword-badge-charge { background: #e67e22; }
+.keyword-badge-lifesteal { background: #c0392b; }
+.keyword-badge-poisonous { background: #27ae60; }
+.keyword-badge-windfury { background: #2980b9; }
+.keyword-badge-spell_damage { background: #3498db; }

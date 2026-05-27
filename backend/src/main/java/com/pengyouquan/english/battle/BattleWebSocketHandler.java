@@ -287,6 +287,54 @@ public class BattleWebSocketHandler {
         endGame(session);
     }
 
+    // ==================== Mulligan 换牌 ====================
+
+    @MessageMapping("/battle/mulligan")
+    public void mulligan(@Payload Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
+        Long userId = getUserId(headerAccessor);
+        if (userId == null) { sendError(null, null, "未认证"); return; }
+
+        String sessionId = getString(payload, "sessionId");
+        if (sessionId == null) { sendError(null, userId, "缺少sessionId"); return; }
+
+        GameSession session = gameEngine.getSession(sessionId);
+        if (session == null) { sendError(sessionId, userId, "游戏不存在"); return; }
+
+        if (session.getPhase() != GamePhase.MULLIGAN) {
+            sendError(sessionId, userId, "不在换牌阶段"); return;
+        }
+
+        // 解析要换掉的牌ID列表
+        List<Long> cardIds = new java.util.ArrayList<>();
+        Object rawIds = payload.get("cardIds");
+        if (rawIds instanceof List) {
+            for (Object id : (List<?>) rawIds) {
+                if (id instanceof Number) cardIds.add(((Number) id).longValue());
+            }
+        }
+
+        GameEngine.MulliganResult mr = gameEngine.processMulligan(sessionId, userId, cardIds);
+        if (!mr.success) {
+            sendError(sessionId, userId, mr.errorMessage);
+            return;
+        }
+
+        // 通知换牌结果
+        messaging.convertAndSendToUser(
+                userId.toString(),
+                "/queue/mulligan-result",
+                new BattleMessage("MULLIGAN_RESULT", sessionId, userId, mr)
+        );
+
+        // 双方都提交后，通知开始游戏
+        if (mr.bothReady) {
+            // 通知双方游戏开始
+            for (Long pid : List.of(session.getPlayer1Id(), session.getPlayer2Id())) {
+                sendGameStart(sessionId, pid);
+            }
+        }
+    }
+
     // ==================== 私有方法 ====================
 
     private Long getUserId(SimpMessageHeaderAccessor headerAccessor) {
@@ -351,6 +399,20 @@ public class BattleWebSocketHandler {
         PlayerState opponent = session.getOpponent(userId);
 
         if (me == null || opponent == null) return;
+
+        // 如果处于 Mulligan 阶段，发送 MulliganStart
+        if (session.getPhase() == GamePhase.MULLIGAN) {
+            BattleMessage.MulliganStart mulliganMsg = new BattleMessage.MulliganStart();
+            mulliganMsg.hand = me.getHand();
+            mulliganMsg.goingFirst = me.isGoingFirst();
+
+            messaging.convertAndSendToUser(
+                    userId.toString(),
+                    "/queue/mulligan-start",
+                    new BattleMessage(BattleMessage.TYPE_MULLIGAN_START, sessionId, userId, mulliganMsg)
+            );
+            return;
+        }
 
         BattleMessage.GameStart myStart = new BattleMessage.GameStart();
         myStart.sessionId = sessionId;
@@ -462,7 +524,7 @@ public class BattleWebSocketHandler {
 
     private GameSession findSessionByPlayer(Long userId) {
         for (GameSession session : gameEngine.getActiveGames().values()) {
-            if (session.getPhase() == GamePhase.PLAYING &&
+            if ((session.getPhase() == GamePhase.PLAYING || session.getPhase() == GamePhase.MULLIGAN) &&
                     (session.getPlayer1Id().equals(userId) || session.getPlayer2Id().equals(userId))) {
                 return session;
             }

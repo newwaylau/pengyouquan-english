@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BattleWebSocket from './api/battleWebSocket';
 import './battle-arena.css';
+import './card-keyword-effects.css';
 import {
   playCardAnimation,
   elementFlash,
@@ -13,7 +14,7 @@ import {
   minionChargeAnimation,
   whiteFlash,
   heroPowerEffect,
-} from './EffectEngine';
+} from './effects/GaspAnimations';
 import { getCardAnimConfig, ELEMENT_STYLES } from './AnimProfileBuilder';
 
 // ===================== 关键词配置 =====================
@@ -69,7 +70,7 @@ interface GameState {
 }
 
 interface BattleState {
-  phase: 'idle' | 'matching' | 'playing' | 'finished';
+  phase: 'idle' | 'matching' | 'mulligan' | 'playing' | 'finished';
   sessionId: string | null;
   matchStartTime: number;
 
@@ -193,13 +194,36 @@ export default function BattleArenaPage({
         const payload = data.payload;
         setState(prev => ({
           ...prev,
-          phase: 'playing',
+          phase: 'mulligan',
           sessionId: payload.sessionId,
           opponentId: payload.opponentId,
           opponentName: payload.opponentName,
           opponentTrophies: payload.opponentTrophies,
           battleLog: [`⚔️ 匹配到对手: ${payload.opponentName}`],
         }));
+      },
+      onMulliganStart: (data: any) => {
+        const payload = data.payload;
+        setState(prev => ({
+          ...prev,
+          phase: 'mulligan',
+          myHand: payload.hand || [],
+          myDeckCount: prev.myDeckCount,
+          battleLog: [...prev.battleLog, '🔄 选择换牌...'],
+        }));
+      },
+      onMulliganResult: (data: any) => {
+        const payload = data.payload;
+        if (payload.success) {
+          setState(prev => ({
+            ...prev,
+            myHand: payload.hand || prev.myHand,
+          }));
+          // 双方都就绪后，等待 onGameStart 进入 PLAYING
+          if (payload.bothReady) {
+            setState(prev => ({ ...prev, battleLog: [...prev.battleLog, '✅ 换牌完成'] }));
+          }
+        }
       },
       onGameStart: (data: any) => {
         const payload = data.payload;
@@ -603,6 +627,100 @@ export default function BattleArenaPage({
     );
   }
 
+  // ===================== 渲染: Mulligan 换牌 =====================
+
+  if (state.phase === 'mulligan') {
+    const [selectedForReplace, setSelectedForReplace] = React.useState<Set<number>>(new Set());
+
+    const toggleReplace = (cardId: number) => {
+      setSelectedForReplace(prev => {
+        const next = new Set(prev);
+        if (next.has(cardId)) {
+          next.delete(cardId);
+        } else {
+          next.add(cardId);
+        }
+        return next;
+      });
+    };
+
+    const confirmMulligan = () => {
+      const ws = wsRef.current;
+      if (!ws || !state.sessionId) return;
+      ws.mulligan(state.sessionId, Array.from(selectedForReplace));
+      setState(prev => ({
+        ...prev,
+        battleLog: [...prev.battleLog, `🔄 换掉 ${selectedForReplace.size} 张牌`],
+      }));
+    };
+
+    return (
+      <div className="battle-arena">
+        <div className="battle-arena-header">
+          <span className="battle-arena-title">换牌阶段</span>
+        </div>
+        <div className="battle-arena-matching">
+          <div className="battle-arena-matching-card">
+            <h2 className="battle-arena-matching-title">选择要换掉的牌</h2>
+            <p className="battle-arena-matching-desc">
+              点击选择要换掉的卡牌（蓝色高亮），然后确认
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, margin: '16px 0' }}>
+              {state.myHand.map(card => (
+                <div
+                  key={card.cardId}
+                  onClick={() => toggleReplace(card.cardId)}
+                  style={{
+                    width: 80,
+                    height: 110,
+                    background: selectedForReplace.has(card.cardId)
+                      ? 'linear-gradient(180deg, #1e40af, #1e3a5f)'
+                      : 'linear-gradient(180deg, #1e293b, #0f172a)',
+                    border: selectedForReplace.has(card.cardId)
+                      ? '3px solid #3b82f6'
+                      : '2px solid #475569',
+                    borderRadius: 8,
+                    padding: 6,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    boxShadow: selectedForReplace.has(card.cardId)
+                      ? '0 0 16px rgba(59,130,246,0.5)'
+                      : 'none',
+                  }}
+                >
+                  <div style={{ fontSize: 10, fontWeight: 800, color: '#e2e8f0' }}>{card.cost}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9', textAlign: 'center' }}>{card.nameCn}</div>
+                  <div style={{ display: 'flex', gap: 6, fontSize: 10 }}>
+                    {card.attack > 0 && <span style={{ color: '#ef4444' }}>⚔{card.attack}</span>}
+                    {card.health > 0 && <span style={{ color: '#22c55e' }}>❤{card.health}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                className="battle-arena-btn battle-arena-btn-primary"
+                onClick={confirmMulligan}
+              >
+                确认换牌
+              </button>
+              <button
+                className="battle-arena-btn battle-arena-btn-secondary"
+                onClick={() => confirmMulligan()}
+              >
+                全留（跳过）
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ===================== 渲染: 游戏结束 =====================
 
   if (state.phase === 'finished') {
@@ -697,6 +815,16 @@ export default function BattleArenaPage({
             ${card.hasTaunt ? 'taunt' : ''}
             ${isMine && state.selectedAttacker?.cardId === card.cardId ? 'selected' : ''}
             ${!isMine && state.attackMode ? 'attackable-target' : ''}
+            ${kws.includes('taunt') ? 'minion-taunt' : ''}
+            ${kws.includes('divine_shield') ? 'minion-divine-shield' : ''}
+            ${kws.includes('stealth') ? 'minion-stealth' : ''}
+            ${kws.includes('rush') ? 'minion-rush' : ''}
+            ${kws.includes('charge') ? 'minion-charge' : ''}
+            ${kws.includes('deathrattle') ? 'minion-deathrattle' : ''}
+            ${kws.includes('lifesteal') ? 'minion-lifesteal' : ''}
+            ${kws.includes('poisonous') ? 'minion-poisonous' : ''}
+            ${kws.includes('windfury') ? 'minion-windfury' : ''}
+            ${kws.includes('spell_damage') ? 'minion-spell-damage' : ''}
           `}
           style={{ borderColor: getRarityColor(card.rarity) }}
           onClick={() => {
@@ -848,7 +976,7 @@ export default function BattleArenaPage({
       </div>
 
       {/* ====== 手牌区（扇形展開） ====== */}
-      <div className="hand-area">
+      <div className="hand-fan-container">
         {state.myHand.map((card, idx) => {
           const isPlayable = card.cost <= state.myMana && state.isMyTurn;
           const kws = parseKeywords(card.keywords);
@@ -862,31 +990,49 @@ export default function BattleArenaPage({
             );
           }) : null;
 
+          // 扇形角度计算: 中间牌直，两边牌旋转
+          const totalCards = state.myHand.length;
+          const fanAngle = Math.min(totalCards * 3, 20); // 最多20度
+          const centerIdx = (totalCards - 1) / 2;
+          const angle = (idx - centerIdx) * (fanAngle / Math.max(totalCards - 1, 1));
+          const zIndex = idx;
+          // 底部偏移: 角度越大越靠下
+          const bottomOffset = Math.abs(angle) * 0.8;
+
           return (
             <div
               key={`hand-${card.cardId}-${idx}`}
               ref={(el) => { if (el) handCardRefs.current.set(card.cardId, el); else handCardRefs.current.delete(card.cardId); }}
-              className={`hand-card ${isPlayable ? 'playable' : 'unplayable'}`}
-              style={{ borderColor: getRarityColor(card.rarity) }}
+              className={`hand-card-wrapper ${!isPlayable ? 'mobile' : ''}`}
+              style={{
+                zIndex,
+                transform: `rotate(${angle}deg) translateY(${bottomOffset}px)`,
+                marginLeft: idx === 0 ? 0 : -8,
+              }}
               onClick={() => handlePlayCard(card)}
             >
-              {/* 费用宝石 */}
-              <div className="hand-cost-gem">{card.cost}</div>
-              {/* 卡牌名 */}
-              <div className="hand-card-name">{card.nameCn}</div>
-              {/* 关键词 */}
-              {kwBadges && (
-                <div className="cg-keywords" style={{ marginTop: 1 }}>
-                  {kwBadges}
+              <div
+                className={`mini-card ${isPlayable ? 'playable' : 'unplayable'}`}
+                style={{ borderColor: getRarityColor(card.rarity) }}
+              >
+                {/* 费用宝石 */}
+                <div className="hand-cost-gem">{card.cost}</div>
+                {/* 卡牌名 */}
+                <div className="hand-card-name">{card.nameCn}</div>
+                {/* 关键词 */}
+                {kwBadges && (
+                  <div className="cg-keywords" style={{ marginTop: 1 }}>
+                    {kwBadges}
+                  </div>
+                )}
+                {/* 属性 */}
+                <div className="hand-stats-row">
+                  {card.attack > 0 && <span style={{ color: '#ef4444' }}>{card.attack}</span>}
+                  {card.health > 0 && <span style={{ color: '#22c55e' }}>{card.health}</span>}
                 </div>
-              )}
-              {/* 属性 */}
-              <div className="hand-stats-row">
-                {card.attack > 0 && <span style={{ color: '#ef4444' }}>{card.attack}</span>}
-                {card.health > 0 && <span style={{ color: '#22c55e' }}>{card.health}</span>}
+                {/* 稀有度色条 */}
+                <div className="rarity-bar" style={{ background: getRarityColor(card.rarity) }} />
               </div>
-              {/* 稀有度色条 */}
-              <div className="rarity-bar" style={{ background: getRarityColor(card.rarity) }} />
             </div>
           );
         })}

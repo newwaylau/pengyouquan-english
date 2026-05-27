@@ -6,8 +6,8 @@ public class PlayerState {
     private Long userId;
     private String nickname;
     private int health = 30;
-    private int mana = 3;
-    private int maxMana = 3;
+    private int mana = 1;
+    private int maxMana = 1;
     private List<CardState> hand;
     private List<CardState> board;
     private List<CardState> deck;
@@ -15,6 +15,7 @@ public class PlayerState {
     private int answeredTotal = 0;
     private int consecutiveCorrect = 0;
     private int consecutiveWrong = 0;
+    private boolean goingFirst = false;
     private boolean hasPlayedThisTurn = false;
     private boolean hasAttackedThisTurn = false;
     private int trophies;
@@ -56,6 +57,9 @@ public class PlayerState {
 
     public int getConsecutiveWrong() { return consecutiveWrong; }
     public void setConsecutiveWrong(int consecutiveWrong) { this.consecutiveWrong = consecutiveWrong; }
+
+    public boolean isGoingFirst() { return goingFirst; }
+    public void setGoingFirst(boolean goingFirst) { this.goingFirst = goingFirst; }
 
     public boolean isHasPlayedThisTurn() { return hasPlayedThisTurn; }
     public void setHasPlayedThisTurn(boolean hasPlayedThisTurn) { this.hasPlayedThisTurn = hasPlayedThisTurn; }

@@ -16,6 +16,8 @@ type GameCallbacks = {
   onMatchFound: (data: any) => void;
   onOpponentAction: (data: any) => void;
   onOpponentTurn: (data: any) => void;
+  onMulliganStart: (data: any) => void;
+  onMulliganResult: (data: any) => void;
 };
 
 class BattleWebSocket {
@@ -209,6 +211,22 @@ class BattleWebSocket {
         this.callbacks?.onError(data);
       }
     });
+
+    // Mulligan 开始
+    this.client.subscribe('/user/queue/mulligan-start', (msg: IMessage) => {
+      const data = JSON.parse(msg.body);
+      if (data.type === 'MULLIGAN_START') {
+        this.callbacks?.onMulliganStart(data);
+      }
+    });
+
+    // Mulligan 结果
+    this.client.subscribe('/user/queue/mulligan-result', (msg: IMessage) => {
+      const data = JSON.parse(msg.body);
+      if (data.type === 'MULLIGAN_RESULT') {
+        this.callbacks?.onMulliganResult(data);
+      }
+    });
   }
 
   // ---- 发送动作 ----
@@ -268,6 +286,13 @@ class BattleWebSocket {
     this.client.publish({
       destination: '/app/battle/concede',
       body: JSON.stringify({}),
+    });
+  }
+
+  mulligan(sessionId: string, cardIds: number[]) {
+    this.client.publish({
+      destination: '/app/battle/mulligan',
+      body: JSON.stringify({ sessionId, cardIds }),
     });
   }
 }

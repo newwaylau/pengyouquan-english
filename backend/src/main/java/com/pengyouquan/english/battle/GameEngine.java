@@ -8,6 +8,7 @@ import com.pengyouquan.english.repository.UserRepository;
 import com.pengyouquan.english.service.TrophyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -58,7 +59,7 @@ public class GameEngine {
         session.setPlayer1Id(player1Id);
         session.setPlayer2Id(player2Id);
         session.setTurnNumber(0);
-        session.setPhase(GamePhase.PLAYING);
+        session.setPhase(GamePhase.MULLIGAN);
         session.setStartTime(System.currentTimeMillis());
         session.setLastActionTime(System.currentTimeMillis());
 
@@ -71,6 +72,18 @@ public class GameEngine {
         // 决定先手（随机）
         boolean p1First = new Random().nextBoolean();
         session.setCurrentPlayerId(p1First ? player1Id : player2Id);
+        p1.setGoingFirst(p1First);
+        p2.setGoingFirst(!p1First);
+
+        // 后手：多抽1张牌 + 获得幸运币
+        PlayerState second = p1First ? p2 : p1;
+        if (second.getDeck() != null && !second.getDeck().isEmpty()) {
+            CardState extraCard = second.getDeck().remove(second.getDeck().size() - 1);
+            second.getHand().add(extraCard);
+        }
+        CardState coin = new CardState(0L, "幸运币", "The Coin",
+                "spell", "common", 0, 0, 0, null);
+        second.getHand().add(coin);
 
         activeGames.put(session.getSessionId(), session);
 
@@ -92,7 +105,7 @@ public class GameEngine {
         session.setLastActionTime(System.currentTimeMillis());
 
         int turn = session.getTurnNumber();
-        int maxMana = Math.min(turn + 2, 10);
+        int maxMana = Math.min(turn, 10);
 
         PlayerState current = session.getPlayerState(session.getCurrentPlayerId());
         current.setMaxMana(maxMana);
@@ -140,6 +153,18 @@ public class GameEngine {
 
         if (player.getMana() < card.getCost()) {
             return new PlayCardResult(false, "费用不足");
+        }
+
+        // 特殊：幸运币（cardId=0）—— 获得1点法力水晶
+        if (card.getCardId() == 0L) {
+            player.setMana(Math.min(player.getMana() + 1, player.getMaxMana()));
+            player.setHasPlayedThisTurn(true);
+            removeFromHand(player, cardId);
+            PlayCardResult result = new PlayCardResult(true, null);
+            result.card = card;
+            result.manaRemaining = player.getMana();
+            session.setLastActionTime(System.currentTimeMillis());
+            return result;
         }
 
         // 扣除费用
@@ -333,6 +358,57 @@ public class GameEngine {
     }
 
     /**
+     * 处理 Mulligan 换牌
+     */
+    public MulliganResult processMulligan(String sessionId, Long userId, List<Long> cardIds) {
+        GameSession session = activeGames.get(sessionId);
+        if (session == null) return new MulliganResult(false, "游戏不存在");
+        if (session.getPhase() != GamePhase.MULLIGAN) return new MulliganResult(false, "不在换牌阶段");
+        if (session.getMulliganSubmitted().contains(userId)) return new MulliganResult(false, "已提交过换牌");
+
+        PlayerState player = session.getPlayerState(userId);
+        if (player == null) return new MulliganResult(false, "玩家不存在");
+
+        if (cardIds == null) cardIds = new ArrayList<>();
+
+        // 将选中的牌放回牌堆
+        List<CardState> cardsToReturn = new ArrayList<>();
+        for (Long cardId : cardIds) {
+            CardState card = findCardInHand(player, cardId);
+            if (card != null) {
+                cardsToReturn.add(card);
+            }
+        }
+        for (CardState c : cardsToReturn) {
+            removeFromHand(player, c.getCardId());
+        }
+
+        // 放回牌堆并洗牌
+        player.getDeck().addAll(cardsToReturn);
+        Collections.shuffle(player.getDeck());
+
+        // 抽等量牌
+        for (int i = 0; i < cardsToReturn.size() && !player.getDeck().isEmpty(); i++) {
+            CardState drawn = player.getDeck().remove(player.getDeck().size() - 1);
+            player.getHand().add(drawn);
+        }
+
+        // 标记已提交
+        session.getMulliganSubmitted().add(userId);
+
+        MulliganResult result = new MulliganResult(true, null);
+        result.hand = new ArrayList<>(player.getHand());
+        result.bothReady = session.getMulliganSubmitted().size() >= 2;
+
+        if (result.bothReady) {
+            session.setPhase(GamePhase.PLAYING);
+        }
+
+        session.setLastActionTime(System.currentTimeMillis());
+        return result;
+    }
+
+    /**
      * 获取游戏会话
      */
     public GameSession getSession(String sessionId) {
@@ -353,6 +429,35 @@ public class GameEngine {
         return activeGames;
     }
 
+    // ==================== 定时清理 ====================
+
+    /**
+     * 每60秒清理游戏的过期会话（5分钟无操作结束，10分钟移除）
+     */
+    @Scheduled(fixedRate = 60000)
+    public void cleanupStaleGames() {
+        long now = System.currentTimeMillis();
+        List<String> toRemove = new ArrayList<>();
+        for (Map.Entry<String, GameSession> entry : activeGames.entrySet()) {
+            GameSession session = entry.getValue();
+            long idle = now - session.getLastActionTime();
+            if (idle > 10 * 60 * 1000) {
+                // 超过10分钟，直接移除
+                toRemove.add(entry.getKey());
+            } else if (idle > 5 * 60 * 1000 && session.getPhase() == GamePhase.PLAYING) {
+                // 超过5分钟无操作，强制结束平局
+                if (session.getWinnerId() == null) {
+                    session.setPhase(GamePhase.FINISHED);
+                    log.info("Game {} auto-ended due to inactivity ({}ms idle)", entry.getKey(), idle);
+                }
+            }
+        }
+        for (String key : toRemove) {
+            activeGames.remove(key);
+            log.info("Removed stale game session: {}", key);
+        }
+    }
+
     // ==================== 私有方法 ====================
 
     private PlayerState initPlayer(Long userId, String nickname, int trophies) {
@@ -360,8 +465,8 @@ public class GameEngine {
         state.setUserId(userId);
         state.setNickname(nickname);
         state.setHealth(30);
-        state.setMana(3);
-        state.setMaxMana(3);
+        state.setMana(1);
+        state.setMaxMana(1);
         state.setTrophies(trophies);
 
         // 获取用户拥有的卡牌，构建牌组
@@ -672,5 +777,17 @@ public class GameEngine {
         public int loserTrophiesAfter;
 
         public GameOverResult() {}
+    }
+
+    public static class MulliganResult {
+        public boolean success;
+        public String errorMessage;
+        public List<CardState> hand;
+        public boolean bothReady;
+
+        public MulliganResult(boolean success, String errorMessage) {
+            this.success = success;
+            this.errorMessage = errorMessage;
+        }
     }
 }

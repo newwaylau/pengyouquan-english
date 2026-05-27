@@ -1,6 +1,8 @@
 package com.pengyouquan.english.battle;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 一场实时对战的完整状态。
@@ -18,6 +20,7 @@ public class GameSession {
     private Long winnerId;
     private Long startTime;
     private Long lastActionTime;
+    private Set<Long> mulliganSubmitted = new HashSet<>();
 
     public GameSession() {}
 
@@ -70,6 +73,9 @@ public class GameSession {
         return null;
     }
 
+    public Set<Long> getMulliganSubmitted() { return mulliganSubmitted; }
+    public void setMulliganSubmitted(Set<Long> mulliganSubmitted) { this.mulliganSubmitted = mulliganSubmitted; }
+
     /** 获取对手的用户ID */
     public Long getOpponentId(Long userId) {
         if (player1Id.equals(userId)) return player2Id;
@@ -78,5 +84,5 @@ public class GameSession {
 }
 
 enum GamePhase {
-    WAITING_MATCH, PLAYING, FINISHED
+    WAITING_MATCH, MULLIGAN, PLAYING, FINISHED
 }

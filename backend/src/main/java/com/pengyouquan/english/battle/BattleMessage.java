@@ -47,6 +47,7 @@ public class BattleMessage {
     public static final String TYPE_GAME_OVER = "GAME_OVER";
     public static final String TYPE_ERROR = "ERROR";
     public static final String TYPE_OPPONENT_DISCONNECTED = "OPPONENT_DISCONNECTED";
+    public static final String TYPE_MULLIGAN_START = "MULLIGAN_START";
 
     // ====== Payload 类型 ======
 
@@ -174,5 +175,12 @@ public class BattleMessage {
             this.code = code;
             this.message = message;
         }
+    }
+
+    public static class MulliganStart {
+        public List<CardState> hand;
+        public boolean goingFirst;
+
+        public MulliganStart() {}
     }
 }
