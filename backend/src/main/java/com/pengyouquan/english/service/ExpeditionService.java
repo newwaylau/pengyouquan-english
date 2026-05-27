@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengyouquan.english.model.*;
 import com.pengyouquan.english.repository.*;
+import com.pengyouquan.english.service.ExpeditionBossService.BossAction;
+import com.pengyouquan.english.service.ExpeditionBossService.BossData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,10 @@ public class ExpeditionService {
     private final SentenceRepository sentenceRepository;
     private final ObjectMapper objectMapper;
     private final AchievementService achievementService;
+    private final ExpeditionMapService expeditionMapService;
+    private final ExpeditionBossService expeditionBossService;
+    private final ExpeditionStatusService expeditionStatusService;
+    private final ExpeditionPotionRepository expeditionPotionRepository;
 
     // 每层节点序列模板（内部数组表示分支选项，多元素表示岔路）
     private static final Map<Integer, List<List<String>>> ACT_NODE_TEMPLATES = new LinkedHashMap<>();
@@ -74,7 +80,11 @@ public class ExpeditionService {
                              UserRepository userRepository,
                              SentenceRepository sentenceRepository,
                              ObjectMapper objectMapper,
-                             AchievementService achievementService) {
+                             AchievementService achievementService,
+                             ExpeditionMapService expeditionMapService,
+                             ExpeditionBossService expeditionBossService,
+                             ExpeditionStatusService expeditionStatusService,
+                             ExpeditionPotionRepository expeditionPotionRepository) {
         this.expeditionRepository = expeditionRepository;
         this.relicRepository = relicRepository;
         this.expeditionRelicRepository = expeditionRelicRepository;
@@ -87,6 +97,10 @@ public class ExpeditionService {
         this.sentenceRepository = sentenceRepository;
         this.objectMapper = objectMapper;
         this.achievementService = achievementService;
+        this.expeditionMapService = expeditionMapService;
+        this.expeditionBossService = expeditionBossService;
+        this.expeditionStatusService = expeditionStatusService;
+        this.expeditionPotionRepository = expeditionPotionRepository;
     }
 
     // ==================== 1. 启动远征 ====================
@@ -115,7 +129,10 @@ public class ExpeditionService {
             validCardIds = validCardIds.subList(0, 10);
         }
 
-        // 生成地图节点（分层结构支持岔路）
+        // 生成地图节点（使用 ExpeditionMapService 生成带坐标和连接关系的地图）
+        Map<String, Object> mapData = expeditionMapService.generateMap(1);
+        String mapDataJson = expeditionMapService.toJson(mapData);
+        // 同时保留旧格式 mapNodes 用于向下兼容
         List<List<String>> template = ACT_NODE_TEMPLATES.get(1);
         String mapNodesJson = toJson(template);
 
@@ -134,6 +151,7 @@ public class ExpeditionService {
         exp.setGold(STARTING_GOLD);
         exp.setStatus("in_progress");
         exp.setMapNodes(mapNodesJson);
+        exp.setMapData(mapDataJson);
         exp.setBattleState("{}");
         expeditionRepository.save(exp);
 
@@ -208,7 +226,30 @@ public class ExpeditionService {
         expeditionRepository.save(exp);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("enemy", buildEnemyData(enemy, exp.getCurrentEnemyHp()));
+
+        // 如果是Boss节点，集成 ExpeditionBossService
+        if ("boss".equals(nodeType)) {
+            BossData bossData = expeditionBossService.getBossForAct(exp.getShowId(), exp.getAct());
+            if (bossData != null) {
+                // 使用BossService的BossData覆盖敌人数据
+                bossData.setCurrentHp(exp.getCurrentEnemyHp() != null ? exp.getCurrentEnemyHp() : bossData.getMaxHp());
+                // 存储BossData到battleState以备Boss技能使用
+                try {
+                    Map<String, Object> bs = new HashMap<>();
+                    bs.put("bossId", bossData.getId());
+                    bs.put("bossNameCn", bossData.getNameCn());
+                    bs.put("bossNameEn", bossData.getNameEn());
+                    bs.put("bossMaxHp", bossData.getMaxHp());
+                    bs.put("bossPhase", bossData.getPhase());
+                    exp.setBattleState(objectMapper.writeValueAsString(bs));
+                    expeditionRepository.save(exp);
+                } catch (Exception ignored) {}
+                result.put("bossData", bossData.toMap());
+            }
+            result.put("enemy", buildEnemyData(enemy, exp.getCurrentEnemyHp()));
+        } else {
+            result.put("enemy", buildEnemyData(enemy, exp.getCurrentEnemyHp()));
+        }
         result.put("expedition", buildExpeditionData(exp));
 
         // 抽手牌
@@ -294,16 +335,87 @@ public class ExpeditionService {
         String resultText = "";
         Random rand = new Random();
 
+        // 解析玩家和敌人的状态（block/weak/vulnerable/strength）
+        Map<String, Object> playerStatus = new HashMap<>();
+        Map<String, Object> enemyStatus = new HashMap<>();
+        try {
+            String bs = exp.getBattleState();
+            if (bs != null && !"{}".equals(bs)) {
+                Map<String, Object> state = objectMapper.readValue(bs, Map.class);
+                Object ps = state.get("playerStatus");
+                if (ps instanceof Map) {
+                    playerStatus = (Map<String, Object>) ps;
+                }
+                Object es = state.get("enemyStatus");
+                if (es instanceof Map) {
+                    enemyStatus = (Map<String, Object>) es;
+                }
+            }
+        } catch (Exception ignored) {}
+
         // 检查遗物效果
         List<Long> relicIds = parseJsonList(exp.getRelics());
         Map<String, Object> relicEffects = getRelicEffects(relicIds);
         // 获取新遗物系统的效果
         Map<String, Integer> newRelicEffects = getNewRelicEffects(exp.getId());
 
-        // 出牌：造成伤害
+        // 出牌：根据卡牌类型执行效果（攻击/格挡/技能）
         exp.setQuestionsTotal(exp.getQuestionsTotal() + 1);
         exp.setQuestionsAnswered(exp.getQuestionsAnswered() + 1);
-        damageDealt = cardAttack;
+
+        // 使用 ExpeditionStatusService 计算玩家实际输出伤害（含力量加成和虚弱减免）
+        int rawDamage = cardAttack;
+        int calculatedPlayerDamage = expeditionStatusService.calculateDamageDealt(rawDamage, playerStatus);
+
+        // 检查卡牌是否能提供格挡（根据cardType或effectJson判断）
+        boolean providesBlock = false;
+        int blockAmount = 0;
+        if (cardOpt.isPresent()) {
+            Card card = cardOpt.get();
+            String cardType = card.getCardType();
+            // "spell" 类型卡牌可能提供格挡效果
+            if ("spell".equals(cardType) || "equipment".equals(cardType)) {
+                // 检查effectJson看是否有block效果
+                String effectJson = card.getEffectJson();
+                if (effectJson != null && !effectJson.isBlank()) {
+                    try {
+                        Map<String, Object> effect = objectMapper.readValue(effectJson, Map.class);
+                        if (effect.containsKey("block")) {
+                            providesBlock = true;
+                            blockAmount = ((Number) effect.get("block")).intValue();
+                        }
+                        if (effect.containsKey("weak")) {
+                            expeditionStatusService.applyWeak(enemyStatus, ((Number) effect.get("weak")).intValue());
+                        }
+                        if (effect.containsKey("vulnerable")) {
+                            expeditionStatusService.applyVulnerable(enemyStatus, ((Number) effect.get("vulnerable")).intValue());
+                        }
+                        if (effect.containsKey("strength")) {
+                            Map<String, Object> strEffect = (Map<String, Object>) effect.get("strength");
+                            int strAmount = ((Number) strEffect.getOrDefault("amount", 0)).intValue();
+                            int strTurns = ((Number) strEffect.getOrDefault("turns", 0)).intValue();
+                            expeditionStatusService.applyStrength(playerStatus, strTurns, strAmount);
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
+        if (providesBlock && blockAmount > 0) {
+            // 格挡卡：增加玩家格挡值，不造成伤害
+            expeditionStatusService.addBlock(playerStatus, blockAmount, exp.getMaxHp());
+            // 卡牌自身攻击力作为额外伤害（如果有）
+            damageDealt = calculatedPlayerDamage;
+            resultText = "格挡！获得 " + blockAmount + " 点护甲";
+            if (damageDealt > 0) {
+                resultText += "，造成 " + damageDealt + " 点伤害！";
+            } else {
+                resultText += "！";
+            }
+        } else {
+            // 攻击卡：计算伤害
+            damageDealt = calculatedPlayerDamage;
+        }
 
         // 新遗物系统：COMBAT_DAMAGE_BOOST
         damageDealt += newRelicEffects.getOrDefault("COMBAT_DAMAGE_BOOST", 0);
@@ -325,21 +437,68 @@ public class ExpeditionService {
             damageDealt += getRelicValue(relicEffects, "extra_damage_on_correct", 2);
         }
 
-        // 应用伤害
-        int newHp = exp.getCurrentEnemyHp() - damageDealt;
+        // 使用 ExpeditionStatusService 计算敌人实际承受伤害（含易伤加成和格挡吸收）
+        int enemyDamageTaken = expeditionStatusService.calculateDamageTaken(damageDealt, enemyStatus);
+        int newHp = exp.getCurrentEnemyHp() - enemyDamageTaken;
         exp.setCurrentEnemyHp(Math.max(0, newHp));
-        resultText = "攻击！造成 " + damageDealt + " 点伤害！";
+
+        if (!providesBlock || damageDealt > 0) {
+            resultText = "攻击！造成 " + enemyDamageTaken + " 点伤害！";
+        }
 
         // 新遗物系统：VAMPIRIC - 造成伤害的20%回血
         int vampPct = newRelicEffects.getOrDefault("VAMPIRIC", 0);
         if (vampPct > 0) {
-            int vampHeal = Math.max(1, damageDealt * vampPct / 100);
+            int vampHeal = Math.max(1, enemyDamageTaken * vampPct / 100);
             exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + vampHeal));
             resultText += " 汲取了 " + vampHeal + " 点生命！";
         }
 
-        // 敌人反击（每次出牌敌人也会攻击）
-        damageTaken = BASE_ENEMY_ATTACK;
+        // 敌人反击（使用 ExpeditionStatusService 计算伤害，含格挡吸收）
+        // 计算敌人基础攻击值（Boss可能使用BossService的技能伤害）
+        int enemyBaseAttack = BASE_ENEMY_ATTACK;
+        // 如果是Boss节点，尝试使用BossService的BossAction代替基础攻击
+        boolean isBossNodeCheck = "boss".equals(getCurrentNodeType(exp));
+        int bossSkillDamage = 0;
+        String bossActionText = "";
+        if (isBossNodeCheck) {
+            try {
+                Map<String, Object> battleStateMap;
+                String bsStr = exp.getBattleState();
+                if (bsStr != null && !"{}".equals(bsStr)) {
+                    battleStateMap = objectMapper.readValue(bsStr, Map.class);
+                } else {
+                    battleStateMap = new HashMap<>();
+                }
+                // 获取BossData
+                BossData bossData = expeditionBossService.getBossForAct(exp.getShowId(), exp.getAct());
+                if (bossData != null) {
+                    bossData.setCurrentHp(exp.getCurrentEnemyHp() != null ? exp.getCurrentEnemyHp() : bossData.getMaxHp());
+                    int currentTurn = ((Number) battleStateMap.getOrDefault("bossTurn", 0)).intValue();
+                    BossAction action = expeditionBossService.executeBossTurn(bossData, currentTurn + 1, battleStateMap);
+                    bossSkillDamage = action.getDamageToPlayer();
+                    bossActionText = action.getDescription();
+                    // 应用Boss的Buff效果
+                    if (action.getBuffsApplied() != null && !action.getBuffsApplied().isEmpty()) {
+                        for (ExpeditionBossService.BossBuff buff : action.getBuffsApplied()) {
+                            if (buff.getName().contains("虚弱") || buff.getName().contains("魅惑")) {
+                                expeditionStatusService.applyWeak(playerStatus, buff.getDuration());
+                            }
+                        }
+                    }
+                    battleStateMap.put("bossTurn", currentTurn + 1);
+                    exp.setBattleState(objectMapper.writeValueAsString(battleStateMap));
+                }
+            } catch (Exception ignored) {}
+        }
+        if (bossSkillDamage > 0) {
+            damageTaken = bossSkillDamage;
+        } else {
+            // 使用 ExpeditionStatusService 计算敌人的输出伤害（含敌人自身状态修正）
+            int enemyRawDamage = expeditionStatusService.calculateDamageDealt(enemyBaseAttack, enemyStatus);
+            damageTaken = enemyRawDamage;
+        }
+
         // 新遗物系统：DAMAGE_REDUCTION
         int dmgReduction = newRelicEffects.getOrDefault("DAMAGE_REDUCTION", 0);
         damageTaken = Math.max(0, damageTaken - dmgReduction);
@@ -347,6 +506,9 @@ public class ExpeditionService {
         if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
             damageTaken *= newRelicEffects.get("DOUBLE_EDGED");
         }
+
+        // 使用 ExpeditionStatusService 计算玩家实际承受伤害（含格挡/易伤吸收）
+        damageTaken = expeditionStatusService.calculateDamageTaken(damageTaken, playerStatus);
         int newPlayerHp = exp.getPlayerHp() - damageTaken;
         exp.setPlayerHp(Math.max(0, newPlayerHp));
 
@@ -360,6 +522,8 @@ public class ExpeditionService {
 
             exp.setCurrentEnemyId(null);
             exp.setCurrentEnemyHp(null);
+            // 更新battleState中的状态信息
+            saveCombatStatus(exp, playerStatus, enemyStatus);
             expeditionRepository.save(exp);
 
             // 新遗物系统：HEAL_ON_COMBAT_WIN
@@ -394,6 +558,7 @@ public class ExpeditionService {
         if (exp.getPlayerHp() <= 0) {
             exp.setStatus("dead");
             clearPlayerRelics(exp.getId());
+            saveCombatStatus(exp, playerStatus, enemyStatus);
             expeditionRepository.save(exp);
 
             Map<String, Object> result = new HashMap<>();
@@ -407,6 +572,7 @@ public class ExpeditionService {
             return result;
         }
 
+        saveCombatStatus(exp, playerStatus, enemyStatus);
         expeditionRepository.save(exp);
 
         Map<String, Object> result = new HashMap<>();
@@ -1745,6 +1911,48 @@ public class ExpeditionService {
         data.put("mapNodes", flatNodes);
         data.put("currentNodeType", getCurrentNodeType(exp));
 
+        // 添加 map_data（完整地图结构）
+        if (exp.getMapData() != null && !"{\"acts\":[]}".equals(exp.getMapData())) {
+            try {
+                data.put("map_data", objectMapper.readValue(exp.getMapData(), Map.class));
+            } catch (Exception e) {
+                data.put("map_data", Map.of("acts", List.of()));
+            }
+        } else {
+            data.put("map_data", Map.of("acts", List.of()));
+        }
+
+        // 添加 potions（药水列表）
+        List<Map<String, Object>> potionsData = new ArrayList<>();
+        try {
+            String potionsJson = exp.getPotions();
+            if (potionsJson != null && !"[]".equals(potionsJson)) {
+                List<Map<String, Object>> potionRefs = objectMapper.readValue(potionsJson, new TypeReference<List<Map<String, Object>>>() {});
+                for (Map<String, Object> pref : potionRefs) {
+                    Number potionId = (Number) pref.get("potionId");
+                    if (potionId != null) {
+                        Optional<ExpeditionPotion> pOpt = expeditionPotionRepository.findById(potionId.longValue());
+                        if (pOpt.isPresent()) {
+                            ExpeditionPotion p = pOpt.get();
+                            Map<String, Object> pm = new LinkedHashMap<>();
+                            pm.put("id", p.getId());
+                            pm.put("nameCn", p.getNameCn());
+                            pm.put("nameEn", p.getNameEn());
+                            pm.put("rarity", p.getRarity());
+                            pm.put("effectType", p.getEffectType());
+                            pm.put("effectValue", p.getEffectValue());
+                            pm.put("descriptionCn", p.getDescriptionCn());
+                            pm.put("descriptionEn", p.getDescriptionEn());
+                            pm.put("icon", p.getIcon());
+                            pm.put("quantity", pref.getOrDefault("quantity", 1));
+                            potionsData.add(pm);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        data.put("potions", potionsData);
+
         // 如果是岔路节点，返回选项
         String nodeType = getCurrentNodeType(exp);
         if ("branch".equals(nodeType)) {
@@ -1894,5 +2102,270 @@ public class ExpeditionService {
         } catch (Exception e) {
             return "[]";
         }
+    }
+
+    // ==================== 战斗状态保存 ====================
+
+    /**
+     * 将玩家和敌人的战斗状态保存到 battleState JSON 中
+     */
+    @SuppressWarnings("unchecked")
+    private void saveCombatStatus(Expedition exp, Map<String, Object> playerStatus, Map<String, Object> enemyStatus) {
+        try {
+            String bs = exp.getBattleState();
+            Map<String, Object> state;
+            if (bs != null && !"{}".equals(bs)) {
+                state = objectMapper.readValue(bs, Map.class);
+            } else {
+                state = new HashMap<>();
+            }
+            state.put("playerStatus", playerStatus);
+            state.put("enemyStatus", enemyStatus);
+            exp.setBattleState(objectMapper.writeValueAsString(state));
+        } catch (Exception ignored) {}
+    }
+
+    // ==================== 药水系统 ====================
+
+    /**
+     * 获取当前远征Boss的详细信息（含技能列表）
+     */
+    public Map<String, Object> getBossInfo(Long userId) {
+        Expedition exp = getActiveExpedition(userId);
+        String nodeType = getCurrentNodeType(exp);
+        if (!"boss".equals(nodeType)) {
+            throw new IllegalStateException("当前节点不是Boss节点");
+        }
+        BossData bossData = expeditionBossService.getBossForAct(exp.getShowId(), exp.getAct());
+        if (bossData == null) {
+            throw new IllegalStateException("未找到Boss配置");
+        }
+        return bossData.toMap();
+    }
+
+    /**
+     * 使用药水（战斗中或非战斗中均可）
+     */
+    @SuppressWarnings("unchecked")
+    @Transactional
+    public Map<String, Object> usePotion(Long userId, Long potionId) {
+        Expedition exp = getActiveExpedition(userId);
+        return applyPotionEffect(exp, potionId);
+    }
+
+    /**
+     * 获取远征中拥有的药水列表
+     */
+    public List<Map<String, Object>> getPotions(Long userId) {
+        Expedition exp = getActiveExpedition(userId);
+        List<Map<String, Object>> potions = new ArrayList<>();
+        try {
+            String potionsJson = exp.getPotions();
+            if (potionsJson != null && !"[]".equals(potionsJson)) {
+                List<Map<String, Object>> potionRefs = objectMapper.readValue(potionsJson, new TypeReference<List<Map<String, Object>>>() {});
+                for (Map<String, Object> pref : potionRefs) {
+                    Number pid = (Number) pref.get("potionId");
+                    if (pid != null) {
+                        Optional<ExpeditionPotion> pOpt = expeditionPotionRepository.findById(pid.longValue());
+                        if (pOpt.isPresent()) {
+                            ExpeditionPotion p = pOpt.get();
+                            Map<String, Object> pm = new LinkedHashMap<>();
+                            pm.put("id", p.getId());
+                            pm.put("nameCn", p.getNameCn());
+                            pm.put("nameEn", p.getNameEn());
+                            pm.put("rarity", p.getRarity());
+                            pm.put("effectType", p.getEffectType());
+                            pm.put("effectValue", p.getEffectValue());
+                            pm.put("descriptionCn", p.getDescriptionCn());
+                            pm.put("descriptionEn", p.getDescriptionEn());
+                            pm.put("icon", p.getIcon());
+                            pm.put("quantity", pref.getOrDefault("quantity", 1));
+                            potions.add(pm);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return potions;
+    }
+
+    /**
+     * 战斗中用药水
+     */
+    @Transactional
+    public Map<String, Object> usePotionInCombat(Long userId, Long potionId) {
+        Expedition exp = getActiveExpedition(userId);
+        if (exp.getCurrentEnemyId() == null) {
+            throw new IllegalStateException("当前没有进行中的战斗");
+        }
+        return applyPotionEffect(exp, potionId);
+    }
+
+    /**
+     * 通用药水效果应用逻辑
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> applyPotionEffect(Expedition exp, Long potionId) {
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 验证药水是否在远征背包中
+        List<Map<String, Object>> potionRefs;
+        try {
+            String potionsJson = exp.getPotions();
+            if (potionsJson == null || "[]".equals(potionsJson)) {
+                throw new IllegalStateException("没有药水可用");
+            }
+            potionRefs = objectMapper.readValue(potionsJson, new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            throw new IllegalStateException("药水数据解析失败");
+        }
+
+        // 查找药水并减少数量
+        Map<String, Object> foundRef = null;
+        int foundIndex = -1;
+        for (int i = 0; i < potionRefs.size(); i++) {
+            Map<String, Object> ref = potionRefs.get(i);
+            Number pid = (Number) ref.get("potionId");
+            if (pid != null && pid.longValue() == potionId) {
+                foundRef = ref;
+                foundIndex = i;
+                break;
+            }
+        }
+        if (foundRef == null) {
+            throw new IllegalStateException("药水不在背包中");
+        }
+
+        int quantity = ((Number) foundRef.getOrDefault("quantity", 1)).intValue();
+        if (quantity <= 0) {
+            throw new IllegalStateException("药水已用完");
+        }
+
+        // 获取药水配置
+        Optional<ExpeditionPotion> pOpt = expeditionPotionRepository.findById(potionId);
+        if (pOpt.isEmpty()) {
+            throw new IllegalStateException("药水配置不存在");
+        }
+        ExpeditionPotion potion = pOpt.get();
+
+        String effectType = potion.getEffectType();
+        int effectValue = potion.getEffectValue() != null ? potion.getEffectValue() : 0;
+
+        // 2. 扣减数量
+        quantity--;
+        if (quantity <= 0) {
+            potionRefs.remove(foundIndex);
+        } else {
+            foundRef.put("quantity", quantity);
+        }
+        try {
+            exp.setPotions(objectMapper.writeValueAsString(potionRefs));
+        } catch (Exception ignored) {}
+
+        // 3. 执行药水效果
+        boolean inCombat = exp.getCurrentEnemyId() != null;
+        String effectDescription = "";
+
+        switch (effectType) {
+            case "HEAL":
+                // 立即回血（非战斗药水）
+                int healAmount = effectValue;
+                int newHp = Math.min(exp.getMaxHp(), exp.getPlayerHp() + healAmount);
+                exp.setPlayerHp(newHp);
+                effectDescription = "回复了 " + healAmount + " 点生命值！";
+                break;
+
+            case "COMBAT_HEAL":
+                // 战斗中回血
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                int combatHeal = effectValue;
+                int newCombatHp = Math.min(exp.getMaxHp(), exp.getPlayerHp() + combatHeal);
+                exp.setPlayerHp(newCombatHp);
+                effectDescription = "战斗中回复了 " + combatHeal + " 点生命值！";
+                break;
+
+            case "ATTACK_BUFF":
+                // 攻击力提升（战斗buff，存入battleState）
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                applyBattleBuffToState(exp, "attackBuff", effectValue);
+                effectDescription = "攻击力提升 " + effectValue + " 点！";
+                break;
+
+            case "BLOCK":
+                // 格挡（战斗buff，存入battleState）
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                applyBattleBuffToState(exp, "potionBlock", effectValue);
+                effectDescription = "获得 " + effectValue + " 点格挡！";
+                break;
+
+            case "ENERGY":
+                // 能量增加（战斗buff，存入battleState）
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                applyBattleBuffToState(exp, "energyGain", effectValue);
+                effectDescription = "获得 " + effectValue + " 点额外能量！";
+                break;
+
+            case "DRAW":
+                // 抽牌（战斗buff，存入battleState）
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                applyBattleBuffToState(exp, "drawBonus", effectValue);
+                effectDescription = "额外抽 " + effectValue + " 张牌！";
+                break;
+
+            case "BOSS_DAMAGE":
+                // 对Boss造成直接伤害
+                if (!inCombat) {
+                    throw new IllegalStateException("该药水只能在战斗中使用");
+                }
+                int bossDmg = effectValue;
+                int currentEnemyHp = exp.getCurrentEnemyHp() != null ? exp.getCurrentEnemyHp() : 0;
+                int newEnemyHp = Math.max(0, currentEnemyHp - bossDmg);
+                exp.setCurrentEnemyHp(newEnemyHp);
+                effectDescription = "对敌人造成 " + bossDmg + " 点直接伤害！";
+                break;
+
+            default:
+                effectDescription = "使用了 " + potion.getNameCn() + "！";
+                break;
+        }
+
+        expeditionRepository.save(exp);
+        result.put("success", true);
+        result.put("effectType", effectType);
+        result.put("effectValue", effectValue);
+        result.put("description", effectDescription);
+        result.put("potionName", potion.getNameCn());
+        result.put("remainingQuantity", quantity);
+        result.put("expedition", buildExpeditionData(exp));
+        return result;
+    }
+
+    /**
+     * 将药水战斗buff写入battleState
+     */
+    @SuppressWarnings("unchecked")
+    private void applyBattleBuffToState(Expedition exp, String key, int value) {
+        try {
+            String bs = exp.getBattleState();
+            Map<String, Object> state;
+            if (bs != null && !"{}".equals(bs)) {
+                state = objectMapper.readValue(bs, Map.class);
+            } else {
+                state = new HashMap<>();
+            }
+            int existing = ((Number) state.getOrDefault(key, 0)).intValue();
+            state.put(key, existing + value);
+            exp.setBattleState(objectMapper.writeValueAsString(state));
+        } catch (Exception ignored) {}
     }
 }

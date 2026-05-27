@@ -70,6 +70,12 @@ public class Expedition {
     @Column(name = "battle_state", columnDefinition = "JSON")
     private String battleState;
 
+    @Column(name = "potions", columnDefinition = "JSON")
+    private String potions = "[]";
+
+    @Column(name = "map_data", columnDefinition = "JSON")
+    private String mapData = "{\"acts\":[]}";
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

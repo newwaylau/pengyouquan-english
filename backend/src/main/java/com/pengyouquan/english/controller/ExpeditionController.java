@@ -199,4 +199,52 @@ public class ExpeditionController {
         if (userId == null) return ApiResponse.unauthorized("未登录");
         return ApiResponse.success(expeditionService.getRandomSentence(userId));
     }
+
+    // ==================== 药水接口 ====================
+
+    @PostMapping("/use-potion")
+    public ApiResponse<Map<String, Object>> usePotion(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long potionId = ((Number) body.get("potionId")).longValue();
+            return ApiResponse.success(expeditionService.usePotionInCombat(userId, potionId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/potions")
+    public ApiResponse<List<Map<String, Object>>> getPotions(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        return ApiResponse.success(expeditionService.getPotions(userId));
+    }
+
+    @PostMapping("/use-potion-outside")
+    public ApiResponse<Map<String, Object>> usePotionOutside(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long potionId = ((Number) body.get("potionId")).longValue();
+            return ApiResponse.success(expeditionService.usePotion(userId, potionId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/boss-info")
+    public ApiResponse<Map<String, Object>> getBossInfo(@CurrentUserId Long userId) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            return ApiResponse.success(expeditionService.getBossInfo(userId));
+        } catch (Exception e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
 }
