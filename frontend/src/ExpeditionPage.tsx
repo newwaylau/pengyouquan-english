@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './expedition.css';
+import ExpeditionMap from './ExpeditionMap';
+import ExpeditionCampfire from './ExpeditionCampfire';
+import ExpeditionStatus from './ExpeditionStatus';
+import ExpeditionPotion from './ExpeditionPotion';
+import ExpeditionEvent from './ExpeditionEvent';
+import ExpeditionBoss from './ExpeditionBoss';
+import ExpeditionReward from './ExpeditionReward';
 
 const API_BASE = '';
 function getToken() { return localStorage.getItem('token'); }
@@ -18,7 +25,7 @@ interface ExpeditionData {
   playerHp: number; maxHp: number; gold: number; status: string;
   questionsAnswered: number; questionsTotal: number; enemiesKilled: number;
   mapNodes: string[]; currentNodeType: string;
-  deck: any[]; relics: any[];
+  deck: any[]; relics: any[]; potions?: any[];
 }
 
 interface EnemyData {
@@ -67,10 +74,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
   // Event state
   const [eventData, setEventData] = useState<any>(null);
-  
-  // Rest upgrade state
-  const [restAction, setRestAction] = useState<'heal' | 'upgrade'>('heal');
-  const [upgradeCardId, setUpgradeCardId] = useState<number | null>(null);
 
   // Shop state
   const [shopItems, setShopItems] = useState<any[]>([]);
@@ -85,8 +88,8 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   // Relic acquisition popup
   const [relicPopup, setRelicPopup] = useState<{ id: number; nameCn: string; nameEn: string; descriptionCn: string; icon: string; rarity: string } | null>(null);
 
-  // Hovered relic for tooltip
-  const [hoveredRelic, setHoveredRelic] = useState<number | null>(null);
+  // Hovered relic for tooltip (moved to ExpeditionStatus)
+  // const [hoveredRelic, setHoveredRelic] = useState<number | null>(null);
 
   // Game phase
   type Phase = 'lobby' | 'map' | 'combat' | 'event' | 'rest' | 'shop' | 'reward' | 'settlement';
@@ -348,13 +351,12 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     }
   }
 
-  // Handle node click
-  function handleNodeClick(ndx: number, nodeType: string, completed: boolean, isCurrent: boolean) {
-    if (completed || !isCurrent) return;
-    if (nodeType === 'branch') {
-      return;
-    }
-    switch (nodeType) {
+  // Handle node click (called from ExpeditionMap)
+  function handleMapNodeClick(ndx: number) {
+    if (!expedition) return;
+    const nt = expedition.mapNodes[ndx];
+    if (!nt) return;
+    switch (nt) {
       case 'combat':
       case 'boss':
         enterCombat();
@@ -377,6 +379,19 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (res.code === 200 && res.data.events) {
       setEventData(res.data.events);
       setPhase('event');
+    }
+  }
+
+  // Use potion
+  async function handleUsePotion(potionId: number) {
+    const res = await apiFetch('/api/expedition/use-potion', {
+      method: 'POST',
+      body: JSON.stringify({ potionId }),
+    });
+    if (res.code === 200) {
+      if (res.data.expedition) setExpedition(res.data.expedition);
+    } else {
+      alert(res.message || '使用药水失败');
     }
   }
 
@@ -412,88 +427,43 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
 
   // ==================== RENDER HELPERS ====================
 
-  function renderNodeIcon(type: string) {
-    return NODE_ICONS[type] || '⚪';
-  }
-
-  function renderMap() {
-    if (!expedition) return null;
-    const nodes = expedition.mapNodes || [];
-    const isBranchNode = nodeType === 'branch' && nodeOptions.length > 0;
-    return (
-      <div className="expedition-map">
-        <div className="expedition-map-act">{ACT_LABELS[expedition.act] || `第${expedition.act}层`}</div>
-        <div className="expedition-map-container">
-          {nodes.map((nt: string, ndx: number) => {
-            const isCompleted = ndx + 1 < expedition.node;
-            const isCurrent = ndx + 1 === expedition.node;
-            const isFuture = ndx + 1 > expedition.node;
-            const displayType = (nt === 'branch') ? 'branch' : nt;
-            return (
-              <React.Fragment key={ndx}>
-                <div
-                  className={`expedition-node ${isCompleted ? 'completed' : isCurrent ? 'current' : 'future'} ${displayType === 'branch' ? 'branch-node' : ''}`}
-                  onClick={() => handleNodeClick(ndx, nt, isCompleted || isFuture, isCurrent)}
-                >
-                  <span>{displayType === 'branch' ? '🔀' : renderNodeIcon(nt)}</span>
-                  <span>{displayType === 'branch' ? '岔路' : (NODE_LABELS[nt] || nt)}</span>
-                </div>
-                {ndx < nodes.length - 1 && (
-                  <div className={`expedition-node-line ${isCompleted ? 'completed' : ''}`} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-        {isBranchNode && (
-          <div className="expedition-result-overlay">
-            <div className="expedition-result-card">
-              <div className="expedition-result-icon">🔀</div>
-              <div className="expedition-result-title">选择路线</div>
-              <div className="expedition-result-text">前方岔路，请选择前进方向：</div>
-              <div className="expedition-rewards">
-                {nodeOptions.map((option: string, i: number) => (
-                  <button key={i} className="expedition-reward-btn" onClick={() => handleChoosePath(i)}>
-                    {renderNodeIcon(option)} {NODE_LABELS[option] || option}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   function renderCombat() {
     if (!enemy) return <div className="expedition-empty">加载中...</div>;
-    const hpPercent = enemy.maxHp > 0 ? (enemy.currentHp / enemy.maxHp) * 100 : 0;
     const playerHpPercent = expedition ? (expedition.playerHp / expedition.maxHp) * 100 : 100;
 
     return (
       <div className="expedition-combat">
-        {damageNumber && (
-          <div className={`expedition-damage-number ${damageNumber.type}`}>
-            {damageNumber.text}
+        {/* Boss area uses ExpeditionBoss when isBoss */}
+        {enemy.isBoss ? (
+          <ExpeditionBoss
+            boss={enemy}
+            playerHp={expedition?.playerHp || 0}
+            maxHp={expedition?.maxHp || 1}
+            damageNumber={damageNumber}
+            feedback={feedback}
+          />
+        ) : (
+          <div className="expedition-enemy-area">
+            {damageNumber && (
+              <div className={`expedition-damage-number ${damageNumber.type}`}>
+                {damageNumber.text}
+              </div>
+            )}
+            <div className="expedition-enemy-name">{enemy.nameCn}</div>
+            <div className="expedition-enemy-sub">{enemy.nameEn}</div>
+            <div className="expedition-enemy-hp-bar">
+              <div className="expedition-enemy-hp-fill" style={{ width: `${(enemy.currentHp / enemy.maxHp) * 100}%` }} />
+            </div>
+            <div className="expedition-enemy-hp-text">{enemy.currentHp} / {enemy.maxHp}</div>
+            {enemy.specialRules && Object.keys(enemy.specialRules).length > 0 && (
+              <div className="expedition-special-rules">
+                {Object.entries(enemy.specialRules).map(([k, v]) => (
+                  <div key={k}>{k}: {String(v)}</div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-
-        <div className="expedition-enemy-area">
-          {enemy.isBoss && <div className="expedition-boss-tag">BOSS</div>}
-          <div className="expedition-enemy-name">{enemy.nameCn}</div>
-          <div className="expedition-enemy-sub">{enemy.nameEn}</div>
-          <div className="expedition-enemy-hp-bar">
-            <div className="expedition-enemy-hp-fill" style={{ width: `${hpPercent}%` }} />
-          </div>
-          <div className="expedition-enemy-hp-text">{enemy.currentHp} / {enemy.maxHp}</div>
-          {enemy.specialRules && Object.keys(enemy.specialRules).length > 0 && (
-            <div className="expedition-special-rules">
-              {Object.entries(enemy.specialRules).map(([k, v]) => (
-                <div key={k}>{k}: {String(v)}</div>
-              ))}
-            </div>
-          )}
-        </div>
 
         <div className="expedition-player-area">
           <div className="expedition-player-hp-bar">
@@ -510,6 +480,13 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           <div style={{ textAlign: 'center', margin: '8px 0', fontSize: 13, fontWeight: 600, color: '#4ade80' }}>{feedback}</div>
         )}
 
+        {/* Potion bar in combat */}
+        <ExpeditionPotion
+          potions={expedition?.potions || []}
+          onUsePotion={handleUsePotion}
+          disabled={combatLoading}
+        />
+
         <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>手牌（点击出牌攻击）</div>
         <div className="expedition-hand">
           {handCards.map((card, i) => (
@@ -525,91 +502,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  function renderEvent() {
-    if (!eventData || !Array.isArray(eventData)) return <div className="expedition-empty">加载中...</div>;
-    return (
-      <div className="expedition-event">
-        <div className="expedition-event-title">❓ 事件</div>
-        <div className="expedition-event-desc">
-          你遇到了一个事件，请做出选择：
-        </div>
-        <div className="expedition-event-choices">
-          {eventData.map((choice: any, i: number) => (
-            <button key={i} className="expedition-reward-btn" onClick={() => handleEventChoice(i)}>
-              {choice.text || choice.label || `选项${i + 1}`}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function renderRest() {
-    if (!expedition) return null;
-    const deck = expedition.deck || [];
-    const hasUpgradeCards = deck.length > 0;
-    return (
-      <div className="expedition-rest">
-        <div className="expedition-rest-title">🔥 休息</div>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-          当前血量：{expedition.playerHp}/{expedition.maxHp}
-        </p>
-        <div className="expedition-rest-buttons">
-          <button className="expedition-rest-btn" onClick={() => handleRest('heal')}>
-            ❤️ 回血
-            <div className="expedition-rest-heal-amount">+{Math.ceil(expedition.maxHp * 0.3)}</div>
-          </button>
-          <button className="expedition-rest-btn" onClick={() => setRestAction('upgrade')}>
-            ⬆️ 强化卡牌
-            <div className="expedition-rest-heal-amount">攻/血+1</div>
-          </button>
-        </div>
-        {restAction === 'upgrade' && (
-          <div className="expedition-upgrade-section" style={{ marginTop: 12 }}>
-            <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
-              选择要强化的卡牌（攻击+1，生命+1）：
-            </div>
-            <div className="expedition-hand" style={{ flexWrap: 'wrap' }}>
-              {deck.map((card: any, i: number) => (
-                <div
-                  key={i}
-                  className={`expedition-hand-card ${upgradeCardId === card.id ? 'selected' : ''}`}
-                  onClick={() => setUpgradeCardId(card.id)}
-                  style={{
-                    cursor: 'pointer',
-                    border: upgradeCardId === card.id ? '2px solid #ffd700' : '2px solid transparent',
-                    transition: 'border 0.2s',
-                  }}
-                >
-                  <div className="expedition-hand-card-name">{card.nameCn}</div>
-                  <div className="expedition-hand-card-attack">
-                    ⚔️{card.effectiveAttack || card.attack || 0}
-                    {card.attackBonus > 0 && <span style={{ color: '#4ade80', marginLeft: 2 }}>(+{card.attackBonus})</span>}
-                  </div>
-                  <div className="expedition-hand-card-cost">❤️{card.effectiveHealth || card.health || 0}</div>
-                </div>
-              ))}
-            </div>
-            <button
-              className="expedition-rest-btn"
-              style={{ marginTop: 8, opacity: upgradeCardId ? 1 : 0.5 }}
-              disabled={!upgradeCardId}
-              onClick={() => {
-                if (upgradeCardId) {
-                  handleRest('upgrade', upgradeCardId);
-                  setRestAction('heal');
-                  setUpgradeCardId(null);
-                }
-              }}
-            >
-              ✅ 确认强化
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -686,25 +578,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         <button className="expedition-start-btn" onClick={leaveShop} style={{ marginTop: 12 }}>
           离开商店
         </button>
-      </div>
-    );
-  }
-
-  function renderReward() {
-    return (
-      <div className="expedition-result-overlay">
-        <div className="expedition-result-card">
-          <div className="expedition-result-icon">🎁</div>
-          <div className="expedition-result-title">击败敌人！</div>
-          <div className="expedition-result-text">选择一个奖励：</div>
-          <div className="expedition-rewards">
-            {rewardChoices.map((choice: any, i: number) => (
-              <button key={i} className="expedition-reward-btn" onClick={() => handleApplyReward(choice)}>
-                {choice.label || '选择'}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
@@ -864,47 +737,54 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       {tab === 'history' ? renderHistory() : (
         <>
           {hasExpedition && expedition && (
-            <div className="expedition-active-bar">
-              <span className="act-label">
-                {ACT_LABELS[expedition.act] || `第${expedition.act}层`} · 节点 {expedition.node}/{expedition.mapNodes?.length || 0}
-              </span>
-              <span>❤️{expedition.playerHp}/{expedition.maxHp} 🪙{expedition.gold}</span>
-              <button className="expedition-abandon-btn" onClick={handleAbandon}>放弃</button>
-              {expedition.relics && expedition.relics.length > 0 && (
-                <div className="expedition-relic-bar">
-                  {expedition.relics.map((rel: any, i: number) => (
-                    <div
-                      key={i}
-                      className={`expedition-relic-icon expedition-relic-${rel.rarity || 'common'}`}
-                      onMouseEnter={() => setHoveredRelic(i)}
-                      onMouseLeave={() => setHoveredRelic(null)}
-                    >
-                      <span>{rel.icon || '🪙'}</span>
-                      {hoveredRelic === i && (
-                        <div className="expedition-relic-tooltip">
-                          <div className="expedition-relic-tooltip-name">
-                            {rel.icon || ''} {rel.nameCn || ''}
-                          </div>
-                          <div className="expedition-relic-tooltip-rarity">{rel.rarity || ''}</div>
-                          <div className="expedition-relic-tooltip-desc">
-                            {rel.descriptionCn || rel.effectCn || rel.effectType || ''}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <>
+              {/* New: ExpeditionStatus component replaces inline status bar */}
+              <ExpeditionStatus expedition={expedition} onAbandon={handleAbandon} />
+
+              {/* New: ExpeditionPotion component */}
+              <ExpeditionPotion
+                potions={expedition.potions || []}
+                onUsePotion={handleUsePotion}
+                disabled={phase === 'combat'}
+              />
+            </>
           )}
 
           {phase === 'lobby' && renderLobby()}
-          {phase === 'map' && renderMap()}
+
+          {phase === 'map' && expedition && (
+            <ExpeditionMap
+              mapNodes={expedition.mapNodes || []}
+              currentNodeIndex={expedition.node - 1}
+              nodeType={nodeType}
+              nodeOptions={nodeOptions}
+              onNodeClick={handleMapNodeClick}
+              onChoosePath={handleChoosePath}
+              act={expedition.act}
+            />
+          )}
+
           {phase === 'combat' && renderCombat()}
-          {phase === 'event' && renderEvent()}
-          {phase === 'rest' && renderRest()}
+
+          {phase === 'event' && (
+            <ExpeditionEvent eventData={eventData} onChoice={handleEventChoice} />
+          )}
+
+          {phase === 'rest' && expedition && (
+            <ExpeditionCampfire
+              playerHp={expedition.playerHp}
+              maxHp={expedition.maxHp}
+              deck={expedition.deck || []}
+              onRest={handleRest}
+            />
+          )}
+
           {phase === 'shop' && renderShop()}
-          {phase === 'reward' && renderReward()}
+
+          {phase === 'reward' && (
+            <ExpeditionReward rewardChoices={rewardChoices} onChoose={handleApplyReward} />
+          )}
+
           {phase === 'settlement' && renderSettlement()}
 
           {relicPopup && (
