@@ -1,0 +1,69 @@
+## 任务1：删除远征系统（前后端+数据库+导航）
+
+### 前端：删除以下文件
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionPage.tsx (791行)
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionMap.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionStatus.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionCampfire.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionEvent.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionReward.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionBoss.tsx
+- /home/heaton/pengyouquan-english/frontend/src/ExpeditionPotion.tsx
+- /home/heaton/pengyouquan-english/frontend/src/expedition.css
+
+### 注意：BattlePageSit.tsx 保留，不要删除！
+这个文件是新的Slay the Spire战斗系统，以后可能复用。
+
+### 前端：修改 App.tsx
+在 /home/heaton/pengyouquan-english/frontend/src/App.tsx:
+1. 移除 ExpeditionPage 的懒加载 import（第21行）
+2. 移除 `{page === 'expedition' && <ExpeditionPage ...>}` 这一行（第223行）
+3. 从底部导航（mobile-bottom-nav）移除 "远征" 按钮项（第236行那段含 `key: 'expedition'` 的）
+
+### 后端：删除以下 Java 源文件
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/controller/ExpeditionController.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/controller/ExpeditionCombatController.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/service/ExpeditionService.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/service/ExpeditionCombatService.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/service/ExpeditionBossService.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/service/ExpeditionStatusService.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/service/ExpeditionMapService.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/Expedition.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionBattleState.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionCard.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionStory.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionPotion.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionRelic.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionEvent.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/model/ExpeditionEnemy.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionBattleStateRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionCardRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionStoryRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionPotionRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionRelicRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionEventRepository.java
+- /home/heaton/pengyouquan-english/backend/src/main/java/com/pengyouquan/english/repository/ExpeditionEnemyRepository.java
+
+### 数据库：删除远征相关 Flyway 迁移文件
+- /home/heaton/pengyouquan-english/backend/src/main/resources/db/migration/V30__add_expedition_relics.sql
+- /home/heaton/pengyouquan-english/backend/src/main/resources/db/migration/V32__add_expedition_stories.sql
+- /home/heaton/pengyouquan-english/backend/src/main/resources/db/migration/V34__add_expedition_combat_system.sql
+- /home/heaton/pengyouquan-english/backend/src/main/resources/db/migration/V35__add_combat_seed_data.sql
+
+### 数据库：创建新的 Flyway 迁移文件删除远征表
+在 /home/heaton/pengyouquan-english/backend/src/main/resources/db/migration/ 创建 V36__drop_expedition_tables.sql:
+```sql
+DROP TABLE IF EXISTS expedition_battle_state;
+DROP TABLE IF EXISTS expedition_cards;
+DROP TABLE IF EXISTS expedition_enemies;
+DROP TABLE IF EXISTS expedition_events;
+DROP TABLE IF EXISTS expedition_potions;
+DROP TABLE IF EXISTS expedition_relics;
+DROP TABLE IF EXISTS expedition_stories;
+DROP TABLE IF EXISTS expeditions;
+```
+
+### 验证
+1. 前端运行 `cd /home/heaton/pengyouquan-english/frontend && npx tsc --noEmit` 检查编译
+2. 后端运行 `cd /home/heaton/pengyouquan-english/backend && ./gradlew compileJava` 检查编译

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './expedition.css';
 
 const API_BASE = '';
 function getToken() { return localStorage.getItem('token'); }

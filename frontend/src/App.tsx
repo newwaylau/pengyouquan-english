@@ -18,7 +18,6 @@ const BattleArenaPage = React.lazy(() => import('./BattleArenaPage'));
 const EquipmentPage = React.lazy(() => import('./EquipmentPage'));
 const HeroSelectPage = React.lazy(() => import('./HeroSelectPage'));
 const ChangePasswordModal = React.lazy(() => import('./ChangePasswordModal'));
-const ExpeditionPage = React.lazy(() => import('./ExpeditionPage'));
 const GuildPage = React.lazy(() => import('./GuildPage'));
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
@@ -30,7 +29,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero' | 'expedition' | 'guild'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero' | 'guild'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -152,7 +151,7 @@ export default function App() {
               {page === 'clan' && '七国铁王座'}
               {page === 'equipment' && '装备'}
               {page === 'hero' && '英雄'}
-              {page === 'expedition' && '远征'}
+
               {page === 'guild' && '公会'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
@@ -220,7 +219,7 @@ export default function App() {
             {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
             {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
             {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
-            {page === 'expedition' && <ExpeditionPage user={user} onNavigate={handleNavigate} />}
+
             {page === 'guild' && <GuildPage user={user} onNavigate={handleNavigate} />}
             {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
           </Suspense>
@@ -233,7 +232,7 @@ export default function App() {
             { key: 'cards', icon: <span>🎴</span>, label: '卡牌', requiresLogin: true },
             { key: 'battle', icon: <span>⚔️</span>, label: '对战', requiresLogin: true },
             { key: 'hero', icon: <span>🦸</span>, label: '英雄', requiresLogin: true },
-            { key: 'expedition', icon: <span>🗡️</span>, label: '远征', requiresLogin: true },
+
             { key: 'guild', icon: <span>🏰</span>, label: '公会', requiresLogin: true },
           ].map(item => {
             const disabled = item.requiresLogin && !user;
