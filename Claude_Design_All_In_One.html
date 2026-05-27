@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冰与火·远征 — 完整设计方案（三合一）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-border: #334155;
+    --text: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: #334155;
+    --teal: #14b8a6;
+    --teal-dark: #0d9488;
+    --teal-light: #5eead4;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --orange: #f97316;
+    --gold: #fbbf24;
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #060b18;
+    color: var(--text);
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    padding: 40px 20px;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+  .container { max-width: 1240px; margin: 0 auto; }
+
+  /* ====== Header ====== */
+  .main-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light), #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .main-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .main-meta {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 48px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .main-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ====== Chapter Divider ====== */
+  .chapter-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 56px 0 40px;
+    position: relative;
+  }
+  .chapter-divider::before,
+  .chapter-divider::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  }
+  .chapter-divider .chap-num {
+    background: var(--teal);
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .chapter-divider .chap-label {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--teal-light);
+    white-space: nowrap;
+  }
+
+  /* ====== Section Title ====== */
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 32px 0 20px;
+    color: var(--teal-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: rgba(20,184,166,0.15);
+    color: var(--teal);
+  }
+
+  /* ====== Cards ====== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 16px 0 8px;
+    color: var(--teal-light);
+  }
+  .card h4:first-of-type { margin-top: 0; }
+  .card p, .card li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .card ul, .card ol {
+    padding-left: 20px;
+    margin: 6px 0 10px;
+  }
+  .card li { margin-bottom: 4px; }
+
+  /* ====== Grid ====== */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+
+  /* ====== Badge / Chip ====== */
+  .badge-teal { display: inline-block; background: rgba(20,184,166,0.12); color: var(--teal-light); padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .badge-purple { display: inline-block; background: rgba(168,85,247,0.15); color: #c084fc; padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .badge-gold { display: inline-block; background: rgba(251,191,36,0.15); color: var(--gold); padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .badge-red { display: inline-block; background: rgba(239,68,68,0.15); color: #fca5a5; padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .badge-green { display: inline-block; background: rgba(34,197,94,0.15); color: #86efac; padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .badge-blue { display: inline-block; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+
+  /* ====== Tables ====== */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 12px 0 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(0,0,0,0.25);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  table tr:last-child td { border-bottom: none; }
+  table .highlight-col { color: var(--teal-light); font-weight: 600; }
+
+  /* ====== Variant Cards (Chapter 1) ====== */
+  .variant-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .variant-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .variant-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .variant-icon.a { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid var(--teal); }
+  .variant-icon.b { background: linear-gradient(135deg, #2d1b69, #1a1a2e); border: 1px solid var(--purple); }
+  .variant-icon.c { background: linear-gradient(135deg, #1e3a2f, #0f172a); border: 1px solid var(--gold); }
+  .variant-head .vtitle { font-size: 18px; font-weight: 800; }
+  .variant-head .vdesc { font-size: 13px; color: var(--text-secondary); }
+  .variant-body { padding: 20px 22px; }
+  .variant-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+  .vf-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .vf-card h4 { font-size: 13px; font-weight: 700; color: var(--teal-light); margin-bottom: 4px; }
+  .vf-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ====== Philosophy Grid ====== */
+  .philosophy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .phil-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+  .phil-card .icon { font-size: 28px; margin-bottom: 6px; }
+  .phil-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .phil-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ====== Animation Templates ====== */
+  .anim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .anim-item {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    border-left: 3px solid var(--teal);
+  }
+  .anim-item .aname { font-weight: 700; font-size: 14px; color: var(--text); }
+  .anim-item .aname .idx { color: var(--text-muted); font-weight: 400; margin-right: 4px; }
+  .anim-item .avis { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+
+  /* ====== StS Compat Table ====== */
+  .sts-compat { margin: 12px 0; }
+
+  /* ====== Code blocks ====== */
+  pre {
+    background: #0c1427;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #e2e8f0;
+    margin: 10px 0;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  code {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* ====== Priority Rows ====== */
+  .prio-list { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+  .prio-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .prio-tag {
+    flex-shrink: 0;
+    width: 38px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 3px 0;
+    border-radius: 6px;
+  }
+  .prio-tag.p0 { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  .prio-tag.p1 { background: rgba(251,191,36,0.2); color: var(--gold); }
+  .prio-tag.p2 { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .prio-tag.p3 { background: rgba(148,163,184,0.2); color: var(--text-secondary); }
+  .prio-text { flex: 1; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ====== StS Comparison Table ====== */
+  .cmp-table td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+  .cmp-yes { color: var(--success); }
+  .cmp-no { color: var(--danger); }
+
+  /* ====== Node Type Cards ====== */
+  .node-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .node-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+  }
+  .node-card .nicon { font-size: 28px; margin-bottom: 4px; }
+  .node-card .nname { font-size: 13px; font-weight: 700; }
+  .node-card .ncount { font-size: 11px; color: var(--text-muted); }
+
+  /* ====== Legal ====== */
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 20px 12px; }
+    .main-title { font-size: 24px; }
+    .chapter-divider .chap-label { font-size: 17px; }
+    .section-title { font-size: 18px; }
+    .variant-head { flex-direction: column; text-align: center; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- HEADER -->
+<!-- ============================================================ -->
+<h1 class="main-title">🐉 冰与火 · 远征</h1>
+<p class="main-subtitle">英语剧场 — 完整设计方案</p>
+<div class="main-meta">
+  <span>⚔️ 社交对战系统 · 三套方向</span>
+  <span>🎬 卡牌动画系统 · 15种模板</span>
+  <span>🗺️ 杀戮尖塔复刻 · 10幕520节点</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 1: 社交对战系统 -->
+<!-- ============================================================ -->
+<div class="chapter-divider">
+  <span class="chap-num">1</span>
+  <span class="chap-label">社交对战系统</span>
+</div>
+
+<!-- Design Foundation -->
+<div class="card">
+  <h3>🎨 共用设计基础</h3>
+  <div class="grid-3" style="margin-top:12px;">
+    <div class="vf-card"><h4>颜色系统</h4><p>Teal/Slate 主题 · 与现有项目 CSS 变量一致 · 深色/白天双模式</p></div>
+    <div class="vf-card"><h4>卡牌稀有度</h4><p>🟢 普通 · 🔵 稀有 · 🟣 史诗 · 🟠 传说</p></div>
+    <div class="vf-card"><h4>核心费用</h4><p>1~10 费能量系统 · 起始 3 费 · 每回合 +1</p></div>
+    <div class="vf-card"><h4>关键词</h4><p>嘲讽 · 圣盾 · 战吼 · 亡语 · 突袭 · 冲锋 · 潜行</p></div>
+    <div class="vf-card"><h4>卡牌类型</h4><p>随从 · 法术 · 装备 · 英雄技能</p></div>
+    <div class="vf-card"><h4>状态系统</h4><p>力量 · 虚弱 · 易伤 · 中毒 · 敏捷 · 格挡</p></div>
+  </div>
+</div>
+
+<!-- Variant A -->
+<div class="variant-card">
+  <div class="variant-head">
+    <div class="variant-icon a">🏰</div>
+    <div>
+      <div class="vtitle" style="color:var(--teal-light);">方向A：炉石酒馆</div>
+      <div class="vdesc">经典社交对战 · 好友约战 · 异步挑战 · 段位天梯</div>
+    </div>
+  </div>
+  <div class="variant-body">
+    <p style="margin-bottom:12px;">最接近炉石传说的体验。酒馆大厅作为社交中枢，好友列表、异步挑战、实时匹配三位一体。费用系统 (3→10)，随从交换，关键词体系，英雄技能，宝箱系统（练习解锁）。纯点击操作，零打字，拖拽出牌。</p>
+    <div class="variant-features">
+      <div class="vf-card"><h4>🎯 核心定位</h4><p>酒馆大厅 · 好友列表 · 异步挑战 · 实时匹配</p></div>
+      <div class="vf-card"><h4>⚙️ 关键机制</h4><p>费用系统 · 随从交换 · 关键词 · 英雄技能 · 宝箱系统</p></div>
+      <div class="vf-card"><h4>🎮 流畅度</h4><p>纯点击 · 拖拽出牌 · EffectEngine 动画反馈</p></div>
+      <div class="vf-card"><h4>🔄 英语关联</h4><p>练习→宝箱→开卡→组牌→对战→赢奖杯→赛季结算→需要更多练习</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Variant B -->
+<div class="variant-card">
+  <div class="variant-head">
+    <div class="variant-icon b">⚡</div>
+    <div>
+      <div class="vtitle" style="color:#c084fc;">方向B：竞技天梯</div>
+      <div class="vdesc">段位竞技 · 赛季制 · 奖杯之路 · 全服排行</div>
+    </div>
+  </div>
+  <div class="variant-body">
+    <p style="margin-bottom:12px;">竞技驱动型。段位系统（青铜→白银→黄金→白金→钻石→传说），赛季重置，奖杯排行。全自动匹配，按段位匹配，可跨区匹配，异步重播。</p>
+    <div class="variant-features">
+      <div class="vf-card"><h4>🎯 核心定位</h4><p>段位系统 · 赛季重置 · 奖杯排行</p></div>
+      <div class="vf-card"><h4>⚙️ 关键机制</h4><p>赛季制 · 段位保护 · 连胜奖励 · 赛季宝箱 · 传说卡背/头像</p></div>
+      <div class="vf-card"><h4>🎮 流畅度</h4><p>全自动段位匹配 · 跨区匹配 · 异步重播</p></div>
+      <div class="vf-card"><h4>🔄 英语关联</h4><p>赛季任务=练习目标 · 赛季宝箱=练习量 · 高段位=更多练习资源需求</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Variant C -->
+<div class="variant-card">
+  <div class="variant-head">
+    <div class="variant-icon c">🏟️</div>
+    <div>
+      <div class="vtitle" style="color:var(--gold);">方向C：公会竞技</div>
+      <div class="vdesc">公会系统 · 部落战 · 组队排行 · 社交生态</div>
+    </div>
+  </div>
+  <div class="variant-body">
+    <p style="margin-bottom:12px;">社交驱动型。公会创建/加入、部落战（每周）、公会排行、贡献系统、聊天系统。异步部落战（总积分比拼），无需同时在线，贡献=对战+练习。</p>
+    <div class="variant-features">
+      <div class="vf-card"><h4>🎯 核心定位</h4><p>公会创建/加入 · 部落战 · 贡献排行 · 聊天系统</p></div>
+      <div class="vf-card"><h4>⚙️ 关键机制</h4><p>公会等级 · 公会科技树 · 部落战攻城 · 贡献排行 · 公会宝库</p></div>
+      <div class="vf-card"><h4>🎮 流畅度</h4><p>异步部落战（总积分比拼）· 无需同时在线</p></div>
+      <div class="vf-card"><h4>🔄 英语关联</h4><p>公会任务=集体练习目标 · 公会宝箱=全公会练习量</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Core Mechanics Table -->
+<div class="card">
+  <h3>⚙️ 核心机制（三者共用）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>机制</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight-col">学习→资源</td><td>练习英语（听写/拼写）→ 赚取卡包/星尘 → 开卡 → 组牌 → 对战。唯一资源入口，无体力系统。</td></tr>
+        <tr><td class="highlight-col">费用系统</td><td>起始 3 费，每回合 +1，上限 10 费。出牌消耗费用。无英语题干扰，纯策略操作。</td></tr>
+        <tr><td class="highlight-col">卡牌关键词</td><td>嘲讽（强制攻击）· 圣盾（抵挡一次伤害）· 战吼（入场效果）· 亡语（死亡效果）· 突袭（当回合可攻击随从）· 冲锋（当回合可攻击英雄）</td></tr>
+        <tr><td class="highlight-col">状态系统</td><td>力量（攻击加成）· 虚弱（攻击减半）· 易伤（受伤+50%）· 中毒（每回合扣血）· 敏捷（护甲加成）· 格挡（每回合重置）</td></tr>
+        <tr><td class="highlight-col">宝箱系统</td><td>对战胜利得宝箱 → 练习英语解锁（10/25/50句）→ 开卡牌/星尘。无等待计时器，全部用练习量解锁。</td></tr>
+        <tr><td class="highlight-col">内容包扩展</td><td>每部剧/每季 = 独立扩展包。包含 15-30 张新卡、新英雄、新关键词。跨包卡牌可混合组牌。</td></tr>
+        <tr><td class="highlight-col">卡片稀有度</td><td>🟢 普通 → 🔵 稀有 → 🟣 史诗 → 🟠 传说。稀有度影响出场动画品质，不影响平衡性。</td></tr>
+        <tr><td class="highlight-col">英雄系统</td><td>每英雄有专属技能（2费使用）。不同英雄解锁不同卡牌类型/关键词组合。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Card Preview -->
+<div class="card">
+  <h3>🃏 卡牌预览（概念设计）</h3>
+  <div class="grid-4">
+    <div style="background:var(--card);border:1px solid rgba(148,163,184,0.3);border-radius:var(--radius);padding:14px;text-align:center;">
+      <span class="badge-teal" style="background:rgba(148,163,184,0.2);color:var(--text-secondary);">普通</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#6b7280;color:#fff;display:flex;align-items:center;justify-content:center;margin:6px auto;font-weight:800;font-size:14px;">1</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:2px;">北境斥候</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">随从</div>
+      <div style="font-size:14px;font-weight:700;display:flex;justify-content:center;gap:12px;margin-bottom:4px;"><span style="color:var(--danger);">1</span>/<span style="color:var(--success);">2</span></div>
+      <div style="font-size:10px;color:var(--text-muted);line-height:1.4;">战吼：抽一张牌</div>
+      <div style="margin-top:4px;"><span class="badge-blue">战吼</span></div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:14px;text-align:center;">
+      <span class="badge-blue" style="background:rgba(59,130,246,0.2);color:#60a5fa;">稀有</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;margin:6px auto;font-weight:800;font-size:14px;">2</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:2px;">守夜人誓言</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">法术</div>
+      <div style="margin:6px 0;"><span style="color:var(--teal-light);font-size:13px;font-weight:700;">获得 6 点格挡</span></div>
+      <div style="font-size:10px;color:var(--text-muted);line-height:1.4;">抽一张牌</div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(168,85,247,0.3);border-radius:var(--radius);padding:14px;text-align:center;">
+      <span class="badge-purple">史诗</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;margin:6px auto;font-weight:800;font-size:14px;">4</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:2px;">龙之吐息</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">法术</div>
+      <div style="margin:6px 0;"><span style="color:var(--danger);font-size:13px;font-weight:700;">对所有敌人造成 4 点伤害</span></div>
+      <div style="font-size:10px;color:var(--text-muted);line-height:1.4;">全场 AOE</div>
+    </div>
+    <div style="background:linear-gradient(180deg,#3b2a1a,#1e1a12);border:1px solid rgba(251,191,36,0.4);border-radius:var(--radius);padding:14px;text-align:center;">
+      <span class="badge-gold" style="background:rgba(251,191,36,0.2);color:var(--gold);">传说</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;margin:6px auto;font-weight:800;font-size:14px;">8</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:2px;">夜王 · 异鬼之王</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">随从</div>
+      <div style="font-size:14px;font-weight:700;display:flex;justify-content:center;gap:12px;margin-bottom:4px;"><span style="color:var(--danger);">8</span>/<span style="color:var(--success);">8</span></div>
+      <div style="font-size:10px;color:var(--text-muted);line-height:1.4;">亡语：复活所有本局阵亡的友方随从</div>
+      <div style="margin-top:4px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;"><span class="badge-red">嘲讽</span><span class="badge-purple">亡语</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Design Philosophy -->
+<div class="card">
+  <h3>📐 设计哲学</h3>
+  <div class="philosophy-grid">
+    <div class="phil-card"><div class="icon">🔄</div><h4>零付费闭环</h4><p>英语练习 = 唯一资源入口。没有体力系统、没有付费加速、没有等待计时器。练多少拿多少。</p></div>
+    <div class="phil-card"><div class="icon">🎮</div><h4>纯策略对战</h4><p>对战过程零英语题、零打字。炉石式点击操作：点手牌→拖战场→攻击选择。游戏体验与英语完全解耦。</p></div>
+    <div class="phil-card"><div class="icon">🏗️</div><h4>渐进式实现</h4><p>P1：异步挑战（纯REST）→ P2：WebSocket实时对战 → P3：公会/部落战/赛季生态。每阶段可玩。</p></div>
+    <div class="phil-card"><div class="icon">🃏</div><h4>收藏驱动</h4><p>全卡收集、全英雄解锁、全关键词组合。每个扩展包=新卡+新流派+新英雄。持续更新的动力。</p></div>
+    <div class="phil-card"><div class="icon">🤝</div><h4>社交粘性</h4><p>好友挑战、公会归属、段位竞争、部落战集体目标。社交压力+集体荣誉=长期留存。</p></div>
+    <div class="phil-card"><div class="icon">📊</div><h4>数据驱动</h4><p>胜率统计、段位分布、工会贡献、赛季排行。每场对战后有详细复盘。玩家看到进步。</p></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 2: 卡牌动画系统 + 杀戮尖塔兼容性 -->
+<!-- ============================================================ -->
+<div class="chapter-divider">
+  <span class="chap-num">2</span>
+  <span class="chap-label">卡牌动画系统 + 杀戮尖塔兼容性</span>
+</div>
+
+<!-- Architecture -->
+<div class="card">
+  <h3>🏗️ 核心架构：4参数引擎</h3>
+  <pre>每张卡 → race + element + keyword + rarity + cost
+         ↓
+    动画配置生成器（buildAnimProfile）
+         ↓
+    15种模板 × 参数调制 = 每张卡独一无二的动画</pre>
+  <p style="font-size:14px;color:var(--text-secondary);">所有卡用 race+element+keyword+rarity 自动计算动画配置，不手写单卡动画。夸张模式优先：震动+喷火+闪电，全部走夸张模式。</p>
+</div>
+
+<!-- 15 Templates -->
+<div class="card">
+  <h3>🎬 15种动画模板</h3>
+  <div class="anim-grid">
+    <div class="anim-item"><div class="aname"><span class="idx">01</span>INFERNO 地狱烈焰</div><div class="avis">🔥 地面爆发→冲天火焰, 50+火焰粒子, 屏幕震动 · 龙族·火, 高费传说</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">02</span>SHATTER 冰碎裂爆</div><div class="avis">🧊 卡片碎裂重组, 冰晶粒子, 蓝白闪光 · 冰族, 亡语卡</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">03</span>SHADOWREALM 暗影穿越</div><div class="avis">🌑 卡片消失→暗影中重现, 紫色粒子 · 暗影族, 潜行卡</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">04</span>LIGHT 圣光天降</div><div class="avis">✨ 金色光柱从天降, 圣光粒子上升 · 圣光族, 治疗卡</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">05</span>METEOR 流星坠地</div><div class="avis">☄️ 流星冲击, 震撼屏幕, 冲击波 · 高费, 铁甲, 嘲讽</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">06</span>BLOOM 花瓣绽放</div><div class="avis">🌸 螺旋绽放, 自然粒子, 轻柔 · 野兽·自然, 低费</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">07</span>THUNDER 雷暴降临</div><div class="avis">⚡ 蓝色闪电, 电击爆裂 · 雷电元素, 史诗+</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">08</span>CRYSTAL 水晶凝聚</div><div class="avis">💎 几何碎片聚合成卡, 棱镜反光 · 贵族角色</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">09</span>GHOSTLY 幽灵凝聚</div><div class="avis">👻 半透明虚影逐渐实体化 · 亡灵, 仆从, 普通卡</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">10</span>VORTEX 能量漩涡</div><div class="avis">🌀 螺旋吸入漩涡, 风轨线条 · 法术卡, 敏捷角色</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">11</span>ARCANE 奥术符文</div><div class="avis">🔮 符文光圈, 奥术符号上浮 · 法师/法术强度</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">12</span>POISON 毒雾弥漫</div><div class="avis">☠️ 绿色毒雾, 气泡升腾 · 刺客/毒系</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">13</span>WIND 疾风突袭</div><div class="avis">💨 速度线, 侧滑入场, 快速 · 冲锋, 低费, 敏捷</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">14</span>EARTH 大地震颤</div><div class="avis">🌍 地面震动, 石柱升起, 重击 · 坦克/防御</div></div>
+    <div class="anim-item"><div class="aname"><span class="idx">15</span>HOLY 圣光飞升</div><div class="avis">🌟 金色光环, 天使粒子, 升腾 · 传说圣光, Boss卡</div></div>
+  </div>
+</div>
+
+<!-- Timeline Example -->
+<div class="card">
+  <h3>⏱️ 投产时序（以龙族为例，1.2秒）</h3>
+  <pre>[0ms]    卡片从 scale(0.2)→1.3，旋转，火焰径向覆盖
+[250ms]  30个火焰粒子爆发（Canvas）
+[300ms]  背景火焰短暂闪白
+[420ms]  屏幕震动（CSS shake）
+[540ms]  卡片回正 scale(1)
+[660ms]  敌人受击效果（偏移+亮度） + 伤害数字浮动
+[1200ms] 传说金色微光持续</pre>
+</div>
+
+<!-- Rarity Multiplier -->
+<div class="card">
+  <h3>💎 稀有度乘数表</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>稀有度</th><th>粒子数</th><th>时长</th><th>额外效果</th></tr></thead>
+      <tbody>
+        <tr><td>🟢 普通</td><td>3-5</td><td>0.3s</td><td>—</td></tr>
+        <tr><td>🔵 稀有</td><td>8-10</td><td>0.5s</td><td>边框闪光</td></tr>
+        <tr><td>🟣 史诗</td><td>15-20</td><td>0.8s</td><td>粒子颜色渐变</td></tr>
+        <tr><td>🟠 传说</td><td>25-35</td><td>1.2s</td><td>金色旋转辉光 + 全屏闪</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CSS + Canvas Dual Engine -->
+<div class="card">
+  <h3>⚡ CSS + Canvas 双引擎</h3>
+  <pre>CSS @keyframes → 卡片本体变换（缩放/旋转/位移/不透明度）
+Canvas requestAnimationFrame → 粒子特效（火焰/冰晶/暗影/圣光）</pre>
+  <p style="font-size:14px;color:var(--text-secondary);margin-top:8px;">实现文件：<code>animationProfiles.ts</code>（15模板映射表）· <code>useCardAnim.ts</code>（React hook）· <code>particles.ts</code>（Canvas粒子系统）· <code>card-animations.css</code>（15套@keyframes）</p>
+</div>
+
+<!-- StS Compatibility -->
+<div class="card">
+  <h3>🔌 杀戮尖塔兼容性分析</h3>
+  <h4 style="margin-top:0;">表结构检查</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>列名</th><th>当前值</th><th>杀戮尖塔需求</th><th>兼容？</th></tr></thead>
+      <tbody>
+        <tr><td><code>card_type</code></td><td>minion/spell/equipment/location</td><td>attack/skill/power/curse/status</td><td><span class="badge-gold">⚠️ 需映射</span></td></tr>
+        <tr><td><code>cost</code></td><td>1-8</td><td>0-3 energy</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>attack</code></td><td>0-8</td><td>damage per card</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>health</code></td><td>1-8</td><td>不适用（HP是战斗状态）</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>effect_json</code></td><td>JSON描述</td><td>结构化效果数据</td><td><span class="badge-gold">⚠️ 需新增字段</span></td></tr>
+        <tr><td><code>keywords</code></td><td>battlecry/taunt等</td><td>无直接对应</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>faction</code></td><td>stark/targaryen</td><td>种族faction</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>race</code></td><td>龙/人/兽</td><td>无直接对应</td><td><span class="badge-green">✅</span></td></tr>
+        <tr><td><code>element</code></td><td>火/冰/暗影</td><td>无直接对应</td><td><span class="badge-green">✅</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>卡牌类型映射</h4>
+  <pre>minion → attack（造成伤害的随从卡）
+       → skill（提供格挡/效果的随从卡）
+spell  → skill（法术效果）
+       → power（持续能力）
+equipment → power（装备效果）
+location → power（场地效果）</pre>
+
+  <h4>效果数据结构化要求</h4>
+  <p style="font-size:13px;color:var(--text-secondary);">当前 <code>effect_json</code> 是自由文本描述，StS需要结构化字段：</p>
+  <pre>{
+  "damage": 6,
+  "block": 5,
+  "buff_self": {"strength": 1},
+  "debuff_enemy": {"vulnerable": 2},
+  "draw": 1,
+  "description_cn": "造成 6 点伤害，获得 5 点格挡"
+}</pre>
+
+  <h4>结论</h4>
+  <div class="grid-3">
+    <div class="vf-card"><h4>✅ 数据结构完全兼容</h4><p><code>race/element/keywords/rarity</code> 字段都已存在</p></div>
+    <div class="vf-card"><h4>✅ 可直接用现有卡牌</h4><p>只需添加 <code>effect_structured</code> 字段</p></div>
+    <div class="vf-card"><h4>⚠️ 缺少StS战斗数据</h4><p>需要为每张卡补充 damage/block/buff 参数</p></div>
+  </div>
+</div>
+
+<!-- Implementation Roadmap -->
+<div class="card">
+  <h3>🛠️ 实施路线</h3>
+  <div class="prio-list">
+    <div class="prio-item"><span class="prio-tag p0">P0</span><div class="prio-text">添加结构化效果数据：给 <code>cards.effect_json</code> 补充 structured 字段（damage/block/buff等）</div></div>
+    <div class="prio-item"><span class="prio-tag p1">P1</span><div class="prio-text">实现动画引擎：创建 <code>animationProfiles.ts</code> → <code>useCardAnim.ts</code> → <code>particles.ts</code> → <code>card-animations.css</code> → 集成到 BattleArenaPage</div></div>
+    <div class="prio-item"><span class="prio-tag p2">P2</span><div class="prio-text">卡牌费用适配 + StS战斗数据：cost→energy 映射（/2 或保持原位），为每张卡补充结构化效果</div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 3: 杀戮尖塔完整复刻设计 -->
+<!-- ============================================================ -->
+<div class="chapter-divider">
+  <span class="chap-num">3</span>
+  <span class="chap-label">杀戮尖塔完整复刻设计</span>
+</div>
+
+<!-- Core Loop -->
+<div class="card">
+  <h3>🔄 核心循环（Core Loop）</h3>
+  <pre>登陆 → 练习英语（听写/填空/翻译）→ 得星尘
+  → 星尘合成卡包 → 开包得新卡（进入永久收藏池）
+  → 进入远征 → 从收藏池选8-10张初始牌组
+  → 跑图10幕520节点岔路 → 战斗/精英/事件/篝火/商店/宝箱/Boss
+  → 通关或死亡 → 得金币+星尘奖励
+  → 用金币买更多卡包 → 收藏更大 → 下次远征更强</pre>
+  <p style="font-size:14px;color:var(--text-secondary);">远征内战斗为纯杀戮尖塔模式：每回合3能量、摸5张牌、出牌攻击敌人、看敌人意图、策略选择。英语只在外围（练习→得资源），远征内无任何题目打断。</p>
+</div>
+
+<!-- Map System -->
+<div class="card">
+  <h3>🗺️ 10幕520节点地图</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>幕</th><th>区域</th><th>层数</th><th>每层节点</th><th>总节点</th><th>Boss</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>长城与荒野</td><td>8</td><td>5-7</td><td>52</td><td>野人首领曼斯·雷德</td></tr>
+        <tr><td>2</td><td>北境</td><td>8</td><td>5-7</td><td>54</td><td>拉姆斯·波顿</td></tr>
+        <tr><td>3</td><td>河间地与铁群岛</td><td>8</td><td>5-7</td><td>52</td><td>巴隆·葛雷乔伊</td></tr>
+        <tr><td>4</td><td>谷地与西境</td><td>7</td><td>5-7</td><td>50</td><td>泰温·兰尼斯特</td></tr>
+        <tr><td>5</td><td>河湾地·风暴地·君临</td><td>8</td><td>5-7</td><td>56</td><td>乔佛里/瑟曦</td></tr>
+        <tr><td>6</td><td>多恩</td><td>7</td><td>5-7</td><td>46</td><td>奥伯伦·马泰尔</td></tr>
+        <tr><td>7</td><td>自由贸易城邦</td><td>8</td><td>5-7</td><td>54</td><td>黑白之院的千面之神</td></tr>
+        <tr><td>8</td><td>多斯拉克海与奴隶湾</td><td>9</td><td>5-7</td><td>58</td><td>渊凯的奴隶主联盟</td></tr>
+        <tr><td>9</td><td>魁尔斯与东方</td><td>7</td><td>5-7</td><td>48</td><td>不朽者议会</td></tr>
+        <tr><td>10</td><td>瓦雷利亚与亚夏</td><td>7</td><td>5-7</td><td>50</td><td>亚夏阴影boss</td></tr>
+        <tr style="background:rgba(20,184,166,0.06);"><td><strong>总计</strong></td><td></td><td><strong>77</strong></td><td></td><td><strong>520</strong></td><td><strong>10</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">每层显示3-6个节点，节点类型可见（图标标识）。玩家选1个进入，选后不可回头。幕间可歇脚（回营地免费回复30%HP）或直接前进。</p>
+</div>
+
+<!-- Node Types -->
+<div class="card">
+  <h3>📌 节点类型表</h3>
+  <div class="node-grid">
+    <div class="node-card"><div class="nicon">⚔️</div><div class="nname">普通战斗</div><div class="ncount">200 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">打怪→选卡+金币</div></div>
+    <div class="node-card"><div class="nicon">💀</div><div class="nname">精英</div><div class="ncount">80 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">强敌→稀有卡+遗物</div></div>
+    <div class="node-card"><div class="nicon">❓</div><div class="nname">事件</div><div class="ncount">100 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">故事→选分支→拿/失去</div></div>
+    <div class="node-card"><div class="nicon">🔥</div><div class="nname">篝火</div><div class="ncount">60 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">回血/升级卡/特殊操作</div></div>
+    <div class="node-card"><div class="nicon">🛒</div><div class="nname">商店</div><div class="ncount">50 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">买卡/删卡/买药水/遗物</div></div>
+    <div class="node-card"><div class="nicon">💎</div><div class="nname">宝箱</div><div class="ncount">15 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">免费遗物</div></div>
+    <div class="node-card"><div class="nicon">👑</div><div class="nname">Boss</div><div class="ncount">30 节点</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">最终战→重奖</div></div>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">总计 520+ 节点，~220,000 字权游英文内容（每节点约500字/Boss 800字）</p>
+</div>
+
+<!-- Battle System -->
+<div class="card">
+  <h3>⚔️ 战斗系统</h3>
+  <h4>回合流程</h4>
+  <pre>[每回合开始]
+  1. 摸5张牌 → 获得3能量
+  2. 玩家出牌阶段（可出任意数量牌，直到能量耗尽或手牌打完）
+  3. 点击「结束回合」
+  4. 弃掉所有手牌（剩余手牌→弃牌堆）
+  5. 敌人行动（执行其意图，攻击/上Buff/Buff等）
+  6. 回合结束 → 回到步骤1</pre>
+
+  <h4>卡牌类型</h4>
+  <div class="grid-4">
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px;text-align:center;border-left:3px solid var(--danger);"><div style="font-weight:700;font-size:14px;">攻击</div><div style="font-size:11px;color:var(--text-secondary);">直接造成伤害</div></div>
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px;text-align:center;border-left:3px solid var(--success);"><div style="font-weight:700;font-size:14px;">技能</div><div style="font-size:11px;color:var(--text-secondary);">格挡/抽牌/Buff/Debuff</div></div>
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px;text-align:center;border-left:3px solid var(--purple);"><div style="font-weight:700;font-size:14px;">能力</div><div style="font-size:11px;color:var(--text-secondary);">整场战斗持续生效</div></div>
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px;text-align:center;border-left:3px solid var(--text-muted);"><div style="font-weight:700;font-size:14px;">诅咒/状态</div><div style="font-size:11px;color:var(--text-secondary);">不可打出/临时减益</div></div>
+  </div>
+
+  <h4>关键词</h4>
+  <p style="font-size:13px;color:var(--text-secondary);">Strike · Block · Exhaust · Ethereal · Innate · Retain · Unplayable · Draw X · Scry X · X-cost · AOE · Channel</p>
+
+  <h4>状态效果</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>状态</th><th>类型</th><th>效果</th></tr></thead>
+      <tbody>
+        <tr><td>⚔️ 力量 (Strength)</td><td>Buff</td><td>每点+1攻击伤害</td></tr>
+        <tr><td>🛡️ 敏捷 (Dexterity)</td><td>Buff</td><td>每点+1格挡值</td></tr>
+        <tr><td>🔴 易伤 (Vulnerable)</td><td>Debuff</td><td>受到伤害+50%</td></tr>
+        <tr><td>🔵 虚弱 (Weak)</td><td>Debuff</td><td>造成伤害-25%</td></tr>
+        <tr><td>🟤 脆弱 (Frail)</td><td>Debuff</td><td>获得格挡-25%</td></tr>
+        <tr><td>🟢 中毒 (Poison)</td><td>Debuff</td><td>回合开始扣(层数)血，层数-1</td></tr>
+        <tr><td>🟡 缠绕 (Slow)</td><td>Debuff</td><td>每打一张牌敌人受伤害+10%</td></tr>
+        <tr><td>❄️ 冰冻 (Frost)</td><td>Debuff</td><td>攻击前消耗1层，攻击力-3</td></tr>
+        <tr><td>☠️ 标记 (Marked)</td><td>Debuff</td><td>下一攻击命中时额外+50%伤害</td></tr>
+        <tr><td>🛡️ 格挡 (Block)</td><td>临时护甲</td><td>回合结束消失</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>伤害计算公式</h4>
+  <pre>最终伤害 = 基础伤害 + 力量加成
+如果敌人有易伤(Vulnerable)：最终伤害 × 1.5   (每层+50%)
+如果玩家有虚弱(Weak)：最终伤害 × 0.75
+如果敌人有缠绕(Slow)：回合内每张牌+10%
+如果敌人有标记(Marked)：第一次命中×1.5
+
+最终伤害 ≥ 1（至少1点伤害）</pre>
+</div>
+
+<!-- Enemy System -->
+<div class="card">
+  <h3>👾 敌人系统</h3>
+  <h4>意图系统</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>意图图标</th><th>含义</th><th>玩家应对</th></tr></thead>
+      <tbody>
+        <tr><td>⚔️ 数字</td><td>下回合攻击(数值)</td><td>本回合堆格挡</td></tr>
+        <tr><td>✨ 箭头向上</td><td>下回合上Buff</td><td>本回合灌伤害</td></tr>
+        <tr><td>🛡️ 盾牌</td><td>下回合叠格挡</td><td>叠力量等Buff</td></tr>
+        <tr><td>💀 箭头向下</td><td>下回合给Debuff</td><td>快速输出</td></tr>
+        <tr><td>🌀 多目标</td><td>下回合AOE攻击</td><td>堆高额格挡</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>示例敌人</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>敌人</th><th>幕</th><th>HP</th><th>行为轮转</th></tr></thead>
+      <tbody>
+        <tr><td>野人斥候</td><td>1</td><td>16</td><td>A(6)→A(6)→A(6)</td></tr>
+        <tr><td>守夜人逃兵</td><td>1</td><td>20</td><td>A(8)→D(6)→A(8)</td></tr>
+        <tr><td>兰尼斯特巡逻兵</td><td>2</td><td>28</td><td>A(10)→A(12)→B(给Weak)</td></tr>
+        <tr><td>魔山部下</td><td>3</td><td>35</td><td>A(12)→A(12)→C(蓄力14+gain2Str)</td></tr>
+        <tr><td>无面者学徒</td><td>7</td><td>32</td><td>D(10)→A(12)→A(12)→B(标记)</td></tr>
+        <tr><td>渊凯角斗士</td><td>8</td><td>40</td><td>A(10)→A(10)→A(15)→B(自回8)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Boss Design -->
+<div class="card">
+  <h3>👑 Boss 设计（双阶段）</h3>
+  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">每个Boss有2个阶段：第一阶段（100%-51%HP）较简单；第二阶段（50%-0%HP）攻击频率提升+新技能解锁。</p>
+  <div class="grid-2">
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:14px;border-left:3px solid var(--danger);">
+      <h4 style="margin-top:0;">拉姆斯·波顿（第二幕）</h4>
+      <p><strong>P1:</strong> A(12)→A(12)→B(给Frail2)→A(14) 循环</p>
+      <p><strong>P2(半血):</strong> A(14)→A(14)→A(18)→B(给Vul2+Frail2)→C(猎犬撕咬10×3)</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:14px;border-left:3px solid var(--purple);">
+      <h4 style="margin-top:0;">夜王（第十幕）</h4>
+      <p><strong>P1:</strong> A(8×4)→召唤(1个异鬼)→A(12×3)→C(冰爆AOE18)</p>
+      <p><strong>P2(半血):</strong> A(10×5)→复活(所有异鬼复活)→A(14×4)→D(冰霜结界格挡30)→C(冰矛30)</p>
+    </div>
+  </div>
+</div>
+
+<!-- Relic System -->
+<div class="card">
+  <h3>💍 遗物系统（75件）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>类型</th><th>获取方式</th><th>数量</th></tr></thead>
+      <tbody>
+        <tr><td>Boss遗物</td><td>击败幕Boss</td><td>10</td></tr>
+        <tr><td>精英遗物</td><td>击败精英</td><td>20</td></tr>
+        <tr><td>普通遗物</td><td>宝箱/商店</td><td>30</td></tr>
+        <tr><td>事件遗物</td><td>事件选择</td><td>15</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h4>权游主题遗物示例</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>遗物</th><th>稀有度</th><th>效果</th></tr></thead>
+      <tbody>
+        <tr><td>⚔️ 瓦雷利亚钢剑</td><td>Boss</td><td>你的所有攻击牌伤害+3</td></tr>
+        <tr><td>🐺 冬狼护符</td><td>精英</td><td>每回合获得2格挡</td></tr>
+        <tr><td>🗡️ 龙晶匕首</td><td>普通</td><td>对「异鬼」敌人伤害翻倍</td></tr>
+        <tr><td>👑 铁王座碎片</td><td>Boss</td><td>每打出3张牌，获得1能量</td></tr>
+        <tr><td>🎭 千面之面</td><td>事件</td><td>每场战斗第一次攻击必定命中且暴击</td></tr>
+        <tr><td>📯 龙之号角</td><td>Boss</td><td>所有牌费用-1（最少1费）</td></tr>
+        <tr><td>🔴 血色婚礼指环</td><td>精英</td><td>每杀死一个敌人回5HP</td></tr>
+        <tr><td>🔥 野火瓶</td><td>普通</td><td>战斗开始时对所有敌人造成8伤害</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Potion System -->
+<div class="card">
+  <h3>🧪 药水系统（12种）</h3>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">最多携带2瓶，战斗内使用，不消耗能量</p>
+  <div class="grid-3">
+    <div class="vf-card"><h4>⚔️ 力量药水</h4><p>本场战斗+5力量</p></div>
+    <div class="vf-card"><h4>🛡️ 格挡药水</h4><p>获得12格挡</p></div>
+    <div class="vf-card"><h4>⚡ 能量药水</h4><p>获得2能量</p></div>
+    <div class="vf-card"><h4>☠️ 中毒药水</h4><p>对全部敌人上12层中毒</p></div>
+    <div class="vf-card"><h4>💥 爆炸药水</h4><p>对所有敌人造成20伤害</p></div>
+    <div class="vf-card"><h4>🃏 急速药水</h4><p>抽3张牌</p></div>
+    <div class="vf-card"><h4>🔙 记忆药水</h4><p>从弃牌堆取一张牌回手</p></div>
+    <div class="vf-card"><h4>🌟 祝福药水</h4><p>升级手牌中所有卡牌</p></div>
+    <div class="vf-card"><h4>💨 敏捷药水</h4><p>本场战斗+4敏捷</p></div>
+    <div class="vf-card"><h4>🛡️ 铁皮药水</h4><p>金属化：每回合自动叠4格挡</p></div>
+    <div class="vf-card"><h4>❤️ 再生药水</h4><p>回复15HP</p></div>
+    <div class="vf-card"><h4>✨ 解咒药水</h4><p>移除所有负面状态</p></div>
+  </div>
+</div>
+
+<!-- Campfire & Shop -->
+<div class="card">
+  <h3>🔥 篝火系统</h3>
+  <div class="grid-3">
+    <div class="vf-card"><h4>🔥 休息 (Rest)</h4><p>回复30%的最大HP</p></div>
+    <div class="vf-card"><h4>🔨 锻造 (Smith)</h4><p>选择一张牌升级，数值翻倍或效果增强</p></div>
+    <div class="vf-card"><h4>💭 回忆 (Recall)</h4><p>若持有特殊钥匙，触发特殊事件</p></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🛒 商店系统</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>商品</th><th>数量</th><th>价格</th></tr></thead>
+      <tbody>
+        <tr><td>卡牌</td><td>3-5张</td><td>50-150金币</td></tr>
+        <tr><td>遗物</td><td>1-2件</td><td>150-350金币</td></tr>
+        <tr><td>药水</td><td>2-3瓶</td><td>40-60金币</td></tr>
+        <tr><td>删卡</td><td>1次</td><td>75金币（每次递增25）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Difficulty Curve -->
+<div class="card">
+  <h3>📈 难度曲线</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>幕</th><th>普通HP</th><th>普通攻击</th><th>精英HP</th><th>精英攻击</th><th>Boss HP</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>16-24</td><td>6-8</td><td>48</td><td>10-12</td><td>60-70</td></tr>
+        <tr><td>2</td><td>20-30</td><td>8-12</td><td>64</td><td>12-14</td><td>80-100</td></tr>
+        <tr><td>3</td><td>24-35</td><td>10-14</td><td>72</td><td>14-16</td><td>100-130</td></tr>
+        <tr><td>4</td><td>28-40</td><td>12-16</td><td>80</td><td>14-18</td><td>120-160</td></tr>
+        <tr><td>5</td><td>30-45</td><td>14-18</td><td>88</td><td>16-20</td><td>140-180</td></tr>
+        <tr><td>6</td><td>32-48</td><td>14-18</td><td>96</td><td>18-22</td><td>160-200</td></tr>
+        <tr><td>7</td><td>35-50</td><td>16-20</td><td>100</td><td>18-24</td><td>180-220</td></tr>
+        <tr><td>8</td><td>38-55</td><td>18-22</td><td>110</td><td>20-26</td><td>200-260</td></tr>
+        <tr><td>9</td><td>40-60</td><td>20-24</td><td>120</td><td>22-28</td><td>220-280</td></tr>
+        <tr><td>10</td><td>45-65</td><td>22-26</td><td>130</td><td>24-30</td><td>250-320</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">每幕敌人基础伤害+2、HP+15%。新幕引入新机制：第3幕起AOE，第5幕起Debuff，第7幕起双阶段。</p>
+</div>
+
+<!-- SQL Schema -->
+<div class="card">
+  <h3>🗄️ 数据表结构</h3>
+  <pre>-- 卡牌数据
+CREATE TABLE cards (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  card_name VARCHAR(100) NOT NULL,
+  card_name_en VARCHAR(100),
+  card_type ENUM('attack','skill','power','curse','status') NOT NULL,
+  rarity ENUM('basic','common','uncommon','rare') NOT NULL DEFAULT 'common',
+  cost INT NOT NULL DEFAULT 1,
+  description TEXT NOT NULL,
+  base_damage INT DEFAULT 0,
+  base_block INT DEFAULT 0,
+  keywords JSON,
+  upgrade_description TEXT,
+  upgrade_damage INT DEFAULT 0,
+  upgrade_block INT DEFAULT 0,
+  is_x_cost BOOLEAN DEFAULT FALSE,
+  show_id BIGINT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 玩家收藏 / 敌人 / 遗物 / 药水 / 节点内容 / 远征实例
+-- 完整表结构见原始设计文档</pre>
+  <p style="font-size:13px;color:var(--text-secondary);">完整包含：<code>cards</code> · <code>user_collections</code> · <code>enemies</code> · <code>relics</code> · <code>potions</code> · <code>node_content</code> · <code>expeditions</code> 共7张表</p>
+</div>
+
+<!-- Implementation Priority -->
+<div class="card">
+  <h3>📋 实施优先级</h3>
+  <div class="prio-list">
+    <div class="prio-item"><span class="prio-tag p0">P0</span><div class="prio-text"><strong>基础可玩：</strong>数据库表 · 50张基础卡 · 战斗系统（回合循环/能量/伤害/格挡） · 第一幕52节点 · 第一幕敌人</div></div>
+    <div class="prio-item"><span class="prio-tag p1">P1</span><div class="prio-text"><strong>完整远征：</strong>全10幕地图渲染 · 岔路选择 · 篝火/商店系统 · 全10幕敌人 · 事件系统</div></div>
+    <div class="prio-item"><span class="prio-tag p2">P2</span><div class="prio-text"><strong>杀戮尖塔完整：</strong>75件遗物 · 12种药水 · 卡牌升级 · Boss第二阶段 · 死亡流程+奖励结算</div></div>
+    <div class="prio-item"><span class="prio-tag p3">P3</span><div class="prio-text"><strong>外围系统：</strong>练习→卡包→收藏池循环 · 卡牌合成/分解 · 远征记录/统计 · 难度递增</div></div>
+  </div>
+</div>
+
+<!-- StS Comparison -->
+<div class="card">
+  <h3>⚖️ 与杀戮尖塔对标表</h3>
+  <div class="table-wrap">
+    <table class="cmp-table">
+      <thead><tr><th>机制</th><th>杀戮尖塔</th><th>本系统</th></tr></thead>
+      <tbody>
+        <tr><td>回合结构</td><td>3能量/5手牌</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>攻击/技能/能力</td><td>三种类型</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>格挡回合结束消失</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>意图系统</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>力量/敏捷/易伤/虚弱</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>中毒/缠绕/冰冻</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>卡牌升级（篝火锻造）</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>遗物系统</td><td>✅</td><td class="cmp-yes">✅ 权游主题75件</td></tr>
+        <tr><td>药水系统</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>岔路地图</td><td>✅</td><td class="cmp-yes">✅ 10幕520节点</td></tr>
+        <tr><td>事件选择</td><td>✅</td><td class="cmp-yes">✅ 100个权游事件</td></tr>
+        <tr><td>Boss双阶段</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>商店/删卡</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>卡牌奖励(3选1)</td><td>✅</td><td class="cmp-yes">✅ 从收藏池抽</td></tr>
+        <tr><td>死亡→重新开始</td><td>✅</td><td class="cmp-yes">✅ 相同</td></tr>
+        <tr><td>英语练习</td><td>❌ 无</td><td class="cmp-gold" style="color:var(--gold);">🌟 外围资源系统</td></tr>
+        <tr><td>场景文字</td><td>极简</td><td class="cmp-gold" style="color:var(--gold);">📖 每个节点500字权游</td></tr>
+        <tr><td>角色卡池</td><td>4角色固定</td><td class="cmp-gold" style="color:var(--gold);">🃏 练习挣卡→收藏池</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  pengyouquan-english · 冰与火·远征 完整设计方案<br>
+  社交对战系统 · 卡牌动画系统 · 杀戮尖塔复刻 · 三合一文档<br>
+  设计概念 · 2025
+</div>
+
+</div><!-- /container -->
+</body>
+</html>

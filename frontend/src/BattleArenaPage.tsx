@@ -106,6 +106,12 @@ interface BattleState {
   attackMode: boolean;
   selectedAttacker: CardData | null;
 
+  // 护甲 & 扩展信息
+  myArmor: number;
+  myGraveyardCount: number;
+  opponentArmor: number;
+  opponentSecrets: number;
+
   // 提示信息
   battleLog: string[];
 }
@@ -152,6 +158,11 @@ export default function BattleArenaPage({
 
     attackMode: false,
     selectedAttacker: null,
+
+    myArmor: 0,
+    myGraveyardCount: 0,
+    opponentArmor: 0,
+    opponentSecrets: 0,
 
     battleLog: [],
   });
@@ -640,170 +651,282 @@ export default function BattleArenaPage({
 
   // ===================== 渲染: 游戏进行中 =====================
 
+  // 法力水晶渲染函数
+  const renderManaCrystals = (current: number, max: number) => {
+    const crystals: JSX.Element[] = [];
+    for (let i = 0; i < 10; i++) {
+      let cls = 'mana-crystal';
+      if (i >= max) cls += ' locked';
+      else if (i >= current) cls += ' spent';
+      crystals.push(<div key={i} className={cls} />);
+    }
+    return crystals;
+  };
+
+  // 高亮攻击目标：攻击模式下，对手场上可被选中的随从
+  const isAttackableTarget = (card: CardData) => {
+    return state.attackMode && state.selectedAttacker !== null;
+  };
+
+  // 渲染随从卡
+  const renderMinionCard = (card: CardData, isMine: boolean, idx: number) => {
+    const kws = parseKeywords(card.keywords);
+    const kwBadges = kws.length > 0 ? kws.map((kw: string) => {
+      const cfg = KEYWORD_CONFIG[kw];
+      if (!cfg) return null;
+      return (
+        <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color }}>
+          {cfg.label}
+        </span>
+      );
+    }) : null;
+
+    return (
+      <div className="minion-slot" key={`${isMine ? 'my' : 'opp'}-${card.cardId}-${idx}`}>
+        <div
+          ref={(el) => {
+            if (!el) return;
+            if (isMine) {
+              myBoardRefs.current.set(card.cardId, el);
+            } else {
+              opponentBoardRefs.current.set(card.cardId, el);
+            }
+          }}
+          className={`minion-card
+            ${isMine && card.canAttack ? 'can-attack' : ''}
+            ${card.hasTaunt ? 'taunt' : ''}
+            ${isMine && state.selectedAttacker?.cardId === card.cardId ? 'selected' : ''}
+            ${!isMine && state.attackMode ? 'attackable-target' : ''}
+          `}
+          style={{ borderColor: getRarityColor(card.rarity) }}
+          onClick={() => {
+            if (isMine) {
+              handleSelectAttacker(card);
+            } else if (state.attackMode && state.selectedAttacker) {
+              handleAttackTarget('minion', card.cardId);
+            }
+          }}
+        >
+          {/* 费用宝石 */}
+          <div className="minion-cost-gem">{card.cost}</div>
+          {/* 关键词徽章（右上） */}
+          <div className="minion-keyword-badge">
+            {card.hasTaunt && <span style={{ fontSize: 10 }}>🛡️</span>}
+          </div>
+          {/* 随从名 */}
+          <div className="minion-name-label">{card.nameCn}</div>
+          {/* 关键词 */}
+          {kwBadges && (
+            <div className="cg-keywords" style={{ marginTop: 'auto' }}>
+              {kwBadges}
+            </div>
+          )}
+          {/* 攻击/生命 */}
+          <div className="minion-bottom-stats">
+            <span className="minion-atk">{card.attack}</span>
+            <span className="minion-hp">{card.health}</span>
+          </div>
+          {isMine && card.canAttack && (
+            <div className="minion-keyword-badge" style={{ position: 'absolute', top: -4, left: '50%', transform: 'translateX(-50%)', fontSize: 12 }}>
+              ⚡
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const heroRarity = 'epic';
+  const heroRarityClass = heroRarity;
+
   return (
     <div className="battle-arena" ref={fieldRef}>
-      {/* ====== 对手信息 ====== */}
-      <div className="battle-arena-opponent-bar">
-        <div className="battle-arena-opponent-info">
-          <span className="battle-arena-opponent-name">{state.opponentName}</span>
-          <div className="battle-arena-health-bar">
-            <div className="battle-arena-health-fill opponent" style={{ width: `${(state.opponentHealth / 30) * 100}%` }} />
-            <span className="battle-arena-health-text">♥{state.opponentHealth}</span>
+      {/* ====== 顶部：对手信息区域 ====== */}
+      <div className="battle-arena-opponent-area">
+        <div className="opponent-portrait-area">
+          <div className={`hero-portrait ${heroRarityClass}`}>
+            <span className="hero-icon">🧙</span>
           </div>
-        </div>
-        <div className="battle-arena-opponent-stats">
-          <span className="battle-arena-stat-item">✋{state.opponentHandCount}</span>
-          <span className="battle-arena-stat-item">🃏{state.opponentDeckCount}</span>
-        </div>
-      </div>
-
-      {/* ====== 对手场上随从 ====== */}
-      <div className="battle-arena-board opponent-board">
-        {state.opponentBoard.map((card, idx) => (
-          <div
-            key={`opp-${card.cardId}-${idx}`}
-            ref={(el) => { if (el) opponentBoardRefs.current.set(card.cardId, el); else opponentBoardRefs.current.delete(card.cardId); }}
-            className={`battle-arena-minion ${card.hasTaunt ? 'taunt' : ''}`}
-            style={{ borderColor: getRarityColor(card.rarity) }}
-            onClick={() => {
-              if (state.attackMode && state.selectedAttacker) {
-                handleAttackTarget('minion', card.cardId);
-              }
-            }}
-          >
-            <div className="battle-arena-minion-cost">{card.cost}</div>
-            <div className="battle-arena-minion-name">{card.nameCn}</div>
-            <div className="battle-arena-minion-stats">
-              <span className="battle-arena-minion-attack">⚔️{card.attack}</span>
-              <span className="battle-arena-minion-health">♥{card.health}</span>
+          <div>
+            <div className="opponent-name">{state.opponentName || '对手'}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span className="hero-hp">{state.opponentHealth}</span>
+              {state.opponentArmor > 0 && (
+                <span className="hero-armor">🛡️{state.opponentArmor}</span>
+              )}
             </div>
-            {card.hasTaunt && <div className="battle-arena-minion-keyword" style={{ color: '#e74c3c', fontSize: 9, fontWeight: 600 }}>🛡️</div>}
           </div>
-        ))}
+        </div>
+        <div className="opponent-meta-stats">
+          {/* 手牌数量 */}
+          <div className="opponent-stat-badge">
+            <span className="stat-icon">✋</span>
+            <span>{state.opponentHandCount}</span>
+          </div>
+          {/* 牌库数量 */}
+          <div className="opponent-stat-badge">
+            <span className="stat-icon">🃏</span>
+            <span>{state.opponentDeckCount}</span>
+          </div>
+          {/* 奥秘槽位 */}
+          {state.opponentSecrets > 0 && (
+            <div className="opponent-secrets">
+              {Array.from({ length: state.opponentSecrets }).map((_, i) => (
+                <div key={i} className="secret-slot">?</div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ====== 回合状态栏 ====== */}
-      <div className="battle-arena-turn-bar">
-        <span className="battle-arena-turn-number">回合 {state.turnNumber}</span>
-        <span className={`battle-arena-turn-status ${state.isMyTurn ? 'my-turn' : ''}`}>
-          {state.isMyTurn ? `你的回合 ⏱️${state.turnTimer}s` : '等待对手...'}
-        </span>
-        {state.isMyTurn && (
-          <div className="battle-arena-turn-actions">
-            {state.attackMode ? (
-              <button className="battle-arena-btn battle-arena-btn-danger-sm" onClick={handleCancelAttack}>
-                取消攻击
-              </button>
-            ) : (
-              <button className="battle-arena-btn battle-arena-btn-primary-sm" onClick={handleEndTurn}>
-                结束回合
-              </button>
-            )}
-            <button className="battle-arena-btn battle-arena-btn-ghost-sm" onClick={handleConcede}>
-              认输
-            </button>
-          </div>
+      {/* ====== 回合计时器（进度条） ====== */}
+      <div className="turn-timer-container">
+        <div
+          className={`turn-timer-fill ${state.turnTimer <= 10 && state.isMyTurn ? 'urgent' : ''}`}
+          style={{ width: `${state.isMyTurn ? (state.turnTimer / 75) * 100 : 0}%` }}
+        />
+      </div>
+
+      {/* ====== 对手随从区 ====== */}
+      <div className="battle-minion-zone">
+        {state.opponentBoard.length === 0 ? (
+          <div style={{ opacity: 0.2, fontSize: 11, padding: '24px 0' }}>空</div>
+        ) : (
+          state.opponentBoard.map((card, idx) => renderMinionCard(card, false, idx))
         )}
       </div>
 
-      {/* ====== 己方场上随从 ====== */}
-      <div className="battle-arena-board my-board">
-        {state.myBoard.map((card, idx) => (
-          <div
-            key={`my-${card.cardId}-${idx}`}
-            ref={(el) => { if (el) myBoardRefs.current.set(card.cardId, el); else myBoardRefs.current.delete(card.cardId); }}
-            className={`battle-arena-minion ${card.canAttack ? 'can-attack' : ''} ${state.selectedAttacker?.cardId === card.cardId ? 'selected' : ''} ${card.hasTaunt ? 'taunt' : ''}`}
-            style={{ borderColor: getRarityColor(card.rarity) }}
-            onClick={() => handleSelectAttacker(card)}
-          >
-            <div className="battle-arena-minion-cost">{card.cost}</div>
-            <div className="battle-arena-minion-name">{card.nameCn}</div>
-            <div className="battle-arena-minion-stats">
-              <span className="battle-arena-minion-attack">⚔️{card.attack}</span>
-              <span className="battle-arena-minion-health">♥{card.health}</span>
-            </div>
-            {card.canAttack && <div className="battle-arena-minion-ready">⚡</div>}
-            {/* 关键词徽章 */}
-            {(() => {
-              const kws = parseKeywords(card.keywords);
-              return kws.length > 0 ? (
-                <div className="cg-keywords" style={{ marginTop: 2 }}>
-                  {kws.map((kw: string) => {
-                    const cfg = KEYWORD_CONFIG[kw];
-                    return cfg ? (
-                      <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7 }}>
-                        {cfg.label}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              ) : null;
-            })()}
-          </div>
-        ))}
+      {/* ====== 中间信息区 ====== */}
+      <div className="battle-center-info">
+        <span className="battle-turn-number">回合 {state.turnNumber}</span>
+        <span className={`battle-turn-status ${state.isMyTurn ? 'my-turn' : ''}`}>
+          {state.isMyTurn ? `⏱️${state.turnTimer}s` : '等待对手...'}
+        </span>
       </div>
 
-      {/* ====== 己方状态栏 ====== */}
-      <div className="battle-arena-player-bar">
-        <div className="battle-arena-player-health">
-          <div className="battle-arena-health-bar">
-            <div className="battle-arena-health-fill" style={{ width: `${(state.myHealth / 30) * 100}%` }} />
-            <span className="battle-arena-health-text">♥{state.myHealth}</span>
+      {/* ====== 己方随从区 ====== */}
+      <div className="battle-minion-zone">
+        {state.myBoard.length === 0 ? (
+          <div style={{ opacity: 0.2, fontSize: 11, padding: '24px 0' }}>空</div>
+        ) : (
+          state.myBoard.map((card, idx) => renderMinionCard(card, true, idx))
+        )}
+      </div>
+
+      {/* ====== 法力水晶条（菱形） ====== */}
+      <div className="mana-crystal-row">
+        {renderManaCrystals(state.myMana, state.myMaxMana)}
+        <span style={{ fontSize: 10, color: '#64748b', marginLeft: 4 }}>
+          {state.myMana}/{state.myMaxMana}
+        </span>
+      </div>
+
+      {/* ====== 己方状态条（HP/护甲/牌库/墓地） ====== */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '2px 12px',
+        fontSize: 13,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="hero-hp" style={{ fontSize: 20 }}>{state.myHealth}</span>
+          {state.myArmor > 0 && (
+            <span className="hero-armor">🛡️{state.myArmor}</span>
+          )}
+        </div>
+        <div className="deck-graveyard-area">
+          <div className="deck-count">
+            <div className="deck-icon">🃏</div>
+            <span className="deck-label">{state.myDeckCount}</span>
           </div>
-        </div>
-        <div className="battle-arena-player-mana">
-          <span className="battle-arena-mana-text">⚡{state.myMana}/{state.myMaxMana}</span>
-        </div>
-        <div className="battle-arena-player-deck">
-          <span className="battle-arena-deck-text">🃏{state.myDeckCount}</span>
+          <div className="graveyard-count">
+            <div className="graveyard-icon">💀</div>
+            <span className="graveyard-label">{state.myGraveyardCount}</span>
+          </div>
         </div>
       </div>
 
-      {/* ====== 手牌区 ====== */}
-      <div className="battle-arena-hand">
-        {state.myHand.map((card, idx) => (
-          <div
-            key={`hand-${card.cardId}-${idx}`}
-            ref={(el) => { if (el) handCardRefs.current.set(card.cardId, el); else handCardRefs.current.delete(card.cardId); }}
-            className={`battle-arena-hand-card ${card.cost <= state.myMana && state.isMyTurn ? 'playable' : 'unplayable'}`}
-            style={{ borderColor: getRarityColor(card.rarity) }}
-            onClick={() => handlePlayCard(card)}
-          >
-            <div className="battle-arena-hand-cost">{card.cost}</div>
-            <div className="battle-arena-hand-name">{card.nameCn}</div>
-            <div className="battle-arena-hand-type">{card.cardType}</div>
-            {/* 关键词徽章 */}
-            {(() => {
-              const kws = parseKeywords(card.keywords);
-              return kws.length > 0 ? (
+      {/* ====== 手牌区（扇形展開） ====== */}
+      <div className="hand-area">
+        {state.myHand.map((card, idx) => {
+          const isPlayable = card.cost <= state.myMana && state.isMyTurn;
+          const kws = parseKeywords(card.keywords);
+          const kwBadges = kws.length > 0 ? kws.map((kw: string) => {
+            const cfg = KEYWORD_CONFIG[kw];
+            if (!cfg) return null;
+            return (
+              <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 6 }}>
+                {cfg.label}
+              </span>
+            );
+          }) : null;
+
+          return (
+            <div
+              key={`hand-${card.cardId}-${idx}`}
+              ref={(el) => { if (el) handCardRefs.current.set(card.cardId, el); else handCardRefs.current.delete(card.cardId); }}
+              className={`hand-card ${isPlayable ? 'playable' : 'unplayable'}`}
+              style={{ borderColor: getRarityColor(card.rarity) }}
+              onClick={() => handlePlayCard(card)}
+            >
+              {/* 费用宝石 */}
+              <div className="hand-cost-gem">{card.cost}</div>
+              {/* 卡牌名 */}
+              <div className="hand-card-name">{card.nameCn}</div>
+              {/* 关键词 */}
+              {kwBadges && (
                 <div className="cg-keywords" style={{ marginTop: 1 }}>
-                  {kws.map((kw: string) => {
-                    const cfg = KEYWORD_CONFIG[kw];
-                    return cfg ? (
-                      <span key={kw} className="cg-keyword-badge" style={{ background: cfg.color, fontSize: 7 }}>
-                        {cfg.label}
-                      </span>
-                    ) : null;
-                  })}
+                  {kwBadges}
                 </div>
-              ) : null;
-            })()}
-            <div className="battle-arena-hand-stats">
-              {card.attack > 0 && <span>⚔️{card.attack}</span>}
-              {card.health > 0 && <span>♥{card.health}</span>}
+              )}
+              {/* 属性 */}
+              <div className="hand-stats-row">
+                {card.attack > 0 && <span style={{ color: '#ef4444' }}>{card.attack}</span>}
+                {card.health > 0 && <span style={{ color: '#22c55e' }}>{card.health}</span>}
+              </div>
+              {/* 稀有度色条 */}
+              <div className="rarity-bar" style={{ background: getRarityColor(card.rarity) }} />
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* ====== 操作提示 ====== */}
+      {/* ====== 英雄技能按钮（左下） ====== */}
+      <button
+        className={`hero-power-btn ${state.isMyTurn ? 'active' : 'inactive'}`}
+        onClick={() => {
+          // 英雄技能占位 - 可绑定实际技能逻辑
+          if (!state.isMyTurn) return;
+        }}
+      >
+        <span className="hp-icon">⚡</span>
+        <span className="hp-cost">2</span>
+      </button>
+
+      {/* ====== 结束回合按钮（右下） ====== */}
+      <button
+        className="end-turn-btn"
+        disabled={!state.isMyTurn || state.attackMode}
+        onClick={() => {
+          if (state.attackMode) return;
+          handleEndTurn();
+        }}
+      >
+        结束回合
+      </button>
+
+      {/* ====== 攻击模式提示 ====== */}
       {state.attackMode && (
-        <div className="battle-arena-attack-hint">
-          选择目标进行攻击
-        </div>
+        <>
+          <div className="attack-mode-indicator">选择攻击目标</div>
+          <button className="cancel-attack-btn" onClick={handleCancelAttack}>
+            取消
+          </button>
+        </>
       )}
 
-      {/* ====== 战斗日志（浮动小区域） ====== */}
+      {/* ====== 战斗日志 ====== */}
       <div className="battle-arena-log">
         {state.battleLog.slice(-3).map((log, i) => (
           <div key={i} className="battle-arena-log-item">{log}</div>

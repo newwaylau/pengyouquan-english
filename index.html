@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冰与火·远征 — 系统设计文档</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    line-height: 1.7;
+    padding: 20px;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #16213e;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  h1 { color: #e94560; font-size: 1.8em; border-bottom: 2px solid #e94560; padding-bottom: 12px; margin-bottom: 24px; }
+  h2 { color: #f5a623; margin: 32px 0 16px; font-size: 1.4em; border-left: 4px solid #f5a623; padding-left: 12px; }
+  h3 { color: #0f3460; background: #e94560; display: inline-block; padding: 4px 16px; border-radius: 4px; margin: 24px 0 12px; font-size: 1.1em; }
+  p { margin: 12px 0; }
+  code { background: #0f3460; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #0f3460; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; border: 1px solid #1a3a5c; }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9em; }
+  th { background: #e94560; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #0f3460; }
+  tr:hover td { background: #1a3a5c; }
+  hr { border: none; border-top: 2px solid #e94560; margin: 32px 0; opacity: 0.5; }
+  strong { color: #f5a623; }
+  em { color: #a0d2eb; }
+  blockquote { border-left: 4px solid #e94560; padding-left: 16px; margin: 16px 0; color: #aaa; }
+  ul, ol { margin: 12px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0f3460; }
+  ::-webkit-scrollbar-thumb { background: #e94560; border-radius: 4px; }
+  .header-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #0f3460;
+  }
+  .header-bar h1 { margin: 0; border: none; padding: 0; }
+  .source-link { color: #a0d2eb; font-size: 0.85em; text-decoration: none; }
+  .source-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header-bar">
+    <h1>🔥 冰与火·远征</h1>
+    <a class="source-link" href="Claude_Design_Complete_System.md" target="_blank">📄 查看原始 Markdown</a>
+  </div>
+  <div id="content">加载中...</div>
+</div>
+<script>
+  fetch('Claude_Design_Complete_System.md')
+    .then(r => r.text())
+    .then(md => {
+      document.getElementById('content').innerHTML = marked.parse(md);
+    })
+    .catch(e => {
+      document.getElementById('content').innerHTML = '<p style="color:red">加载失败: ' + e.message + '</p>';
+    });
+</script>
+</body>
+</html>

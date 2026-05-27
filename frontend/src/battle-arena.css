@@ -1,47 +1,631 @@
-/* ====== Battle Arena Page (实时对战) ====== */
+/* ====== Battle Arena — Hearthstone 风格 UI ====== */
+/* 深色模式优先，手机竖屏适配 (max-width: 500px) */
 
 .battle-arena {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: 100dvh;
   max-width: 500px;
   margin: 0 auto;
-  padding: 8px;
-  background: var(--bg);
+  background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 40%, #162548 100%);
   color: var(--text);
   overflow: hidden;
   position: relative;
+  user-select: none;
 }
 
-.battle-arena-header {
+/* ====== 顶部：对手信息区域 ====== */
+.battle-arena-opponent-area {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.battle-arena-back {
-  background: none;
-  border: none;
-  color: var(--teal);
-  font-size: 15px;
+.opponent-portrait-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a4a7a, #0d1f3c);
+  border: 3px solid #8b5cf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+}
+.hero-portrait .hero-icon {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+}
+.hero-portrait.legendary { border-color: #ff8c00; box-shadow: 0 0 16px rgba(255,140,0,0.4); }
+.hero-portrait.epic { border-color: #a335ee; box-shadow: 0 0 12px rgba(163,53,238,0.3); }
+.hero-portrait.rare { border-color: #0070dd; box-shadow: 0 0 12px rgba(0,112,221,0.3); }
+
+.hero-hp {
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 0 12px rgba(239,68,68,0.3);
+  line-height: 1;
+}
+.hero-armor {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.opponent-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opponent-meta-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.opponent-stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+.opponent-stat-badge .stat-icon {
+  font-size: 11px;
+}
+
+.opponent-secrets {
+  display: flex;
+  gap: 2px;
+}
+.secret-slot {
+  width: 20px;
+  height: 28px;
+  background: linear-gradient(135deg, #1e3a5f, #0f2a4a);
+  border: 1px solid #3b5998;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #8bb8ff;
+  opacity: 0.6;
+}
+
+/* ====== 回合计时器 (顶部横条进度条) ====== */
+.turn-timer-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(0,0,0,0.3);
+  position: relative;
+}
+.turn-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #14b8a6, #2dd4bf);
+  transition: width 1s linear;
+  border-radius: 0 2px 2px 0;
+}
+.turn-timer-fill.urgent {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: timer-pulse 0.5s ease-in-out infinite;
+}
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ====== 随从板面 ====== */
+.battle-minion-zone {
+  display: flex;
+  justify-content: center;
+  padding: 6px 8px;
+  gap: 4px;
+  min-height: 82px;
+}
+
+.minion-slot {
+  width: 55px;
+  height: 75px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.minion-card {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #475569;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px;
+  position: relative;
   cursor: pointer;
-  padding: 4px 8px;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-sizing: border-box;
+}
+.minion-card:active {
+  transform: scale(0.92);
 }
 
-.battle-arena-title {
-  font-size: 18px;
+/* 费用宝石（左上） */
+.minion-cost-gem {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* 攻击(左下) + 生命(右下) */
+.minion-bottom-stats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 2px;
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+}
+.minion-atk {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ef4444;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.3);
+  padding: 0 3px;
+  border-radius: 2px;
+}
+.minion-hp {
+  font-size: 11px;
+  font-weight: 800;
+  color: #22c55e;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.3);
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+/* 关键词徽章（右上） */
+.minion-keyword-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* 己方可攻击随从 — 绿色发光边框 */
+.minion-card.can-attack {
+  border-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.5), inset 0 0 6px rgba(34,197,94,0.15);
+  animation: atk-glow 1.5s ease-in-out infinite;
+}
+@keyframes atk-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(34,197,94,0.5), inset 0 0 6px rgba(34,197,94,0.15); }
+  50% { box-shadow: 0 0 14px rgba(34,197,94,0.7), inset 0 0 10px rgba(34,197,94,0.2); }
+}
+
+/* 嘲讽随从 — 红色边框光效 */
+.minion-card.taunt {
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239,68,68,0.4);
+  animation: taunt-glow 1.2s ease-in-out infinite;
+}
+@keyframes taunt-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 18px rgba(239,68,68,0.7); }
+}
+
+/* 攻击模式 — 高亮敌方可攻击目标 */
+.minion-card.attackable-target {
+  border-color: #f59e0b;
+  box-shadow: 0 0 14px rgba(245,158,11,0.6);
+  animation: target-glow 0.8s ease-in-out infinite;
+}
+@keyframes target-glow {
+  0%, 100% { box-shadow: 0 0 14px rgba(245,158,11,0.6); }
+  50% { box-shadow: 0 0 24px rgba(245,158,11,0.9), 0 0 40px rgba(245,158,11,0.2); }
+}
+
+/* 选中状态 */
+.minion-card.selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245,158,11,0.7);
+  transform: translateY(-4px);
+}
+
+/* 随从名（迷你） */
+.minion-name-label {
+  font-size: 7px;
+  color: #cbd5e1;
+  text-align: center;
+  line-height: 1.1;
+  max-width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ====== 法力水晶条 ====== */
+.mana-crystal-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 0;
+  min-height: 22px;
+}
+
+.mana-crystal {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  box-shadow: 0 0 6px rgba(20,184,166,0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+.mana-crystal.spent {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  box-shadow: none;
+  opacity: 0.4;
+}
+.mana-crystal.locked {
+  display: none;
+}
+
+/* ====== 手牌区域（底部扇形展开） ====== */
+.hand-area {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex: 1;
+  padding: 4px 16px 8px;
+  max-height: 110px;
+  min-height: 90px;
+  overflow: visible;
+}
+
+.hand-card {
+  width: 60px;
+  height: 80px;
+  flex-shrink: 0;
+  margin-left: -12px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #475569;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px 2px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+  transform-origin: bottom center;
+  box-sizing: border-box;
+}
+.hand-card:first-child { margin-left: 0; }
+
+/* 扇形效果：每张卡旋转 + 上移 */
+.hand-area .hand-card:nth-child(1) { transform: rotate(-10deg) translateY(2px); z-index: 1; }
+.hand-area .hand-card:nth-child(2) { transform: rotate(-6deg) translateY(1px); z-index: 2; }
+.hand-area .hand-card:nth-child(3) { transform: rotate(-3deg) translateY(0); z-index: 3; }
+.hand-area .hand-card:nth-child(4) { transform: rotate(0deg) translateY(0); z-index: 4; }
+.hand-area .hand-card:nth-child(5) { transform: rotate(3deg) translateY(0); z-index: 3; }
+.hand-area .hand-card:nth-child(6) { transform: rotate(6deg) translateY(1px); z-index: 2; }
+.hand-area .hand-card:nth-child(7) { transform: rotate(10deg) translateY(2px); z-index: 1; }
+/* 超过7张继续展开 */
+.hand-card:nth-child(n+8) { margin-left: -16px; }
+
+/* 选中手牌上浮 */
+.hand-card.selected {
+  transform: translateY(-20px) scale(1.05) !important;
+  z-index: 20 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.hand-card.selected:hover {
+  transform: translateY(-22px) scale(1.08) !important;
+}
+
+/* 可出牌微光 */
+.hand-card.playable {
+  border-color: #14b8a6;
+  box-shadow: 0 0 8px rgba(20,184,166,0.2);
+}
+.hand-card.playable:hover {
+  transform: translateY(-6px) scale(1.06);
+  box-shadow: 0 0 16px rgba(20,184,166,0.4);
+}
+
+/* 不可出牌变灰 */
+.hand-card.unplayable {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 手牌费用宝石 */
+.hand-cost-gem {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.hand-card-name {
+  font-size: 8px;
+  color: #e2e8f0;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 54px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 1px 0;
+}
+
+/* 稀有度色条（卡底） */
+.hand-card .rarity-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+}
+
+.hand-card .hand-stats-row {
+  display: flex;
+  gap: 4px;
+  font-size: 9px;
   font-weight: 700;
+  margin-top: auto;
+  padding-bottom: 3px;
 }
 
+/* ====== 英雄技能按钮（左下） ====== */
+.hero-power-btn {
+  position: absolute;
+  bottom: 100px;
+  left: 8px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 2px solid #475569;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.15s;
+  color: #cbd5e1;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.hero-power-btn .hp-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+.hero-power-btn .hp-cost {
+  font-size: 10px;
+  font-weight: 700;
+  color: #14b8a6;
+  line-height: 1;
+}
+.hero-power-btn.active {
+  border-color: #14b8a6;
+  box-shadow: 0 0 12px rgba(20,184,166,0.4);
+}
+.hero-power-btn.active:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(20,184,166,0.6);
+}
+.hero-power-btn.inactive {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ====== 结束回合按钮（右下） ====== */
+.end-turn-btn {
+  position: absolute;
+  bottom: 100px;
+  right: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 15;
+  box-shadow: 0 2px 12px rgba(5,150,105,0.4);
+  transition: all 0.15s;
+  letter-spacing: 1px;
+}
+.end-turn-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(5,150,105,0.6);
+}
+.end-turn-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.end-turn-btn:disabled {
+  background: #4a5568;
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ====== 牌库/墓地计数 ====== */
+.deck-graveyard-area {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.deck-count, .graveyard-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.deck-icon, .graveyard-icon {
+  width: 24px;
+  height: 32px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid #475569;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.deck-count .deck-label,
+.graveyard-count .graveyard-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+/* ====== 攻击模式指示条 ====== */
+.attack-mode-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(245,158,11,0.9);
+  color: #000;
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 20;
+  animation: atk-hint-pulse 0.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes atk-hint-pulse {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+}
+
+.cancel-attack-btn {
+  position: absolute;
+  top: calc(50% + 36px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239,68,68,0.85);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ====== 战斗日志 ====== */
+.battle-arena-log {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+}
+.battle-arena-log-item {
+  background: rgba(0,0,0,0.65);
+  color: var(--text);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  animation: fade-in 0.3s ease;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== 中间信息区 ====== */
+.battle-center-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 2px 0;
+  font-size: 12px;
+}
+.battle-turn-number {
+  font-weight: 700;
+  color: #14b8a6;
+  text-shadow: 0 0 8px rgba(20,184,166,0.3);
+}
+.battle-turn-status {
+  color: #94a3b8;
+}
+.battle-turn-status.my-turn {
+  color: #14b8a6;
+  font-weight: 600;
+}
+
+/* ====== 现有样式保留 ====== */
+
+/* 匹配界面 */
 .battle-arena-matching {
   display: flex;
   justify-content: center;
   align-items: center;
   flex: 1;
 }
-
 .battle-arena-matching-card {
   background: var(--card);
   border-radius: var(--radius-lg);
@@ -51,45 +635,38 @@
   width: 100%;
   border: 1px solid var(--border);
 }
-
 .battle-arena-matching-icon {
   font-size: 48px;
   margin-bottom: 12px;
 }
-
 .battle-arena-matching-title {
   font-size: 22px;
   font-weight: 700;
   margin: 0 0 8px;
   color: var(--text-primary);
 }
-
 .battle-arena-matching-desc {
   font-size: 14px;
   color: var(--text-secondary);
   margin: 0 0 16px;
   line-height: 1.6;
 }
-
 .battle-arena-matching-hint {
   font-size: 12px;
   color: var(--text-tertiary, #666);
   margin: 0 0 20px;
 }
-
 .battle-arena-rules {
   text-align: left;
   margin: 0 auto 20px;
   max-width: 260px;
 }
-
 .battle-arena-rule-item {
   font-size: 13px;
   color: var(--text-secondary);
   padding: 4px 0;
   line-height: 1.6;
 }
-
 .battle-arena-matching-spinner {
   width: 48px;
   height: 48px;
@@ -99,11 +676,9 @@
   animation: battle-spin 0.8s linear infinite;
   margin: 0 auto 16px;
 }
-
 @keyframes battle-spin {
   to { transform: rotate(360deg); }
 }
-
 .battle-arena-btn {
   border: none;
   border-radius: var(--radius-sm);
@@ -113,329 +688,184 @@
   padding: 10px 24px;
   transition: opacity 0.2s;
 }
-
 .battle-arena-btn:active { opacity: 0.8; }
-
 .battle-arena-btn-primary {
   background: linear-gradient(135deg, var(--teal), var(--teal-dark));
   color: white;
 }
-
 .battle-arena-btn-secondary {
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
 }
-
-.battle-arena-btn-primary-sm {
-  background: var(--teal);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-}
-
-.battle-arena-btn-danger-sm {
-  background: var(--danger);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-}
-
-.battle-arena-btn-ghost-sm {
-  background: none;
-  color: var(--text-secondary);
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 4px 8px;
-}
-
-.battle-arena-opponent-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-  margin-bottom: 4px;
-}
-
-.battle-arena-opponent-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.battle-arena-opponent-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.battle-arena-opponent-stats {
-  display: flex;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.battle-arena-stat-item {
-  background: var(--card);
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-}
-
-.battle-arena-health-bar {
-  position: relative;
-  height: 20px;
-  background: var(--bg-deep, #0a0a1a);
-  border-radius: 10px;
-  overflow: hidden;
-  width: 100%;
-  max-width: 200px;
-}
-
-.battle-arena-health-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--danger), #ff6b6b);
-  border-radius: 10px;
-  transition: width 0.3s ease;
-  min-width: 20px;
-}
-
-.battle-arena-health-fill.opponent {
-  background: linear-gradient(90deg, #ff6b6b, var(--danger));
-}
-
-.battle-arena-health-text {
-  position: absolute;
-  top: 50%;
-  left: 8px;
-  transform: translateY(-50%);
-  font-size: 11px;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.battle-arena-board {
-  display: flex;
-  gap: 6px;
-  padding: 6px 0;
-  min-height: 70px;
-  overflow-x: auto;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.battle-arena-board.opponent-board { min-height: 60px; }
-.battle-arena-board.my-board { min-height: 70px; }
-
-.battle-arena-minion {
-  position: relative;
-  width: 64px;
-  min-height: 72px;
-  background: var(--card);
-  border: 2px solid #555;
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 2px;
-  cursor: pointer;
-  transition: transform 0.15s;
-  font-size: 10px;
-}
-
-.battle-arena-minion:active { transform: scale(0.95); }
-
-.battle-arena-minion.can-attack {
-  box-shadow: 0 0 8px var(--teal-glow, rgba(20, 184, 166, 0.4));
-  cursor: pointer;
-}
-
-.battle-arena-minion.selected {
-  box-shadow: 0 0 12px var(--warning);
-  border-color: var(--warning);
-  transform: translateY(-4px);
-}
-
-.battle-arena-minion.taunt {
-  border-color: var(--danger) !important;
-  border-width: 2px;
-}
-
-.battle-arena-minion-cost {
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  width: 18px;
-  height: 18px;
-  background: #5533aa;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: white;
-}
-
-.battle-arena-minion-name {
-  font-size: 9px;
-  text-align: center;
-  line-height: 1.2;
-  margin-top: 4px;
-  color: var(--text);
-}
-
-.battle-arena-minion-stats {
-  display: flex;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.battle-arena-minion-attack { color: var(--danger); }
-.battle-arena-minion-health { color: var(--success); }
-
-.battle-arena-minion-ready {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  font-size: 12px;
-}
-
-.battle-arena-turn-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  font-size: 13px;
-}
-
-.battle-arena-turn-number {
-  font-weight: 700;
-  color: var(--teal);
-}
-
-.battle-arena-turn-status {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.battle-arena-turn-status.my-turn {
-  color: var(--teal);
-  font-weight: 600;
-}
-
-.battle-arena-turn-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.battle-arena-player-bar {
+.battle-arena-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 0;
+  padding: 8px 0;
+  margin-bottom: 8px;
 }
-
-.battle-arena-player-health { flex: 1; }
-
-.battle-arena-player-mana {
-  font-size: 14px;
+.battle-arena-back {
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.battle-arena-title {
+  font-size: 18px;
   font-weight: 700;
 }
 
-.battle-arena-mana-text { color: #4488ff; }
-.battle-arena-player-deck { font-size: 14px; }
-
-.battle-arena-hand {
+/* 游戏结束 */
+.battle-arena-finished {
   display: flex;
-  gap: 4px;
-  padding: 6px 0;
-  overflow-x: auto;
   justify-content: center;
+  align-items: center;
   flex: 1;
-  align-items: flex-end;
-  min-height: 80px;
 }
-
-.battle-arena-hand-card {
-  position: relative;
-  width: 56px;
-  min-height: 76px;
+.battle-arena-result-card {
   background: var(--card);
-  border: 2px solid #555;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  border: 1px solid var(--border);
+}
+.battle-arena-result-icon {
+  font-size: 56px;
+  margin-bottom: 8px;
+}
+.battle-arena-result-icon.win {
+  animation: result-bounce 0.5s ease;
+}
+@keyframes result-bounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.battle-arena-result-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+.battle-arena-result-title.win { color: var(--teal); }
+.battle-arena-result-title.lose { color: var(--danger); }
+.battle-arena-result-trophy {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--warning);
+  margin-bottom: 20px;
+}
+.battle-arena-result-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.battle-arena-result-stat {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 2px;
-  cursor: pointer;
-  transition: transform 0.15s;
-  font-size: 9px;
-  flex-shrink: 0;
+  gap: 4px;
 }
-
-.battle-arena-hand-card.playable {
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
-}
-
-.battle-arena-hand-card.playable:active {
-  transform: translateY(-8px);
-}
-
-.battle-arena-hand-card.unplayable {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.battle-arena-hand-cost {
-  width: 20px;
-  height: 20px;
-  background: #4488ff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 2px;
-}
-
-.battle-arena-hand-name {
-  font-size: 9px;
-  text-align: center;
-  line-height: 1.2;
-  color: var(--text);
-  margin: 2px 0;
-}
-
-.battle-arena-hand-type {
-  font-size: 8px;
+.battle-arena-result-stat-label {
+  font-size: 12px;
   color: var(--text-secondary);
 }
-
-.battle-arena-hand-stats {
+.battle-arena-result-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.battle-arena-result-stat-detail {
+  font-size: 12px;
+  color: var(--text-tertiary, #666);
+}
+.battle-arena-result-divider {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.battle-arena-result-buttons {
   display: flex;
-  gap: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  margin-top: auto;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* light mode overrides */
+[data-theme="light"] .battle-arena {
+  background: linear-gradient(180deg, #e8f0fe 0%, #d4e4f7 40%, #c0d8ef 100%);
+}
+[data-theme="light"] .battle-arena-opponent-area {
+  background: rgba(0,0,0,0.06);
+}
+[data-theme="light"] .minion-card {
+  background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+  border-color: #94a3b8;
+}
+[data-theme="light"] .minion-name-label {
+  color: #334155;
+}
+[data-theme="light"] .hand-card {
+  background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+  border-color: #94a3b8;
+}
+[data-theme="light"] .hand-card-name {
+  color: #1e293b;
+}
+[data-theme="light"] .hero-power-btn {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border-color: #94a3b8;
+  color: #334155;
+}
+[data-theme="light"] .end-turn-btn {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+/* ====== Battle Animations (EffectEngine) ====== */
+@keyframes ba-dmg-float {
+  0% { transform: translateY(0) scale(0.3); opacity: 0; }
+  15% { transform: translateY(-8px) scale(1.4); opacity: 1; }
+  40% { transform: translateY(-20px) scale(1.8); opacity: 1; }
+  70% { transform: translateY(-35px) scale(1.2); opacity: 0.5; }
+  100% { transform: translateY(-55px) scale(0.8); opacity: 0; }
+}
+@keyframes ba-enemy-hit {
+  0% { transform: translateX(0) scale(1); }
+  10% { transform: translateX(10px) scale(0.92); filter: brightness(2); }
+  25% { transform: translateX(-5px) scale(0.95); filter: brightness(1.3); }
+  45% { transform: translateX(3px) scale(0.98); }
+  70% { transform: translateX(-2px); }
+  100% { transform: translateX(0) scale(1); filter: brightness(1); }
+}
+@keyframes ba-shake-big {
+  0%,100%{transform:translate(0,0)} 8%{transform:translate(-5px,4px)}
+  16%{transform:translate(6px,-3px)} 24%{transform:translate(-4px,5px)}
+  32%{transform:translate(5px,-4px)} 40%{transform:translate(-3px,3px)}
+  50%{transform:translate(4px,-3px)} 60%{transform:translate(-3px,2px)}
+  72%{transform:translate(3px,-2px)} 84%{transform:translate(-2px,1px)}
+  92%{transform:translate(2px,-1px)}
+}
+@keyframes ba-shake-mid {
+  0%,100%{transform:translate(0,0)} 12%{transform:translate(-3px,2px)}
+  25%{transform:translate(3px,-2px)} 37%{transform:translate(-2px,3px)}
+  50%{transform:translate(2px,-1px)} 62%{transform:translate(-1px,2px)}
+  75%{transform:translate(1px,-2px)} 87%{transform:translate(-2px,1px)}
+}
+@keyframes ba-shake-light {
+  0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)}
+  40%{transform:translate(2px,-1px)} 60%{transform:translate(-1px,2px)}
+  80%{transform:translate(1px,-1px)}
+}
+@keyframes ba-minion-recoil {
+  0% { transform: scale(0.9); }
+  30% { transform: scale(1.05); }
+  60% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
 /* ====== 关键词徽章（通用） ====== */
@@ -457,26 +887,7 @@
   line-height: 1.4;
 }
 
-.battle-arena-attack-hint {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--warning);
-  color: #000;
-  padding: 6px 16px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  z-index: 10;
-  animation: pulse-hint 1s ease-in-out infinite;
-}
-
-@keyframes pulse-hint {
-  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
-}
-
+/* 问答面板（保留旧样式） */
 .battle-arena-overlay {
   position: fixed;
   top: 0;
@@ -490,7 +901,6 @@
   z-index: 100;
   padding: 20px;
 }
-
 .battle-arena-question-panel {
   background: var(--card);
   border-radius: var(--radius-lg);
@@ -499,16 +909,9 @@
   overflow: hidden;
   animation: slide-up 0.3s ease;
 }
-
 .battle-arena-question-panel.defense {
   border: 2px solid var(--warning);
 }
-
-@keyframes slide-up {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
 .battle-arena-question-header {
   background: linear-gradient(135deg, var(--teal-dark), var(--teal));
   padding: 12px 16px;
@@ -516,39 +919,32 @@
   justify-content: space-between;
   align-items: center;
 }
-
 .battle-arena-question-header.defense {
   background: linear-gradient(135deg, #c0392b, var(--danger));
 }
-
 .battle-arena-question-card-name {
   font-size: 16px;
   font-weight: 700;
   color: white;
 }
-
 .battle-arena-question-type {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
 }
-
 .battle-arena-question-body {
   padding: 20px 16px;
 }
-
 .battle-arena-question-content {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .battle-arena-question-prompt {
   font-size: 14px;
   color: var(--text);
   margin: 0;
   text-align: center;
 }
-
 .battle-arena-question-sentence {
   font-size: 14px;
   color: var(--text-secondary);
@@ -560,7 +956,6 @@
   margin: 0;
   line-height: 1.5;
 }
-
 .battle-arena-question-word {
   font-size: 22px;
   font-weight: 700;
@@ -568,21 +963,18 @@
   color: var(--teal);
   margin: 0;
 }
-
 .battle-arena-question-keyword {
   font-size: 18px;
   text-align: center;
   margin: 0;
   color: var(--text);
 }
-
 .battle-arena-options {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
 }
-
 .battle-arena-option-btn {
   min-width: 80px;
   padding: 10px 16px;
@@ -595,34 +987,27 @@
   transition: all 0.15s;
   flex: 1;
 }
-
 .battle-arena-option-btn:active { transform: scale(0.95); }
-
 .battle-arena-option-btn.selected {
   border-color: var(--teal);
   background: rgba(20, 184, 166, 0.15);
 }
-
 .battle-arena-option-btn.correct {
   border-color: var(--success);
   background: rgba(34, 197, 94, 0.15);
 }
-
 .battle-arena-option-btn.wrong {
   border-color: var(--danger);
   background: rgba(239, 68, 68, 0.15);
 }
-
 .battle-arena-question-result {
   text-align: center;
   font-size: 24px;
   font-weight: 700;
   padding: 32px 0;
 }
-
 .battle-arena-question-result.correct { color: var(--success); }
 .battle-arena-question-result.wrong { color: var(--danger); }
-
 .battle-arena-input {
   width: 100%;
   padding: 10px 12px;
@@ -634,18 +1019,15 @@
   text-align: center;
   box-sizing: border-box;
 }
-
 .battle-arena-input:focus {
   outline: none;
   border-color: var(--teal);
 }
-
 .battle-arena-defense-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .battle-arena-defense-prompt {
   font-size: 14px;
   color: var(--warning);
@@ -654,173 +1036,5 @@
   margin: 0;
 }
 
-.battle-arena-log {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  pointer-events: none;
-}
-
-.battle-arena-log-item {
-  background: rgba(0, 0, 0, 0.6);
-  color: var(--text);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  animation: fade-in 0.3s ease;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.battle-arena-finished {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-
-.battle-arena-result-card {
-  background: var(--card);
-  border-radius: var(--radius-lg);
-  padding: 32px 24px;
-  text-align: center;
-  max-width: 360px;
-  width: 100%;
-  border: 1px solid var(--border);
-}
-
-.battle-arena-result-icon {
-  font-size: 56px;
-  margin-bottom: 8px;
-}
-
-.battle-arena-result-icon.win {
-  animation: result-bounce 0.5s ease;
-}
-
-@keyframes result-bounce {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-.battle-arena-result-title {
-  font-size: 28px;
-  font-weight: 800;
-  margin: 0 0 8px;
-}
-
-.battle-arena-result-title.win { color: var(--teal); }
-.battle-arena-result-title.lose { color: var(--danger); }
-
-.battle-arena-result-trophy {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--warning);
-  margin-bottom: 20px;
-}
-
-.battle-arena-result-stats {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.battle-arena-result-stat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.battle-arena-result-stat-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.battle-arena-result-stat-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.battle-arena-result-stat-detail {
-  font-size: 12px;
-  color: var(--text-tertiary, #666);
-}
-
-.battle-arena-result-divider {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.battle-arena-result-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-[data-theme="light"] .battle-arena { background: var(--bg); }
-[data-theme="light"] .battle-arena-minion { background: var(--card); }
-[data-theme="light"] .battle-arena-hand-card { background: var(--card); }
-
-/* ====== Battle Animations (EffectEngine) ====== */
-
-/* 伤害数字浮出 */
-@keyframes ba-dmg-float {
-  0% { transform: translateY(0) scale(0.3); opacity: 0; }
-  15% { transform: translateY(-8px) scale(1.4); opacity: 1; }
-  40% { transform: translateY(-20px) scale(1.8); opacity: 1; }
-  70% { transform: translateY(-35px) scale(1.2); opacity: 0.5; }
-  100% { transform: translateY(-55px) scale(0.8); opacity: 0; }
-}
-
-/* 敌人受击后仰 */
-@keyframes ba-enemy-hit {
-  0% { transform: translateX(0) scale(1); }
-  10% { transform: translateX(10px) scale(0.92); filter: brightness(2); }
-  25% { transform: translateX(-5px) scale(0.95); filter: brightness(1.3); }
-  45% { transform: translateX(3px) scale(0.98); }
-  70% { transform: translateX(-2px); }
-  100% { transform: translateX(0) scale(1); filter: brightness(1); }
-}
-
-/* 屏幕震动 - 剧烈 */
-@keyframes ba-shake-big {
-  0%,100%{transform:translate(0,0)} 8%{transform:translate(-5px,4px)}
-  16%{transform:translate(6px,-3px)} 24%{transform:translate(-4px,5px)}
-  32%{transform:translate(5px,-4px)} 40%{transform:translate(-3px,3px)}
-  50%{transform:translate(4px,-3px)} 60%{transform:translate(-3px,2px)}
-  72%{transform:translate(3px,-2px)} 84%{transform:translate(-2px,1px)}
-  92%{transform:translate(2px,-1px)}
-}
-@keyframes ba-shake-mid {
-  0%,100%{transform:translate(0,0)} 12%{transform:translate(-3px,2px)}
-  25%{transform:translate(3px,-2px)} 37%{transform:translate(-2px,3px)}
-  50%{transform:translate(2px,-1px)} 62%{transform:translate(-1px,2px)}
-  75%{transform:translate(1px,-2px)} 87%{transform:translate(-2px,1px)}
-}
-@keyframes ba-shake-light {
-  0%,100%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)}
-  40%{transform:translate(2px,-1px)} 60%{transform:translate(-1px,2px)}
-  80%{transform:translate(1px,-1px)}
-}
-
-/* 随从受击后坐力 */
-@keyframes ba-minion-recoil {
-  0% { transform: scale(0.9); }
-  30% { transform: scale(1.05); }
-  60% { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
+/* 旧样式别名保留（兼容性） */
+.battle-arena-opponent-bar { /* kept for animation code compatibility */ }

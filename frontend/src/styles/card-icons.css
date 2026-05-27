@@ -1,0 +1,394 @@
+/* ============================================================
+   card-icons.css — Hearthstone-style Card Icon System
+   All icons are inline SVG (no external resources)
+   ============================================================ */
+
+/* --- Base Icon Container --- */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+/* ============================================================
+   1. CORE GAME ICONS (24x24)
+   ============================================================ */
+
+/* --- Attack — Crossed Swords --- */
+.icon-attack {
+  color: #e74c3c;
+}
+.icon-attack svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Health — Heart --- */
+.icon-heart {
+  color: #2ecc71;
+}
+.icon-heart svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* --- Mana — Diamond Gem --- */
+.icon-mana {
+  color: #3498db;
+}
+.icon-mana svg {
+  fill: currentColor;
+  stroke: #2980b9;
+  stroke-width: 1.5;
+}
+
+/* --- Armor — Shield --- */
+.icon-armor {
+  color: #95a5a6;
+}
+.icon-armor svg {
+  fill: currentColor;
+  stroke: #7f8c8d;
+  stroke-width: 1.5;
+}
+
+/* --- Taunt — Shield + Border --- */
+.icon-taunt {
+  color: #f39c12;
+}
+.icon-taunt svg {
+  fill: currentColor;
+  stroke: #e67e22;
+  stroke-width: 1.5;
+}
+
+/* --- Divine Shield — Golden Star --- */
+.icon-divine-shield {
+  color: #f1c40f;
+}
+.icon-divine-shield svg {
+  fill: currentColor;
+  stroke: #f39c12;
+  stroke-width: 1;
+}
+
+/* --- Deathrattle — Skull --- */
+.icon-deathrattle {
+  color: #8e44ad;
+}
+.icon-deathrattle svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Battlecry — Lightning / Explosion --- */
+.icon-battlecry {
+  color: #e67e22;
+}
+.icon-battlecry svg {
+  fill: currentColor;
+  stroke: #d35400;
+  stroke-width: 1;
+}
+
+/* --- Stealth — Eye --- */
+.icon-stealth {
+  color: #1abc9c;
+}
+.icon-stealth svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Rush — Wings --- */
+.icon-rush {
+  color: #9b59b6;
+}
+.icon-rush svg {
+  fill: currentColor;
+  stroke: #8e44ad;
+  stroke-width: 1;
+}
+
+/* --- Charge — Arrow --- */
+.icon-charge {
+  color: #e74c3c;
+}
+.icon-charge svg {
+  fill: currentColor;
+  stroke: #c0392b;
+  stroke-width: 1.5;
+}
+
+/* --- Faction (base) --- */
+.icon-faction {
+  color: #ecf0f1;
+}
+.icon-faction svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ============================================================
+   2. FACTION ICONS × 8
+   ============================================================ */
+
+/* --- Stark — Wolf Head --- */
+.icon-faction-stark {
+  color: #bdc3c7;
+}
+
+/* --- Lannister — Lion --- */
+.icon-faction-lannister {
+  color: #f1c40f;
+}
+
+/* --- Targaryen — Three-Headed Dragon --- */
+.icon-faction-targaryen {
+  color: #e74c3c;
+}
+
+/* --- Baratheon — Stag --- */
+.icon-faction-baratheon {
+  color: #2ecc71;
+}
+
+/* --- Greyjoy — Kraken --- */
+.icon-faction-greyjoy {
+  color: #3498db;
+}
+
+/* --- Martell — Sun & Spear --- */
+.icon-faction-martell {
+  color: #e67e22;
+}
+
+/* --- Tyrell — Rose --- */
+.icon-faction-tyrell {
+  color: #2ecc71;
+}
+
+/* --- Night's Watch — Raven / Crow --- */
+.icon-faction-nightswatch {
+  color: #7f8c8d;
+}
+
+/* ============================================================
+   3. RARITY BORDER EFFECTS
+   ============================================================ */
+
+/* --- Common — Thin Gray Border --- */
+.rarity-common {
+  border: 1px solid #7f8c8d;
+  border-radius: 8px;
+  background: rgba(127, 140, 141, 0.05);
+}
+
+/* --- Rare — Blue Glowing Border (pulsing) --- */
+.rarity-rare {
+  border: 1.5px solid #3498db;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4), 0 0 12px rgba(52, 152, 219, 0.2);
+  animation: rarity-rare-glow 2s ease-in-out infinite;
+  background: rgba(52, 152, 219, 0.05);
+}
+
+@keyframes rarity-rare-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(52, 152, 219, 0.4), 0 0 12px rgba(52, 152, 219, 0.2); }
+  50%      { box-shadow: 0 0 12px rgba(52, 152, 219, 0.7), 0 0 24px rgba(52, 152, 219, 0.35); }
+}
+
+/* --- Epic — Purple Rotating Gradient Border --- */
+.rarity-epic {
+  position: relative;
+  border-radius: 8px;
+  background: rgba(155, 89, 182, 0.05);
+  overflow: hidden;
+}
+.rarity-epic::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  border-radius: 10px;
+  background: conic-gradient(
+    #9b59b6, #8e44ad, #9b59b6, #bb6bd9,
+    #9b59b6, #8e44ad, #9b59b6, #bb6bd9
+  );
+  animation: rarity-epic-rotate 3s linear infinite;
+}
+.rarity-epic::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  z-index: -1;
+  border-radius: 7px;
+  background: inherit;
+}
+
+@keyframes rarity-epic-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Legendary — Golden Rotating Glow + Particle Sparkle --- */
+.rarity-legendary {
+  position: relative;
+  border-radius: 8px;
+  background: rgba(241, 196, 15, 0.05);
+  overflow: hidden;
+}
+.rarity-legendary::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  z-index: -1;
+  border-radius: 11px;
+  background: conic-gradient(
+    #f1c40f, #f39c12, #f1c40f, #e67e22,
+    #f1c40f, #f39c12, #f1c40f, #e67e22
+  );
+  animation: rarity-legendary-spin 2s linear infinite;
+  filter: blur(2px);
+}
+.rarity-legendary::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  z-index: -1;
+  border-radius: 6px;
+  background: inherit;
+}
+/* Sparkle dots around legendary border */
+.rarity-legendary .sparkle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #f1c40f;
+  animation: rarity-legendary-sparkle 1.5s ease-out infinite;
+  pointer-events: none;
+}
+.rarity-legendary .sparkle:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+.rarity-legendary .sparkle:nth-child(2) { top: 5%; left: 30%; animation-delay: 0.3s; }
+.rarity-legendary .sparkle:nth-child(3) { top: 8%; left: 60%; animation-delay: 0.6s; }
+.rarity-legendary .sparkle:nth-child(4) { top: 12%; left: 85%; animation-delay: 0.9s; }
+.rarity-legendary .sparkle:nth-child(5) { top: 40%; left: 3%; animation-delay: 0.15s; }
+.rarity-legendary .sparkle:nth-child(6) { top: 35%; left: 92%; animation-delay: 0.45s; }
+.rarity-legendary .sparkle:nth-child(7) { top: 70%; left: 8%; animation-delay: 0.75s; }
+.rarity-legendary .sparkle:nth-child(8) { top: 65%; left: 88%; animation-delay: 1.05s; }
+.rarity-legendary .sparkle:nth-child(9) { top: 90%; left: 25%; animation-delay: 0.2s; }
+.rarity-legendary .sparkle:nth-child(10) { top: 85%; left: 70%; animation-delay: 0.7s; }
+
+@keyframes rarity-legendary-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rarity-legendary-sparkle {
+  0%   { opacity: 0; transform: scale(0); }
+  50%  { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(0); }
+}
+
+/* ============================================================
+   4. INLINE SVG ICONS — Usage via data-icon attributes
+   or use the .icon-* classes above with your own SVG markup
+   ============================================================ */
+
+/* SVG icon data URIs for direct background-image usage */
+[data-icon="attack"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 17.5L3 6l3-3 11.5 11.5' fill='none' stroke='%23e74c3c' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M21 15l-5 5-4-4 5-5z' fill='none' stroke='%23e74c3c' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M17.5 14.5L21 3l-3-3-6.5 6.5' fill='none' stroke='%23e74c3c' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+[data-icon="health"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%232ecc71'/%3E%3C/svg%3E");
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+[data-icon="mana"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 20,12 12,22 4,12' fill='%233498db' stroke='%232980b9' stroke-width='1.5'/%3E%3C/svg%3E");
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+[data-icon="armor"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l7 4v5c0 5-3.5 9.74-7 11-3.5-1.26-7-6-7-11V6l7-4z' fill='%2395a5a6' stroke='%237f8c8d' stroke-width='1.5'/%3E%3C/svg%3E");
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+/* ============================================================
+   5. ICON SIZE VARIANTS
+   ============================================================ */
+
+.icon-xs { width: 14px; height: 14px; }
+.icon-sm { width: 18px; height: 18px; }
+.icon-md { width: 24px; height: 24px; }
+.icon-lg { width: 32px; height: 32px; }
+.icon-xl { width: 48px; height: 48px; }
+
+/* ============================================================
+   6. UTILITY CLASSES
+   ============================================================ */
+
+.icon-glow {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.icon-pulse {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+
+.icon-shake {
+  animation: icon-shake 0.5s ease-in-out;
+}
+
+@keyframes icon-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  50%      { transform: translateX(3px); }
+  75%      { transform: translateX(-2px); }
+}
