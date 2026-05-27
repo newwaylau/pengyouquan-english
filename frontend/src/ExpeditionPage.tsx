@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './expedition.css';
 import ExpeditionMap from './ExpeditionMap';
 import ExpeditionCampfire from './ExpeditionCampfire';
@@ -7,6 +7,11 @@ import ExpeditionPotion from './ExpeditionPotion';
 import ExpeditionEvent from './ExpeditionEvent';
 import ExpeditionBoss from './ExpeditionBoss';
 import ExpeditionReward from './ExpeditionReward';
+import { 
+  playCardAnimation, elementFlash, showDamageNumber, hitAnimation, screenShake, 
+  spawnParticles, victoryEffect, defeatEffect, enemyDeathAnimation, cardDrawAnimation 
+} from './EffectEngine';
+import { getCardAnimConfig, ELEMENT_STYLES } from './AnimProfileBuilder';
 
 const API_BASE = '';
 function getToken() { return localStorage.getItem('token'); }
@@ -66,6 +71,10 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   const [attackingCard, setAttackingCard] = useState<number | null>(null);
   const [combatLoading, setCombatLoading] = useState(false);
 
+  // Animation refs
+  const combatRef = useRef<HTMLDivElement>(null);
+  const enemyAreaRef = useRef<HTMLDivElement>(null);
+
   // Node interaction
   const [nodeType, setNodeType] = useState<string>('');
 
@@ -99,6 +108,16 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Card draw animation when new hand cards appear in combat
+  useEffect(() => {
+    if (handCards.length > 0 && phase === 'combat' && combatRef.current) {
+      const handArea = combatRef.current.querySelector('.expedition-hand') as HTMLElement;
+      if (handArea) {
+        cardDrawAnimation(combatRef.current, handArea, '🃏');
+      }
+    }
+  }, [handCards.length, phase]);
 
   async function loadInitialData() {
     setLoading(true);
@@ -162,6 +181,15 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (combatLoading) return;
     setCombatLoading(true);
     setAttackingCard(cardId);
+
+    // Card fly animation before API call
+    const cardEl = combatRef.current?.querySelector(`.expedition-hand-card[data-card-id="${cardId}"]`) as HTMLElement;
+    const currentCard = handCards.find(c => c.id === cardId);
+    const cardConfig = currentCard ? getCardAnimConfig(currentCard.attack, currentCard.rarity) : getCardAnimConfig(0, 'common');
+    if (cardEl && combatRef.current) {
+      await playCardAnimation(cardEl, combatRef.current, cardConfig.damageColor);
+    }
+
     const res = await apiFetch('/api/expedition/play-card', {
       method: 'POST',
       body: JSON.stringify({ cardId }),
@@ -171,12 +199,24 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (res.code === 200) {
       const data = res.data;
       if (data.playerDead) {
+        // Defeat effect: dark particles + red overlay
+        if (combatRef.current) {
+          await defeatEffect(combatRef.current);
+        }
         setExpedition(data.expedition);
         setSettlement({ cleared: false, expedition: data.expedition });
         setPhase('settlement');
         return;
       }
       if (data.enemyDefeated) {
+        // Enemy death + victory effects
+        if (combatRef.current) {
+          const enemyEl = combatRef.current.querySelector('.expedition-enemy-area, .expedition-boss') as HTMLElement;
+          if (enemyEl) {
+            await enemyDeathAnimation(enemyEl);
+          }
+          await victoryEffect(combatRef.current);
+        }
         setExpedition(data.expedition);
         setEnemy(null);
         setHandCards([]);
@@ -185,7 +225,35 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         setPhase('reward');
         return;
       }
-      // Show damage numbers
+      // Normal damage: animate hit + particles + numbers
+      if (data.damageDealt > 0 && combatRef.current) {
+        const combat = combatRef.current;
+        const combatRect = combat.getBoundingClientRect();
+        const enemyEl = combat.querySelector('.expedition-enemy-area, .expedition-boss') as HTMLElement;
+
+        elementFlash(combat, cardConfig.element);
+        screenShake(combat, data.damageDealt);
+
+        if (enemyEl) {
+          const enemyRect = enemyEl.getBoundingClientRect();
+          const enemyCx = enemyRect.left - combatRect.left + enemyRect.width / 2;
+          const enemyCy = enemyRect.top - combatRect.top;
+
+          hitAnimation(enemyEl, data.damageDealt >= 8 ? 'big' : data.damageDealt >= 5 ? 'mid' : 'light');
+          spawnParticles(combat, enemyCx, enemyCy + enemyRect.height / 2, cardConfig.particleCount, cardConfig.element);
+          showDamageNumber(combat, enemyCx - 20, enemyCy, data.damageDealt, cardConfig.damageColor);
+        }
+      }
+      if (data.damageTaken > 0 && combatRef.current) {
+        showDamageNumber(
+          combatRef.current,
+          50,
+          combatRef.current.offsetHeight - 80,
+          data.damageTaken,
+          '#ef4444'
+        );
+      }
+      // Keep existing state-based damage number display for backward compat
       if (data.damageDealt > 0) {
         setDamageNumber({ text: `-${data.damageDealt}`, type: 'damage-dealt' });
         setTimeout(() => setDamageNumber(null), 1000);
@@ -432,7 +500,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     const playerHpPercent = expedition ? (expedition.playerHp / expedition.maxHp) * 100 : 100;
 
     return (
-      <div className="expedition-combat">
+      <div ref={combatRef} className="expedition-combat">
         {/* Boss area uses ExpeditionBoss when isBoss */}
         {enemy.isBoss ? (
           <ExpeditionBoss
@@ -443,7 +511,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             feedback={feedback}
           />
         ) : (
-          <div className="expedition-enemy-area">
+          <div ref={enemyAreaRef} className="expedition-enemy-area">
             {damageNumber && (
               <div className={`expedition-damage-number ${damageNumber.type}`}>
                 {damageNumber.text}
@@ -492,6 +560,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           {handCards.map((card, i) => (
             <div
               key={i}
+              data-card-id={card.id}
               className={`expedition-hand-card ${attackingCard === card.id ? 'attacking' : ''}`}
               onClick={() => !combatLoading && handlePlayCard(card.id)}
               style={{ cursor: combatLoading ? 'wait' : 'pointer', opacity: combatLoading ? 0.6 : 1 }}

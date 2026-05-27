@@ -1,6 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BattleWebSocket from './api/battleWebSocket';
 import './battle-arena.css';
+import {
+  playCardAnimation,
+  elementFlash,
+  showDamageNumber,
+  hitAnimation,
+  screenShake,
+  spawnParticles,
+  victoryEffect,
+  defeatEffect,
+  minionChargeAnimation,
+  whiteFlash,
+  heroPowerEffect,
+} from './EffectEngine';
+import { getCardAnimConfig, ELEMENT_STYLES } from './AnimProfileBuilder';
 
 // ===================== 关键词配置 =====================
 const KEYWORD_CONFIG: Record<string, { label: string; color: string }> = {
@@ -146,6 +160,14 @@ export default function BattleArenaPage({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const turnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ===================== 动画相关 refs =====================
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const handCardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const myBoardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const opponentBoardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const lastPlayedCardRef = useRef<CardData | null>(null);
+  const lastAttackerRef = useRef<CardData | null>(null);
+
   // ===================== WebSocket 连接 =====================
 
   useEffect(() => {
@@ -204,6 +226,16 @@ export default function BattleArenaPage({
       onCardPlayResult: (data: any) => {
         const payload = data.payload;
         if (payload.success) {
+          // 播放元素闪屏 + 粒子爆发
+          const container = fieldRef.current;
+          const lastCard = lastPlayedCardRef.current;
+          if (container && lastCard) {
+            const config = getCardAnimConfig(lastCard.attack, lastCard.rarity);
+            elementFlash(container, config.element);
+            const cx = container.offsetWidth / 2;
+            const cy = container.offsetHeight / 2;
+            spawnParticles(container, cx, cy, config.particleCount, config.element);
+          }
           setState(prev => ({
             ...prev,
             myMana: payload.manaRemaining,
@@ -215,6 +247,60 @@ export default function BattleArenaPage({
       onDefenseQuestion: (_data: any) => {},
       onAttackResult: (data: any) => {
         const payload = data.payload;
+        const container = fieldRef.current;
+        const damage = payload.damage || 0;
+
+        if (container) {
+          // 确定目标位置显示伤害数字
+          let targetX: number | null = null;
+          let targetY: number | null = null;
+
+          if (payload.targetType === 'minion' && payload.targetId != null) {
+            // 尝试找到场上的目标随从（对手或己方）
+            const targetEl =
+              opponentBoardRefs.current.get(payload.targetId) ||
+              myBoardRefs.current.get(payload.targetId);
+            if (targetEl) {
+              const rect = targetEl.getBoundingClientRect();
+              const containerRect = container.getBoundingClientRect();
+              targetX = rect.left - containerRect.left + rect.width / 2;
+              targetY = rect.top - containerRect.top;
+              // 受击动画
+              hitAnimation(targetEl, damage >= 8 ? 'big' : damage >= 5 ? 'mid' : 'light');
+            }
+          } else if (payload.targetType === 'hero') {
+            // 英雄受击 —— 在对手区域显示伤害数字
+            targetX = container.offsetWidth / 2 - 40;
+            targetY = 30;
+            // 对手头像白闪（大伤害）
+            if (damage >= 5) {
+              // 尝试获取对手区域元素进行 hitAnimation
+              const opponentBar = container.querySelector('.battle-arena-opponent-bar') as HTMLElement | null;
+              if (opponentBar) {
+                hitAnimation(opponentBar, damage >= 8 ? 'big' : 'mid');
+              }
+            }
+          }
+
+          // 如果没有精确的目标位置，放在战场中央
+          if (targetX === null) {
+            targetX = container.offsetWidth / 2;
+            targetY = container.offsetHeight / 2;
+          }
+
+          // 显示伤害数字
+          const dmgColor = damage >= 8 ? '#ff4444' : damage >= 5 ? '#ff8844' : '#ffaa44';
+          showDamageNumber(container, targetX - 20, targetY - 10, damage, dmgColor);
+
+          // 大伤害带白闪
+          if (damage >= 8) {
+            whiteFlash(container);
+          }
+
+          // 屏幕震动
+          screenShake(container, damage);
+        }
+
         setState(prev => ({
           ...prev,
           battleLog: [...prev.battleLog, `⚡ 攻击造成 ${payload.damage || 0} 点伤害`],
@@ -249,6 +335,18 @@ export default function BattleArenaPage({
           battleLog: [...prev.battleLog, isWin ? '🏆 胜利!' : '💀 失败'],
         }));
         stopTurnTimer();
+
+        // 播放胜利/失败特效（延时一点等状态更新）
+        const container = fieldRef.current;
+        if (container) {
+          setTimeout(() => {
+            if (isWin) {
+              victoryEffect(container);
+            } else {
+              defeatEffect(container);
+            }
+          }, 300);
+        }
       },
       onCombo: (_data: any) => {},
       onError: (_data: any) => {},
@@ -332,11 +430,24 @@ export default function BattleArenaPage({
 
   // ===================== 出牌操作（纯点击，无答题） =====================
 
-  const handlePlayCard = (card: CardData) => {
+  const handlePlayCard = async (card: CardData) => {
     if (!state.isMyTurn || state.attackMode) return;
     if (card.cost > state.myMana) return;
     const ws = wsRef.current;
     if (!ws || !state.sessionId) return;
+
+    // 记录本次出的牌，供后续回调使用
+    lastPlayedCardRef.current = card;
+
+    // 出牌动画：手牌飞向战场中心
+    const cardEl = handCardRefs.current.get(card.cardId);
+    const container = fieldRef.current;
+    if (cardEl && container) {
+      const config = getCardAnimConfig(card.attack, card.rarity);
+      const style = ELEMENT_STYLES[config.element] || ELEMENT_STYLES.fire;
+      await playCardAnimation(cardEl, container, style.color);
+    }
+
     ws.playCard(state.sessionId, card.cardId);
     // 从手牌中移除（乐观更新）
     setState(prev => ({
@@ -357,11 +468,21 @@ export default function BattleArenaPage({
     }));
   };
 
-  const handleAttackTarget = (targetType: 'minion' | 'hero', targetId?: number) => {
+  const handleAttackTarget = async (targetType: 'minion' | 'hero', targetId?: number) => {
     if (!state.selectedAttacker || !state.sessionId) return;
     const ws = wsRef.current;
     if (!ws) return;
-    ws.attack(state.sessionId, state.selectedAttacker.cardId, targetType, targetId);
+
+    const attacker = state.selectedAttacker;
+    lastAttackerRef.current = attacker;
+
+    // 攻击方冲锋动画
+    const attackerEl = myBoardRefs.current.get(attacker.cardId);
+    if (attackerEl && fieldRef.current) {
+      await minionChargeAnimation(attackerEl, attacker.attack);
+    }
+
+    ws.attack(state.sessionId, attacker.cardId, targetType, targetId);
     setState(prev => ({
       ...prev,
       attackMode: false,
@@ -520,7 +641,7 @@ export default function BattleArenaPage({
   // ===================== 渲染: 游戏进行中 =====================
 
   return (
-    <div className="battle-arena">
+    <div className="battle-arena" ref={fieldRef}>
       {/* ====== 对手信息 ====== */}
       <div className="battle-arena-opponent-bar">
         <div className="battle-arena-opponent-info">
@@ -541,6 +662,7 @@ export default function BattleArenaPage({
         {state.opponentBoard.map((card, idx) => (
           <div
             key={`opp-${card.cardId}-${idx}`}
+            ref={(el) => { if (el) opponentBoardRefs.current.set(card.cardId, el); else opponentBoardRefs.current.delete(card.cardId); }}
             className={`battle-arena-minion ${card.hasTaunt ? 'taunt' : ''}`}
             style={{ borderColor: getRarityColor(card.rarity) }}
             onClick={() => {
@@ -589,6 +711,7 @@ export default function BattleArenaPage({
         {state.myBoard.map((card, idx) => (
           <div
             key={`my-${card.cardId}-${idx}`}
+            ref={(el) => { if (el) myBoardRefs.current.set(card.cardId, el); else myBoardRefs.current.delete(card.cardId); }}
             className={`battle-arena-minion ${card.canAttack ? 'can-attack' : ''} ${state.selectedAttacker?.cardId === card.cardId ? 'selected' : ''} ${card.hasTaunt ? 'taunt' : ''}`}
             style={{ borderColor: getRarityColor(card.rarity) }}
             onClick={() => handleSelectAttacker(card)}
@@ -641,6 +764,7 @@ export default function BattleArenaPage({
         {state.myHand.map((card, idx) => (
           <div
             key={`hand-${card.cardId}-${idx}`}
+            ref={(el) => { if (el) handCardRefs.current.set(card.cardId, el); else handCardRefs.current.delete(card.cardId); }}
             className={`battle-arena-hand-card ${card.cost <= state.myMana && state.isMyTurn ? 'playable' : 'unplayable'}`}
             style={{ borderColor: getRarityColor(card.rarity) }}
             onClick={() => handlePlayCard(card)}
