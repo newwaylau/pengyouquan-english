@@ -218,11 +218,11 @@ public class ExpeditionService {
         return result;
     }
 
-    // ==================== 4. 答题 ====================
+    // ==================== 4. 战斗出牌攻击（纯卡牌策略，无答题） ====================
 
     @SuppressWarnings("unchecked")
     @Transactional
-    public Map<String, Object> answerQuestion(Long userId, Long sentenceId, String answer, boolean correct) {
+    public Map<String, Object> playCardInCombat(Long userId, Long cardId) {
         Expedition exp = getActiveExpedition(userId);
 
         if (exp.getCurrentEnemyId() == null) {
@@ -236,18 +236,42 @@ public class ExpeditionService {
         }
         ExpeditionEnemy enemy = enemyOpt.get();
 
-        // 更新答题统计
-        exp.setQuestionsTotal(exp.getQuestionsTotal() + 1);
-
-        // 获取当前手牌中的一张卡
+        // 验证卡牌在手牌中
         List<Long> deck = parseJsonList(exp.getCurrentDeck());
         if (deck.isEmpty()) {
             deck = parseJsonList(exp.getStartingDeck());
         }
 
-        // 随机选一张牌做本次攻击
-        Random rand = new Random();
-        Long cardId = deck.get(rand.nextInt(deck.size()));
+        // 检查battle_state中的手牌
+        Map<String, Object> battleState = new HashMap<>();
+        try {
+            String bs = exp.getBattleState();
+            if (bs != null && !"{}".equals(bs)) {
+                battleState = objectMapper.readValue(bs, Map.class);
+            }
+        } catch (Exception ignored) {}
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> hand = (List<Map<String, Object>>) battleState.get("hand");
+        boolean cardInHand = false;
+        if (hand != null) {
+            for (Map<String, Object> hc : hand) {
+                Number hid = (Number) hc.get("id");
+                if (hid != null && hid.longValue() == cardId) {
+                    cardInHand = true;
+                    break;
+                }
+            }
+        }
+        // 兜底：从牌组检查
+        if (!cardInHand && !deck.contains(cardId)) {
+            throw new IllegalStateException("该卡牌不在手牌中");
+        }
+
+        if (!deck.contains(cardId)) {
+            throw new IllegalStateException("该卡牌不在牌组中");
+        }
+
         Optional<Card> cardOpt = cardRepository.findById(cardId);
 
         // 读取升级信息
@@ -259,9 +283,16 @@ public class ExpeditionService {
             cardAttack += cardUpgrades.get(cardId).getOrDefault("attackBonus", 0);
         }
 
+        // 应用事件buff
+        Object attackBuffObj = battleState.get("attackBuff");
+        if (attackBuffObj instanceof Number) {
+            cardAttack += ((Number) attackBuffObj).intValue();
+        }
+
         int damageDealt = 0;
         int damageTaken = 0;
         String resultText = "";
+        Random rand = new Random();
 
         // 检查遗物效果
         List<Long> relicIds = parseJsonList(exp.getRelics());
@@ -269,14 +300,178 @@ public class ExpeditionService {
         // 获取新遗物系统的效果
         Map<String, Integer> newRelicEffects = getNewRelicEffects(exp.getId());
 
+        // 出牌：造成伤害
+        exp.setQuestionsTotal(exp.getQuestionsTotal() + 1);
+        exp.setQuestionsAnswered(exp.getQuestionsAnswered() + 1);
+        damageDealt = cardAttack;
+
+        // 新遗物系统：COMBAT_DAMAGE_BOOST
+        damageDealt += newRelicEffects.getOrDefault("COMBAT_DAMAGE_BOOST", 0);
+        // 新遗物系统：BOSS_DAMAGE_BONUS
+        boolean isBossNode = "boss".equals(getCurrentNodeType(exp));
+        if (isBossNode) {
+            int bossBonus = newRelicEffects.getOrDefault("BOSS_DAMAGE_BONUS", 0);
+            if (bossBonus > 0) {
+                damageDealt += (int) Math.round(damageDealt * bossBonus / 100.0);
+            }
+        }
+        // 新遗物系统：DOUBLE_EDGED
+        if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
+            damageDealt *= newRelicEffects.get("DOUBLE_EDGED");
+        }
+
+        // 遗物：龙焰宝珠 额外+2伤害
+        if (hasRelicEffect(relicEffects, "extra_damage_on_correct")) {
+            damageDealt += getRelicValue(relicEffects, "extra_damage_on_correct", 2);
+        }
+
+        // 应用伤害
+        int newHp = exp.getCurrentEnemyHp() - damageDealt;
+        exp.setCurrentEnemyHp(Math.max(0, newHp));
+        resultText = "攻击！造成 " + damageDealt + " 点伤害！";
+
+        // 新遗物系统：VAMPIRIC - 造成伤害的20%回血
+        int vampPct = newRelicEffects.getOrDefault("VAMPIRIC", 0);
+        if (vampPct > 0) {
+            int vampHeal = Math.max(1, damageDealt * vampPct / 100);
+            exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + vampHeal));
+            resultText += " 汲取了 " + vampHeal + " 点生命！";
+        }
+
+        // 敌人反击（每次出牌敌人也会攻击）
+        damageTaken = BASE_ENEMY_ATTACK;
+        // 新遗物系统：DAMAGE_REDUCTION
+        int dmgReduction = newRelicEffects.getOrDefault("DAMAGE_REDUCTION", 0);
+        damageTaken = Math.max(0, damageTaken - dmgReduction);
+        // 新遗物系统：DOUBLE_EDGED - 自伤翻倍
+        if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
+            damageTaken *= newRelicEffects.get("DOUBLE_EDGED");
+        }
+        int newPlayerHp = exp.getPlayerHp() - damageTaken;
+        exp.setPlayerHp(Math.max(0, newPlayerHp));
+
+        // 检测敌人是否死亡
+        if (exp.getCurrentEnemyHp() <= 0) {
+            exp.setEnemiesKilled(exp.getEnemiesKilled() + 1);
+            // 掉落金币
+            int goldBonus = newRelicEffects.getOrDefault("GOLD_BONUS", 0);
+            int goldReward = 5 + rand.nextInt(11) + goldBonus;
+            exp.setGold(exp.getGold() + goldReward);
+
+            exp.setCurrentEnemyId(null);
+            exp.setCurrentEnemyHp(null);
+            expeditionRepository.save(exp);
+
+            // 新遗物系统：HEAL_ON_COMBAT_WIN
+            int healOnWin = newRelicEffects.getOrDefault("HEAL_ON_COMBAT_WIN", 0);
+            if (healOnWin > 0) {
+                exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + healOnWin));
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("damageDealt", damageDealt);
+            result.put("damageTaken", damageTaken);
+            result.put("enemyDefeated", true);
+            result.put("isBoss", isBossNode);
+            result.put("goldReward", goldReward);
+            result.put("resultText", resultText + " 击败了敌人！获得 " + goldReward + " 金币。");
+            result.put("expedition", buildExpeditionData(exp));
+
+            // 如果是Boss战胜利
+            if (isBossNode) {
+                result.put("bossDefeated", true);
+                result.put("rewards", generateBossRewards(exp));
+                int totalBossKills = expeditionRepository.sumBossKillsByUserId(userId);
+                achievementService.checkByConditionType(userId, "boss_kills", totalBossKills);
+            } else {
+                result.put("rewards", generateCombatRewards(exp));
+            }
+            return result;
+        }
+
+        // 检查玩家是否死亡
+        if (exp.getPlayerHp() <= 0) {
+            exp.setStatus("dead");
+            clearPlayerRelics(exp.getId());
+            expeditionRepository.save(exp);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("damageDealt", damageDealt);
+            result.put("damageTaken", damageTaken);
+            result.put("enemyDefeated", false);
+            result.put("playerDead", true);
+            result.put("resultText", "远征结束！你已阵亡...");
+            result.put("expedition", buildExpeditionData(exp));
+            return result;
+        }
+
+        expeditionRepository.save(exp);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("damageDealt", damageDealt);
+        result.put("damageTaken", damageTaken);
+        result.put("enemyDefeated", false);
+        result.put("playerDead", false);
+        result.put("enemyRemainingHp", exp.getCurrentEnemyHp());
+        result.put("enemyMaxHp", enemy.getHp());
+        result.put("resultText", resultText);
+        final int finalCardAttack = cardAttack;
+        result.put("cardUsed", cardOpt.map(c -> Map.of("id", c.getId(), "nameCn", c.getNameCn(), "attack", finalCardAttack)).orElse(null));
+        result.put("expedition", buildExpeditionData(exp));
+        return result;
+    }
+
+    // ==================== 5. 答题（旧版入口，保留兼容但不再被前端使用） ====================
+
+    @SuppressWarnings("unchecked")
+    @Transactional
+    public Map<String, Object> answerQuestion(Long userId, Long sentenceId, String answer, boolean correct) {
+        Expedition exp = getActiveExpedition(userId);
+
+        if (exp.getCurrentEnemyId() == null) {
+            throw new IllegalStateException("当前没有进行中的战斗");
+        }
+
+        Optional<ExpeditionEnemy> enemyOpt = expeditionEnemyRepository.findById(exp.getCurrentEnemyId());
+        if (enemyOpt.isEmpty()) {
+            throw new IllegalStateException("敌人不存在");
+        }
+        ExpeditionEnemy enemy = enemyOpt.get();
+
+        exp.setQuestionsTotal(exp.getQuestionsTotal() + 1);
+
+        List<Long> deck = parseJsonList(exp.getCurrentDeck());
+        if (deck.isEmpty()) {
+            deck = parseJsonList(exp.getStartingDeck());
+        }
+
+        Random rand = new Random();
+        Long cardId = deck.get(rand.nextInt(deck.size()));
+        Optional<Card> cardOpt = cardRepository.findById(cardId);
+
+        Map<Long, Map<String, Integer>> cardUpgrades = getCardUpgrades(exp);
+
+        int cardAttack = cardOpt.map(c -> c.getAttack() != null ? c.getAttack() : 2).orElse(2);
+        if (cardUpgrades.containsKey(cardId)) {
+            cardAttack += cardUpgrades.get(cardId).getOrDefault("attackBonus", 0);
+        }
+
+        int damageDealt = 0;
+        int damageTaken = 0;
+        String resultText = "";
+
+        List<Long> relicIds = parseJsonList(exp.getRelics());
+        Map<String, Object> relicEffects = getRelicEffects(relicIds);
+        Map<String, Integer> newRelicEffects = getNewRelicEffects(exp.getId());
+
         if (correct) {
-            // 答对：造成伤害
             exp.setQuestionsAnswered(exp.getQuestionsAnswered() + 1);
             damageDealt = cardAttack;
 
-            // 新遗物系统：COMBAT_DAMAGE_BOOST
             damageDealt += newRelicEffects.getOrDefault("COMBAT_DAMAGE_BOOST", 0);
-            // 新遗物系统：BOSS_DAMAGE_BONUS
             boolean isBossNode = "boss".equals(getCurrentNodeType(exp));
             if (isBossNode) {
                 int bossBonus = newRelicEffects.getOrDefault("BOSS_DAMAGE_BONUS", 0);
@@ -284,17 +479,14 @@ public class ExpeditionService {
                     damageDealt += (int) Math.round(damageDealt * bossBonus / 100.0);
                 }
             }
-            // 新遗物系统：DOUBLE_EDGED
             if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
                 damageDealt *= newRelicEffects.get("DOUBLE_EDGED");
             }
 
-            // 遗物：龙焰宝珠 额外+2伤害
             if (hasRelicEffect(relicEffects, "extra_damage_on_correct")) {
                 damageDealt += getRelicValue(relicEffects, "extra_damage_on_correct", 2);
             }
 
-            // 遗物：无面者面具 上次答错则此伤害×2
             if (hasRelicEffect(relicEffects, "consecutive_damage_boost")) {
                 String battleStateStr = exp.getBattleState();
                 if (battleStateStr != null) {
@@ -309,12 +501,10 @@ public class ExpeditionService {
                 }
             }
 
-            // 应用伤害
             int newHp = exp.getCurrentEnemyHp() - damageDealt;
             exp.setCurrentEnemyHp(Math.max(0, newHp));
             resultText = "答对了！造成 " + damageDealt + " 点伤害！";
 
-            // 新遗物系统：VAMPIRIC - 造成伤害的20%回血
             int vampPct = newRelicEffects.getOrDefault("VAMPIRIC", 0);
             if (vampPct > 0) {
                 int vampHeal = Math.max(1, damageDealt * vampPct / 100);
@@ -322,12 +512,10 @@ public class ExpeditionService {
                 resultText += " 汲取了 " + vampHeal + " 点生命！";
             }
 
-            // 检测敌人是否死亡
             if (exp.getCurrentEnemyHp() <= 0) {
                 exp.setEnemiesKilled(exp.getEnemiesKilled() + 1);
-                // 掉落金币（新遗物系统：GOLD_BONUS）
                 int goldBonus = newRelicEffects.getOrDefault("GOLD_BONUS", 0);
-                int goldReward = 5 + rand.nextInt(11) + goldBonus; // 5-15 + bonus
+                int goldReward = 5 + rand.nextInt(11) + goldBonus;
                 exp.setGold(exp.getGold() + goldReward);
 
                 String nodeType = getCurrentNodeType(exp);
@@ -337,7 +525,6 @@ public class ExpeditionService {
                 exp.setCurrentEnemyHp(null);
                 expeditionRepository.save(exp);
 
-                // 新遗物系统：HEAL_ON_COMBAT_WIN
                 int healOnWin = newRelicEffects.getOrDefault("HEAL_ON_COMBAT_WIN", 0);
                 if (healOnWin > 0) {
                     exp.setPlayerHp(Math.min(exp.getMaxHp(), exp.getPlayerHp() + healOnWin));
@@ -353,11 +540,9 @@ public class ExpeditionService {
                 result.put("resultText", resultText + " 击败了敌人！获得 " + goldReward + " 金币。");
                 result.put("expedition", buildExpeditionData(exp));
 
-                // 如果是Boss战胜利
                 if (isBoss) {
                     result.put("bossDefeated", true);
                     result.put("rewards", generateBossRewards(exp));
-                    // 成就检查
                     int totalBossKills = expeditionRepository.sumBossKillsByUserId(userId);
                     achievementService.checkByConditionType(userId, "boss_kills", totalBossKills);
                 } else {
@@ -366,25 +551,20 @@ public class ExpeditionService {
                 return result;
             }
         } else {
-            // 答错：受到伤害
             damageTaken = BASE_ENEMY_ATTACK;
 
-            // 新遗物系统：DAMAGE_REDUCTION
             int dmgReduction = newRelicEffects.getOrDefault("DAMAGE_REDUCTION", 0);
             damageTaken = Math.max(0, damageTaken - dmgReduction);
 
-            // 新遗物系统：WRONG_PENALTY_REDUCE
             int penaltyReduce = newRelicEffects.getOrDefault("WRONG_PENALTY_REDUCE", 0);
             if (penaltyReduce > 0) {
                 damageTaken = Math.max(0, damageTaken * (100 - penaltyReduce) / 100);
             }
 
-            // 新遗物系统：DOUBLE_EDGED - 答错自伤翻倍
             if (newRelicEffects.containsKey("DOUBLE_EDGED")) {
                 damageTaken *= newRelicEffects.get("DOUBLE_EDGED");
             }
 
-            // 检查遗物：渡鸦之眼 首次答错不扣血
             if (hasRelicEffect(relicEffects, "first_mistake_no_damage")) {
                 String battleStateStr = exp.getBattleState();
                 try {
@@ -398,7 +578,6 @@ public class ExpeditionService {
                 } catch (Exception ignored) {}
             }
 
-            // 遗物：无面者面具 - 记录答错
             if (hasRelicEffect(relicEffects, "consecutive_damage_boost")) {
                 try {
                     Map<String, Object> state = objectMapper.readValue(exp.getBattleState(), Map.class);

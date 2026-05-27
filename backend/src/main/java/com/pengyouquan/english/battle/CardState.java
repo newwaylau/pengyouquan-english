@@ -24,12 +24,11 @@ public class CardState {
     private boolean hasRush;
     private boolean battlecryTriggered;
     private boolean stealthRevealed;
-    private Long challengeSentenceId;
 
     public CardState() {}
 
     public CardState(Long cardId, String nameCn, String nameEn, String cardType, String rarity,
-                     int cost, int attack, int health, String effectJson, Long challengeSentenceId) {
+                     int cost, int attack, int health, String effectJson) {
         this.cardId = cardId;
         this.nameCn = nameCn;
         this.nameEn = nameEn;
@@ -50,7 +49,6 @@ public class CardState {
         this.hasRush = false;
         this.battlecryTriggered = false;
         this.stealthRevealed = false;
-        this.challengeSentenceId = challengeSentenceId;
     }
 
     // --- getters/setters ---
@@ -117,7 +115,4 @@ public class CardState {
 
     public boolean isStealthRevealed() { return stealthRevealed; }
     public void setStealthRevealed(boolean stealthRevealed) { this.stealthRevealed = stealthRevealed; }
-
-    public Long getChallengeSentenceId() { return challengeSentenceId; }
-    public void setChallengeSentenceId(Long challengeSentenceId) { this.challengeSentenceId = challengeSentenceId; }
 }

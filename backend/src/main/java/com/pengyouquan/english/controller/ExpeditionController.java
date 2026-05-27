@@ -51,6 +51,21 @@ public class ExpeditionController {
         }
     }
 
+    @PostMapping("/play-card")
+    public ApiResponse<Map<String, Object>> playCard(
+            @CurrentUserId Long userId,
+            @RequestBody Map<String, Object> body) {
+        if (userId == null) return ApiResponse.unauthorized("未登录");
+        try {
+            Long cardId = ((Number) body.get("cardId")).longValue();
+            return ApiResponse.success(expeditionService.playCardInCombat(userId, cardId));
+        } catch (IllegalStateException e) {
+            return ApiResponse.error(400, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.badRequest("参数错误：" + e.getMessage());
+        }
+    }
+
     @PostMapping("/answer")
     public ApiResponse<Map<String, Object>> answerQuestion(
             @CurrentUserId Long userId,

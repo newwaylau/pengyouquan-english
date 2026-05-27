@@ -453,4 +453,11 @@ public class PracticeService {
     public List<Object[]> getExportRecords(Long userId) {
         return practiceLogRepository.findPracticeRecordsForExport(userId);
     }
+
+    /**
+     * 获取用户总练习数
+     */
+    public long getTotalPracticeCount(Long userId) {
+        return practiceLogRepository.countByUserId(userId);
+    }
 }

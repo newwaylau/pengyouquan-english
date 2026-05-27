@@ -38,26 +38,6 @@ interface CardData {
   keywords?: any;
 }
 
-interface QuestionData {
-  cardId: number;
-  cardNameCn: string;
-  questionType: string;
-  questionData: string;
-  timeLimit: number;
-  sentenceText?: string;
-  [key: string]: any;
-}
-
-interface DefenseQuestionData {
-  attackerId: number;
-  attackerName: string;
-  attackPower: number;
-  targetType: string;
-  targetId?: number;
-  question: QuestionData;
-  [key: string]: any;
-}
-
 interface GameState {
   myHealth: number;
   myMana: number;
@@ -100,14 +80,6 @@ interface BattleState {
   turnNumber: number;
   isMyTurn: boolean;
   turnTimer: number;
-
-  // 答题弹窗
-  currentQuestion: QuestionData | null;
-  answerResult: 'waiting' | 'correct' | 'wrong' | null;
-
-  // 防御弹窗
-  defenseQuestion: DefenseQuestionData | null;
-  defenseResult: 'waiting' | 'correct' | 'wrong' | null;
 
   // 对战结果
   result: 'win' | 'lose' | null;
@@ -158,12 +130,6 @@ export default function BattleArenaPage({
     turnNumber: 0,
     isMyTurn: false,
     turnTimer: 0,
-
-    currentQuestion: null,
-    answerResult: null,
-
-    defenseQuestion: null,
-    defenseResult: null,
 
     result: null,
     resultData: null,
@@ -232,62 +198,28 @@ export default function BattleArenaPage({
           selectedAttacker: null,
           battleLog: [...prev.battleLog, `📋 回合 ${payload.turnNumber} 开始`],
         }));
-        // 开始回合倒计时
         startTurnTimer();
       },
-      onQuestion: (data: any) => {
-        const payload = data.payload;
-        setState(prev => ({
-          ...prev,
-          currentQuestion: payload,
-          answerResult: 'waiting',
-        }));
-      },
+      onQuestion: (_data: any) => {},
       onCardPlayResult: (data: any) => {
         const payload = data.payload;
         if (payload.success) {
           setState(prev => ({
             ...prev,
-            answerResult: 'correct',
             myMana: payload.manaRemaining,
             battleLog: [...prev.battleLog, `✅ 出牌成功`],
           }));
-          // 关闭答题弹窗
-          setTimeout(() => {
-            setState(prev => ({
-              ...prev,
-              currentQuestion: null,
-              answerResult: null,
-            }));
-          }, 1000);
-        } else {
-          setState(prev => ({
-            ...prev,
-            answerResult: 'wrong',
-            battleLog: [...prev.battleLog, `❌ ${payload.errorMessage || '出牌失败'}`],
-          }));
-          setTimeout(() => {
-            setState(prev => ({
-              ...prev,
-              currentQuestion: null,
-              answerResult: null,
-            }));
-          }, 1500);
         }
       },
-      onAttackDeclared: (_data: any) => {
-        // 攻击已发起
-      },
-      onDefenseQuestion: (data: any) => {
+      onAttackDeclared: (_data: any) => {},
+      onDefenseQuestion: (_data: any) => {},
+      onAttackResult: (data: any) => {
         const payload = data.payload;
         setState(prev => ({
           ...prev,
-          defenseQuestion: payload,
-          defenseResult: 'waiting',
-          battleLog: [...prev.battleLog, `⚔️ ${payload.attackerName} 发起攻击!`],
+          battleLog: [...prev.battleLog, `⚡ 攻击造成 ${payload.damage || 0} 点伤害`],
         }));
       },
-      onAttackResult: (_data: any) => {},
       onDefenseResult: (_data: any) => {},
       onGameState: (data: any) => {
         const payload = data.payload;
@@ -318,13 +250,7 @@ export default function BattleArenaPage({
         }));
         stopTurnTimer();
       },
-      onCombo: (data: any) => {
-        const payload = data.payload;
-        setState(prev => ({
-          ...prev,
-          battleLog: [...prev.battleLog, `🔥 ${payload.comboCount}连击! ${payload.bonus}`],
-        }));
-      },
+      onCombo: (_data: any) => {},
       onError: (_data: any) => {},
       onOpponentAction: (data: any) => {
         setState(prev => ({
@@ -343,7 +269,6 @@ export default function BattleArenaPage({
     ws.connect();
     setState(prev => ({ ...prev, wsConnected: false }));
 
-    // 检查连接状态
     const connectTimer = setInterval(() => {
       if (wsRef.current?.isConnected()) {
         setState(prev => ({ ...prev, wsConnected: true }));
@@ -391,7 +316,6 @@ export default function BattleArenaPage({
       battleLog: ['🔍 正在匹配对手...'],
     }));
     wsRef.current?.joinQueue();
-    // 更新等待时间
     timerRef.current = setInterval(() => {
       setState(prev => ({ ...prev }));
     }, 1000);
@@ -406,23 +330,20 @@ export default function BattleArenaPage({
     }
   };
 
-  // ===================== 出牌操作 =====================
+  // ===================== 出牌操作（纯点击，无答题） =====================
 
   const handlePlayCard = (card: CardData) => {
     if (!state.isMyTurn || state.attackMode) return;
-    if (state.currentQuestion) return;
-    if (state.defenseQuestion) return;
-    const ws = wsRef.current;
-    if (!ws) return;
-    ws.playCard(state.sessionId!, card.cardId);
-  };
-
-  // ===================== 答题 =====================
-
-  const handleAnswer = (correct: boolean) => {
+    if (card.cost > state.myMana) return;
     const ws = wsRef.current;
     if (!ws || !state.sessionId) return;
-    ws.submitAnswer(state.sessionId, correct);
+    ws.playCard(state.sessionId, card.cardId);
+    // 从手牌中移除（乐观更新）
+    setState(prev => ({
+      ...prev,
+      myHand: prev.myHand.filter(c => c.cardId !== card.cardId),
+      myMana: prev.myMana - card.cost,
+    }));
   };
 
   // ===================== 攻击 =====================
@@ -455,25 +376,6 @@ export default function BattleArenaPage({
       attackMode: false,
       selectedAttacker: null,
     }));
-  };
-
-  // ===================== 防御 =====================
-
-  const handleDefense = (correct: boolean) => {
-    const ws = wsRef.current;
-    if (!ws || !state.sessionId) return;
-    ws.submitDefense(state.sessionId, correct);
-    setState(prev => ({
-      ...prev,
-      defenseResult: correct ? 'correct' : 'wrong',
-    }));
-    setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        defenseQuestion: null,
-        defenseResult: null,
-      }));
-    }, 1000);
   };
 
   // ===================== 回合控制 =====================
@@ -537,13 +439,13 @@ export default function BattleArenaPage({
                 <div className="battle-arena-matching-icon">⚔️</div>
                 <h2 className="battle-arena-matching-title">实时对战</h2>
                 <p className="battle-arena-matching-desc">
-                  与其他玩家实时英语对战！<br />
-                  答题出牌，攻防兼备，赢取奖杯！
+                  与其他玩家实时卡牌对战！<br />
+                  纯策略操作，出牌攻击，赢取奖杯！
                 </p>
                 <div className="battle-arena-rules">
-                  <div className="battle-arena-rule-item">🎯 答对出牌，答错回手</div>
-                  <div className="battle-arena-rule-item">💪 3连击免费出牌</div>
-                  <div className="battle-arena-rule-item">🛡️ 防御题可减免伤害</div>
+                  <div className="battle-arena-rule-item">🎯 点击手牌出牌</div>
+                  <div className="battle-arena-rule-item">⚡ 点击随从攻击</div>
+                  <div className="battle-arena-rule-item">🛡️ 圣盾/嘲讽/潜行关键词生效</div>
                   <div className="battle-arena-rule-item">🏆 胜利+30奖杯，失败-25</div>
                 </div>
                 <button className="battle-arena-btn battle-arena-btn-primary" onClick={handleStartMatching}>
@@ -591,14 +493,12 @@ export default function BattleArenaPage({
                 <span className="battle-arena-result-stat-label">胜者</span>
                 <span className="battle-arena-result-stat-value">{rd?.winnerStats?.nickname || ''}</span>
                 <span className="battle-arena-result-stat-detail">血量: {rd?.winnerStats?.healthRemaining}</span>
-                <span className="battle-arena-result-stat-detail">正确率: {rd?.winnerStats?.accuracy}%</span>
               </div>
               <div className="battle-arena-result-divider">VS</div>
               <div className="battle-arena-result-stat">
                 <span className="battle-arena-result-stat-label">败者</span>
                 <span className="battle-arena-result-stat-value">{rd?.loserStats?.nickname || ''}</span>
                 <span className="battle-arena-result-stat-detail">血量: {rd?.loserStats?.healthRemaining}</span>
-                <span className="battle-arena-result-stat-detail">正确率: {rd?.loserStats?.accuracy}%</span>
               </div>
             </div>
             <div className="battle-arena-result-buttons">
@@ -779,205 +679,11 @@ export default function BattleArenaPage({
         </div>
       )}
 
-      {/* ====== 答题弹窗 ====== */}
-      {state.currentQuestion && (
-        <div className="battle-arena-overlay">
-          <div className="battle-arena-question-panel">
-            <div className="battle-arena-question-header">
-              <span className="battle-arena-question-card-name">{state.currentQuestion.cardNameCn}</span>
-              <span className="battle-arena-question-type">
-                出牌答题 · {state.currentQuestion.timeLimit}秒
-              </span>
-            </div>
-            <div className="battle-arena-question-body">
-              {state.answerResult === 'waiting' ? (
-                <QuestionDisplay question={state.currentQuestion} onAnswer={handleAnswer} />
-              ) : (
-                <div className={`battle-arena-question-result ${state.answerResult}`}>
-                  {state.answerResult === 'correct' ? '✅ 答对了！' : '❌ 答错了！'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ====== 防御弹窗 ====== */}
-      {state.defenseQuestion && (
-        <div className="battle-arena-overlay">
-          <div className="battle-arena-question-panel defense">
-            <div className="battle-arena-question-header defense">
-              <span>🛡️ 防御！</span>
-              <span>{state.defenseQuestion.attackerName} 攻击力 {state.defenseQuestion.attackPower}</span>
-            </div>
-            <div className="battle-arena-question-body">
-              {state.defenseResult === 'waiting' ? (
-                <div className="battle-arena-defense-section">
-                  <p className="battle-arena-defense-prompt">
-                    答对减免一半伤害！
-                  </p>
-                  <DefenseDisplay
-                    question={state.defenseQuestion}
-                    onAnswer={(correct) => handleDefense(correct)}
-                  />
-                </div>
-              ) : (
-                <div className={`battle-arena-question-result ${state.defenseResult}`}>
-                  {state.defenseResult === 'correct' ? '✅ 防御成功！伤害减半' : '❌ 防御失败！全额伤害'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ====== 战斗日志（浮动小区域） ====== */}
       <div className="battle-arena-log">
         {state.battleLog.slice(-3).map((log, i) => (
           <div key={i} className="battle-arena-log-item">{log}</div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ===================== 题目展示组件 =====================
-
-function QuestionDisplay({
-  question,
-  onAnswer,
-}: {
-  question: QuestionData;
-  onAnswer: (correct: boolean) => void;
-}) {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [inputValue, setInputValue] = useState('');
-
-  const questionType = question.questionType;
-
-  // 听力题
-  if (questionType === 'listening') {
-    let qData: any = {};
-    try {
-      qData = typeof question.questionData === 'string'
-        ? JSON.parse(question.questionData)
-        : question.questionData;
-    } catch { /* ignore */ }
-
-    const options = qData.options || [];
-    const correctIdx = qData.correctIndex ?? 0;
-
-    return (
-      <div className="battle-arena-question-content">
-        <p className="battle-arena-question-prompt">请选择正确的单词</p>
-        {qData.sentence && (
-          <p className="battle-arena-question-sentence">{qData.sentence}</p>
-        )}
-        <div className="battle-arena-options">
-          {options.map((opt: string, idx: number) => (
-            <button
-              key={idx}
-              className={`battle-arena-option-btn ${selectedOption === idx ? 'selected' : ''}`}
-              onClick={() => {
-                setSelectedOption(idx);
-                setTimeout(() => onAnswer(idx === correctIdx), 500);
-              }}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // 拼写题
-  if (questionType === 'spelling') {
-    let qData: any = {};
-    try {
-      qData = typeof question.questionData === 'string'
-        ? JSON.parse(question.questionData)
-        : question.questionData;
-    } catch { /* ignore */ }
-
-    const answer = qData.answer || qData.prompt || '';
-
-    return (
-      <div className="battle-arena-question-content">
-        <p className="battle-arena-question-prompt">请拼写以下单词</p>
-        <p className="battle-arena-question-word">{qData.prompt || qData.answer || ''}</p>
-        <input
-          className="battle-arena-input"
-          type="text"
-          value={inputValue}
-          onChange={e => setInputValue(e.target.value)}
-          placeholder="输入拼写..."
-          autoFocus
-        />
-        <button
-          className="battle-arena-btn battle-arena-btn-primary"
-          onClick={() => {
-            const isCorrect = inputValue.trim().toLowerCase() === answer.trim().toLowerCase();
-            onAnswer(isCorrect);
-          }}
-        >
-          提交
-        </button>
-      </div>
-    );
-  }
-
-  // 默认为选择题（简化）
-  return (
-    <div className="battle-arena-question-content">
-      <p className="battle-arena-question-prompt">答题出牌！</p>
-      <p className="battle-arena-question-sentence">
-        {typeof question.questionData === 'string' ? question.questionData.slice(0, 100) : '答题'}
-      </p>
-      <div className="battle-arena-options">
-        <button className="battle-arena-option-btn correct" onClick={() => onAnswer(true)}>
-          ✅ 答对
-        </button>
-        <button className="battle-arena-option-btn wrong" onClick={() => onAnswer(false)}>
-          ❌ 答错
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ===================== 防御题展示组件 =====================
-
-function DefenseDisplay({
-  question,
-  onAnswer,
-}: {
-  question: DefenseQuestionData;
-  onAnswer: (correct: boolean) => void;
-}) {
-  let qData: any = {};
-  try {
-    qData = typeof question.questionData === 'string'
-      ? JSON.parse(question.questionData)
-      : (question.question || {});
-  } catch { /* ignore */ }
-
-  return (
-    <div className="battle-arena-question-content">
-      <p className="battle-arena-question-prompt">防御！请在以下句子中找到正确的关键词</p>
-      {qData.sentence && (
-        <p className="battle-arena-question-sentence">{qData.sentence}</p>
-      )}
-      <p className="battle-arena-question-keyword">
-        关键词: <strong>{qData.keyword || qData.answer || ''}</strong>
-      </p>
-      <div className="battle-arena-options">
-        <button className="battle-arena-option-btn correct" onClick={() => onAnswer(true)}>
-          ✅ 答对（伤害减半）
-        </button>
-        <button className="battle-arena-option-btn wrong" onClick={() => onAnswer(false)}>
-          ❌ 答错（全额伤害）
-        </button>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 实时对战 WebSocket 消息处理器
+ * 实时对战 WebSocket 消息处理器（纯卡牌策略操作，无答题）
  */
 @Controller
 public class BattleWebSocketHandler {
@@ -45,7 +45,6 @@ public class BattleWebSocketHandler {
         String nickname = getStringHeader(headerAccessor, "nickname");
         if (nickname == null) nickname = "Player " + userId;
 
-        // 获取奖杯数
         int trophies = 0;
         try {
             trophies = gameEngine.getTrophiesForUser(userId);
@@ -54,10 +53,8 @@ public class BattleWebSocketHandler {
         log.info("User {} ({}) joining match queue, trophies: {}", userId, nickname, trophies);
 
         matchmaking.joinQueue(userId, nickname, trophies, result -> {
-            // 匹配成功回调 - 通知双方
             log.info("Match found for user {}, opponent: {}", userId, result.getOpponentName());
 
-            // 通知当前玩家
             BattleMessage.MatchFound matchFound = new BattleMessage.MatchFound(
                     result.getSessionId(),
                     result.getOpponentId(),
@@ -71,7 +68,6 @@ public class BattleWebSocketHandler {
                     new BattleMessage(BattleMessage.TYPE_MATCH_FOUND, result.getSessionId(), userId, matchFound)
             );
 
-            // 通知两个玩家游戏开始（由匹配回调的另一端触发，但我们在两个回调里都发GAME_START）
             sendGameStart(result.getSessionId(), userId);
         });
     }
@@ -99,15 +95,12 @@ public class BattleWebSocketHandler {
             return;
         }
 
-        // 检查玩家是否参与此会话
         if (!session.getPlayer1Id().equals(userId) && !session.getPlayer2Id().equals(userId)) {
             sendError(sessionId, userId, "无权加入此对战");
             return;
         }
 
         log.info("User {} joining session {}", userId, sessionId);
-
-        // 发送游戏开始
         sendGameStart(sessionId, userId);
     }
 
@@ -120,96 +113,27 @@ public class BattleWebSocketHandler {
 
         String sessionId = getString(payload, "sessionId");
         Long cardId = getLong(payload, "cardId");
+        Long targetId = payload.containsKey("targetId") ? getLong(payload, "targetId") : null;
+
         if (sessionId == null || cardId == null) {
             sendError(sessionId, userId, "缺少参数");
             return;
         }
 
-        GameEngine.QuestionResult qr = gameEngine.playCard(sessionId, userId, cardId);
+        GameEngine.PlayCardResult pr = gameEngine.playCard(sessionId, userId, cardId, targetId);
 
-        if (!qr.success) {
-            sendError(sessionId, userId, qr.errorMessage);
+        if (!pr.success) {
+            sendError(sessionId, userId, pr.errorMessage);
             return;
         }
 
-        // 存储pending动作
-        gameEngine.setPendingAction(sessionId, userId,
-                new GameEngine.PendingAction(qr.card));
-
-        // 给对手发送出牌通知
-        GameSession session = gameEngine.getSession(sessionId);
-        if (session != null) {
-            Long opponentId = session.getOpponentId(userId);
-            BattleMessage.AttackDeclared declared = new BattleMessage.AttackDeclared();
-            declared.attackerId = cardId;
-            declared.attackerName = qr.card != null ? qr.card.getNameCn() : "";
-            messaging.convertAndSendToUser(
-                    opponentId.toString(),
-                    "/queue/opponent-action",
-                    new BattleMessage("OPPONENT_PLAY_CARD", sessionId, opponentId, declared)
-            );
-        }
-
-        // 非法术牌：发送考题
-        if (qr.card != null && !"spell".equals(qr.card.getCardType()) && qr.questionData != null) {
-            BattleMessage.Question question = new BattleMessage.Question();
-            question.cardId = qr.card.getCardId();
-            question.cardNameCn = qr.card.getNameCn();
-            question.questionType = qr.questionType;
-            question.questionData = qr.questionData;
-            question.timeLimit = qr.timeLimit;
-
-            messaging.convertAndSendToUser(
-                    userId.toString(),
-                    "/queue/question",
-                    new BattleMessage(BattleMessage.TYPE_QUESTION, sessionId, userId, question)
-            );
-        } else {
-            // 法术牌直接成功
-            BattleMessage.CardPlayResult playResult = new BattleMessage.CardPlayResult();
-            playResult.cardId = cardId;
-            playResult.success = true;
-            playResult.playedCard = qr.card;
-            playResult.manaRemaining = qr.manaRemaining;
-
-            messaging.convertAndSendToUser(
-                    userId.toString(),
-                    "/queue/card-result",
-                    new BattleMessage(BattleMessage.TYPE_CARD_PLAY_RESULT, sessionId, userId, playResult)
-            );
-
-            // 广播给全房间
-            broadcastGameState(sessionId);
-        }
-    }
-
-    // ==================== 答题 ====================
-
-    @MessageMapping("/battle/submit-answer")
-    public void submitAnswer(@Payload Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
-        Long userId = getUserId(headerAccessor);
-        if (userId == null) { sendError(null, null, "未认证"); return; }
-
-        String sessionId = getString(payload, "sessionId");
-        boolean correct = getBoolean(payload, "correct");
-
-        if (sessionId == null) {
-            sendError(null, userId, "缺少sessionId");
-            return;
-        }
-
-        GameEngine.AnswerResult ar = gameEngine.submitAnswer(sessionId, userId, correct);
-
+        // 通知出牌者
         BattleMessage.CardPlayResult playResult = new BattleMessage.CardPlayResult();
-        playResult.cardId = ar.card != null ? ar.card.getCardId() : null;
-        playResult.success = ar.success;
-        playResult.playedCard = ar.card;
-        playResult.manaRemaining = ar.manaRemaining;
-        playResult.damageDealt = ar.damageDealt;
-
-        if (!ar.success) {
-            playResult.errorMessage = ar.errorMessage;
-        }
+        playResult.cardId = cardId;
+        playResult.success = true;
+        playResult.playedCard = pr.card;
+        playResult.manaRemaining = pr.manaRemaining;
+        playResult.damageDealt = pr.damageDealt;
 
         messaging.convertAndSendToUser(
                 userId.toString(),
@@ -217,43 +141,28 @@ public class BattleWebSocketHandler {
                 new BattleMessage(BattleMessage.TYPE_CARD_PLAY_RESULT, sessionId, userId, playResult)
         );
 
-        // 连击奖励
-        if (ar.comboCount > 0 && ar.comboCount % 3 == 0) {
-            BattleMessage.ComboBonus comboBonus = new BattleMessage.ComboBonus();
-            comboBonus.comboCount = ar.comboCount;
-            comboBonus.bonus = "下一张卡费用-1";
+        // 通知对手
+        GameSession session = gameEngine.getSession(sessionId);
+        if (session != null) {
+            Long opponentId = session.getOpponentId(userId);
+            BattleMessage.AttackDeclared declared = new BattleMessage.AttackDeclared();
+            declared.attackerId = cardId;
+            declared.attackerName = pr.card != null ? pr.card.getNameCn() : "";
             messaging.convertAndSendToUser(
-                    userId.toString(),
-                    "/queue/combo",
-                    new BattleMessage(BattleMessage.TYPE_COMBO_BONUS, sessionId, userId, comboBonus)
+                    opponentId.toString(),
+                    "/queue/opponent-action",
+                    new BattleMessage("OPPONENT_PLAY_CARD", sessionId, opponentId, declared)
             );
         }
 
         // 检查游戏结束
-        if (ar.gameOver) {
-            GameSession session = gameEngine.getSession(sessionId);
-            if (session != null) {
-                endGame(session);
-            }
+        if (pr.gameOver && session != null) {
+            endGame(session);
             return;
         }
 
         // 广播当前状态
         broadcastGameState(sessionId);
-
-        // 如果是对手的答对补偿，通知对手
-        if (ar.opponentGainedCard) {
-            GameSession session = gameEngine.getSession(sessionId);
-            if (session != null) {
-                Long opponentId = session.getOpponentId(userId);
-                messaging.convertAndSendToUser(
-                        opponentId.toString(),
-                        "/queue/opponent-action",
-                        new BattleMessage("COMPENSATION", sessionId, opponentId,
-                                Map.of("gainedCard", true, "healed", ar.opponentHealed))
-                );
-            }
-        }
     }
 
     // ==================== 攻击 ====================
@@ -273,97 +182,40 @@ public class BattleWebSocketHandler {
             return;
         }
 
-        GameEngine.AttackDeclarationResult adr = gameEngine.declareAttack(sessionId, userId, attackerCardId, targetType, targetId);
+        GameEngine.AttackResult ar = gameEngine.declareAttack(sessionId, userId, attackerCardId, targetType, targetId);
 
-        if (!adr.success) {
-            sendError(sessionId, userId, adr.errorMessage);
-            return;
-        }
-
-        // 通知攻击方：攻击已发起
-        BattleMessage.AttackResult attackNotice = new BattleMessage.AttackResult();
-        attackNotice.attackerId = attackerCardId;
-        attackNotice.defenderId = targetId;
-        messaging.convertAndSendToUser(
-                userId.toString(),
-                "/queue/attack-declared",
-                new BattleMessage(BattleMessage.TYPE_ATTACK_DECLARED, sessionId, userId, attackNotice)
-        );
-
-        // 通知防御方：需要答题防御
-        BattleMessage.DefenseQuestion defenseQ = new BattleMessage.DefenseQuestion();
-        defenseQ.attackerId = attackerCardId;
-        defenseQ.attackerName = adr.attackerName;
-        defenseQ.attackPower = adr.attackerAttack;
-        defenseQ.targetType = targetType;
-        defenseQ.targetId = targetId;
-        BattleMessage.Question defQ = new BattleMessage.Question();
-        defQ.questionData = adr.defenseQuestionData;
-        defQ.questionType = "listening";
-        defQ.timeLimit = 30;
-        defenseQ.question = defQ;
-
-        GameSession session = gameEngine.getSession(sessionId);
-        if (session != null) {
-            Long opponentId = session.getOpponentId(userId);
-            messaging.convertAndSendToUser(
-                    opponentId.toString(),
-                    "/queue/defense-question",
-                    new BattleMessage(BattleMessage.TYPE_DEFENSE_QUESTION, sessionId, opponentId, defenseQ)
-            );
-        }
-    }
-
-    // ==================== 防御 ====================
-
-    @MessageMapping("/battle/submit-defense")
-    public void submitDefense(@Payload Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
-        Long userId = getUserId(headerAccessor);
-        if (userId == null) { sendError(null, null, "未认证"); return; }
-
-        String sessionId = getString(payload, "sessionId");
-        boolean correct = getBoolean(payload, "correct");
-
-        if (sessionId == null) {
-            sendError(null, userId, "缺少sessionId");
-            return;
-        }
-
-        GameEngine.DefenseResult dr = gameEngine.submitDefense(sessionId, userId, correct);
-
-        if (!dr.success) {
-            sendError(sessionId, userId, dr.errorMessage);
+        if (!ar.success) {
+            sendError(sessionId, userId, ar.errorMessage);
             return;
         }
 
         // 通知攻击方
         BattleMessage.AttackResult attackResult = new BattleMessage.AttackResult();
-        attackResult.attackerId = dr.attackerId;
-        attackResult.defenderId = dr.defenderId;
-        attackResult.damage = dr.damage;
-        attackResult.defenderDead = dr.defenderDead;
-        attackResult.defenderHealthLeft = dr.defenderHealthLeft;
-        attackResult.defenderCorrect = dr.defenderCorrect;
+        attackResult.attackerId = attackerCardId;
+        attackResult.defenderId = ar.defenderId;
+        attackResult.damage = ar.damage;
+        attackResult.defenderDead = ar.defenderDead;
+        attackResult.defenderHealthLeft = ar.defenderHealthLeft;
 
+        messaging.convertAndSendToUser(
+                userId.toString(),
+                "/queue/attack-result",
+                new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, userId, attackResult)
+        );
+
+        // 通知对手
         GameSession session = gameEngine.getSession(sessionId);
         if (session != null) {
-            Long attackerId = session.getOpponentId(userId);
+            Long opponentId = session.getOpponentId(userId);
             messaging.convertAndSendToUser(
-                    attackerId.toString(),
-                    "/queue/attack-result",
-                    new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, attackerId, attackResult)
-            );
-
-            // 通知防御方
-            messaging.convertAndSendToUser(
-                    userId.toString(),
+                    opponentId.toString(),
                     "/queue/defense-result",
-                    new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, userId, attackResult)
+                    new BattleMessage(BattleMessage.TYPE_ATTACK_RESULT, sessionId, opponentId, attackResult)
             );
         }
 
         // 检查游戏结束
-        if (dr.gameOver && session != null) {
+        if (ar.gameOver && session != null) {
             endGame(session);
             return;
         }
@@ -384,7 +236,6 @@ public class BattleWebSocketHandler {
 
         String sessionId = session.getSessionId();
 
-        // 获取下一回合的数据
         GameEngine.EndTurnResult etr = gameEngine.endTurn(sessionId, userId);
         if (etr == null) { sendError(sessionId, userId, "无法结束回合"); return; }
 
@@ -447,7 +298,6 @@ public class BattleWebSocketHandler {
                 return null;
             }
         }
-        // 从session attributes中获取
         Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
         if (sessionAttributes != null) {
             Object userIdAttr = sessionAttributes.get("userId");
@@ -482,13 +332,6 @@ public class BattleWebSocketHandler {
         return null;
     }
 
-    private boolean getBoolean(Map<String, Object> map, String key) {
-        Object val = map.get(key);
-        if (val instanceof Boolean) return (Boolean) val;
-        if (val instanceof String) return "true".equalsIgnoreCase((String) val);
-        return false;
-    }
-
     private void sendError(String sessionId, Long userId, String message) {
         BattleMessage.ErrorMessage error = new BattleMessage.ErrorMessage("ERROR", message);
         if (userId != null && sessionId != null) {
@@ -504,7 +347,6 @@ public class BattleWebSocketHandler {
         GameSession session = gameEngine.getSession(sessionId);
         if (session == null) return;
 
-        // 发给自己
         PlayerState me = session.getPlayerState(userId);
         PlayerState opponent = session.getOpponent(userId);
 
@@ -543,19 +385,10 @@ public class BattleWebSocketHandler {
         }
     }
 
-    private void sendGameStartToOpponent(String sessionId, Long userId) {
-        // 由匹配回调的另一端触发
-        GameSession session = gameEngine.getSession(sessionId);
-        if (session == null) return;
-        Long opponentId = session.getOpponentId(userId);
-        sendGameStart(sessionId, opponentId);
-    }
-
     private void broadcastGameState(String sessionId) {
         GameSession session = gameEngine.getSession(sessionId);
         if (session == null) return;
 
-        // 发送精简版面状态给每个玩家
         for (Long playerId : List.of(session.getPlayer1Id(), session.getPlayer2Id())) {
             PlayerState me = session.getPlayerState(playerId);
             PlayerState opponent = session.getOpponent(playerId);
@@ -587,7 +420,6 @@ public class BattleWebSocketHandler {
     private void endGame(GameSession session) {
         Long winnerId = session.getWinnerId();
         if (winnerId == null) {
-            // 如果还没设置winner，用concede逻辑
             return;
         }
 
@@ -610,17 +442,15 @@ public class BattleWebSocketHandler {
             gameOver.winnerStats.userId = winnerId;
             gameOver.winnerStats.nickname = winner != null ? winner.getNickname() : "";
             gameOver.winnerStats.healthRemaining = winner != null ? winner.getHealth() : 0;
-            gameOver.winnerStats.cardsPlayed = winner != null ? winner.getAnsweredCorrectly() : 0;
-            gameOver.winnerStats.accuracy = me != null && me.getAnsweredTotal() > 0
-                    ? me.getAnsweredCorrectly() * 100 / me.getAnsweredTotal() : 0;
+            gameOver.winnerStats.cardsPlayed = 0;
+            gameOver.winnerStats.accuracy = 0;
 
             gameOver.loserStats = new BattleMessage.PlayerFinalStats();
             gameOver.loserStats.userId = loserId;
             gameOver.loserStats.nickname = loser != null ? loser.getNickname() : "";
             gameOver.loserStats.healthRemaining = loser != null ? loser.getHealth() : 0;
-            gameOver.loserStats.cardsPlayed = loser != null ? loser.getAnsweredCorrectly() : 0;
-            gameOver.loserStats.accuracy = loser != null && loser.getAnsweredTotal() > 0
-                    ? loser.getAnsweredCorrectly() * 100 / loser.getAnsweredTotal() : 0;
+            gameOver.loserStats.cardsPlayed = 0;
+            gameOver.loserStats.accuracy = 0;
 
             messaging.convertAndSendToUser(
                     playerId.toString(),
@@ -628,23 +458,6 @@ public class BattleWebSocketHandler {
                     new BattleMessage(BattleMessage.TYPE_GAME_OVER, session.getSessionId(), playerId, gameOver)
             );
         }
-    }
-
-    private BattleMessage.DefenseQuestion createDefenseQuestion(GameEngine.AttackDeclarationResult adr) {
-        BattleMessage.DefenseQuestion dq = new BattleMessage.DefenseQuestion();
-        dq.attackerId = adr.attackerId;
-        dq.attackerName = adr.attackerName;
-        dq.attackPower = adr.attackerAttack;
-        dq.targetType = adr.targetType;
-        dq.targetId = adr.targetId;
-
-        BattleMessage.Question q = new BattleMessage.Question();
-        q.questionType = "defense";
-        q.questionData = adr.defenseQuestionData;
-        q.timeLimit = 30;
-        dq.question = q;
-
-        return dq;
     }
 
     private GameSession findSessionByPlayer(Long userId) {

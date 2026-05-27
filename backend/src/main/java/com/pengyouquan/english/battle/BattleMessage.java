@@ -3,7 +3,7 @@ package com.pengyouquan.english.battle;
 import java.util.List;
 
 /**
- * WebSocket 消息类型
+ * WebSocket 消息类型（纯卡牌策略对战）
  */
 public class BattleMessage {
 
@@ -41,15 +41,12 @@ public class BattleMessage {
     public static final String TYPE_GAME_START = "GAME_START";
     public static final String TYPE_QUEUE_STATUS = "QUEUE_STATUS";
     public static final String TYPE_TURN_START = "TURN_START";
-    public static final String TYPE_QUESTION = "QUESTION";
     public static final String TYPE_CARD_PLAY_RESULT = "CARD_PLAY_RESULT";
     public static final String TYPE_ATTACK_DECLARED = "ATTACK_DECLARED";
-    public static final String TYPE_DEFENSE_QUESTION = "DEFENSE_QUESTION";
     public static final String TYPE_ATTACK_RESULT = "ATTACK_RESULT";
     public static final String TYPE_GAME_OVER = "GAME_OVER";
     public static final String TYPE_ERROR = "ERROR";
     public static final String TYPE_OPPONENT_DISCONNECTED = "OPPONENT_DISCONNECTED";
-    public static final String TYPE_COMBO_BONUS = "COMBO_BONUS";
 
     // ====== Payload 类型 ======
 
@@ -116,17 +113,6 @@ public class BattleMessage {
         public TurnStart() {}
     }
 
-    public static class Question {
-        public Long cardId;
-        public String cardNameCn;
-        public String questionType;
-        public String questionData;
-        public int timeLimit;
-        public String sentenceText;
-
-        public Question() {}
-    }
-
     public static class CardPlayResult {
         public Long cardId;
         public boolean success;
@@ -148,26 +134,12 @@ public class BattleMessage {
         public AttackDeclared() {}
     }
 
-    public static class DefenseQuestion {
-        public Long attackerId;
-        public String attackerName;
-        public String attackerNameCn;
-        public int attackPower;
-        public String targetType;
-        public Long targetId;
-        public String targetName;
-        public Question question;
-
-        public DefenseQuestion() {}
-    }
-
     public static class AttackResult {
         public Long attackerId;
         public Long defenderId;
         public int damage;
         public boolean defenderDead;
         public int defenderHealthLeft;
-        public boolean defenderCorrect;
 
         public AttackResult() {}
     }
@@ -192,14 +164,6 @@ public class BattleMessage {
         public int trophiesAfter;
 
         public PlayerFinalStats() {}
-    }
-
-    public static class ComboBonus {
-        public int comboCount;
-        public String bonus;
-        public Long cardId;
-
-        public ComboBonus() {}
     }
 
     public static class ErrorMessage {

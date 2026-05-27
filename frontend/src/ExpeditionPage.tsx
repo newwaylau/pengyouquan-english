@@ -53,11 +53,11 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [deckSelectMode, setDeckSelectMode] = useState(false);
 
-  // Question state
-  const [currentSentence, setCurrentSentence] = useState<any>(null);
-  const [answer, setAnswer] = useState('');
+  // Combat state (pure click-based, no questions)
   const [feedback, setFeedback] = useState<string | null>(null);
   const [damageNumber, setDamageNumber] = useState<{ text: string; type: string } | null>(null);
+  const [attackingCard, setAttackingCard] = useState<number | null>(null);
+  const [combatLoading, setCombatLoading] = useState(false);
 
   // Node interaction
   const [nodeType, setNodeType] = useState<string>('');
@@ -149,26 +149,22 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       setEnemy(res.data.enemy);
       setHandCards(res.data.hand || []);
       setPhase('combat');
-      fetchSentence();
     } else {
       alert(res.message || '进入战斗失败，请重试');
     }
   }
 
-  // Fetch random sentence
-  async function fetchSentence() {
-    const res = await apiFetch('/api/expedition/sentence');
-    if (res.code === 200) setCurrentSentence(res.data);
-  }
-
-  // Submit answer
-  async function handleSubmitAnswer() {
-    if (!currentSentence || !answer.trim()) return;
-    const correct = answer.trim().toLowerCase() === currentSentence.text?.trim().toLowerCase();
-    const res = await apiFetch('/api/expedition/answer', {
+  // Play card in combat (click a card to attack - no questions)
+  async function handlePlayCard(cardId: number) {
+    if (combatLoading) return;
+    setCombatLoading(true);
+    setAttackingCard(cardId);
+    const res = await apiFetch('/api/expedition/play-card', {
       method: 'POST',
-      body: JSON.stringify({ sentenceId: currentSentence.id, answer, correct }),
+      body: JSON.stringify({ cardId }),
     });
+    setAttackingCard(null);
+    setCombatLoading(false);
     if (res.code === 200) {
       const data = res.data;
       if (data.playerDead) {
@@ -180,18 +176,13 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       if (data.enemyDefeated) {
         setExpedition(data.expedition);
         setEnemy(null);
-        if (data.isBoss && data.bossDefeated) {
-          // Boss defeated - next node
-          setRewardChoices(data.rewards || []);
-        } else {
-          setRewardChoices(data.rewards || []);
-        }
+        setHandCards([]);
+        setRewardChoices(data.rewards || []);
         setFeedback(data.resultText);
         setPhase('reward');
-        setAnswer('');
         return;
       }
-      // Show damage
+      // Show damage numbers
       if (data.damageDealt > 0) {
         setDamageNumber({ text: `-${data.damageDealt}`, type: 'damage-dealt' });
         setTimeout(() => setDamageNumber(null), 1000);
@@ -201,13 +192,13 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         setTimeout(() => setDamageNumber(null), 1000);
       }
       if (res.data.expedition) setExpedition(res.data.expedition);
-      if (res.data.enemyRemainingHp !== undefined && enemy) {
-        setEnemy({ ...enemy, currentHp: res.data.enemyRemainingHp });
+      if (data.enemyRemainingHp !== undefined && enemy) {
+        setEnemy({ ...enemy, currentHp: data.enemyRemainingHp });
       }
-      setFeedback(correct ? '✅ 答对了！' : '❌ 答错了');
+      setFeedback(data.resultText);
       setTimeout(() => setFeedback(null), 1500);
-      setAnswer('');
-      fetchSentence();
+    } else {
+      alert(res.message || '出牌失败');
     }
   }
 
@@ -221,7 +212,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       setExpedition(res.data.expedition);
       setRewardChoices([]);
 
-      // Show relic popup if a new relic was obtained
       if (choice.type === 'new_relic' && choice.relic) {
         setRelicPopup({
           id: choice.relic.id,
@@ -231,7 +221,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           icon: choice.relic.icon || '🪙',
           rarity: choice.relic.rarity || 'common',
         });
-        // Auto-dismiss after 3 seconds, then move to next node
         setTimeout(async () => {
           setRelicPopup(null);
           await moveToNextNode();
@@ -239,7 +228,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         return;
       }
 
-      // Move to next node or show result
       await moveToNextNode();
     }
   }
@@ -338,7 +326,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
     if (res.code === 200) {
       setExpedition(res.data.expedition);
       alert('购买成功！');
-      // Refresh shop
       const shopRes = await apiFetch('/api/expedition/shop');
       if (shopRes.code === 200) setShopItems(shopRes.data.items || []);
     } else {
@@ -365,7 +352,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   function handleNodeClick(ndx: number, nodeType: string, completed: boolean, isCurrent: boolean) {
     if (completed || !isCurrent) return;
     if (nodeType === 'branch') {
-      // Branch node - show choices (handled by nodeOptions state already set)
       return;
     }
     switch (nodeType) {
@@ -433,7 +419,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   function renderMap() {
     if (!expedition) return null;
     const nodes = expedition.mapNodes || [];
-    // Check if current node is a branch and show overlay
     const isBranchNode = nodeType === 'branch' && nodeOptions.length > 0;
     return (
       <div className="expedition-map">
@@ -443,7 +428,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             const isCompleted = ndx + 1 < expedition.node;
             const isCurrent = ndx + 1 === expedition.node;
             const isFuture = ndx + 1 > expedition.node;
-            // For branch nodes, show based on whether it's the current branch type
             const displayType = (nt === 'branch') ? 'branch' : nt;
             return (
               <React.Fragment key={ndx}>
@@ -522,49 +506,25 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           </div>
         </div>
 
-        <div className="expedition-question-area">
-          {currentSentence ? (
-            <>
-              <div className="expedition-question-text">{currentSentence.text}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', marginBottom: 8 }}>
-                {currentSentence.translation}
-              </div>
-            </>
-          ) : (
-            <div className="expedition-question-text">加载题目中...</div>
-          )}
-          <div className="expedition-question-input-row">
-            <input
-              className="expedition-question-input"
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSubmitAnswer(); }}
-              placeholder="输入字幕原文..."
-              autoFocus
-            />
-            <button className="expedition-question-submit" onClick={handleSubmitAnswer} disabled={!answer.trim()}>
-              答题
-            </button>
-          </div>
-          {feedback && (
-            <div style={{ textAlign: 'center', marginTop: 8, fontSize: 13, fontWeight: 600 }}>{feedback}</div>
-          )}
-        </div>
-
-        {handCards.length > 0 && (
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>手牌 (答对使用)</div>
-            <div className="expedition-hand">
-              {handCards.map((card, i) => (
-                <div key={i} className="expedition-hand-card">
-                  <div className="expedition-hand-card-name">{card.nameCn}</div>
-                  <div className="expedition-hand-card-attack">⚔️{card.attack}</div>
-                  <div className="expedition-hand-card-cost">费用:{card.cost}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {feedback && (
+          <div style={{ textAlign: 'center', margin: '8px 0', fontSize: 13, fontWeight: 600, color: '#4ade80' }}>{feedback}</div>
         )}
+
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>手牌（点击出牌攻击）</div>
+        <div className="expedition-hand">
+          {handCards.map((card, i) => (
+            <div
+              key={i}
+              className={`expedition-hand-card ${attackingCard === card.id ? 'attacking' : ''}`}
+              onClick={() => !combatLoading && handlePlayCard(card.id)}
+              style={{ cursor: combatLoading ? 'wait' : 'pointer', opacity: combatLoading ? 0.6 : 1 }}
+            >
+              <div className="expedition-hand-card-name">{card.nameCn}</div>
+              <div className="expedition-hand-card-attack">⚔️{card.attack}</div>
+              <div className="expedition-hand-card-cost">费用:{card.cost}</div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -575,7 +535,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
       <div className="expedition-event">
         <div className="expedition-event-title">❓ 事件</div>
         <div className="expedition-event-desc">
-          {/* Events might not have title display; use generic */}
           你遇到了一个事件，请做出选择：
         </div>
         <div className="expedition-event-choices">
@@ -692,7 +651,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
             </div>
           ))}
         </div>
-        {/* Remove card mode: show deck to pick a card to remove */}
         {removeMode && (
           <div className="expedition-remove-section" style={{ marginTop: 12 }}>
             <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
@@ -774,12 +732,8 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               <div className="expedition-settlement-stat-label">击杀数</div>
             </div>
             <div className="expedition-settlement-stat">
-              <div className="expedition-settlement-stat-value">{accuracy}%</div>
-              <div className="expedition-settlement-stat-label">正确率</div>
-            </div>
-            <div className="expedition-settlement-stat">
               <div className="expedition-settlement-stat-value">{exp.questionsAnswered}</div>
-              <div className="expedition-settlement-stat-label">答对题数</div>
+              <div className="expedition-settlement-stat-label">出牌数</div>
             </div>
           </div>
           <button className="expedition-settlement-btn" onClick={handleSettlementDone} style={{ marginTop: 16 }}>
@@ -799,7 +753,7 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
         {history.map((h: any, i: number) => (
           <div key={i} className="expedition-history-item">
             <div>
-              <div>第{h.act}层 · 击杀{h.enemiesKilled} · 答对{h.questionsAnswered}/{h.questionsTotal}</div>
+              <div>第{h.act}层 · 击杀{h.enemiesKilled} · 出牌{h.questionsAnswered}/{h.questionsTotal}</div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                 {h.createdAt ? new Date(h.createdAt).toLocaleDateString() : ''}
               </div>
@@ -814,7 +768,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
   }
 
   function renderLobby() {
-    // Get user's available cards
     const availableCards: any[] = [];
     if (userCards && Array.isArray(userCards)) {
       userCards.forEach((uc: any) => {
@@ -917,7 +870,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
               </span>
               <span>❤️{expedition.playerHp}/{expedition.maxHp} 🪙{expedition.gold}</span>
               <button className="expedition-abandon-btn" onClick={handleAbandon}>放弃</button>
-              {/* Relic bar */}
               {expedition.relics && expedition.relics.length > 0 && (
                 <div className="expedition-relic-bar">
                   {expedition.relics.map((rel: any, i: number) => (
@@ -928,7 +880,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
                       onMouseLeave={() => setHoveredRelic(null)}
                     >
                       <span>{rel.icon || '🪙'}</span>
-                      {/* Tooltip */}
                       {hoveredRelic === i && (
                         <div className="expedition-relic-tooltip">
                           <div className="expedition-relic-tooltip-name">
@@ -956,7 +907,6 @@ export default function ExpeditionPage({ onNavigate }: { user?: any; onNavigate?
           {phase === 'reward' && renderReward()}
           {phase === 'settlement' && renderSettlement()}
 
-          {/* Relic acquisition popup */}
           {relicPopup && (
             <div className="expedition-result-overlay" onClick={() => setRelicPopup(null)}>
               <div className="expedition-result-card expedition-relic-popup-card">

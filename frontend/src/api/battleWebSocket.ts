@@ -227,10 +227,12 @@ class BattleWebSocket {
     });
   }
 
-  playCard(sessionId: string, cardId: number) {
+  playCard(sessionId: string, cardId: number, targetId?: number) {
+    const payload: any = { sessionId, cardId };
+    if (targetId !== undefined) payload.targetId = targetId;
     this.client.publish({
       destination: '/app/battle/play-card',
-      body: JSON.stringify({ sessionId, cardId }),
+      body: JSON.stringify(payload),
     });
   }
 

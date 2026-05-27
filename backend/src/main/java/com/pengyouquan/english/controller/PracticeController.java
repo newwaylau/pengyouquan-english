@@ -37,7 +37,7 @@ public class PracticeController {
         this.chestService = chestService;
     }
 
-    /** 记录一次练习结果（增强版：返回错题检查信息 + 宝箱进度） */
+    /** 记录一次练习结果（增强版：返回错题检查信息 + 宝箱进度 + 自动发放宝箱） */
     @PostMapping("/practice/log")
     public ApiResponse<Map<String, Object>> logPractice(@CurrentUserId Long userId,
                                                         @RequestBody Map<String, Object> body) {
@@ -48,10 +48,18 @@ public class PracticeController {
         int totalWords = Integer.parseInt(body.getOrDefault("totalWords", "0").toString());
         String mode = (String) body.getOrDefault("mode", "sentry");
         Map<String, Object> result = practiceService.logPractice(userId, sentenceId, correct, correctCount, totalWords, mode);
-        // 推进宝箱解锁进度（每个练习句推进1句）
+        // 推进宝箱解锁进度 + 自动发放宝箱
         if (userId != null) {
             List<UserChest> chestUpdates = chestService.progressChest(userId, 1);
             result.put("chestUpdates", chestUpdates);
+            // 检查总练习数并自动发放宝箱（每10句/25句/50句）
+            long totalPractices = practiceService.getTotalPracticeCount(userId);
+            if (totalPractices % 10 == 0 && totalPractices > 0) {
+                chestService.grantBattleChest(userId, "practice");
+                chestUpdates = chestService.progressChest(userId, 1);
+                result.put("chestUpdates", chestUpdates);
+            }
+            result.put("totalPractices", totalPractices);
         }
         return ApiResponse.success(result);
     }
