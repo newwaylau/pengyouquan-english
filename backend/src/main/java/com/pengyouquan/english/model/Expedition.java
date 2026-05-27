@@ -44,6 +44,15 @@ public class Expedition {
     private String relics;
 
     @Column(nullable = false)
+    private Integer floor = 1;
+
+    @Column(name = "max_floor", nullable = false)
+    private Integer maxFloor = 1;
+
+    @Column(name = "visited_nodes", columnDefinition = "JSON")
+    private String visitedNodes;
+
+    @Column(nullable = false)
     private Integer gold = 0;
 
     @Column(nullable = false, length = 20)
@@ -75,6 +84,12 @@ public class Expedition {
 
     @Column(name = "map_data", columnDefinition = "JSON")
     private String mapData = "{\"acts\":[]}";
+
+    @Column(name = "story_intro", columnDefinition = "TEXT")
+    private String storyIntro;
+
+    @Column(name = "node_stories", columnDefinition = "JSON")
+    private String nodeStories;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
