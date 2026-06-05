@@ -26,9 +26,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // SockJS 端点（兼容旧客户端 / 不支持 WebSocket 的环境）
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+        // 原生 WebSocket 端点（主用：现代浏览器 + Cloudflare WebSocket 代理）
+        registry.addEndpoint("/ws/raw")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override

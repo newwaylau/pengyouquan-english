@@ -97,25 +97,21 @@ export const api = {
   // Demo 问候接口
   demoGreeting: (name?: string) =>
     request(`/api/demo/greeting?name=${encodeURIComponent(name || '访客')}`),
-};
 
-// 游戏化相关 API
-export const gameApi = {
-  getPrestige: () => request('/api/game/prestige'),
-  getDailyChallenge: () => request('/api/game/daily-challenge'),
-  submitAnswer: (challengeId: number, questionId: number, answer: string) =>
-    request(`/api/game/daily-challenge/${challengeId}/submit`, { method: 'POST', body: JSON.stringify({ questionId, answer }) }),
-  completeChallenge: (challengeId: number) =>
-    request(`/api/game/daily-challenge/${challengeId}/complete`, { method: 'POST', body: JSON.stringify({}) }),
-  getLeaderboard: (period: string = 'today') =>
-    request(`/api/game/leaderboard?period=${period}`),
-  getHistory: () => request('/api/game/history'),
-  getInviteCode: () => request('/api/game/invite-code'),
-  recruit: (inviteCode: string) =>
-    request('/api/game/recruit', { method: 'POST', body: JSON.stringify({ inviteCode }) }),
-  getClan: () => request('/api/game/clan'),
-  getRankTiers: () => request('/api/game/rank-tiers'),
-  getStreakRewards: () => request('/api/game/streak-rewards'),
-  claimStreakReward: (id: number) =>
-    request(`/api/game/streak-rewards/${id}/claim`, { method: 'POST', body: JSON.stringify({}) }),
+  // 通用 GET / POST
+  get: (path: string, config?: { params?: Record<string, any> }) => {
+    let url = path;
+    if (config?.params) {
+      const entries = Object.entries(config.params)
+        .filter(([_, v]) => v !== undefined && v !== null);
+      if (entries.length > 0) {
+        url += '?' + entries
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+          .join('&');
+      }
+    }
+    return request(url);
+  },
+  post: (path: string, body?: any) =>
+    request(path, { method: 'POST', body: body !== undefined ? JSON.stringify(body) : undefined }),
 };

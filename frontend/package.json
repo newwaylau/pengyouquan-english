@@ -22,6 +22,7 @@
     "react-router-dom": "^7.14.2",
     "react-scripts": "^5.0.1",
     "recharts": "^3.8.1",
+    "sockjs-client": "^1.6.1",
     "vite": "^6.4.2"
   },
   "eslintConfig": {
@@ -51,7 +52,8 @@
     "@types/react-dom": "^19.2.3",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "ws": "^8.21.0"
   },
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
   "main": "eslint.config.js",

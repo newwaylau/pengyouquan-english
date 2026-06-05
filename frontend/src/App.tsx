@@ -9,16 +9,7 @@ const SearchPage = React.lazy(() => import('./SearchPage'));
 const BrowsePage = React.lazy(() => import('./BrowsePage'));
 const AdminPage = React.lazy(() => import('./AdminPage'));
 const DemoPage = React.lazy(() => import('./DemoPage'));
-const ArenaPage = React.lazy(() => import('./ArenaPage'));
-const LeaderboardPage = React.lazy(() => import('./LeaderboardPage'));
-const DailyChallengePage = React.lazy(() => import('./DailyChallengePage'));
-const CardCollectionPage = React.lazy(() => import('./CardCollectionPage'));
-const BattlePage = React.lazy(() => import('./BattlePage'));
-const BattleArenaPage = React.lazy(() => import('./BattleArenaPage'));
-const EquipmentPage = React.lazy(() => import('./EquipmentPage'));
-const HeroSelectPage = React.lazy(() => import('./HeroSelectPage'));
 const ChangePasswordModal = React.lazy(() => import('./ChangePasswordModal'));
-const GuildPage = React.lazy(() => import('./GuildPage'));
 import { initAudioBase } from './audioBase';
 import { useTheme } from './useTheme';
 import { IconTarget, IconClose, IconSettings } from './Icons';
@@ -29,7 +20,7 @@ import './v2-missing.css';
 initAudioBase();
 
 export default function App() {
-  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo' | 'arena' | 'clan' | 'daily-challenge' | 'cards' | 'battle' | 'battle-arena' | 'equipment' | 'hero' | 'guild'>('practice');
+  const [page, setPage] = useState<'practice' | 'login' | 'wrong' | 'search' | 'browse' | 'admin' | 'demo'>('practice');
   const [user, setUser] = useState<any>(null);
   const [jumpId, setJumpId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -144,15 +135,6 @@ export default function App() {
               {page === 'browse' && '浏览'}
               {page === 'admin' && '管理后台'}
               {page === 'demo' && 'Demo'}
-              {page === 'arena' && '演武场'}
-              {page === 'cards' && '卡牌'}
-              {page === 'battle' && '对战'}
-              {page === 'battle-arena' && '实时对战'}
-              {page === 'clan' && '七国铁王座'}
-              {page === 'equipment' && '装备'}
-              {page === 'hero' && '英雄'}
-
-              {page === 'guild' && '公会'}
             </div>
             <div className="topbar-subtitle">跟读经典美剧台词，逐词精听练习</div>
           </div>
@@ -212,16 +194,6 @@ export default function App() {
             {page === 'browse' && <BrowsePage onJump={(id) => { setJumpId(id); setPage('practice'); }} onBack={() => setPage('practice')} />}
             {page === 'admin' && <AdminPage onlineCount={onlineCount} />}
             {page === 'demo' && <DemoPage onBack={() => setPage('practice')} />}
-            {page === 'arena' && <ArenaPage user={user} onNavigate={handleNavigate} refreshKey={refreshKey} />}
-            {page === 'cards' && <CardCollectionPage user={user} onNavigate={handleNavigate} />}
-            {page === 'battle' && <BattlePage user={user} onNavigate={handleNavigate} />}
-            {page === 'battle-arena' && <BattleArenaPage user={user} onBack={() => setPage('battle')} />}
-            {page === 'clan' && <LeaderboardPage user={user} onNavigate={handleNavigate} />}
-            {page === 'equipment' && <EquipmentPage user={user} onBack={() => setPage('hero')} />}
-            {page === 'hero' && <HeroSelectPage user={user} onNavigate={handleNavigate} />}
-
-            {page === 'guild' && <GuildPage user={user} onNavigate={handleNavigate} />}
-            {page === 'daily-challenge' && <DailyChallengePage onBack={() => { setPage('arena'); setRefreshKey(k => k + 1); }} />}
           </Suspense>
         </main>
 
@@ -229,11 +201,6 @@ export default function App() {
         <nav className="mobile-bottom-nav">
           {[
             { key: 'practice', icon: <IconTarget size={20} />, label: '练习' },
-            { key: 'cards', icon: <span>🎴</span>, label: '卡牌', requiresLogin: true },
-            { key: 'battle', icon: <span>⚔️</span>, label: '对战', requiresLogin: true },
-            { key: 'hero', icon: <span>🦸</span>, label: '英雄', requiresLogin: true },
-
-            { key: 'guild', icon: <span>🏰</span>, label: '公会', requiresLogin: true },
           ].map(item => {
             const disabled = item.requiresLogin && !user;
             return (

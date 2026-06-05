@@ -3,9 +3,7 @@ package com.pengyouquan.english.controller;
 import com.pengyouquan.english.dto.*;
 import com.pengyouquan.english.model.SentenceFlag;
 import com.pengyouquan.english.repository.SentenceFlagRepository;
-import com.pengyouquan.english.model.UserChest;
 import com.pengyouquan.english.security.CurrentUserId;
-import com.pengyouquan.english.service.ChestService;
 import com.pengyouquan.english.service.PracticeService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
@@ -27,14 +25,11 @@ public class PracticeController {
 
     private final PracticeService practiceService;
     private final SentenceFlagRepository sentenceFlagRepository;
-    private final ChestService chestService;
 
     public PracticeController(PracticeService practiceService,
-                              SentenceFlagRepository sentenceFlagRepository,
-                              ChestService chestService) {
+                              SentenceFlagRepository sentenceFlagRepository) {
         this.practiceService = practiceService;
         this.sentenceFlagRepository = sentenceFlagRepository;
-        this.chestService = chestService;
     }
 
     /** 记录一次练习结果（增强版：返回错题检查信息 + 宝箱进度 + 自动发放宝箱） */
@@ -48,17 +43,8 @@ public class PracticeController {
         int totalWords = Integer.parseInt(body.getOrDefault("totalWords", "0").toString());
         String mode = (String) body.getOrDefault("mode", "sentry");
         Map<String, Object> result = practiceService.logPractice(userId, sentenceId, correct, correctCount, totalWords, mode);
-        // 推进宝箱解锁进度 + 自动发放宝箱
         if (userId != null) {
-            List<UserChest> chestUpdates = chestService.progressChest(userId, 1);
-            result.put("chestUpdates", chestUpdates);
-            // 检查总练习数并自动发放宝箱（每10句/25句/50句）
             long totalPractices = practiceService.getTotalPracticeCount(userId);
-            if (totalPractices % 10 == 0 && totalPractices > 0) {
-                chestService.grantBattleChest(userId, "practice");
-                chestUpdates = chestService.progressChest(userId, 1);
-                result.put("chestUpdates", chestUpdates);
-            }
             result.put("totalPractices", totalPractices);
         }
         return ApiResponse.success(result);

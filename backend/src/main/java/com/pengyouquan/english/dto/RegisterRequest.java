@@ -30,7 +30,4 @@ public class RegisterRequest {
     private String password;
 
     private String nickname;
-
-    /** 邀请码（可选） */
-    private String invitedBy;
 }

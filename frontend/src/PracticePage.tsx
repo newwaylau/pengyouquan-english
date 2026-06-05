@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SettingsPanel from './SettingsPanel';
 import { api } from './api/client';
-import { cardApi } from './api/cardClient';
 import { getAudioUrl, getTtsUrl } from './audioBase';
 import { IconTarget, IconClose, IconSearch, IconBook, IconSettings, IconEdit, IconPen, IconFilm, IconMic, IconEye, IconEyeOff, IconFlag, IconCheck, IconCheckCircle, IconMeditation, IconNext, IconSkipNext, IconRefresh, IconConstruction, IconPhone, IconCheckPlain, IconCelebration, IconBookClosed, IconCalendar, IconSpeaker, IconRocket, IconKey } from './Icons';
-import PackOpeningModal from './PackOpeningModal';
 
 /** 从字幕文本中提取英文（含大小写校正） */
 function extractEn(text: string) {
@@ -153,8 +151,6 @@ export default function PracticePage({
   const [episodeAccuracyCount, setEpisodeAccuracyCount] = useState(0);
   const [currentEpisodeShowId, setCurrentEpisodeShowId] = useState<number | null>(null);
   const prevShowIdsParamRef = useRef<string>('');
-  const [packResult, setPackResult] = useState<any>(null);
-  const [packLoading, setPackLoading] = useState(false);
 
   // 刷新统计
   const refreshStats = () => {
@@ -332,10 +328,6 @@ export default function PracticePage({
   // showIdsParam变化时加载句子（初始''不加载，避免随机）
   useEffect(() => {
     if (showIdsParam) {
-      // 切换剧集时检查上一集是否完成结算
-      if (prevShowIdsParamRef.current && prevShowIdsParamRef.current !== showIdsParam) {
-        checkEpisodeCompletion();
-      }
       prevShowIdsParamRef.current = showIdsParam;
       setHistoryIds([]);
       loadSentence(undefined, true);
@@ -615,28 +607,7 @@ export default function PracticePage({
     goNext();
   };
 
-  // 整集完成检查：触发结算发卡（用 function 声明，hoisted 到 useEffect 之前可用）
-  function checkEpisodeCompletion() {
-    const showId = currentEpisodeShowId;
-    if (!showId || episodeAccuracyCount < 1 || !user) return;
-    if (packLoading || packResult) return;
-
-    const avgAccuracy = Math.round(episodeAccuracySum / episodeAccuracyCount);
-    setPackLoading(true);
-    cardApi.grantPack(showId, avgAccuracy).then((res: any) => {
-      setPackLoading(false);
-      if (res.code === 200 && res.data?.cards?.length > 0) {
-        setPackResult(res.data);
-      }
-    }).catch(() => {
-      setPackLoading(false);
-    });
-    // 重置追踪
-    setEpisodePracticedIds(new Set());
-    setEpisodeAccuracySum(0);
-    setEpisodeAccuracyCount(0);
-    setCurrentEpisodeShowId(null);
-  }
+  // 重置追踪（移除整集完成检查）
 
   // 下一句
   const goNext = () => {
@@ -672,7 +643,6 @@ export default function PracticePage({
     // 队列用完，加载新一批
     hiddenInputRef.current?.focus({ preventScroll: true });
     setHistoryIds(h => [...h, sentence.id]);
-    checkEpisodeCompletion();
     loadSentence();
   };
 
@@ -837,10 +807,6 @@ export default function PracticePage({
           </div>
           <div className="bottom-section">
             <div className="bottom-nav">
-              <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('arena')}>
-                <span className="bottom-nav-icon">⚔️</span>
-                <span className="bottom-nav-label">演武(Arena)</span>
-              </button>
               <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('wrong')}>
                 <span className="bottom-nav-icon"><IconClose /></span>
                 <span className="bottom-nav-label">错题(Wrong)</span>
@@ -848,10 +814,6 @@ export default function PracticePage({
               <button className="bottom-nav-btn" onClick={() => setSettingsOpen(true)}>
                 <span className="bottom-nav-icon"><IconSettings /></span>
                 <span className="bottom-nav-label">设置(Settings)</span>
-              </button>
-              <button className="bottom-nav-btn" onClick={() => checkLogin() && onNavigate?.('clan')}>
-                <span className="bottom-nav-icon">👑</span>
-                <span className="bottom-nav-label">封臣(Clan)</span>
               </button>
               <button className="bottom-nav-btn" onClick={() => { setFocusMode(f => !f); if (focusMode) setPhoneMode(false); }}>
                 <span className="bottom-nav-icon"><IconMeditation /></span>
@@ -1207,15 +1169,6 @@ export default function PracticePage({
             </div>
           </div>
         </div>
-      )}
-
-      {/* 开包弹窗 */}
-      {packResult && (
-        <PackOpeningModal
-          cards={packResult.cards || []}
-          packType={packResult.packType}
-          onClose={() => { setPackResult(null); }}
-        />
       )}
 
     </div>

@@ -36,7 +36,6 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                                 return userId.toString();
                             }
                         });
-                        accessor.setSessionId(userId.toString());
                     }
                 } catch (Exception ignored) {}
             }
